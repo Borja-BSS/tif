@@ -1,6 +1,17 @@
 import Link from 'next/link'
 import { db } from '@/lib/db'
 import { computeTerritoryScore, LEVEL_COLOR } from '@/lib/scoring/territory-score'
+import type { TerritoryScore } from '@/lib/scoring/territory-score'
+
+type ActiveEvent = {
+  id: string; type: string; geohash: string; severity: string
+  confidence: number; detectedAt: Date; expiresAt: Date; titleFr: string | null
+  territoryScore: TerritoryScore
+}
+type RecentEvent = {
+  id: string; type: string; geohash: string; severity: string
+  detectedAt: Date; resolvedAt: Date | null; titleFr: string | null
+}
 
 async function getActiveAlerts() {
   const now = new Date()
@@ -113,7 +124,7 @@ export default async function AlertsPage() {
             </div>
           ) : (
             <div className="space-y-2">
-              {active.map(e => {
+              {active.map((e: ActiveEvent) => {
                 const color = LEVEL_COLOR[e.territoryScore.level]
                 return (
                   <div
@@ -188,7 +199,7 @@ export default async function AlertsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {recent.map((e, i) => (
+                  {recent.map((e: RecentEvent, i: number) => (
                     <tr
                       key={e.id}
                       className={i % 2 === 0 ? 'bg-transparent' : 'bg-white/[0.015]'}

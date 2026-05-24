@@ -1,6 +1,10 @@
 import { db } from '@/lib/db'
 
-type LeadTimeRow = { event_type: string; avg_lead: number; count: bigint }
+type LeadTimeRow  = { event_type: string; avg_lead: number; count: bigint }
+type RecentEvent  = {
+  id: string; eventType: string; geohash6: string; severity: string
+  detectedAt: Date; resolvedAt: Date | null; leadTimeMinutes: number
+}
 
 async function getStats() {
   const now    = new Date()
@@ -128,7 +132,7 @@ export default async function AdminPage() {
           <p className="text-[12px] text-white/25 italic">Aucune résolution encore.</p>
         ) : (
           <div className="flex flex-col gap-2">
-            {recentEvents.map(ev => (
+            {recentEvents.map((ev: RecentEvent) => (
               <div key={ev.id} className="flex items-center justify-between rounded-lg bg-white/[0.04] px-4 py-2.5">
                 <div className="flex items-center gap-3">
                   <span className={`text-[11px] font-semibold ${severityColor(ev.severity)}`}>
