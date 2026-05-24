@@ -1,5 +1,7 @@
 import { db } from '@/lib/db'
 
+type LeadTimeRow = { event_type: string; avg_lead: number; count: bigint }
+
 async function getStats() {
   const now    = new Date()
   const since7 = new Date(now.getTime() - 7  * 24 * 60 * 60 * 1000)
@@ -95,7 +97,7 @@ export default async function AdminPage() {
               </tr>
             </thead>
             <tbody>
-              {leadTimeByType.map((row: { event_type: string; avg_lead: number; count: bigint }) => (
+              {leadTimeByType.map((row: LeadTimeRow) => (
                 <tr key={row.event_type} className="border-b border-white/[0.04]">
                   <td className="py-2 text-white/70">{row.event_type.replace(/_/g, ' ')}</td>
                   <td className={`py-2 text-right font-semibold ${row.avg_lead >= 4 ? 'text-emerald-400' : 'text-amber-400'}`}>
@@ -109,9 +111,9 @@ export default async function AdminPage() {
         )}
         <p className="text-[10px] text-white/20 mt-3">
           Cible : lead time moyen &gt; 4 min sur incidents trafic
-          {leadTimeByType.find(r => r.event_type === 'TRAFFIC_INCIDENT' && r.avg_lead >= 4)
+          {leadTimeByType.find((r: LeadTimeRow) => r.event_type === 'TRAFFIC_INCIDENT' && r.avg_lead >= 4)
             ? ' — ✓ ATTEINTE'
-            : leadTimeByType.find(r => r.event_type === 'TRAFFIC_INCIDENT')
+            : leadTimeByType.find((r: LeadTimeRow) => r.event_type === 'TRAFFIC_INCIDENT')
               ? ' — en cours'
               : ''}
         </p>
