@@ -95,7 +95,7 @@ export default async function AdminPage() {
               </tr>
             </thead>
             <tbody>
-              {leadTimeByType.map(row => (
+              {leadTimeByType.map((row: { event_type: string; avg_lead: number; count: bigint }) => (
                 <tr key={row.event_type} className="border-b border-white/[0.04]">
                   <td className="py-2 text-white/70">{row.event_type.replace(/_/g, ' ')}</td>
                   <td className={`py-2 text-right font-semibold ${row.avg_lead >= 4 ? 'text-emerald-400' : 'text-amber-400'}`}>
