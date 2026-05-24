@@ -1,0 +1,243 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String     @id @default(cuid())
+  createdAt DateTime   @default(now()) @db.Timestamptz
+  updatedAt DateTime   @updatedAt @db.Timestamptz
+
+  consentAt      DateTime  @db.Timestamptz
+  consentVersion String
+
+  role   Role       @default(USER)
+  status UserStatus @default(ACTIVE)
+
+  pii             UserPii?
+  sessions        Session[]
+  accounts        Account[]
+  mfaConfig       MfaConfig?
+  mobilityConsent MobilityConsent?
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model UserPii {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  emailHash      String @unique
+  emailEncrypted String
+  nameEncrypted  String?
+
+  deletedAt DateTime? @db.Timestamptz
+
+  @@index([emailHash])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  expires   DateTime @db.Timestamptz
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  ipHash     String
+  deviceHash String
+  userAgent  String? @db.VarChar(500)
+
+  @@index([userId])
+  @@index([expires])
+}
+
+model Account {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type              String
+  provider          String
+  providerAccountId String
+
+  access_token  String? @db.Text
+  refresh_token String? @db.Text
+  expires_at    Int?
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model MfaConfig {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  totpSecret   String?
+  totpVerified Boolean  @default(false)
+  backupCodes  String[]
+
+  updatedAt DateTime @updatedAt @db.Timestamptz
+}
+
+model TerritorialEvent {
+  id   String    @id @default(cuid())
+  type EventType
+
+  geohash String @db.VarChar(12)
+  lat     Float?
+  lng     Float?
+
+  confidence     Float
+  officialStatus String?
+  realityStatus  String?
+
+  sourceCount   Int  @default(1)
+  sourceWeights Json
+
+  detectedAt  DateTime  @db.Timestamptz
+  verifiedAt  DateTime? @db.Timestamptz
+  resolvedAt  DateTime? @db.Timestamptz
+  expiresAt   DateTime  @db.Timestamptz
+
+  titleFr       String  @db.VarChar(200)
+  titleEn       String? @db.VarChar(200)
+  descriptionFr String? @db.VarChar(1000)
+
+  severity Severity @default(MEDIUM)
+
+  @@index([geohash, detectedAt])
+  @@index([type, confidence])
+  @@index([expiresAt])
+  @@index([severity, detectedAt])
+}
+
+model MobilitySignal {
+  id String @id @default(cuid())
+
+  geohash6   String @db.VarChar(6)
+  deviceHash String @db.VarChar(64)
+
+  speedBucket Int
+  direction   Int?
+
+  timestamp     DateTime @db.Timestamptz
+  datePartition String   @db.VarChar(10)
+
+  @@index([geohash6, timestamp])
+  @@index([datePartition])
+}
+
+model MobilityConsent {
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  location       Boolean @default(false)
+  mobility       Boolean @default(false)
+  devicePresence Boolean @default(false)
+
+  consentedAt    DateTime @db.Timestamptz
+  updatedAt      DateTime @updatedAt @db.Timestamptz
+  consentVersion String
+}
+
+model TrafficZone {
+  id       String @id @default(cuid())
+  geohash6 String @unique @db.VarChar(6)
+
+  deviceCount      Int    @default(0)
+  avgSpeedBucket   Float?
+  congestionScore  Float?
+
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  @@index([geohash6])
+  @@index([congestionScore])
+}
+
+enum Role {
+  USER
+  MODERATOR
+  ANALYST
+  ADMIN
+  SYSTEM
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+enum EventType {
+  TRAFFIC_INCIDENT
+  ROAD_CLOSURE
+  BORDER_CONGESTION
+  PUBLIC_TRANSPORT_DISRUPTION
+  DEMONSTRATION
+  CONSTRUCTION
+  WEATHER_IMPACT
+  EMERGENCY
+  UNKNOWN
+}
+
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model TemporalPattern {
+  id        String @id @default(cuid())
+  geohash6  String @db.VarChar(6)
+  dayOfWeek Int    // 0=dimanche … 6=samedi
+  hourOfDay Int    // 0–23
+
+  baseline        Json
+  recurringEvents Json     @default("[]")
+
+  sampleCount Int
+  lastUpdated DateTime @db.Timestamptz
+
+  @@unique([geohash6, dayOfWeek, hourOfDay])
+  @@index([geohash6])
+  @@index([lastUpdated])
+}
+
+model EventResolution {
+  id        String @id @default(cuid())
+
+  eventId    String @db.VarChar(30)   // TerritorialEvent.id (ref souple)
+  eventType  String @db.VarChar(50)
+  geohash6   String @db.VarChar(6)
+  severity   String @db.VarChar(20)
+
+  detectedAt       DateTime  @db.Timestamptz
+  resolvedAt       DateTime  @db.Timestamptz
+  officialSourceAt DateTime? @db.Timestamptz
+
+  leadTimeMinutes Float  // minutes entre détection TIF et confirmation officielle
+
+  @@index([eventType, detectedAt])
+  @@index([detectedAt])
+}
+
+model ZoneConsensusSnapshot {
+  id       String @id @default(cuid())
+  geohash6 String @db.VarChar(6)
+
+  consensus     Json
+  computedAt    DateTime @db.Timestamptz
+  datePartition String   @db.VarChar(10)
+
+  @@index([geohash6, computedAt])
+  @@index([datePartition])
+}
