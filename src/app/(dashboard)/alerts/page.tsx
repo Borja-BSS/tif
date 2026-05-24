@@ -3,15 +3,16 @@ import { db } from '@/lib/db'
 import { computeTerritoryScore, LEVEL_COLOR } from '@/lib/scoring/territory-score'
 import type { TerritoryScore } from '@/lib/scoring/territory-score'
 
-type ActiveEvent = {
+type RawActive = {
   id: string; type: string; geohash: string; severity: string
   confidence: number; detectedAt: Date; expiresAt: Date; titleFr: string | null
-  territoryScore: TerritoryScore
 }
+type ActiveEvent = RawActive & { territoryScore: TerritoryScore }
 type RecentEvent = {
   id: string; type: string; geohash: string; severity: string
   detectedAt: Date; resolvedAt: Date | null; titleFr: string | null
 }
+type ZoneRow = { geohash6: string; congestionScore: number | null }
 
 async function getActiveAlerts() {
   const now = new Date()
@@ -46,24 +47,27 @@ async function getActiveAlerts() {
   ])
 
   // Zones avec congestionScore pour scoring territorial
-  const geohashes = [...new Set(active.map(e => e.geohash.slice(0, 6)))]
-  const zones = geohashes.length
+  const rawActive = active as RawActive[]
+  const rawRecent = recent as RecentEvent[]
+
+  const geohashes = [...new Set(rawActive.map((e: RawActive) => e.geohash.slice(0, 6)))]
+  const zones: ZoneRow[] = geohashes.length
     ? await db.trafficZone.findMany({
         where:  { geohash6: { in: geohashes } },
         select: { geohash6: true, congestionScore: true },
       })
     : []
 
-  const congestionMap = new Map(zones.map(z => [z.geohash6, z.congestionScore ?? 0]))
+  const congestionMap = new Map(zones.map((z: ZoneRow) => [z.geohash6, z.congestionScore ?? 0]))
 
-  const activeWithScore = active.map(e => {
+  const activeWithScore: ActiveEvent[] = rawActive.map((e: RawActive) => {
     const g6   = e.geohash.slice(0, 6)
     const cong = congestionMap.get(g6) ?? 0
     const ts   = computeTerritoryScore(cong, e.severity === 'HIGH' || e.severity === 'CRITICAL')
     return { ...e, territoryScore: ts }
   })
 
-  return { active: activeWithScore, recent }
+  return { active: activeWithScore, recent: rawRecent }
 }
 
 const SEVERITY_BADGE: Record<string, string> = {
