@@ -5,7 +5,10 @@ import { useState } from 'react'
 import type mapboxgl from 'mapbox-gl'
 import type { MapGLProps } from './MapGL'
 import type { FilterState } from './FilterPanel'
-import { useTerritorialLayers } from './useTerritorialLayers'
+import { useTerritorialLayers }  from './useTerritorialLayers'
+import { useHereMobilityLayer }  from './useHereMobilityLayer'
+import { useHereAlertsLayer }    from './useHereAlertsLayer'
+import { useGtfsTransportLayer } from './useGtfsTransportLayer'
 
 const MapGL          = dynamic(() => import('./MapGL'),          { ssr: false })
 const RealtimeLayer  = dynamic(() => import('./RealtimeLayer'),  { ssr: false })
@@ -25,7 +28,16 @@ export default function MapView(props: Omit<MapGLProps, 'onMapReady'>) {
   const [map, setMap]         = useState<mapboxgl.Map | null>(null)
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS)
 
-  // Layer marqueurs incidents territoriaux actifs (via API REST)
+  // HERE Maps — trafic temps réel (lignes colorées)
+  useHereMobilityLayer(filters.heatmap ? map : null)
+
+  // HERE Maps — incidents/alertes (markers emoji)
+  useHereAlertsLayer(filters.alerts ? map : null)
+
+  // GTFS-RT — positions véhicules TPG/CFF
+  useGtfsTransportLayer(filters.transport ? map : null)
+
+  // TIF — événements territoriaux détectés (TerritorialEvent DB)
   useTerritorialLayers(filters.alerts ? map : null)
 
   return (
