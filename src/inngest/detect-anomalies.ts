@@ -102,7 +102,7 @@ export const detectAnomaliesJob = inngest.createFunction(
       const batch = zones.slice(i, i + BATCH)
 
       // eslint-disable-next-line no-await-in-loop
-      const batchResults = await step.run(`detect-batch-${i}`, async () => {
+      const batchResults = (await step.run(`detect-batch-${i}`, async () => {
         const all: DetectedAnomaly[] = []
         for (const zone of batch) {
           const found = await detectZoneAnomalies(
@@ -114,7 +114,7 @@ export const detectAnomaliesJob = inngest.createFunction(
           all.push(...found)
         }
         return all
-      })
+      })) as unknown as DetectedAnomaly[]
 
       totalAnomalies += batchResults.length
 

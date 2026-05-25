@@ -15,6 +15,8 @@ interface SnapshotRow {
   consensus:   unknown
   computed_at: Date
 }
+type ZoneRef        = { geohash6: string }
+type MobilityLearnRaw = { geohash6: string; avg_count: number | null; avg_bucket: number | null }
 
 interface ConsensusData {
   congestionScore: number
@@ -32,13 +34,13 @@ export const learnPatterns = inngest.createFunction(
     const hourOfDay = now.getHours()
 
     // ── 1. Zones actives (signaux dans les 24 dernières heures) ───────────────
-    const activeGeohashes = await step.run('fetch-active-zones', async () => {
+    const activeGeohashes: string[] = await step.run('fetch-active-zones', async () => {
       const cutoff = new Date(now.getTime() - ACTIVE_WINDOW_H * 60 * 60 * 1000)
       const zones  = await db.trafficZone.findMany({
         where:  { updatedAt: { gte: cutoff } },
         select: { geohash6: true },
       })
-      return zones.map(z => z.geohash6)
+      return (zones as ZoneRef[]).map((z: ZoneRef) => z.geohash6)
     })
 
     if (!activeGeohashes.length) return { patterns: 0, purged: 0 }
@@ -68,7 +70,7 @@ export const learnPatterns = inngest.createFunction(
     }
 
     // ── 4. Mobility aggregation pour deviceCount + speedBucket ────────────────
-    const mobilityRows = await step.run('fetch-mobility-agg', async () => {
+    const mobilityRows: MobilityLearnRaw[] = await step.run('fetch-mobility-agg', async () => {
       return db.$queryRaw<
         { geohash6: string; avg_count: number | null; avg_bucket: number | null }[]
       >`
@@ -92,7 +94,7 @@ export const learnPatterns = inngest.createFunction(
     })
 
     const mobilityByZone = new Map(
-      mobilityRows.map(r => [r.geohash6, {
+      mobilityRows.map((r: MobilityLearnRaw) => [r.geohash6, {
         avgDeviceCount: r.avg_count  ?? 0,
         avgSpeedBucket: r.avg_bucket ?? 2.5,
       }])

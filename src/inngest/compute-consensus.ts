@@ -6,6 +6,11 @@ import { computeTerritoryScore }                                    from '@/lib/
 import type { SourceSnapshot }                                      from '@/lib/consensus/types'
 import type { ZoneTerritorySnapshot }                               from '@/lib/consensus/store'
 
+type ActiveZone    = { geohash6: string; congestionScore: number | null; updatedAt: string | Date }
+type BatchResult   = { divergent: boolean; broadcast: boolean; snapshot: ZoneTerritorySnapshot }
+type MobilityAggRaw = { geohash6: string; device_count: bigint; avg_bucket: number | null }
+type MobilityAgg   = { geohash6: string; deviceCount: number; avgBucket: number }
+
 // Fenêtre d'activité : zones ayant reçu des données SIG dans les 10 dernières minutes
 const ACTIVE_WINDOW_MS = 10 * 60 * 1000
 
@@ -22,7 +27,7 @@ export const computeConsensusJob = inngest.createFunction(
     const now = new Date()
 
     // ── 1. Zones actives depuis TrafficZone ───────────────────────────────────
-    const activeZones = await step.run('fetch-active-zones', async () => {
+    const activeZones: ActiveZone[] = await step.run('fetch-active-zones', async () => {
       const cutoff = new Date(now.getTime() - ACTIVE_WINDOW_MS)
       return db.trafficZone.findMany({
         where:  { updatedAt: { gte: cutoff } },
@@ -36,7 +41,7 @@ export const computeConsensusJob = inngest.createFunction(
     const mobilityWindow = new Date(now.getTime() - MOBILITY_WINDOW_MS)
     const geohashes      = activeZones.map(z => z.geohash6)
 
-    const mobilityRows = await step.run('fetch-mobility-agg', async () => {
+    const mobilityRows: MobilityAgg[] = await step.run('fetch-mobility-agg', async () => {
       // Agrégation brute : count + avg speedBucket par geohash6
       const rows = await db.$queryRaw<
         { geohash6: string; device_count: bigint; avg_bucket: number | null }[]
@@ -50,7 +55,7 @@ export const computeConsensusJob = inngest.createFunction(
           AND "timestamp" >= ${mobilityWindow}
         GROUP BY "geohash6"
       `
-      return rows.map(r => ({
+      return rows.map((r: MobilityAggRaw) => ({
         geohash6:    r.geohash6,
         deviceCount: Number(r.device_count),
         avgBucket:   r.avg_bucket ?? 0,
@@ -69,7 +74,7 @@ export const computeConsensusJob = inngest.createFunction(
       const batch = activeZones.slice(i, i + BATCH)
 
       // eslint-disable-next-line no-await-in-loop
-      const results = await step.run(`compute-batch-${i}`, async () => {
+      const results: BatchResult[] = await step.run(`compute-batch-${i}`, async () => {
         return Promise.all(batch.map(async zone => {
           const sources: SourceSnapshot[] = []
 

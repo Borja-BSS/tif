@@ -4,6 +4,8 @@ import { getConsensus }          from '@/lib/consensus/store'
 import { computeTerritoryScore } from '@/lib/scoring/territory-score'
 import { withMetrics }           from '@/lib/route-utils'
 
+type TrafficZoneRow = { geohash6: string; congestionScore: number | null }
+
 // Fenêtre de zones "actives" pour l'état initial de la carte
 const ACTIVE_WINDOW_MS = 2 * 60 * 60 * 1000  // 2h
 
@@ -18,7 +20,7 @@ async function handler(_req: NextRequest) {
   if (!zones.length) return NextResponse.json([])
 
   const results = await Promise.all(
-    zones.map(async zone => {
+    (zones as TrafficZoneRow[]).map(async (zone: TrafficZoneRow) => {
       // Priorité : consensus Redis (données fraîches) → fallback DB
       const consensus = await getConsensus(zone.geohash6)
       const cong      = consensus?.congestionScore ?? zone.congestionScore ?? 0

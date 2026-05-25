@@ -6,6 +6,7 @@
  */
 import { inngest }    from '@/lib/inngest'
 import { getMetrics, SLO_TARGETS } from '@/lib/metrics'
+import type { RouteMetrics }        from '@/lib/metrics'
 import { logger }     from '@/lib/logger'
 
 const MONITORED_ROUTES = Object.keys(SLO_TARGETS)
@@ -25,7 +26,7 @@ export const shipLogs = inngest.createFunction(
       return { skipped: true }
     }
 
-    const metrics = await step.run('fetch-slo-metrics', () =>
+    const metrics: RouteMetrics[] = await step.run('fetch-slo-metrics', () =>
       getMetrics(MONITORED_ROUTES),
     )
 

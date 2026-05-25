@@ -33,14 +33,15 @@ export const processMobilitySignals = inngest.createFunction(
     const now         = new Date()
 
     // ── 1. Re-validation bbox serveur-side (défense en profondeur) ───────────
-    const valid = await step.run('filter-bbox', async () =>
-      signals.filter(s => cellInBbox(s.geohash6)),
+    const valid: IncomingSignal[] = await step.run('filter-bbox', async () =>
+      signals.filter((s: IncomingSignal) => cellInBbox(s.geohash6)),
     )
 
     if (!valid.length) return { stored: 0, zones: 0 }
 
     // ── 2. Agrégation par geohash6 ────────────────────────────────────────────
-    const aggregated = await step.run('aggregate', async () => {
+    type AggZone = { geohash6: string; deviceCount: number; avgSpeedBucket: number }
+    const aggregated: AggZone[] = await step.run('aggregate', async () => {
       const zones = new Map<string, ZoneAgg>()
 
       for (const sig of valid) {
@@ -64,7 +65,7 @@ export const processMobilitySignals = inngest.createFunction(
     // ── 3. Upsert TrafficZone (deviceCount + avgSpeedBucket) ─────────────────
     await step.run('upsert-traffic-zones', async () => {
       await Promise.all(
-        aggregated.map(z =>
+        aggregated.map((z: AggZone) =>
           db.trafficZone.upsert({
             where:  { geohash6: z.geohash6 },
             update: {
@@ -86,7 +87,7 @@ export const processMobilitySignals = inngest.createFunction(
     const stored = await step.run('insert-signals', async () => {
       const datePartition = now.toISOString().slice(0, 10)
       await db.mobilitySignal.createMany({
-        data: valid.map(s => ({
+        data: valid.map((s: IncomingSignal) => ({
           geohash6:      s.geohash6,
           deviceHash:    s.sessionToken || 'anon',
           speedBucket:   s.speedBucket,

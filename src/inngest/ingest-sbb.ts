@@ -45,7 +45,7 @@ export const ingestSbb = inngest.createFunction(
       return res.json() as Promise<GtfsrtFeed>
     })
 
-    const signals = await step.run('process-vehicles', async () => {
+    const signals: { lat: number; lng: number; weight: number; type: string }[] = await step.run('process-vehicles', async () => {
       return (feed.entity ?? []).flatMap((e) => {
         const pos = e.vehicle?.position
         if (!pos) return []
@@ -70,7 +70,7 @@ export const ingestSbb = inngest.createFunction(
 )
 
 // ── Simulation réaliste Grand Genève ──────────────────────────
-const TRANSPORT_AXES = [
+const TRANSPORT_AXES: [number, number][] = [
   // Tram 12 : Annemasse ↔ Cornavin
   [46.1942, 6.2234], [46.2020, 6.2050], [46.2080, 6.1900], [46.2180, 6.1420],
   // Tram 15 : Palettes ↔ Nations

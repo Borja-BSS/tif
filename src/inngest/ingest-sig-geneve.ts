@@ -8,6 +8,8 @@ import { createHmac } from 'crypto'
 const SIG_TRAFFIC_URL =
   'https://ge.ch/sitg/rest/services/SITG/MapServer/1036/query?f=json&where=1%3D1&outFields=*&resultRecordCount=200'
 
+type SigSignal = { lat: number; lng: number; geohash6: string; congestion: number; speedBucket: number; deviceHash: string; datePartition: string }
+
 interface SigFeature {
   attributes: {
     VITESSE_MESUREE?: number
@@ -33,7 +35,7 @@ export const ingestSigGeneve = inngest.createFunction(
       return res.json() as Promise<{ features: SigFeature[] }>
     })
 
-    const signals = await step.run('process-quantify', async () => {
+    const signals: SigSignal[] = await step.run('process-quantify', async () => {
       const daily = new Date().toISOString().slice(0, 10)
       const salt  = process.env.NEXTAUTH_SECRET ?? 'dev-salt'
 
