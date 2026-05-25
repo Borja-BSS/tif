@@ -45,8 +45,8 @@ export interface HereIncidentDetails {
   startTime:   string
   endTime?:    string
   criticality: HereCriticality
-  type:        { mainType: HereMainType }
-  description: { value: string; language: string }[]
+  type:        HereMainType
+  description: { value: string; language: string }
   location:    HereLocation
 }
 

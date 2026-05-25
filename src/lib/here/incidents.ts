@@ -48,20 +48,17 @@ function mapIncident(inc: HereIncidentDetails): IncidentFeature | null {
   const firstPoint = inc.location.shape.links[0]?.points[0]
   if (!firstPoint) return null
 
-  const description =
-    inc.description.find(d => d.language === 'fr')?.value ??
-    inc.description[0]?.value ??
-    'Incident signalé'
+  const description = inc.description?.value ?? 'Incident signalé'
 
   return {
     type:       'Feature',
     properties: {
       id:          inc.id,
-      type:        inc.type.mainType,
+      type:        inc.type,
       criticality: inc.criticality,
       description,
-      icon:        ICON[inc.type.mainType],
-      color:       SEVERITY_COLOR[inc.criticality],
+      icon:        ICON[inc.type] ?? '⚠️',
+      color:       SEVERITY_COLOR[inc.criticality] ?? '#8E8E93',
       startTime:   inc.startTime,
       endTime:     inc.endTime ?? null,
     },
