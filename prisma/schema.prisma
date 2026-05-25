@@ -91,7 +91,7 @@ model TerritorialEvent {
   id   String    @id @default(cuid())
   type EventType
 
-  geohash String @db.VarChar(12)
+  geohash String @db.VarChar(15)
   lat     Float?
   lng     Float?
 
@@ -113,6 +113,10 @@ model TerritorialEvent {
 
   severity Severity @default(MEDIUM)
 
+  // Phase 3 : lead time vs sources officielles
+  officialSourceAt DateTime? @db.Timestamptz  // date de la première annonce officielle (SIG/SBB)
+  leadTimeMinutes  Float?                      // avance TIF en minutes (positif = TIF détecte avant)
+
   @@index([geohash, detectedAt])
   @@index([type, confidence])
   @@index([expiresAt])
@@ -122,7 +126,7 @@ model TerritorialEvent {
 model MobilitySignal {
   id String @id @default(cuid())
 
-  geohash6   String @db.VarChar(6)
+  geohash6   String @db.VarChar(15)
   deviceHash String @db.VarChar(64)
 
   speedBucket Int
@@ -150,7 +154,7 @@ model MobilityConsent {
 
 model TrafficZone {
   id       String @id @default(cuid())
-  geohash6 String @unique @db.VarChar(6)
+  geohash6 String @unique @db.VarChar(15)
 
   deviceCount      Int    @default(0)
   avgSpeedBucket   Float?
@@ -197,7 +201,7 @@ enum Severity {
 
 model TemporalPattern {
   id        String @id @default(cuid())
-  geohash6  String @db.VarChar(6)
+  geohash6  String @db.VarChar(15)
   dayOfWeek Int    // 0=dimanche … 6=samedi
   hourOfDay Int    // 0–23
 
@@ -217,7 +221,7 @@ model EventResolution {
 
   eventId    String @db.VarChar(30)   // TerritorialEvent.id (ref souple)
   eventType  String @db.VarChar(50)
-  geohash6   String @db.VarChar(6)
+  geohash6   String @db.VarChar(15)
   severity   String @db.VarChar(20)
 
   detectedAt       DateTime  @db.Timestamptz
@@ -232,7 +236,7 @@ model EventResolution {
 
 model ZoneConsensusSnapshot {
   id       String @id @default(cuid())
-  geohash6 String @db.VarChar(6)
+  geohash6 String @db.VarChar(15)
 
   consensus     Json
   computedAt    DateTime @db.Timestamptz

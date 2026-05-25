@@ -1,5 +1,6 @@
 import { inngest } from '@/lib/inngest'
 import { db }     from '@/lib/db'
+import { redis }  from '@/lib/redis'
 
 /**
  * Auto-résolution des TerritorialEvents expirés.
@@ -12,14 +13,15 @@ import { db }     from '@/lib/db'
 export const resolveEvents = inngest.createFunction(
   {
     id:       'resolve-events',
-    name:     'Lead Time Tracker — résolution événements toutes 30min',
-    triggers: [{ cron: '*/30 * * * *' }],
+    name:     'Lead Time Tracker — résolution événements toutes 2min',
+    triggers: [{ cron: '*/2 * * * *' }],
   },
   async ({ step }) => {
     const now = new Date()
 
     // Événements expirés non encore résolus
-    const expired = await step.run('fetch-expired-events', async () => {
+    type ExpiredEvent = { id: string; type: string; geohash: string; severity: string; detectedAt: Date | string; expiresAt: Date | string }
+    const expired: ExpiredEvent[] = await step.run('fetch-expired-events', async () => {
       return db.territorialEvent.findMany({
         where: {
           expiresAt:  { lt: now },
@@ -60,6 +62,9 @@ export const resolveEvents = inngest.createFunction(
             leadTimeMinutes,
           },
         })
+
+        // Invalider cache Redis consensus pour la zone résolue
+        await redis.del(`tif:consensus:${event.geohash.slice(0, 6)}`)
 
         count++
       }

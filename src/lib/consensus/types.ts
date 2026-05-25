@@ -16,13 +16,24 @@ export interface ZoneConsensus {
   officialStatus: OfficialStatus
   realityStatus:  RealityStatus
 
-  confidenceScore:        number   // fraction de fraîcheur des sources disponibles
+  /** Fraction de fraîcheur des sources disponibles (0-1). Alias : confidenceScore. */
+  dataConfidence:  number
+  /** @deprecated utiliser dataConfidence */
+  confidenceScore: number
+
   divergence:             boolean
   divergenceExplanation?: string
 
-  sourceWeights:   Record<SourceType, number>
-  congestionScore: number          // score pondéré brut [0,1]
+  sourceWeights:    Record<SourceType, number>
+  sourcesAvailable: SourceType[]
+  sourcesMissing:   SourceType[]
+
+  /** Score de congestion pondéré brut [0,1] (pour affichage ÷100). */
+  congestionScore: number
+
+  /** true si ≥ SOURCES_MIN sources et dataConfidence ≥ RELIABILITY_MIN */
+  isReliable: boolean
 
   computedAt: Date
-  ttl:        number               // secondes avant recompute
+  ttl:        number  // secondes avant recompute
 }

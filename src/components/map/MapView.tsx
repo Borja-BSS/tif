@@ -5,6 +5,7 @@ import { useState } from 'react'
 import type mapboxgl from 'mapbox-gl'
 import type { MapGLProps } from './MapGL'
 import type { FilterState } from './FilterPanel'
+import { useTerritorialLayers } from './useTerritorialLayers'
 
 const MapGL          = dynamic(() => import('./MapGL'),          { ssr: false })
 const RealtimeLayer  = dynamic(() => import('./RealtimeLayer'),  { ssr: false })
@@ -23,6 +24,9 @@ const DEFAULT_FILTERS: FilterState = {
 export default function MapView(props: Omit<MapGLProps, 'onMapReady'>) {
   const [map, setMap]         = useState<mapboxgl.Map | null>(null)
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS)
+
+  // Layer marqueurs incidents territoriaux actifs (via API REST)
+  useTerritorialLayers(filters.alerts ? map : null)
 
   return (
     <>

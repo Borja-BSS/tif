@@ -110,15 +110,24 @@ export function computeConsensus(
     s => s.type === 'mobility' && (s.deviceCount ?? 0) >= MOBILITY_MIN_DEVICES,
   )
 
+  const ALL_TYPES: SourceType[] = ['sig', 'sbb', 'gtfs', 'mobility', 'social']
+  const usedTypes = sources
+    .filter(s => !(s.type === 'mobility' && (s.deviceCount ?? 0) < MOBILITY_MIN_DEVICES))
+    .map(s => s.type)
+
   return {
     geohash6,
     officialStatus:        official,
     realityStatus:         reality,
+    dataConfidence:        confidenceScore,
     confidenceScore,
     divergence,
     divergenceExplanation: divergence ? buildExplanation(official, reality) : undefined,
     sourceWeights:         weights,
+    sourcesAvailable:      usedTypes,
+    sourcesMissing:        ALL_TYPES.filter(t => !usedTypes.includes(t)),
     congestionScore,
+    isReliable:            usedTypes.length >= 2 && confidenceScore >= 0.30,
     computedAt:            now,
     ttl:                   hasMobility ? 30 : 120,
   }

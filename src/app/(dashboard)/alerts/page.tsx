@@ -1,4 +1,10 @@
+export const dynamic = 'force-dynamic'
+
+import type { Metadata } from 'next'
 import Link from 'next/link'
+
+export const metadata: Metadata = { title: 'Alertes Territoriales' }
+
 import { db } from '@/lib/db'
 import { computeTerritoryScore, LEVEL_COLOR } from '@/lib/scoring/territory-score'
 import type { TerritoryScore } from '@/lib/scoring/territory-score'
@@ -161,17 +167,38 @@ export default async function AlertsPage() {
                         <span>Détecté {fmt(e.detectedAt)}</span>
                         <span>·</span>
                         <span>Expire {fmt(e.expiresAt)}</span>
-                        <span>·</span>
-                        <span>Score {e.territoryScore.score}/100</span>
+                      </div>
+                      {/* Score territorial — congestion pondérée + divergence */}
+                      <div className="flex items-center gap-3 mt-0.5 text-[10px] font-mono">
+                        <span className="text-white/25">Congestion</span>
+                        <span
+                          className="font-semibold"
+                          style={{ color: LEVEL_COLOR[e.territoryScore.level] }}
+                          title="Score territorial : intensité de congestion détectée (0=fluide, 100=bloqué)"
+                        >
+                          {e.territoryScore.score}/100
+                        </span>
+                        <span className="text-white/15">·</span>
+                        <span className="text-white/25">Fiabilité sources</span>
+                        <span
+                          className="text-white/50"
+                          title="Qualité des données : proportion de sources disponibles et fraîches"
+                        >
+                          {Math.round(e.confidence * 100)}%
+                        </span>
                       </div>
                     </div>
 
-                    {/* Confidence */}
+                    {/* Indicateur divergence officiel/réalité */}
                     <div className="text-right flex-shrink-0">
-                      <div className="text-[11px] font-mono text-white/50">
-                        {Math.round(e.confidence * 100)}%
+                      {e.territoryScore.components.divergence > 0 && (
+                        <div className="text-[9px] font-mono text-amber-400/80 whitespace-nowrap">
+                          ⚡ divergence
+                        </div>
+                      )}
+                      <div className="text-[10px] font-mono text-white/20 mt-0.5">
+                        {e.territoryScore.level}
                       </div>
-                      <div className="text-[9px] font-mono text-white/20">conf.</div>
                     </div>
                   </div>
                 )

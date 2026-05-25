@@ -1,4 +1,10 @@
+export const dynamic = 'force-dynamic'
+
+import type { Metadata } from 'next'
 import { db } from '@/lib/db'
+
+export const metadata: Metadata = { title: 'Admin · Tableau de bord' }
+
 
 type LeadTimeRow  = { event_type: string; avg_lead: number; count: bigint }
 type RecentEvent  = {

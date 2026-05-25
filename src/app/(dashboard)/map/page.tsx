@@ -1,5 +1,8 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import MapView from '@/components/map/MapView'
+
+export const metadata: Metadata = { title: 'Carte Live' }
 
 export default function MapPage() {
   return (
