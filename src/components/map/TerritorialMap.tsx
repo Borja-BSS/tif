@@ -22,18 +22,25 @@ const REFRESH_MS: Record<LayerId, number> = {
 }
 
 const SOURCE_BADGE: Record<string, string> = {
-  OFROU:        'bg-blue-500/20 text-blue-300',
-  TPG:          'bg-orange-500/20 text-orange-300',
-  MétéoSuisse:  'bg-cyan-500/20 text-cyan-300',
-  HERE:         'bg-purple-500/20 text-purple-300',
+  OFROU:       'bg-blue-500/20 text-blue-300',
+  TPG:         'bg-orange-500/20 text-orange-300',
+  MétéoSuisse: 'bg-cyan-500/20 text-cyan-300',
+  HERE:        'bg-purple-500/20 text-purple-300',
 }
 
-// Mapbox layer / source IDs par couche
+// Border crossings are permanent — never removed when switching layers
+const BC_SOURCE    = 'bc-source'
+const BC_CIRCLE    = 'bc-circles'
+const BC_LABEL     = 'bc-labels'
+const BC_REFRESH   = 120_000
+
+// Mapbox layer / source IDs managed by the toggle system
+// border crossings are NOT in this list — they're always visible
 const LAYER_DEFS: Record<LayerId, { sources: string[]; layers: string[] }> = {
   mobility:  { sources: ['mobility'],  layers: ['mobility-lines'] },
   transport: { sources: ['transport'], layers: ['transport-circles', 'transport-labels'] },
   alerts:    { sources: ['alerts'],    layers: ['alerts-symbols'] },
-  territory: { sources: ['territory'], layers: ['territory-symbols', 'border-crossings', 'border-labels'] },
+  territory: { sources: ['territory'], layers: ['territory-symbols'] },
 }
 
 function injectPopupStyle() {
@@ -58,11 +65,12 @@ export function TerritorialMap() {
   const mapRef       = useRef<mapboxgl.Map | null>(null)
   const loadedRef    = useRef(false)
   const timerRef     = useRef<ReturnType<typeof setInterval> | null>(null)
+  const bcTimerRef   = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  const [activeLayer, setActiveLayer]   = useState<LayerId>('mobility')
-  const [isReady, setIsReady]           = useState(false)
-  const [lastRefresh, setLastRefresh]   = useState<Date | null>(null)
-  const [secondsAgo, setSecondsAgo]     = useState(0)
+  const [activeLayer, setActiveLayer] = useState<LayerId>('mobility')
+  const [isReady, setIsReady]         = useState(false)
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null)
+  const [secondsAgo, setSecondsAgo]   = useState(0)
 
   // ── Init Mapbox ───────────────────────────────────────────────
   useEffect(() => {
@@ -95,26 +103,134 @@ export function TerritorialMap() {
 
     return () => {
       map.remove()
-      mapRef.current  = null
+      mapRef.current    = null
       loadedRef.current = false
     }
   }, [])
 
-  // ── Cleanup d'une couche ───────────────────────────────────────
+  // ── Postes de douanes — toujours visibles, indépendants des onglets ──
+  const loadBorderCrossings = useCallback(async () => {
+    const m = mapRef.current
+    if (!m || !loadedRef.current) return
+
+    let geojson: FeatureCollection
+    try {
+      const res = await fetch('/api/v1/layers/territory')
+      if (!res.ok) return
+      geojson = await res.json() as FeatureCollection
+    } catch {
+      return
+    }
+
+    if (!mapRef.current || !loadedRef.current) return
+
+    const borderFC: FeatureCollection = {
+      type:     'FeatureCollection',
+      features: geojson.features.filter(f => (f.properties as Record<string, unknown>)?.type === 'border'),
+    }
+
+    // Si la source existe déjà → mise à jour des données sans recréer les layers
+    const existing = m.getSource(BC_SOURCE) as mapboxgl.GeoJSONSource | undefined
+    if (existing) {
+      existing.setData(borderFC)
+      return
+    }
+
+    // Premier chargement — créer source + layers
+    m.addSource(BC_SOURCE, { type: 'geojson', data: borderFC })
+
+    m.addLayer({
+      id:     BC_CIRCLE,
+      type:   'circle',
+      source: BC_SOURCE,
+      paint:  {
+        'circle-radius':          12,
+        'circle-color':           ['get', 'color'],
+        'circle-stroke-width':    2,
+        'circle-stroke-color':    '#FFFFFF',
+        'circle-opacity':         0.9,
+        'circle-pitch-alignment': 'viewport',
+        'circle-pitch-scale':     'viewport',
+      },
+    })
+
+    m.addLayer({
+      id:     BC_LABEL,
+      type:   'symbol',
+      source: BC_SOURCE,
+      layout: {
+        'text-field':            '🛂',
+        'text-size':             14,
+        'text-anchor':           'center',
+        'text-allow-overlap':    true,
+        'text-ignore-placement': true,
+      },
+    })
+
+    // Popup au clic
+    m.on('click', BC_CIRCLE, (e: mapboxgl.MapMouseEvent & { features?: mapboxgl.MapboxGeoJSONFeature[] }) => {
+      if (!e.features?.length) return
+      const props = e.features[0].properties ?? {}
+      const geo   = e.features[0].geometry as { type: string; coordinates: [number, number] }
+      if (geo.type !== 'Point') return
+
+      const statusColor: Record<string, string> = {
+        CLEAR: '#34C759', LIGHT: '#30D158', MODERATE: '#FF9500', HEAVY: '#FF3B30', BLOCKED: '#8E8E93',
+      }
+      const status  = String(props.status ?? 'CLEAR')
+      const color   = statusColor[status] ?? '#8E8E93'
+      const wait    = Number(props.waitTimeMinutes ?? 0)
+      const updated = props.lastUpdated
+        ? new Date(String(props.lastUpdated)).toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' })
+        : '—'
+
+      new mapboxgl.Popup({ maxWidth: '260px', className: 'tif-popup', closeButton: false })
+        .setLngLat(geo.coordinates)
+        .setHTML(`
+          <div style="font-family:-apple-system,SF Pro Text,sans-serif;font-size:13px;line-height:1.6">
+            <div style="font-weight:600;margin-bottom:6px">🛂 ${String(props.name ?? 'Passage frontière')}</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+              <span style="width:8px;height:8px;border-radius:50%;background:${color};display:inline-block"></span>
+              <span style="color:${color};font-weight:500">${status}</span>
+              ${wait > 0 ? `<span style="color:rgba(255,255,255,.45);font-size:11px">· ~${wait} min d'attente</span>` : ''}
+            </div>
+            <div style="color:rgba(255,255,255,.35);font-size:11px">CH ⇄ FR · Mis à jour ${updated}</div>
+          </div>
+        `)
+        .addTo(m)
+    })
+
+    m.on('mouseenter', BC_CIRCLE, () => { m.getCanvas().style.cursor = 'pointer' })
+    m.on('mouseleave', BC_CIRCLE, () => { m.getCanvas().style.cursor = '' })
+  }, [])
+
+  // ── Démarrer les postes de douanes dès que la carte est prête ──
+  useEffect(() => {
+    if (!isReady) return
+
+    loadBorderCrossings()
+
+    bcTimerRef.current = setInterval(loadBorderCrossings, BC_REFRESH)
+
+    return () => {
+      if (bcTimerRef.current) clearInterval(bcTimerRef.current)
+    }
+  }, [isReady, loadBorderCrossings])
+
+  // ── Cleanup d'une couche (toggle) ──────────────────────────────
   const clearLayer = useCallback((id: LayerId) => {
     const m = mapRef.current
     if (!m) return
     const { layers, sources } = LAYER_DEFS[id]
-    layers.forEach(l  => { if (m.getLayer(l))   m.removeLayer(l)   })
-    sources.forEach(s => { if (m.getSource(s))  m.removeSource(s)  })
+    layers.forEach(l  => { if (m.getLayer(l))  m.removeLayer(l)  })
+    sources.forEach(s => { if (m.getSource(s)) m.removeSource(s) })
   }, [])
 
-  // ── Chargement + rendu d'une couche ───────────────────────────
+  // ── Chargement + rendu d'une couche (toggle) ───────────────────
   const loadLayer = useCallback(async (id: LayerId) => {
     const m = mapRef.current
     if (!m || !loadedRef.current) return
 
-    // Vider les layers existants de cette couche
     clearLayer(id)
 
     let geojson: FeatureCollection
@@ -127,12 +243,10 @@ export function TerritorialMap() {
       return
     }
 
-    // Vérifier que la carte est toujours là après l'await
     if (!mapRef.current || !loadedRef.current) return
 
     m.addSource(id, { type: 'geojson', data: geojson })
     setLastRefresh(new Date())
-    console.log(`[TIF] layer ${id} loaded:`, geojson.features.length, 'features')
 
     if (id === 'mobility') {
       m.addLayer({
@@ -141,8 +255,8 @@ export function TerritorialMap() {
         source: 'mobility',
         layout: { 'line-join': 'round', 'line-cap': 'round' },
         paint:  {
-          'line-color': ['get', 'color'],
-          'line-width': ['interpolate', ['linear'], ['zoom'], 9, 2, 12, 4, 15, 7],
+          'line-color':   ['get', 'color'],
+          'line-width':   ['interpolate', ['linear'], ['zoom'], 9, 2, 12, 4, 15, 7],
           'line-opacity': 0.85,
         },
       })
@@ -173,9 +287,9 @@ export function TerritorialMap() {
           'text-anchor': 'top',
         },
         paint: {
-          'text-color':       '#FFFFFF',
-          'text-halo-color':  'rgba(0,0,0,0.7)',
-          'text-halo-width':  1,
+          'text-color':      '#FFFFFF',
+          'text-halo-color': 'rgba(0,0,0,0.7)',
+          'text-halo-width': 1,
         },
       })
     }
@@ -200,8 +314,7 @@ export function TerritorialMap() {
         const geo   = e.features[0].geometry as { type: string; coordinates: [number, number] }
         if (geo.type !== 'Point') return
 
-        const src    = String(props.source ?? '')
-        const badge  = SOURCE_BADGE[src] ?? 'bg-white/10 text-white/60'
+        const src = String(props.source ?? '')
 
         new mapboxgl.Popup({ maxWidth: '300px', className: 'tif-popup', closeButton: false })
           .setLngLat(geo.coordinates)
@@ -227,90 +340,21 @@ export function TerritorialMap() {
     }
 
     if (id === 'territory') {
-      try {
-        // Border crossing circles (colour = status)
-        m.addLayer({
-          id:     'border-crossings',
-          type:   'circle',
-          source: 'territory',
-          filter: ['==', ['get', 'type'], 'border'],
-          paint:  {
-            'circle-radius':            12,
-            'circle-color':             ['get', 'color'],
-            'circle-stroke-width':      2,
-            'circle-stroke-color':      '#FFFFFF',
-            'circle-opacity':           0.9,
-            'circle-pitch-alignment':   'viewport',
-            'circle-pitch-scale':       'viewport',
-          },
-        })
-
-        // 🛂 emoji on top of circles
-        m.addLayer({
-          id:     'border-labels',
-          type:   'symbol',
-          source: 'territory',
-          filter: ['==', ['get', 'type'], 'border'],
-          layout: {
-            'text-field':               ['get', 'icon'],
-            'text-size':                18,
-            'text-anchor':              'center',
-            'text-allow-overlap':       true,
-            'text-ignore-placement':    true,
-          },
-        })
-
-        // Other territory symbols (HERE closures / construction)
-        m.addLayer({
-          id:     'territory-symbols',
-          type:   'symbol',
-          source: 'territory',
-          filter: ['!=', ['get', 'type'], 'border'],
-          layout: {
-            'text-field':         ['get', 'icon'],
-            'text-size':          ['interpolate', ['linear'], ['zoom'], 9, 16, 13, 24],
-            'text-anchor':        'center',
-            'text-allow-overlap': false,
-          },
-        })
-      } catch (err) {
-        console.error('[TIF] territory addLayer error:', err)
-      }
-
-      // Popup for border crossings
-      m.on('click', 'border-crossings', (e: mapboxgl.MapMouseEvent & { features?: mapboxgl.MapboxGeoJSONFeature[] }) => {
-        if (!e.features?.length) return
-        const props = e.features[0].properties ?? {}
-        const geo   = e.features[0].geometry as { type: string; coordinates: [number, number] }
-        if (geo.type !== 'Point') return
-
-        const statusColor: Record<string, string> = {
-          CLEAR: '#34C759', LIGHT: '#30D158', MODERATE: '#FF9500', HEAVY: '#FF3B30', BLOCKED: '#8E8E93',
-        }
-        const status = String(props.status ?? 'CLEAR')
-        const color  = statusColor[status] ?? '#8E8E93'
-        const wait   = Number(props.waitTimeMinutes ?? 0)
-        const updated = props.lastUpdated
-          ? new Date(String(props.lastUpdated)).toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' })
-          : '—'
-
-        new mapboxgl.Popup({ maxWidth: '260px', className: 'tif-popup', closeButton: false })
-          .setLngLat(geo.coordinates)
-          .setHTML(`
-            <div style="font-family:-apple-system,SF Pro Text,sans-serif;font-size:13px;line-height:1.6">
-              <div style="font-weight:600;margin-bottom:6px">🛂 ${String(props.name ?? 'Passage frontière')}</div>
-              <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
-                <span style="width:8px;height:8px;border-radius:50%;background:${color};display:inline-block"></span>
-                <span style="color:${color};font-weight:500">${status}</span>
-                ${wait > 0 ? `<span style="color:rgba(255,255,255,.45);font-size:11px">· ~${wait} min d'attente</span>` : ''}
-              </div>
-              <div style="color:rgba(255,255,255,.35);font-size:11px">CH ⇄ FR · Mis à jour ${updated}</div>
-            </div>
-          `)
-          .addTo(m)
+      // Événements HERE (fermetures, travaux, événements planifiés)
+      // Les postes de douanes sont dans une couche permanente séparée
+      m.addLayer({
+        id:     'territory-symbols',
+        type:   'symbol',
+        source: 'territory',
+        filter: ['!=', ['get', 'type'], 'border'],
+        layout: {
+          'text-field':         ['get', 'icon'],
+          'text-size':          ['interpolate', ['linear'], ['zoom'], 9, 16, 13, 24],
+          'text-anchor':        'center',
+          'text-allow-overlap': false,
+        },
       })
 
-      // Popup for other territory events
       m.on('click', 'territory-symbols', (e: mapboxgl.MapMouseEvent & { features?: mapboxgl.MapboxGeoJSONFeature[] }) => {
         if (!e.features?.length) return
         const props = e.features[0].properties ?? {}
@@ -335,10 +379,8 @@ export function TerritorialMap() {
           .addTo(m)
       })
 
-      for (const lid of ['border-crossings', 'border-labels', 'territory-symbols']) {
-        m.on('mouseenter', lid, () => { m.getCanvas().style.cursor = 'pointer' })
-        m.on('mouseleave', lid, () => { m.getCanvas().style.cursor = '' })
-      }
+      m.on('mouseenter', 'territory-symbols', () => { m.getCanvas().style.cursor = 'pointer' })
+      m.on('mouseleave', 'territory-symbols', () => { m.getCanvas().style.cursor = '' })
     }
   }, [clearLayer])
 
@@ -370,7 +412,7 @@ export function TerritorialMap() {
 
   // ── Toggle handler ────────────────────────────────────────────
   const toggle = (id: LayerId) => {
-    if (id === activeLayer) return  // bouton actif = ne rien faire
+    if (id === activeLayer) return
     clearLayer(activeLayer)
     setActiveLayer(id)
   }
@@ -395,7 +437,7 @@ export function TerritorialMap() {
         </div>
       )}
 
-      {/* Layer toggles — style Apple Maps */}
+      {/* Layer toggles */}
       <div className="absolute bottom-8 left-4 flex flex-col gap-2 z-10">
         {LAYERS.map(layer => {
           const active = activeLayer === layer.id
