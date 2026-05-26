@@ -28,11 +28,8 @@ const SOURCE_BADGE: Record<string, string> = {
   HERE:        'bg-purple-500/20 text-purple-300',
 }
 
-// Border crossings are permanent — never removed when switching layers
-const BC_SOURCE    = 'bc-source'
-const BC_CIRCLE    = 'bc-circles'
-const BC_LABEL     = 'bc-labels'
-const BC_REFRESH   = 120_000
+// Border crossings refresh interval (markers HTML, toujours visibles)
+const BC_REFRESH = 120_000
 
 // Mapbox layer / source IDs managed by the toggle system
 // border crossings are NOT in this list — they're always visible
@@ -61,11 +58,12 @@ function injectPopupStyle() {
 }
 
 export function TerritorialMap() {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const mapRef       = useRef<mapboxgl.Map | null>(null)
-  const loadedRef    = useRef(false)
-  const timerRef     = useRef<ReturnType<typeof setInterval> | null>(null)
-  const bcTimerRef   = useRef<ReturnType<typeof setInterval> | null>(null)
+  const containerRef  = useRef<HTMLDivElement>(null)
+  const mapRef        = useRef<mapboxgl.Map | null>(null)
+  const loadedRef     = useRef(false)
+  const timerRef      = useRef<ReturnType<typeof setInterval> | null>(null)
+  const bcTimerRef    = useRef<ReturnType<typeof setInterval> | null>(null)
+  const bcMarkersRef  = useRef<mapboxgl.Marker[]>([])
 
   const [activeLayer, setActiveLayer] = useState<LayerId>('mobility')
   const [isReady, setIsReady]         = useState(false)
@@ -108,7 +106,7 @@ export function TerritorialMap() {
     }
   }, [])
 
-  // ── Postes de douanes — toujours visibles, indépendants des onglets ──
+  // ── Postes de douanes — markers HTML, toujours visibles ─────────
   const loadBorderCrossings = useCallback(async () => {
     const m = mapRef.current
     if (!m || !loadedRef.current) return
@@ -124,84 +122,65 @@ export function TerritorialMap() {
 
     if (!mapRef.current || !loadedRef.current) return
 
-    const borderFC: FeatureCollection = {
-      type:     'FeatureCollection',
-      features: geojson.features.filter(f => (f.properties as Record<string, unknown>)?.type === 'border'),
+    const STATUS_COLOR: Record<string, string> = {
+      CLEAR: '#34C759', LIGHT: '#30D158', MODERATE: '#FF9500', HEAVY: '#FF3B30', BLOCKED: '#8E8E93',
     }
 
-    // Si la source existe déjà → mise à jour des données sans recréer les layers
-    const existing = m.getSource(BC_SOURCE) as mapboxgl.GeoJSONSource | undefined
-    if (existing) {
-      existing.setData(borderFC)
-      return
-    }
+    // Supprimer les anciens markers
+    bcMarkersRef.current.forEach(mk => mk.remove())
+    bcMarkersRef.current = []
 
-    // Premier chargement — créer source + layers
-    m.addSource(BC_SOURCE, { type: 'geojson', data: borderFC })
+    for (const feature of geojson.features) {
+      const props = feature.properties as Record<string, unknown>
+      if (props?.type !== 'border') continue
 
-    m.addLayer({
-      id:     BC_CIRCLE,
-      type:   'circle',
-      source: BC_SOURCE,
-      paint:  {
-        'circle-radius':          12,
-        'circle-color':           ['get', 'color'],
-        'circle-stroke-width':    2,
-        'circle-stroke-color':    '#FFFFFF',
-        'circle-opacity':         0.9,
-        'circle-pitch-alignment': 'viewport',
-        'circle-pitch-scale':     'viewport',
-      },
-    })
-
-    m.addLayer({
-      id:     BC_LABEL,
-      type:   'symbol',
-      source: BC_SOURCE,
-      layout: {
-        'text-field':            '🛂',
-        'text-size':             14,
-        'text-anchor':           'center',
-        'text-allow-overlap':    true,
-        'text-ignore-placement': true,
-      },
-    })
-
-    // Popup au clic
-    m.on('click', BC_CIRCLE, (e: mapboxgl.MapMouseEvent & { features?: mapboxgl.MapboxGeoJSONFeature[] }) => {
-      if (!e.features?.length) return
-      const props = e.features[0].properties ?? {}
-      const geo   = e.features[0].geometry as { type: string; coordinates: [number, number] }
-      if (geo.type !== 'Point') return
-
-      const statusColor: Record<string, string> = {
-        CLEAR: '#34C759', LIGHT: '#30D158', MODERATE: '#FF9500', HEAVY: '#FF3B30', BLOCKED: '#8E8E93',
-      }
+      const coords  = (feature.geometry as unknown as { coordinates: [number, number] }).coordinates
       const status  = String(props.status ?? 'CLEAR')
-      const color   = statusColor[status] ?? '#8E8E93'
+      const color   = STATUS_COLOR[status] ?? '#8E8E93'
+      const name    = String(props.name ?? 'Passage frontière')
       const wait    = Number(props.waitTimeMinutes ?? 0)
       const updated = props.lastUpdated
         ? new Date(String(props.lastUpdated)).toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' })
         : '—'
 
-      new mapboxgl.Popup({ maxWidth: '260px', className: 'tif-popup', closeButton: false })
-        .setLngLat(geo.coordinates)
-        .setHTML(`
-          <div style="font-family:-apple-system,SF Pro Text,sans-serif;font-size:13px;line-height:1.6">
-            <div style="font-weight:600;margin-bottom:6px">🛂 ${String(props.name ?? 'Passage frontière')}</div>
-            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
-              <span style="width:8px;height:8px;border-radius:50%;background:${color};display:inline-block"></span>
-              <span style="color:${color};font-weight:500">${status}</span>
-              ${wait > 0 ? `<span style="color:rgba(255,255,255,.45);font-size:11px">· ~${wait} min d'attente</span>` : ''}
-            </div>
-            <div style="color:rgba(255,255,255,.35);font-size:11px">CH ⇄ FR · Mis à jour ${updated}</div>
-          </div>
-        `)
-        .addTo(m)
-    })
+      // Marker HTML — rendu garanti, indépendant du système de layers
+      const el = document.createElement('div')
+      el.style.cssText = [
+        'width:34px', 'height:34px', 'border-radius:50%',
+        `background:${color}`,
+        'border:2.5px solid rgba(255,255,255,0.95)',
+        'display:flex', 'align-items:center', 'justify-content:center',
+        'font-size:16px', 'cursor:pointer',
+        'box-shadow:0 2px 10px rgba(0,0,0,0.5)',
+        'user-select:none',
+      ].join(';')
+      el.textContent = '🛂'
+      el.title = name
 
-    m.on('mouseenter', BC_CIRCLE, () => { m.getCanvas().style.cursor = 'pointer' })
-    m.on('mouseleave', BC_CIRCLE, () => { m.getCanvas().style.cursor = '' })
+      const popup = new mapboxgl.Popup({
+        maxWidth:    '260px',
+        className:   'tif-popup',
+        closeButton: false,
+        offset:      20,
+      }).setHTML(`
+        <div style="font-family:-apple-system,SF Pro Text,sans-serif;font-size:13px;line-height:1.6">
+          <div style="font-weight:600;margin-bottom:6px">🛂 ${name}</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <span style="width:8px;height:8px;border-radius:50%;background:${color};display:inline-block"></span>
+            <span style="color:${color};font-weight:500">${status}</span>
+            ${wait > 0 ? `<span style="color:rgba(255,255,255,.45);font-size:11px">· ~${wait} min d'attente</span>` : ''}
+          </div>
+          <div style="color:rgba(255,255,255,.35);font-size:11px">CH ⇄ FR · Mis à jour ${updated}</div>
+        </div>
+      `)
+
+      const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
+        .setLngLat(coords)
+        .setPopup(popup)
+        .addTo(m)
+
+      bcMarkersRef.current.push(marker)
+    }
   }, [])
 
   // ── Démarrer les postes de douanes dès que la carte est prête ──
@@ -214,6 +193,8 @@ export function TerritorialMap() {
 
     return () => {
       if (bcTimerRef.current) clearInterval(bcTimerRef.current)
+      bcMarkersRef.current.forEach(mk => mk.remove())
+      bcMarkersRef.current = []
     }
   }, [isReady, loadBorderCrossings])
 
