@@ -14,11 +14,15 @@ const CACHE_TTL     = 60
 const TERRITORY_TYPES = new Set(['roadClosure', 'construction', 'plannedEvent'])
 
 async function handler(_req: NextRequest): Promise<NextResponse> {
-  const cached = await redis.get<FeatureCollection>(CACHE_KEY)
-  if (cached) {
-    return NextResponse.json(cached, {
-      headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120' },
-    })
+  try {
+    const cached = await redis.get<FeatureCollection>(CACHE_KEY)
+    if (cached) {
+      return NextResponse.json(cached, {
+        headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120' },
+      })
+    }
+  } catch (err) {
+    logger.warn({ err }, 'territory:redis-get-failed — skipping cache')
   }
 
   const [hereResult, borderResult] = await Promise.allSettled([
@@ -43,13 +47,13 @@ async function handler(_req: NextRequest): Promise<NextResponse> {
     logger.warn({ err: hereResult.reason }, 'territory:merge:here-failed')
   }
 
-  const data: FeatureCollection = {
-    type:        'FeatureCollection',
-    features,
-    generatedAt: new Date().toISOString(),
-  } as FeatureCollection & { generatedAt: string }
+  const data: FeatureCollection = { type: 'FeatureCollection', features }
 
-  await redis.set(CACHE_KEY, data, { ex: CACHE_TTL })
+  try {
+    await redis.set(CACHE_KEY, data, { ex: CACHE_TTL })
+  } catch (err) {
+    logger.warn({ err }, 'territory:redis-set-failed — skipping cache write')
+  }
 
   return NextResponse.json(data, {
     headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120' },

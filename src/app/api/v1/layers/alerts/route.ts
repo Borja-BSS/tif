@@ -37,11 +37,15 @@ function deduplicateFeatures(features: Feature<Point>[]): Feature<Point>[] {
 }
 
 async function handler(_req: NextRequest): Promise<NextResponse> {
-  const cached = await redis.get<FeatureCollection>(CACHE_KEY)
-  if (cached) {
-    return NextResponse.json(cached, {
-      headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120' },
-    })
+  try {
+    const cached = await redis.get<FeatureCollection>(CACHE_KEY)
+    if (cached) {
+      return NextResponse.json(cached, {
+        headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120' },
+      })
+    }
+  } catch (err) {
+    logger.warn({ err }, 'alerts:redis-get-failed — skipping cache')
   }
 
   const [hereResult, ofrouResult, tpgResult, weatherResult] = await Promise.allSettled([
@@ -78,9 +82,13 @@ async function handler(_req: NextRequest): Promise<NextResponse> {
   }
 
   const features = deduplicateFeatures(allFeatures)
-  const data: FeatureCollection = { type: 'FeatureCollection', features, generatedAt: new Date().toISOString() } as FeatureCollection & { generatedAt: string }
+  const data: FeatureCollection = { type: 'FeatureCollection', features }
 
-  await redis.set(CACHE_KEY, data, { ex: CACHE_TTL })
+  try {
+    await redis.set(CACHE_KEY, data, { ex: CACHE_TTL })
+  } catch (err) {
+    logger.warn({ err }, 'alerts:redis-set-failed — skipping cache write')
+  }
 
   return NextResponse.json(data, {
     headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120' },

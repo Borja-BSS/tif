@@ -95,8 +95,12 @@ const CACHE_KEY = 'tif:layer:border-crossings'
 const CACHE_TTL = 120
 
 export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
-  const cached = await redis.get<BorderFeatureCollection>(CACHE_KEY)
-  if (cached) return cached
+  try {
+    const cached = await redis.get<BorderFeatureCollection>(CACHE_KEY)
+    if (cached) return cached
+  } catch (err) {
+    logger.warn({ err }, 'border-crossings:redis-get-failed — recomputing')
+  }
 
   const now      = new Date()
   const features: Feature<Point, BorderProperties>[] = CROSSINGS.map(c => {
@@ -124,7 +128,12 @@ export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
 
   const result: BorderFeatureCollection = { type: 'FeatureCollection', features }
 
-  await redis.set(CACHE_KEY, result, { ex: CACHE_TTL })
+  try {
+    await redis.set(CACHE_KEY, result, { ex: CACHE_TTL })
+  } catch (err) {
+    logger.warn({ err }, 'border-crossings:redis-set-failed')
+  }
+
   logger.debug({ count: features.length }, 'border-crossings:computed')
   return result
 }
