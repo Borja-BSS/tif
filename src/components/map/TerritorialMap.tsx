@@ -132,6 +132,7 @@ export function TerritorialMap() {
 
     m.addSource(id, { type: 'geojson', data: geojson })
     setLastRefresh(new Date())
+    console.log(`[TIF] layer ${id} loaded:`, geojson.features.length, 'features')
 
     if (id === 'mobility') {
       m.addLayer({
@@ -226,48 +227,55 @@ export function TerritorialMap() {
     }
 
     if (id === 'territory') {
-      // Border crossing circles (colour = status)
-      m.addLayer({
-        id:     'border-crossings',
-        type:   'circle',
-        source: 'territory',
-        filter: ['==', ['get', 'type'], 'border'],
-        paint:  {
-          'circle-radius':       12,
-          'circle-color':        ['get', 'color'],
-          'circle-stroke-width': 2,
-          'circle-stroke-color': '#FFFFFF',
-          'circle-opacity':      0.9,
-        },
-      })
+      try {
+        // Border crossing circles (colour = status)
+        m.addLayer({
+          id:     'border-crossings',
+          type:   'circle',
+          source: 'territory',
+          filter: ['==', ['get', 'type'], 'border'],
+          paint:  {
+            'circle-radius':            12,
+            'circle-color':             ['get', 'color'],
+            'circle-stroke-width':      2,
+            'circle-stroke-color':      '#FFFFFF',
+            'circle-opacity':           0.9,
+            'circle-pitch-alignment':   'viewport',
+            'circle-pitch-scale':       'viewport',
+          },
+        })
 
-      // 🛂 emoji on top of circles
-      m.addLayer({
-        id:     'border-labels',
-        type:   'symbol',
-        source: 'territory',
-        filter: ['==', ['get', 'type'], 'border'],
-        layout: {
-          'text-field':         ['get', 'icon'],
-          'text-size':          16,
-          'text-anchor':        'center',
-          'text-allow-overlap': true,
-        },
-      })
+        // 🛂 emoji on top of circles
+        m.addLayer({
+          id:     'border-labels',
+          type:   'symbol',
+          source: 'territory',
+          filter: ['==', ['get', 'type'], 'border'],
+          layout: {
+            'text-field':               ['get', 'icon'],
+            'text-size':                18,
+            'text-anchor':              'center',
+            'text-allow-overlap':       true,
+            'text-ignore-placement':    true,
+          },
+        })
 
-      // Other territory symbols (HERE closures / construction)
-      m.addLayer({
-        id:     'territory-symbols',
-        type:   'symbol',
-        source: 'territory',
-        filter: ['!=', ['get', 'type'], 'border'],
-        layout: {
-          'text-field':         ['get', 'icon'],
-          'text-size':          ['interpolate', ['linear'], ['zoom'], 9, 16, 13, 24],
-          'text-anchor':        'center',
-          'text-allow-overlap': false,
-        },
-      })
+        // Other territory symbols (HERE closures / construction)
+        m.addLayer({
+          id:     'territory-symbols',
+          type:   'symbol',
+          source: 'territory',
+          filter: ['!=', ['get', 'type'], 'border'],
+          layout: {
+            'text-field':         ['get', 'icon'],
+            'text-size':          ['interpolate', ['linear'], ['zoom'], 9, 16, 13, 24],
+            'text-anchor':        'center',
+            'text-allow-overlap': false,
+          },
+        })
+      } catch (err) {
+        console.error('[TIF] territory addLayer error:', err)
+      }
 
       // Popup for border crossings
       m.on('click', 'border-crossings', (e: mapboxgl.MapMouseEvent & { features?: mapboxgl.MapboxGeoJSONFeature[] }) => {
