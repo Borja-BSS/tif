@@ -144,6 +144,18 @@ const DIRECTIVES = [
 ]
 
 async function main() {
+  // ── Guard : ne pas re-seeder si les données sont déjà présentes ──────────
+  const existingDirectives = await db.g7Directive.count()
+  const existingSources    = await db.g7Source.count()
+
+  if (existingDirectives > 0 && existingSources > 0) {
+    console.log(`Already seeded (${existingDirectives} directives, ${existingSources} sources). Skipping.`)
+    console.log('To force re-seed: delete G7Directive and G7Source rows first.')
+    await db.$disconnect()
+    process.exit(0)
+  }
+
+  // ── Sources ──────────────────────────────────────────────────────────────
   console.log('Seeding G7 sources...')
   for (const s of SOURCES) {
     await db.g7Source.upsert({
@@ -154,25 +166,21 @@ async function main() {
     console.log(`  ✓ ${s.label}`)
   }
 
+  // ── Directives ───────────────────────────────────────────────────────────
+  // G7Directive n'a pas de champ unique naturel sauf l'id auto-généré.
+  // On utilise findFirst + create pour éviter les doublons.
   console.log('\nSeeding G7 directives...')
   for (const d of DIRECTIVES) {
-    await db.g7Directive.upsert({
-      where:  { id: d.publishedAt.toISOString() + d.title.slice(0, 20) },
-      create: d,
-      update: { title: d.title, summary: d.summary, severity: d.severity },
-    }).catch(async () => {
-      // upsert sur champ non-unique → create si inexistant
-      const exists = await db.g7Directive.findFirst({
-        where: { title: d.title },
-      })
-      if (!exists) {
-        await db.g7Directive.create({ data: d })
-        console.log(`  ✓ ${d.publishedAt.toISOString().slice(0, 10)} — ${d.title.slice(0, 60)}`)
-      } else {
-        console.log(`  ~ déjà présent: ${d.title.slice(0, 60)}`)
-      }
+    const exists = await db.g7Directive.findFirst({
+      where: { title: d.title },
+      select: { id: true },
     })
-    console.log(`  ✓ ${d.publishedAt.toISOString().slice(0, 10)} — ${d.title.slice(0, 60)}`)
+    if (exists) {
+      console.log(`  ~ déjà présent: ${d.title.slice(0, 70)}`)
+    } else {
+      await db.g7Directive.create({ data: d })
+      console.log(`  ✓ ${d.publishedAt.toISOString().slice(0, 10)} — ${d.title.slice(0, 70)}`)
+    }
   }
 
   console.log('\nDone.')
