@@ -1,33 +1,18 @@
-// GTFS-RT feed opentransportdata.swiss — format JSON (Accept: application/json)
-// Même structure que ingest-sbb.ts : { entity: [{ vehicle: {...} }] }
+import { redis }  from '@/lib/redis'
+import { logger } from '@/lib/logger'
+import type { FeatureCollection } from 'geojson'
+import type { ExtendedVehicleType, VehicleSplit } from './types'
 
 const GTFS_RT_URL = 'https://api.opentransportdata.swiss/gtfs-rt/vehicleposition'
+const BBOX        = { latMin: 46.05, latMax: 46.45, lngMin: 5.85, lngMax: 6.60 }
+const CACHE_KEY   = 'tif:layer:vehicles:v2'
+const CACHE_TTL   = 15
 
-const BBOX = { latMin: 46.05, latMax: 46.45, lngMin: 5.85, lngMax: 6.60 }
-
-type VehicleType = 'train' | 'tram' | 'bus'
-
-type VehicleFeature = {
-  type:       'Feature'
-  properties: {
-    id:          string
-    routeId:     string
-    vehicleType: VehicleType
-    speed:       number
-    bearing:     number
-    color:       string
-    timestamp:   number | null
-  }
-  geometry: {
-    type:        'Point'
-    coordinates: [number, number]
-  }
-}
-
-export type VehicleFeatureCollection = {
-  type:        'FeatureCollection'
-  features:    VehicleFeature[]
-  generatedAt: string
+const VEHICLE_COLOR: Record<ExtendedVehicleType, string> = {
+  train: '#0040FF',
+  tram:  '#FF9500',
+  bus:   '#34C759',
+  ceva:  '#AF52DE',
 }
 
 interface GtfsVehiclePosition {
@@ -43,23 +28,38 @@ interface GtfsFeed {
   entity?: ({ id: string } & GtfsVehiclePosition)[]
 }
 
-function detectVehicleType(routeId: string): VehicleType {
-  if (routeId.includes('IC') || routeId.includes('IR') || routeId.includes('RE') || routeId.length > 6) return 'train'
-  if (/^(1|2|10|12|14|15|18)$/.test(routeId)) return 'tram'
+function detectVehicleType(routeId: string): ExtendedVehicleType {
+  const r = routeId.trim().toUpperCase()
+  // CEVA / Léman Express (L1-L5)
+  if (/^L[1-5]$/.test(r)) return 'ceva'
+  // CFF intercity / EC / TGV / RER
+  if (/^(IC|IR|RE|EC|TGV|S)\d/.test(r)) return 'train'
+  if (r.startsWith('IR ') || r.startsWith('IC ') || r.startsWith('RE ')) return 'train'
+  // Long routeId = CFF
+  if (r.length > 6) return 'train'
+  // TPG trams (Geneva specific lines)
+  if (/^(T?)?(12|14|15|18)$/.test(r)) return 'tram'
+  // Default: TPG bus
   return 'bus'
 }
 
-const VEHICLE_COLOR: Record<VehicleType, string> = {
-  train: '#0040FF',
-  tram:  '#FF9500',
-  bus:   '#34C759',
+function emptyFC(): FeatureCollection {
+  return { type: 'FeatureCollection', features: [] }
 }
 
-export async function getVehiclePositions(): Promise<VehicleFeatureCollection> {
-  const apiKey = process.env.OPENTRANSPORT_API_KEY
+export async function getVehiclePositions(): Promise<VehicleSplit> {
+  try {
+    const cached = await redis.get<VehicleSplit>(CACHE_KEY)
+    if (cached) return cached
+  } catch (err) {
+    logger.warn({ err }, 'vehicles:redis-get-failed')
+  }
 
+  const apiKey = process.env.OPENTRANSPORT_API_KEY
   if (!apiKey) {
-    return { type: 'FeatureCollection', features: [], generatedAt: new Date().toISOString() }
+    logger.warn('vehicles:no-api-key')
+    const generatedAt = new Date().toISOString()
+    return { tpg: emptyFC(), cff: emptyFC(), generatedAt }
   }
 
   const res = await fetch(GTFS_RT_URL, {
@@ -67,40 +67,61 @@ export async function getVehiclePositions(): Promise<VehicleFeatureCollection> {
       'Authorization': `Bearer ${apiKey}`,
       'Accept':        'application/json',
     },
-    signal: AbortSignal.timeout(10000),
-    next:   { revalidate: 15 },
+    signal: AbortSignal.timeout(10_000),
+    cache:  'no-store',
   })
 
   if (!res.ok) throw new Error(`GTFS-RT ${res.status}`)
 
   const feed = await res.json() as GtfsFeed
 
-  const features: VehicleFeature[] = (feed.entity ?? []).flatMap(
-    (entity): VehicleFeature[] => {
-      const pos = entity.vehicle?.position
-      if (!pos) return []
+  const tpgFeatures: FeatureCollection['features'] = []
+  const cffFeatures: FeatureCollection['features'] = []
 
-      const { latitude: lat, longitude: lng } = pos
-      if (lat < BBOX.latMin || lat > BBOX.latMax || lng < BBOX.lngMin || lng > BBOX.lngMax) return []
+  for (const entity of feed.entity ?? []) {
+    const pos = entity.vehicle?.position
+    if (!pos) continue
 
-      const routeId     = entity.vehicle?.trip?.routeId ?? ''
-      const vehicleType = detectVehicleType(routeId)
+    const { latitude: lat, longitude: lng } = pos
+    if (lat < BBOX.latMin || lat > BBOX.latMax || lng < BBOX.lngMin || lng > BBOX.lngMax) continue
 
-      return [{
-        type:       'Feature',
-        properties: {
-          id:          entity.id,
-          routeId,
-          vehicleType,
-          speed:       pos.speed ?? 0,
-          bearing:     pos.bearing ?? 0,
-          color:       VEHICLE_COLOR[vehicleType],
-          timestamp:   entity.vehicle?.timestamp ?? null,
-        },
-        geometry: { type: 'Point', coordinates: [lng, lat] },
-      }]
-    },
-  )
+    const routeId     = entity.vehicle?.trip?.routeId ?? ''
+    const vehicleType = detectVehicleType(routeId)
 
-  return { type: 'FeatureCollection', features, generatedAt: new Date().toISOString() }
+    const feature = {
+      type: 'Feature' as const,
+      properties: {
+        id:          entity.id,
+        routeId:     routeId || '?',
+        vehicleType,
+        speed:       pos.speed ?? 0,
+        bearing:     pos.bearing ?? 0,
+        color:       VEHICLE_COLOR[vehicleType],
+        timestamp:   entity.vehicle?.timestamp ?? null,
+        isCEVA:      vehicleType === 'ceva',
+      },
+      geometry: { type: 'Point' as const, coordinates: [lng, lat] },
+    }
+
+    if (vehicleType === 'bus' || vehicleType === 'tram') {
+      tpgFeatures.push(feature)
+    } else {
+      cffFeatures.push(feature)
+    }
+  }
+
+  const result: VehicleSplit = {
+    tpg: { type: 'FeatureCollection', features: tpgFeatures },
+    cff: { type: 'FeatureCollection', features: cffFeatures },
+    generatedAt: new Date().toISOString(),
+  }
+
+  try {
+    await redis.set(CACHE_KEY, result, { ex: CACHE_TTL })
+  } catch (err) {
+    logger.warn({ err }, 'vehicles:redis-set-failed')
+  }
+
+  logger.debug({ tpg: tpgFeatures.length, cff: cffFeatures.length }, 'vehicles:fetched')
+  return result
 }

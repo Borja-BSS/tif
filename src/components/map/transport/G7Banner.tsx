@@ -1,0 +1,60 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import type { G7Impact } from '@/lib/transport/types'
+
+export function G7Banner() {
+  const [g7, setG7]           = useState<G7Impact | null>(null)
+  const [dismissed, setDismissed] = useState(false)
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      setG7((e as CustomEvent<G7Impact>).detail)
+    }
+    window.addEventListener('tif:g7-warning', handler)
+    return () => window.removeEventListener('tif:g7-warning', handler)
+  }, [])
+
+  if (!g7 || dismissed) return null
+
+  return (
+    <div
+      className="absolute top-16 left-1/2 -translate-x-1/2 z-20 max-w-sm w-full px-4"
+      style={{ fontFamily: '-apple-system, SF Pro Text, sans-serif' }}
+    >
+      <div
+        className="rounded-2xl border border-orange-500/30 px-4 py-3 shadow-xl"
+        style={{ background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(16px)' }}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-base">🏛️</span>
+              <span className="font-semibold text-white text-sm">
+                {g7.isActive ? 'G7 en cours — Perturbations TPG' : 'G7 Évian — À venir'}
+              </span>
+            </div>
+            <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>
+              {g7.isActive
+                ? 'Horaire vacances en vigueur sur la plupart des lignes TPG.'
+                : 'Perturbations TPG prévues du 8 au 17 juin. Anticipez vos déplacements.'}
+              {g7.suspendedLines.length > 0 &&
+                ` Ligne${g7.suspendedLines.length > 1 ? 's' : ''} ${g7.suspendedLines.join(', ')} supprimée${g7.suspendedLines.length > 1 ? 's' : ''}.`}
+            </p>
+            <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              Info TPG : <span style={{ color: 'rgba(255,255,255,0.65)' }}>{g7.hotline}</span>
+            </p>
+          </div>
+          <button
+            onClick={() => setDismissed(true)}
+            className="text-xl leading-none flex-shrink-0 mt-0.5 transition-opacity hover:opacity-70"
+            style={{ color: 'rgba(255,255,255,0.35)' }}
+            aria-label="Fermer"
+          >
+            ×
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
