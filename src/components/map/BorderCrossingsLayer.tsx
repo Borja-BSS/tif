@@ -32,14 +32,22 @@ export default function BorderCrossingsLayer({ map }: BorderCrossingsLayerProps)
   const timerRef   = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const load = useCallback(async (m: mapboxgl.Map) => {
+    console.log('[TIF] BorderCrossingsLayer: fetching territory...')
     let geojson: FeatureCollection
     try {
       const res = await fetch('/api/v1/layers/territory')
-      if (!res.ok) return
+      if (!res.ok) {
+        console.error('[TIF] BorderCrossingsLayer: fetch failed', res.status)
+        return
+      }
       geojson = await res.json() as FeatureCollection
-    } catch {
+    } catch (err) {
+      console.error('[TIF] BorderCrossingsLayer: fetch error', err)
       return
     }
+
+    const borderFeatures = geojson.features.filter(f => (f.properties as Record<string, unknown>)?.type === 'border')
+    console.log(`[TIF] BorderCrossingsLayer: ${geojson.features.length} total features, ${borderFeatures.length} border`)
 
     // Clear previous markers
     markersRef.current.forEach(mk => mk.remove())
@@ -124,6 +132,7 @@ export default function BorderCrossingsLayer({ map }: BorderCrossingsLayerProps)
         .setPopup(popup)
         .addTo(m)
 
+      console.log(`[TIF] marker added: ${name} @ [${coords}]`)
       markersRef.current.push(marker)
     }
   }, [])
@@ -131,6 +140,7 @@ export default function BorderCrossingsLayer({ map }: BorderCrossingsLayerProps)
   useEffect(() => {
     if (!map) return
 
+    console.log('[TIF] BorderCrossingsLayer mounted, map.loaded()=', map.loaded())
     injectPopupStyle()
 
     const run = () => load(map)
