@@ -102,13 +102,7 @@ function buildAlertFC(tpg: TpgDisruption[], cff: CffDisruption[]): FeatureCollec
 function initLayers(map: mapboxgl.Map) {
   for (const src of ALL_SOURCES) {
     if (!map.getSource(src)) {
-      map.addSource(src, {
-        type: 'geojson',
-        data: EMPTY_FC,
-        buffer: 0,
-        tolerance: 0.375,
-        generateId: true,
-      })
+      map.addSource(src, { type: 'geojson', data: EMPTY_FC, generateId: true })
     }
   }
 
