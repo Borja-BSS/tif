@@ -10,12 +10,13 @@ import { useHereMobilityLayer }  from './useHereMobilityLayer'
 import { useHereAlertsLayer }    from './useHereAlertsLayer'
 import { useGtfsTransportLayer } from './useGtfsTransportLayer'
 
-const MapGL          = dynamic(() => import('./MapGL'),          { ssr: false })
-const RealtimeLayer  = dynamic(() => import('./RealtimeLayer'),  { ssr: false })
-const AlertLayer     = dynamic(() => import('./AlertLayer'),     { ssr: false })
-const TerritoryLayer = dynamic(() => import('./TerritoryLayer'), { ssr: false })
-const G7Overlay      = dynamic(() => import('./G7Overlay'),      { ssr: false })
-const FilterPanel    = dynamic(() => import('./FilterPanel'),    { ssr: false })
+const MapGL                = dynamic(() => import('./MapGL'),                { ssr: false })
+const RealtimeLayer        = dynamic(() => import('./RealtimeLayer'),        { ssr: false })
+const AlertLayer           = dynamic(() => import('./AlertLayer'),           { ssr: false })
+const TerritoryLayer       = dynamic(() => import('./TerritoryLayer'),       { ssr: false })
+const G7Overlay            = dynamic(() => import('./G7Overlay'),            { ssr: false })
+const FilterPanel          = dynamic(() => import('./FilterPanel'),          { ssr: false })
+const BorderCrossingsLayer = dynamic(() => import('./BorderCrossingsLayer'), { ssr: false })
 
 const DEFAULT_FILTERS: FilterState = {
   heatmap:   true,
@@ -45,11 +46,12 @@ export default function MapView(props: Omit<MapGLProps, 'onMapReady'>) {
       <MapGL {...props} onMapReady={setMap} />
       {map && (
         <>
-          <TerritoryLayer map={map} visible={filters.territory} />
-          <RealtimeLayer  map={map} visible={filters.heatmap} showTransport={filters.transport} />
-          <AlertLayer     map={map} visible={filters.alerts} />
-          <G7Overlay      map={map} />
-          <FilterPanel    filters={filters} onChange={setFilters} />
+          <TerritoryLayer       map={map} visible={filters.territory} />
+          <RealtimeLayer        map={map} visible={filters.heatmap} showTransport={filters.transport} />
+          <AlertLayer           map={map} visible={filters.alerts} />
+          <G7Overlay            map={map} />
+          <BorderCrossingsLayer map={map} />
+          <FilterPanel          filters={filters} onChange={setFilters} />
         </>
       )}
     </>
