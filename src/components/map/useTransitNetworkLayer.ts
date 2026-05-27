@@ -28,15 +28,20 @@ const ALL_SOURCES = [SRC_NETWORK, SRC_DISRUPTED, SRC_ALERTS] as const
 const EMPTY_FC: FeatureCollection = { type: 'FeatureCollection', features: [] }
 
 // ── Fetch helpers ─────────────────────────────────────────────────────────────
-async function fetchNetwork(): Promise<FeatureCollection<MultiLineString, TransitRouteProperties> | null> {
-  try {
-    const res = await fetch('/data/transit-network.json')
-    if (!res.ok) return null
-    return await res.json() as FeatureCollection<MultiLineString, TransitRouteProperties>
-  } catch {
-    return null
+// Module-level promise: starts fetching immediately on first import (before user clicks Transport)
+let networkPromise: Promise<FeatureCollection<MultiLineString, TransitRouteProperties> | null> | null = null
+
+function fetchNetwork(): Promise<FeatureCollection<MultiLineString, TransitRouteProperties> | null> {
+  if (!networkPromise) {
+    networkPromise = fetch('/data/transit-network.json')
+      .then(res => res.ok ? res.json() as Promise<FeatureCollection<MultiLineString, TransitRouteProperties>> : null)
+      .catch(() => null)
   }
+  return networkPromise
 }
+
+// Kick off the prefetch as soon as this module is imported
+if (typeof window !== 'undefined') fetchNetwork()
 
 async function fetchDisruptions(): Promise<TransportLayerResponse | null> {
   try {
@@ -97,16 +102,22 @@ function buildAlertFC(tpg: TpgDisruption[], cff: CffDisruption[]): FeatureCollec
 function initLayers(map: mapboxgl.Map) {
   for (const src of ALL_SOURCES) {
     if (!map.getSource(src)) {
-      map.addSource(src, { type: 'geojson', data: EMPTY_FC })
+      map.addSource(src, {
+        type: 'geojson',
+        data: EMPTY_FC,
+        buffer: 0,
+        tolerance: 0.375,
+        generateId: true,
+      })
     }
   }
 
-  // Bus lines (thin green)
+  // Bus lines (thin green) — bevel join is GPU-cheaper than round for large datasets
   if (!map.getLayer(LAYER_NETWORK_BUS)) {
     map.addLayer({
       id: LAYER_NETWORK_BUS, type: 'line', source: SRC_NETWORK,
       filter: ['==', ['get', 'routeType'], 'bus'],
-      layout: { 'line-join': 'round', 'line-cap': 'round' },
+      layout: { 'line-join': 'bevel', 'line-cap': 'butt' },
       paint: {
         'line-color':   ['get', 'color'],
         'line-width':   ['interpolate', ['linear'], ['zoom'], 9, 1, 13, 2.5],
@@ -115,12 +126,12 @@ function initLayers(map: mapboxgl.Map) {
     })
   }
 
-  // Trolleybus lines (same as bus)
+  // Tram / trolleybus lines
   if (!map.getLayer(LAYER_NETWORK_TRAM)) {
     map.addLayer({
       id: LAYER_NETWORK_TRAM, type: 'line', source: SRC_NETWORK,
       filter: ['in', ['get', 'routeType'], ['literal', ['tram', 'trolleybus', 'share_taxi']]],
-      layout: { 'line-join': 'round', 'line-cap': 'round' },
+      layout: { 'line-join': 'bevel', 'line-cap': 'butt' },
       paint: {
         'line-color':   ['get', 'color'],
         'line-width':   ['interpolate', ['linear'], ['zoom'], 9, 2, 13, 4],
@@ -134,12 +145,11 @@ function initLayers(map: mapboxgl.Map) {
     map.addLayer({
       id: LAYER_NETWORK_CEVA, type: 'line', source: SRC_NETWORK,
       filter: ['==', ['get', 'isCEVA'], true],
-      layout: { 'line-join': 'round', 'line-cap': 'round' },
+      layout: { 'line-join': 'bevel', 'line-cap': 'butt' },
       paint: {
-        'line-color':         '#AF52DE',
-        'line-width':         ['interpolate', ['linear'], ['zoom'], 9, 2.5, 13, 5],
-        'line-opacity':       0.9,
-        'line-dasharray':     [1, 0],
+        'line-color':   '#AF52DE',
+        'line-width':   ['interpolate', ['linear'], ['zoom'], 9, 2.5, 13, 5],
+        'line-opacity': 0.9,
       },
     })
   }
@@ -152,7 +162,7 @@ function initLayers(map: mapboxgl.Map) {
         ['in', ['get', 'routeType'], ['literal', ['train', 'rail', 'light_rail', 'subway', 'monorail']]],
         ['==', ['get', 'isCEVA'], false],
       ],
-      layout: { 'line-join': 'round', 'line-cap': 'round' },
+      layout: { 'line-join': 'bevel', 'line-cap': 'butt' },
       paint: {
         'line-color':   '#0040FF',
         'line-width':   ['interpolate', ['linear'], ['zoom'], 9, 2, 13, 4.5],
@@ -161,11 +171,11 @@ function initLayers(map: mapboxgl.Map) {
     })
   }
 
-  // Disrupted lines overlay (red, wide)
+  // Disrupted lines overlay (red dashed)
   if (!map.getLayer(LAYER_DISRUPTED)) {
     map.addLayer({
       id: LAYER_DISRUPTED, type: 'line', source: SRC_DISRUPTED,
-      layout: { 'line-join': 'round', 'line-cap': 'round' },
+      layout: { 'line-join': 'bevel', 'line-cap': 'butt' },
       paint: {
         'line-color':     '#FF3B30',
         'line-width':     ['interpolate', ['linear'], ['zoom'], 9, 3, 13, 6],
