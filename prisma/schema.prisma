@@ -245,3 +245,69 @@ model ZoneConsensusSnapshot {
   @@index([geohash6, computedAt])
   @@index([datePartition])
 }
+
+// ── Veille G7 ────────────────────────────────────────────────────────────────
+
+model G7Source {
+  id       String  @id @default(cuid())
+  url      String  @unique @db.VarChar(500)
+  label    String  @db.VarChar(200)
+  category String  @db.VarChar(50)
+  active   Boolean @default(true)
+
+  lastChecked DateTime? @db.Timestamptz
+  lastHash    String?   @db.VarChar(64)
+  lastStatus  Int?
+
+  createdAt DateTime       @default(now()) @db.Timestamptz
+  alerts    G7WatchAlert[]
+
+  @@index([active])
+}
+
+model G7Directive {
+  id String @id @default(cuid())
+
+  publishedAt DateTime @db.Timestamptz
+  authority   String   @db.VarChar(100)
+  category    G7DirectiveCategory
+
+  title    String  @db.VarChar(500)
+  summary  String  @db.Text
+  url      String? @db.VarChar(500)
+
+  severity Severity @default(MEDIUM)
+  impact   String[]
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  @@index([publishedAt])
+  @@index([category])
+}
+
+model G7WatchAlert {
+  id       String   @id @default(cuid())
+  sourceId String
+  source   G7Source @relation(fields: [sourceId], references: [id])
+
+  detectedAt DateTime @default(now()) @db.Timestamptz
+  summary    String   @db.VarChar(1000)
+  newHash    String   @db.VarChar(64)
+  oldHash    String?  @db.VarChar(64)
+
+  @@index([detectedAt])
+  @@index([sourceId])
+}
+
+enum G7DirectiveCategory {
+  ARMY_DEPLOYMENT
+  BORDER_CONTROL
+  AIRSPACE_RESTRICTION
+  SECURITY_MEASURE
+  DEMONSTRATION_RULES
+  COST_SHARING
+  MOBILITY_IMPACT
+  DIPLOMATIC
+  MACARON_SYSTEM
+  OTHER
+}

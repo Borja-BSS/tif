@@ -17,6 +17,7 @@ export default function MapPage() {
           <nav className="flex items-center gap-3 text-[11px] font-mono">
             <Link href="/map"     className="text-white/80">Carte</Link>
             <Link href="/alerts"  className="text-white/50 hover:text-white/80 transition-colors">Alertes</Link>
+            <Link href="/veille"  className="text-white/50 hover:text-white/80 transition-colors">Veille G7</Link>
             <Link href="/admin"   className="text-white/50 hover:text-white/80 transition-colors">Admin</Link>
           </nav>
           <span className="flex items-center gap-1.5 text-[11px] text-emerald-400/80">

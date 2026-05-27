@@ -9,6 +9,7 @@ import { processMobilitySignals }   from '@/inngest/process-mobility-signals'
 import { learnPatterns }            from '@/inngest/learn-patterns'
 import { resolveEvents }            from '@/inngest/resolve-events'
 import { shipLogs }                 from '@/inngest/ship-logs'
+import { watchG7Sources }          from '@/inngest/watch-g7-sources'
 
 export const { GET, POST, PUT } = serve({
   client:    inngest,
@@ -22,5 +23,6 @@ export const { GET, POST, PUT } = serve({
     learnPatterns,
     resolveEvents,
     shipLogs,
+    watchG7Sources,
   ],
 })
