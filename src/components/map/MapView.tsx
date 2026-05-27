@@ -23,7 +23,7 @@ const BorderCrossingsLayer = dynamic(() => import('./BorderCrossingsLayer'), { s
 const DEFAULT_FILTERS: FilterState = {
   heatmap:   true,
   alerts:    true,
-  transport: true,
+  transport: false,
   territory: true,
 }
 

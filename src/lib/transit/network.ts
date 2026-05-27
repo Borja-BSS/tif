@@ -108,13 +108,15 @@ function parseOverpass(response: OverpassResponse): TransitNetwork {
   return { type: 'FeatureCollection', features }
 }
 
+const EMPTY_NETWORK: TransitNetwork = { type: 'FeatureCollection', features: [] }
+
 async function fetchFromOverpass(): Promise<TransitNetwork> {
   for (const endpoint of OVERPASS_ENDPOINTS) {
     try {
-      const res = await fetch(endpoint, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body:    `data=${encodeURIComponent(OVERPASS_QUERY)}`,
+      const url = new URL(endpoint)
+      url.searchParams.set('data', OVERPASS_QUERY)
+      const res = await fetch(url.toString(), {
+        headers: { 'User-Agent': 'TIF-Monitor/1.0 (G7 Geneva 2026)' },
         signal:  AbortSignal.timeout(50_000),
         cache:   'no-store',
       })
@@ -125,7 +127,8 @@ async function fetchFromOverpass(): Promise<TransitNetwork> {
       logger.warn({ err, endpoint }, 'transit:network:overpass-failed — trying next')
     }
   }
-  throw new Error('All Overpass endpoints failed')
+  logger.warn('transit:network:all-endpoints-failed — returning empty network')
+  return EMPTY_NETWORK
 }
 
 export async function getTransitNetwork(): Promise<TransitNetwork> {
@@ -139,12 +142,20 @@ export async function getTransitNetwork(): Promise<TransitNetwork> {
     logger.warn({ err }, 'transit:network:redis-get-failed')
   }
 
-  const network = await fetchFromOverpass()
-
+  let network: TransitNetwork
   try {
-    await redis.set(CACHE_KEY, network, { ex: CACHE_TTL })
+    network = await fetchFromOverpass()
   } catch (err) {
-    logger.warn({ err }, 'transit:network:redis-set-failed')
+    logger.warn({ err }, 'transit:network:fetch-failed — returning empty')
+    return EMPTY_NETWORK
+  }
+
+  if (network.features.length > 0) {
+    try {
+      await redis.set(CACHE_KEY, network, { ex: CACHE_TTL })
+    } catch (err) {
+      logger.warn({ err }, 'transit:network:redis-set-failed')
+    }
   }
 
   return network
