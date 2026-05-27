@@ -42,11 +42,11 @@ const CROSSINGS: Crossing[] = [
   // Coordonnées OSM vérifiées — nodes "Douane/border_control" Grand Genève
   { id: 'bardonnex',       name: 'Bardonnex',       lat: 46.1495, lng: 6.0961, type: 'motorway',  capacity: 'high'   },
   { id: 'thonex-vallard',  name: 'Thônex-Vallard',  lat: 46.1889, lng: 6.2021, type: 'main',      capacity: 'medium' },
-  { id: 'meyrin',          name: 'Meyrin',           lat: 46.2323, lng: 6.1060, type: 'main',      capacity: 'medium' },
+  { id: 'meyrin',          name: 'Meyrin',           lat: 46.2347, lng: 6.0505, type: 'main',      capacity: 'medium' },
   { id: 'ferney-voltaire', name: 'Ferney-Voltaire',  lat: 46.2500, lng: 6.1190, type: 'secondary', capacity: 'low'    },
   { id: 'moillesulaz',     name: 'Moillesulaz',      lat: 46.1920, lng: 6.2070, type: 'main',      capacity: 'medium' },
   { id: 'perly',           name: 'Perly',            lat: 46.1523, lng: 6.0910, type: 'secondary', capacity: 'low'    },
-  { id: 'anieres',         name: 'Anières',          lat: 46.2686, lng: 6.2382, type: 'secondary', capacity: 'low'    },
+  { id: 'anieres',         name: 'Anières',          lat: 46.2416, lng: 6.3085, type: 'secondary', capacity: 'low'    },
   { id: 'croix-de-rozon',  name: 'Croix-de-Rozon',  lat: 46.1441, lng: 6.1375, type: 'secondary', capacity: 'low'    },
   { id: 'veyrier',         name: 'Veyrier',          lat: 46.1664, lng: 6.1885, type: 'secondary', capacity: 'low'    },
 ]
