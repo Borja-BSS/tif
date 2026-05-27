@@ -39,16 +39,16 @@ export type BorderFeatureCollection = FeatureCollection<Point, BorderProperties>
 // ── Postes de douane Grand Genève ─────────────────────────────────────────────
 // Inclut Anières (7e passage G7 autorisé) + Croix-de-Rozon + Veyrier (fermés G7)
 const CROSSINGS: Crossing[] = [
-  // Coordonnées vérifiées sur le terrain — CH-FR Grand Genève
-  { id: 'bardonnex',       name: 'Bardonnex',       lat: 46.1527, lng: 6.0869, type: 'motorway',  capacity: 'high'   },
-  { id: 'thonex-vallard',  name: 'Thônex-Vallard',  lat: 46.1940, lng: 6.2094, type: 'main',      capacity: 'medium' },
-  { id: 'meyrin',          name: 'Meyrin',           lat: 46.2241, lng: 6.0650, type: 'main',      capacity: 'medium' },
-  { id: 'ferney-voltaire', name: 'Ferney-Voltaire',  lat: 46.2566, lng: 6.1127, type: 'secondary', capacity: 'low'    },
-  { id: 'moillesulaz',     name: 'Moillesulaz',      lat: 46.1965, lng: 6.2113, type: 'main',      capacity: 'medium' },
-  { id: 'perly',           name: 'Perly',            lat: 46.1590, lng: 6.0529, type: 'secondary', capacity: 'low'    },
-  { id: 'anieres',         name: 'Anières',          lat: 46.2396, lng: 6.3196, type: 'secondary', capacity: 'low'    },
-  { id: 'croix-de-rozon',  name: 'Croix-de-Rozon',  lat: 46.1315, lng: 6.0960, type: 'secondary', capacity: 'low'    },
-  { id: 'veyrier',         name: 'Veyrier',          lat: 46.1714, lng: 6.1909, type: 'secondary', capacity: 'low'    },
+  // Coordonnées OSM vérifiées — nodes "Douane/border_control" Grand Genève
+  { id: 'bardonnex',       name: 'Bardonnex',       lat: 46.1495, lng: 6.0961, type: 'motorway',  capacity: 'high'   },
+  { id: 'thonex-vallard',  name: 'Thônex-Vallard',  lat: 46.1889, lng: 6.2021, type: 'main',      capacity: 'medium' },
+  { id: 'meyrin',          name: 'Meyrin',           lat: 46.2323, lng: 6.1060, type: 'main',      capacity: 'medium' },
+  { id: 'ferney-voltaire', name: 'Ferney-Voltaire',  lat: 46.2500, lng: 6.1190, type: 'secondary', capacity: 'low'    },
+  { id: 'moillesulaz',     name: 'Moillesulaz',      lat: 46.1920, lng: 6.2070, type: 'main',      capacity: 'medium' },
+  { id: 'perly',           name: 'Perly',            lat: 46.1523, lng: 6.0910, type: 'secondary', capacity: 'low'    },
+  { id: 'anieres',         name: 'Anières',          lat: 46.2686, lng: 6.2382, type: 'secondary', capacity: 'low'    },
+  { id: 'croix-de-rozon',  name: 'Croix-de-Rozon',  lat: 46.1441, lng: 6.1375, type: 'secondary', capacity: 'low'    },
+  { id: 'veyrier',         name: 'Veyrier',          lat: 46.1664, lng: 6.1885, type: 'secondary', capacity: 'low'    },
 ]
 
 // ── Directives G7 (CF 06.05.2026 + CE GE 13.05.2026) ────────────────────────
