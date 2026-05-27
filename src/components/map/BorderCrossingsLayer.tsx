@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef } from 'react'
 import mapboxgl from 'mapbox-gl'
 import type { FeatureCollection } from 'geojson'
 
@@ -27,135 +27,160 @@ function injectPopupStyle() {
   document.head.appendChild(s)
 }
 
-export default function BorderCrossingsLayer({ map }: BorderCrossingsLayerProps) {
-  const markersRef = useRef<mapboxgl.Marker[]>([])
-  const timerRef   = useRef<ReturnType<typeof setInterval> | null>(null)
+async function fetchBorderData(): Promise<FeatureCollection | null> {
+  try {
+    const res = await fetch('/api/v1/layers/territory')
+    if (!res.ok) return null
+    return await res.json() as FeatureCollection
+  } catch {
+    return null
+  }
+}
 
-  const load = useCallback(async (m: mapboxgl.Map) => {
-    console.log('[TIF] BorderCrossingsLayer: fetching territory...')
-    let geojson: FeatureCollection
-    try {
-      const res = await fetch('/api/v1/layers/territory')
-      if (!res.ok) {
-        console.error('[TIF] BorderCrossingsLayer: fetch failed', res.status)
-        return
-      }
-      geojson = await res.json() as FeatureCollection
-    } catch (err) {
-      console.error('[TIF] BorderCrossingsLayer: fetch error', err)
-      return
-    }
+function applyMarkers(
+  m: mapboxgl.Map,
+  geojson: FeatureCollection,
+  markersRef: React.MutableRefObject<mapboxgl.Marker[]>,
+) {
+  markersRef.current.forEach(mk => mk.remove())
+  markersRef.current = []
 
-    const borderFeatures = geojson.features.filter(f => (f.properties as Record<string, unknown>)?.type === 'border')
-    console.log(`[TIF] BorderCrossingsLayer: ${geojson.features.length} total features, ${borderFeatures.length} border`)
+  for (const feature of geojson.features) {
+    const props = feature.properties as Record<string, unknown>
+    if (props?.type !== 'border') continue
 
-    // Clear previous markers
-    markersRef.current.forEach(mk => mk.remove())
-    markersRef.current = []
+    const coords   = (feature.geometry as unknown as { coordinates: [number, number] }).coordinates
+    const name     = String(props.name ?? 'Passage frontière')
+    const status   = String(props.status ?? 'CLEAR')
+    const color    = String(props.color ?? '#8E8E93')
+    const icon     = String(props.icon ?? '🛂')
+    const wait     = Number(props.waitTimeMinutes ?? 0)
+    const g7Period = Boolean(props.g7Period)
+    const g7Status = props.g7Status ? String(props.g7Status) : null
+    const source   = String(props.source ?? '')
+    const updated  = props.lastUpdated
+      ? new Date(String(props.lastUpdated)).toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' })
+      : '—'
 
-    for (const feature of geojson.features) {
-      const props = feature.properties as Record<string, unknown>
-      if (props?.type !== 'border') continue
+    const g7Badge = g7Period && g7Status === 'closed'
+      ? `<div style="margin-top:6px;padding:4px 8px;border-radius:6px;background:rgba(255,59,48,.15);border:1px solid rgba(255,59,48,.3);font-size:11px;font-weight:600;color:#FF3B30">
+           🔒 FERMÉ — Directive G7 (12–18 juin)
+         </div>`
+      : g7Period && g7Status === 'macaron'
+      ? `<div style="margin-top:6px;padding:4px 8px;border-radius:6px;background:rgba(90,200,250,.1);border:1px solid rgba(90,200,250,.25);font-size:11px;font-weight:600;color:#5AC8FA">
+           ⭐ Macarons prioritaires · Contrôles renforcés
+         </div>`
+      : g7Period && g7Status === 'open'
+      ? `<div style="margin-top:6px;padding:4px 8px;border-radius:6px;background:rgba(255,149,0,.1);border:1px solid rgba(255,149,0,.25);font-size:11px;color:#FF9500">
+           ⚠ Délais accrus — Dispositif G7
+         </div>`
+      : ''
 
-      const coords   = (feature.geometry as unknown as { coordinates: [number, number] }).coordinates
-      const name     = String(props.name ?? 'Passage frontière')
-      const status   = String(props.status ?? 'CLEAR')
-      const color    = String(props.color ?? '#8E8E93')
-      const icon     = String(props.icon ?? '🛂')
-      const wait     = Number(props.waitTimeMinutes ?? 0)
-      const g7Period = Boolean(props.g7Period)
-      const g7Status = props.g7Status ? String(props.g7Status) : null
-      const source   = String(props.source ?? '')
-      const updated  = props.lastUpdated
-        ? new Date(String(props.lastUpdated)).toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' })
-        : '—'
+    const sourceLabel = source === 'G7-directive'
+      ? `<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(255,59,48,.12);color:rgba(255,120,100,.8)">G7 directive</span>`
+      : `<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.5)">synthétique</span>`
 
-      const g7Badge = g7Period && g7Status === 'closed'
-        ? `<div style="margin-top:6px;padding:4px 8px;border-radius:6px;background:rgba(255,59,48,.15);border:1px solid rgba(255,59,48,.3);font-size:11px;font-weight:600;color:#FF3B30">
-             🔒 FERMÉ — Directive G7 (12–18 juin)
-           </div>`
-        : g7Period && g7Status === 'macaron'
-        ? `<div style="margin-top:6px;padding:4px 8px;border-radius:6px;background:rgba(90,200,250,.1);border:1px solid rgba(90,200,250,.25);font-size:11px;font-weight:600;color:#5AC8FA">
-             ⭐ Macarons prioritaires · Contrôles renforcés
-           </div>`
-        : g7Period && g7Status === 'open'
-        ? `<div style="margin-top:6px;padding:4px 8px;border-radius:6px;background:rgba(255,149,0,.1);border:1px solid rgba(255,149,0,.25);font-size:11px;color:#FF9500">
-             ⚠ Délais accrus — Dispositif G7
-           </div>`
-        : ''
+    const borderStyle = g7Status === 'closed'
+      ? 'border:2.5px solid rgba(255,59,48,0.95)'
+      : g7Status === 'macaron'
+      ? 'border:2.5px solid rgba(90,200,250,0.95)'
+      : 'border:2.5px solid rgba(255,255,255,0.95)'
 
-      const sourceLabel = source === 'G7-directive'
-        ? `<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(255,59,48,.12);color:rgba(255,120,100,.8)">G7 directive</span>`
-        : `<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.5)">synthétique</span>`
+    const el = document.createElement('div')
+    el.style.cssText = [
+      'width:34px', 'height:34px', 'border-radius:50%',
+      `background:${color}`,
+      borderStyle,
+      'display:flex', 'align-items:center', 'justify-content:center',
+      'font-size:15px', 'cursor:pointer',
+      'box-shadow:0 2px 10px rgba(0,0,0,0.5)',
+      'user-select:none',
+    ].join(';')
+    el.textContent = icon
+    el.title       = name
 
-      const el = document.createElement('div')
-      const borderStyle = g7Status === 'closed'
-        ? 'border:2.5px solid rgba(255,59,48,0.95)'
-        : g7Status === 'macaron'
-        ? 'border:2.5px solid rgba(90,200,250,0.95)'
-        : 'border:2.5px solid rgba(255,255,255,0.95)'
-      el.style.cssText = [
-        'width:34px', 'height:34px', 'border-radius:50%',
-        `background:${color}`,
-        borderStyle,
-        'display:flex', 'align-items:center', 'justify-content:center',
-        'font-size:15px', 'cursor:pointer',
-        'box-shadow:0 2px 10px rgba(0,0,0,0.5)',
-        'user-select:none',
-      ].join(';')
-      el.textContent = icon
-      el.title       = name
-
-      const popup = new mapboxgl.Popup({
-        maxWidth:    '280px',
-        className:   'tif-popup',
-        closeButton: false,
-        offset:      20,
-      }).setHTML(`
-        <div style="font-family:-apple-system,SF Pro Text,sans-serif;font-size:13px;line-height:1.6">
-          <div style="font-weight:600;margin-bottom:6px">${icon} ${name}</div>
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
-            <span style="width:8px;height:8px;border-radius:50%;background:${color};display:inline-block"></span>
-            <span style="color:${color};font-weight:500">${status}</span>
-            ${wait > 0 ? `<span style="color:rgba(255,255,255,.45);font-size:11px">· ~${wait} min d'attente</span>` : ''}
-          </div>
-          ${g7Badge}
-          <div style="display:flex;align-items:center;gap:6px;margin-top:6px">
-            <span style="color:rgba(255,255,255,.35);font-size:11px">CH ⇄ FR · Mis à jour ${updated}</span>
-            ${sourceLabel}
-          </div>
+    const popup = new mapboxgl.Popup({
+      maxWidth:    '280px',
+      className:   'tif-popup',
+      closeButton: false,
+      offset:      20,
+    }).setHTML(`
+      <div style="font-family:-apple-system,SF Pro Text,sans-serif;font-size:13px;line-height:1.6">
+        <div style="font-weight:600;margin-bottom:6px">${icon} ${name}</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+          <span style="width:8px;height:8px;border-radius:50%;background:${color};display:inline-block"></span>
+          <span style="color:${color};font-weight:500">${status}</span>
+          ${wait > 0 ? `<span style="color:rgba(255,255,255,.45);font-size:11px">· ~${wait} min d'attente</span>` : ''}
         </div>
-      `)
+        ${g7Badge}
+        <div style="display:flex;align-items:center;gap:6px;margin-top:6px">
+          <span style="color:rgba(255,255,255,.35);font-size:11px">CH ⇄ FR · Mis à jour ${updated}</span>
+          ${sourceLabel}
+        </div>
+      </div>
+    `)
 
-      const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
-        .setLngLat(coords)
-        .setPopup(popup)
-        .addTo(m)
+    const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
+      .setLngLat(coords)
+      .setPopup(popup)
+      .addTo(m)
 
-      console.log(`[TIF] marker added: ${name} @ [${coords}]`)
-      markersRef.current.push(marker)
-    }
+    markersRef.current.push(marker)
+  }
+}
+
+export default function BorderCrossingsLayer({ map }: BorderCrossingsLayerProps) {
+  const markersRef  = useRef<mapboxgl.Marker[]>([])
+  const timerRef    = useRef<ReturnType<typeof setInterval> | null>(null)
+  // Prefetch result stored here so it's ready when map fires 'load'
+  const prefetchRef = useRef<FeatureCollection | null>(null)
+  const prefetchDone = useRef(false)
+
+  // ── Prefetch immediately on mount (parallel with map loading) ──────────────
+  useEffect(() => {
+    let cancelled = false
+    fetchBorderData().then(data => {
+      if (cancelled || !data) return
+      prefetchRef.current = data
+      prefetchDone.current = true
+    })
+    return () => { cancelled = true }
   }, [])
 
+  // ── Wire to map once available ──────────────────────────────────────────────
   useEffect(() => {
     if (!map) return
 
-    console.log('[TIF] BorderCrossingsLayer mounted, map.loaded()=', map.loaded())
     injectPopupStyle()
 
-    const run = () => load(map)
+    const run = async () => {
+      // Use prefetched data if ready, otherwise fetch now
+      const data = prefetchDone.current
+        ? prefetchRef.current!
+        : await fetchBorderData()
+      if (!data) return
+      prefetchRef.current  = data
+      prefetchDone.current = true
+      applyMarkers(map, data, markersRef)
+    }
 
     if (map.loaded()) run()
-    else map.on('load', run)
+    else map.once('load', run)
 
-    timerRef.current = setInterval(run, REFRESH_MS)
+    timerRef.current = setInterval(async () => {
+      const data = await fetchBorderData()
+      if (!data) return
+      prefetchRef.current  = data
+      prefetchDone.current = true
+      applyMarkers(map, data, markersRef)
+    }, REFRESH_MS)
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
       markersRef.current.forEach(mk => mk.remove())
       markersRef.current = []
     }
-  }, [map, load])
+  }, [map])
 
   return null
 }

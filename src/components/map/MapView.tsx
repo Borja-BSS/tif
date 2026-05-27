@@ -44,14 +44,15 @@ export default function MapView(props: Omit<MapGLProps, 'onMapReady'>) {
   return (
     <>
       <MapGL {...props} onMapReady={setMap} />
+      {/* Prefetch démarre immédiatement, markers appliqués dès que la carte est prête */}
+      <BorderCrossingsLayer map={map} />
       {map && (
         <>
-          <TerritoryLayer       map={map} visible={filters.territory} />
-          <RealtimeLayer        map={map} visible={filters.heatmap} showTransport={filters.transport} />
-          <AlertLayer           map={map} visible={filters.alerts} />
-          <G7Overlay            map={map} />
-          <BorderCrossingsLayer map={map} />
-          <FilterPanel          filters={filters} onChange={setFilters} />
+          <TerritoryLayer map={map} visible={filters.territory} />
+          <RealtimeLayer  map={map} visible={filters.heatmap} showTransport={filters.transport} />
+          <AlertLayer     map={map} visible={filters.alerts} />
+          <G7Overlay      map={map} />
+          <FilterPanel    filters={filters} onChange={setFilters} />
         </>
       )}
     </>
