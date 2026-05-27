@@ -30,7 +30,7 @@ const EMPTY_FC: FeatureCollection = { type: 'FeatureCollection', features: [] }
 // ── Fetch helpers ─────────────────────────────────────────────────────────────
 async function fetchNetwork(): Promise<FeatureCollection<MultiLineString, TransitRouteProperties> | null> {
   try {
-    const res = await fetch('/api/v1/layers/transit-network')
+    const res = await fetch('/data/transit-network.json')
     if (!res.ok) return null
     return await res.json() as FeatureCollection<MultiLineString, TransitRouteProperties>
   } catch {
