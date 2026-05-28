@@ -47,14 +47,14 @@ export interface BorderProperties {
 export type BorderFeatureCollection = FeatureCollection<Point, BorderProperties>
 
 // ── 27 postes de douane Grand Genève (CH-FR) ──────────────────────────────────
-// Coordonnées vérifiées OSM/research — Tier 2/3 = approximations communales
+// Tier 1/2 : coordonnées OSM vérifiées — Tier 3 : estimations géographiques
 const CROSSINGS: Crossing[] = [
 
   // ── TIER 1 — Ouverts 24/7 (normalement et pendant G7) ─────────────────────
 
   {
     id: 'bardonnex', name: 'Bardonnex',
-    lat: 46.1495, lng: 6.0961,
+    lat: 46.14953, lng: 6.09703,
     type: 'motorway', capacity: 'high',
     hours: '24h/24, 7j/7',
     vehicles: ['Voitures', 'Camions', 'Cars', 'Motos'],
@@ -68,7 +68,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'thonex-vallard', name: 'Thônex-Vallard',
-    lat: 46.1889, lng: 6.2021,
+    lat: 46.18885, lng: 6.20215,
     type: 'main', capacity: 'medium',
     hours: '24h/24, 7j/7',
     vehicles: ['Voitures', 'Camions', 'Cars', 'Motos'],
@@ -81,7 +81,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'moillesulaz', name: 'Moillesulaz',
-    lat: 46.1920, lng: 6.2070,
+    lat: 46.19220, lng: 6.20628,
     type: 'main', capacity: 'medium',
     hours: '24h/24, 7j/7',
     vehicles: ['Voitures', 'Motos', 'Piétons', 'Vélos', 'Tram D'],
@@ -94,7 +94,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'meyrin', name: 'Meyrin',
-    lat: 46.2330, lng: 6.0550,
+    lat: 46.23466, lng: 6.05046,
     type: 'main', capacity: 'medium',
     hours: '24h/24, 7j/7',
     vehicles: ['Voitures', 'Camions', 'Motos'],
@@ -107,7 +107,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'ferney-voltaire', name: 'Ferney-Voltaire',
-    lat: 46.2560, lng: 6.1060,
+    lat: 46.25004, lng: 6.11905,
     type: 'main', capacity: 'medium',
     hours: '24h/24, 7j/7',
     vehicles: ['Voitures', 'Motos', 'Cars'],
@@ -120,7 +120,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'perly', name: 'Perly',
-    lat: 46.1690, lng: 6.0890,
+    lat: 46.15234, lng: 6.09103,
     type: 'secondary', capacity: 'low',
     hours: '24h/24, 7j/7',
     vehicles: ['Voitures', 'Motos'],
@@ -132,7 +132,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'anieres', name: 'Anières',
-    lat: 46.2416, lng: 6.3085,
+    lat: 46.26925, lng: 6.23907,
     type: 'secondary', capacity: 'low',
     hours: '24h/24, 7j/7',
     vehicles: ['Voitures', 'Motos'],
@@ -147,7 +147,7 @@ const CROSSINGS: Crossing[] = [
 
   {
     id: 'croix-de-rozon', name: 'Croix-de-Rozon',
-    lat: 46.1441, lng: 6.1375,
+    lat: 46.14382, lng: 6.13789,
     type: 'secondary', capacity: 'low',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures', 'Motos'],
@@ -157,7 +157,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'veyrier', name: 'Veyrier',
-    lat: 46.1664, lng: 6.1885,
+    lat: 46.16637, lng: 6.18851,
     type: 'secondary', capacity: 'low',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures', 'Motos', 'Piétons'],
@@ -167,7 +167,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'fossard', name: 'Fossard',
-    lat: 46.1910, lng: 6.2130,
+    lat: 46.20654, lng: 6.25008,
     type: 'secondary', capacity: 'low',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures'],
@@ -177,7 +177,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'mategnin', name: 'Mategnin',
-    lat: 46.2490, lng: 6.0810,
+    lat: 46.25060, lng: 6.07630,
     type: 'secondary', capacity: 'low',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures', 'Motos'],
@@ -187,7 +187,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'mon-idee', name: 'Mon-Idée',
-    lat: 46.1840, lng: 6.0830,
+    lat: 46.18350, lng: 6.08120,
     type: 'secondary', capacity: 'low',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures'],
@@ -197,7 +197,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'monniaz', name: 'Monniaz',
-    lat: 46.2990, lng: 6.2590,
+    lat: 46.24155, lng: 6.30836,
     type: 'secondary', capacity: 'low',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures'],
@@ -207,7 +207,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'chancy', name: 'Chancy',
-    lat: 46.1560, lng: 5.9730,
+    lat: 46.14442, lng: 5.96568,
     type: 'secondary', capacity: 'low',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures', 'Motos'],
@@ -217,7 +217,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'soral', name: 'Soral',
-    lat: 46.1620, lng: 5.9970,
+    lat: 46.13708, lng: 6.03615,
     type: 'secondary', capacity: 'low',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures'],
@@ -230,7 +230,7 @@ const CROSSINGS: Crossing[] = [
 
   {
     id: 'landecy', name: 'Landecy',
-    lat: 46.1450, lng: 6.1170,
+    lat: 46.14550, lng: 6.11720,
     type: 'tertiary', capacity: 'low',
     hours: 'Restreint (locaux)',
     vehicles: ['Voitures', 'Riverains'],
@@ -240,7 +240,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'bossey', name: 'Bossey',
-    lat: 46.1530, lng: 6.2050,
+    lat: 46.15300, lng: 6.20500,
     type: 'tertiary', capacity: 'low',
     hours: 'Piétons / Vélos uniquement',
     vehicles: ['Piétons', 'Vélos'],
@@ -250,7 +250,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'certoux', name: 'Certoux',
-    lat: 46.1650, lng: 6.0850,
+    lat: 46.15257, lng: 6.09052,
     type: 'tertiary', capacity: 'low',
     hours: 'Restreint (agricole/local)',
     vehicles: ['Voitures', 'Tracteurs'],
@@ -260,7 +260,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'troinex', name: 'Troinex',
-    lat: 46.1620, lng: 6.1750,
+    lat: 46.16150, lng: 6.17520,
     type: 'tertiary', capacity: 'low',
     hours: 'Restreint (locaux)',
     vehicles: ['Voitures'],
@@ -270,7 +270,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'sezenove', name: 'Sézenove',
-    lat: 46.1850, lng: 6.2180,
+    lat: 46.18750, lng: 6.21950,
     type: 'tertiary', capacity: 'low',
     hours: 'Restreint (locaux)',
     vehicles: ['Voitures'],
@@ -280,7 +280,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'compesieres', name: 'Compesières',
-    lat: 46.1620, lng: 6.0600,
+    lat: 46.15950, lng: 6.06200,
     type: 'tertiary', capacity: 'low',
     hours: 'Restreint (locaux)',
     vehicles: ['Voitures'],
@@ -290,7 +290,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'confignon', name: 'Confignon',
-    lat: 46.1840, lng: 6.0930,
+    lat: 46.18400, lng: 6.09300,
     type: 'tertiary', capacity: 'low',
     hours: 'Restreint (locaux)',
     vehicles: ['Voitures'],
@@ -300,7 +300,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'lancy', name: 'Lancy',
-    lat: 46.1880, lng: 6.1180,
+    lat: 46.18800, lng: 6.11800,
     type: 'tertiary', capacity: 'low',
     hours: 'Restreint (locaux)',
     vehicles: ['Voitures', 'Piétons'],
@@ -310,7 +310,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'onex', name: 'Onex',
-    lat: 46.1880, lng: 6.1020,
+    lat: 46.18750, lng: 6.09750,
     type: 'tertiary', capacity: 'low',
     hours: 'Piétons / Vélos',
     vehicles: ['Piétons', 'Vélos'],
@@ -320,7 +320,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'bernex', name: 'Bernex',
-    lat: 46.1850, lng: 6.0820,
+    lat: 46.18450, lng: 6.08200,
     type: 'tertiary', capacity: 'low',
     hours: 'Restreint (locaux)',
     vehicles: ['Voitures'],
@@ -330,7 +330,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'ecogia', name: 'Écogia (Satigny)',
-    lat: 46.2670, lng: 6.0640,
+    lat: 46.22955, lng: 6.03859,
     type: 'tertiary', capacity: 'low',
     hours: 'Restreint (agricole/local)',
     vehicles: ['Voitures', 'Tracteurs'],
@@ -340,7 +340,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'veigy', name: 'Veigy',
-    lat: 46.2780, lng: 6.2400,
+    lat: 46.27637, lng: 6.24670,
     type: 'tertiary', capacity: 'low',
     hours: 'Restreint (locaux)',
     vehicles: ['Voitures'],
@@ -411,7 +411,7 @@ export function computeCrossingStatus(
   return                                       { status: 'CLEAR',    jamFactor: 0 }
 }
 
-const CACHE_KEY = 'tif:layer:border-crossings:v2'
+const CACHE_KEY = 'tif:layer:border-crossings:v3'
 const CACHE_TTL = 120
 
 export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
