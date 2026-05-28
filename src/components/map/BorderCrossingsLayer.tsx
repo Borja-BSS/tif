@@ -54,7 +54,7 @@ function injectPopupStyle() {
 
 async function fetchBorderData(): Promise<FeatureCollection | null> {
   try {
-    const res = await fetch('/api/v1/layers/territory')
+    const res = await fetch('/api/v1/layers/territory', { cache: 'no-store' })
     if (!res.ok) return null
     return await res.json() as FeatureCollection
   } catch {
