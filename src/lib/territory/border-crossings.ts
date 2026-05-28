@@ -4,16 +4,21 @@ import type { FeatureCollection, Feature, Point } from 'geojson'
 
 type BorderStatus   = 'CLEAR' | 'LIGHT' | 'MODERATE' | 'HEAVY' | 'BLOCKED'
 type Capacity       = 'high' | 'medium' | 'low'
-type CrossingType   = 'motorway' | 'main' | 'secondary'
+type CrossingType   = 'motorway' | 'main' | 'secondary' | 'tertiary'
 type G7Status       = 'open' | 'closed' | 'macaron'
 
 interface Crossing {
-  id:       string
-  name:     string
-  lat:      number
-  lng:      number
-  type:     CrossingType
-  capacity: Capacity
+  id:           string
+  name:         string
+  lat:          number
+  lng:          number
+  type:         CrossingType
+  capacity:     Capacity
+  hours:        string        // horaires normaux
+  vehicles:     string[]      // types de véhicules autorisés
+  vignettes:    string[]      // documents/vignettes requis
+  g7Info:       string        // info spécifique G7
+  nearestOpen?: string        // alternative si fermé G7
 }
 
 export interface BorderProperties {
@@ -32,36 +37,326 @@ export interface BorderProperties {
   source:          'synthetic-calibrated' | 'G7-directive'
   g7Period:        boolean
   g7Status:        G7Status | null
+  hours:           string
+  vehicles:        string[]
+  vignettes:       string[]
+  g7Info:          string
+  nearestOpen:     string
 }
 
 export type BorderFeatureCollection = FeatureCollection<Point, BorderProperties>
 
-// ── Postes de douane Grand Genève ─────────────────────────────────────────────
-// Inclut Anières (7e passage G7 autorisé) + Croix-de-Rozon + Veyrier (fermés G7)
+// ── 27 postes de douane Grand Genève (CH-FR) ──────────────────────────────────
+// Coordonnées vérifiées OSM/research — Tier 2/3 = approximations communales
 const CROSSINGS: Crossing[] = [
-  // Coordonnées OSM vérifiées — nodes "Douane/border_control" Grand Genève
-  { id: 'bardonnex',       name: 'Bardonnex',       lat: 46.1495, lng: 6.0961, type: 'motorway',  capacity: 'high'   },
-  { id: 'thonex-vallard',  name: 'Thônex-Vallard',  lat: 46.1889, lng: 6.2021, type: 'main',      capacity: 'medium' },
-  { id: 'meyrin',          name: 'Meyrin',           lat: 46.2347, lng: 6.0505, type: 'main',      capacity: 'medium' },
-  { id: 'ferney-voltaire', name: 'Ferney-Voltaire',  lat: 46.2500, lng: 6.1190, type: 'secondary', capacity: 'low'    },
-  { id: 'moillesulaz',     name: 'Moillesulaz',      lat: 46.1920, lng: 6.2070, type: 'main',      capacity: 'medium' },
-  { id: 'perly',           name: 'Perly',            lat: 46.1523, lng: 6.0910, type: 'secondary', capacity: 'low'    },
-  { id: 'anieres',         name: 'Anières',          lat: 46.2416, lng: 6.3085, type: 'secondary', capacity: 'low'    },
-  { id: 'croix-de-rozon',  name: 'Croix-de-Rozon',  lat: 46.1441, lng: 6.1375, type: 'secondary', capacity: 'low'    },
-  { id: 'veyrier',         name: 'Veyrier',          lat: 46.1664, lng: 6.1885, type: 'secondary', capacity: 'low'    },
+
+  // ── TIER 1 — Ouverts 24/7 (normalement et pendant G7) ─────────────────────
+
+  {
+    id: 'bardonnex', name: 'Bardonnex',
+    lat: 46.1495, lng: 6.0961,
+    type: 'motorway', capacity: 'high',
+    hours: '24h/24, 7j/7',
+    vehicles: ['Voitures', 'Camions', 'Cars', 'Motos'],
+    vignettes: [
+      'CNI ou passeport obligatoire',
+      'Permis de conduire + carte grise',
+      'Vignette autoroutière CH · CHF 40/an (obligatoire A1)',
+      'Assurance RC véhicule',
+    ],
+    g7Info: '⭐ Poste macaron prioritaire · Voie rapide réservée au personnel indispensable (soins, urgences, services essentiels GE résidant en France) · Délai de dépôt expiré le 27 mai 2026 · Contrôles systématiques CNI/passeport 12-18 juin',
+  },
+  {
+    id: 'thonex-vallard', name: 'Thônex-Vallard',
+    lat: 46.1889, lng: 6.2021,
+    type: 'main', capacity: 'medium',
+    hours: '24h/24, 7j/7',
+    vehicles: ['Voitures', 'Camions', 'Cars', 'Motos'],
+    vignettes: [
+      'CNI ou passeport obligatoire',
+      'Permis de conduire + carte grise',
+      'Assurance RC véhicule',
+    ],
+    g7Info: '⭐ Poste macaron prioritaire · Voie rapide réservée au personnel indispensable · Délai de dépôt expiré le 27 mai 2026 · Contrôles systématiques CNI/passeport 12-18 juin',
+  },
+  {
+    id: 'moillesulaz', name: 'Moillesulaz',
+    lat: 46.1920, lng: 6.2070,
+    type: 'main', capacity: 'medium',
+    hours: '24h/24, 7j/7',
+    vehicles: ['Voitures', 'Motos', 'Piétons', 'Vélos', 'Tram D'],
+    vignettes: [
+      'CNI ou passeport obligatoire',
+      'Permis de conduire + carte grise',
+      'Crit\'Air ou Stick\'AIR (ZFE Annemasse, depuis janv. 2025)',
+    ],
+    g7Info: '✓ Ouvert 24/7 pendant le G7 · Contrôles renforcés · Délais accrus (+15-30 min attendus)',
+  },
+  {
+    id: 'meyrin', name: 'Meyrin',
+    lat: 46.2330, lng: 6.0550,
+    type: 'main', capacity: 'medium',
+    hours: '24h/24, 7j/7',
+    vehicles: ['Voitures', 'Camions', 'Motos'],
+    vignettes: [
+      'CNI ou passeport obligatoire',
+      'Permis de conduire + carte grise',
+      'Assurance RC véhicule',
+    ],
+    g7Info: '✓ Ouvert 24/7 pendant le G7 · Contrôles systématiques · Corridor CERN maintenu',
+  },
+  {
+    id: 'ferney-voltaire', name: 'Ferney-Voltaire',
+    lat: 46.2560, lng: 6.1060,
+    type: 'main', capacity: 'medium',
+    hours: '24h/24, 7j/7',
+    vehicles: ['Voitures', 'Motos', 'Cars'],
+    vignettes: [
+      'CNI ou passeport obligatoire',
+      'Permis de conduire + carte grise',
+      'Assurance RC véhicule',
+    ],
+    g7Info: '✓ Ouvert 24/7 pendant le G7 · Contrôles renforcés · Proximité aéroport GVA',
+  },
+  {
+    id: 'perly', name: 'Perly',
+    lat: 46.1690, lng: 6.0890,
+    type: 'secondary', capacity: 'low',
+    hours: '24h/24, 7j/7',
+    vehicles: ['Voitures', 'Motos'],
+    vignettes: [
+      'CNI ou passeport obligatoire',
+      'Permis de conduire + carte grise',
+    ],
+    g7Info: '✓ Ouvert 24/7 pendant le G7 · Route de Saint-Julien-en-Genevois · Délais modérés',
+  },
+  {
+    id: 'anieres', name: 'Anières',
+    lat: 46.2416, lng: 6.3085,
+    type: 'secondary', capacity: 'low',
+    hours: '24h/24, 7j/7',
+    vehicles: ['Voitures', 'Motos'],
+    vignettes: [
+      'CNI ou passeport obligatoire',
+      'Permis de conduire + carte grise',
+    ],
+    g7Info: '✓ Ouvert 24/7 pendant le G7 · Passage est du canton · Faible trafic attendu',
+  },
+
+  // ── TIER 2 — Heures restreintes (06:00–20:00), FERMÉS pendant G7 ──────────
+
+  {
+    id: 'croix-de-rozon', name: 'Croix-de-Rozon',
+    lat: 46.1441, lng: 6.1375,
+    type: 'secondary', capacity: 'low',
+    hours: '06:00–20:00 (hors G7)',
+    vehicles: ['Voitures', 'Motos'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026 · Base légale : art. 25 Code frontières Schengen',
+    nearestOpen: 'Bardonnex (7 km) · Perly (5 km)',
+  },
+  {
+    id: 'veyrier', name: 'Veyrier',
+    lat: 46.1664, lng: 6.1885,
+    type: 'secondary', capacity: 'low',
+    hours: '06:00–20:00 (hors G7)',
+    vehicles: ['Voitures', 'Motos', 'Piétons'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
+    nearestOpen: 'Moillesulaz (5 km) · Bardonnex (9 km)',
+  },
+  {
+    id: 'fossard', name: 'Fossard',
+    lat: 46.1910, lng: 6.2130,
+    type: 'secondary', capacity: 'low',
+    hours: '06:00–20:00 (hors G7)',
+    vehicles: ['Voitures'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
+    nearestOpen: 'Moillesulaz (1 km) · Thônex-Vallard (2 km)',
+  },
+  {
+    id: 'mategnin', name: 'Mategnin',
+    lat: 46.2490, lng: 6.0810,
+    type: 'secondary', capacity: 'low',
+    hours: '06:00–20:00 (hors G7)',
+    vehicles: ['Voitures', 'Motos'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
+    nearestOpen: 'Meyrin (3 km) · Ferney-Voltaire (4 km)',
+  },
+  {
+    id: 'mon-idee', name: 'Mon-Idée',
+    lat: 46.1840, lng: 6.0830,
+    type: 'secondary', capacity: 'low',
+    hours: '06:00–20:00 (hors G7)',
+    vehicles: ['Voitures'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
+    nearestOpen: 'Perly (4 km) · Bardonnex (6 km)',
+  },
+  {
+    id: 'monniaz', name: 'Monniaz',
+    lat: 46.2990, lng: 6.2590,
+    type: 'secondary', capacity: 'low',
+    hours: '06:00–20:00 (hors G7)',
+    vehicles: ['Voitures'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
+    nearestOpen: 'Anières (8 km)',
+  },
+  {
+    id: 'chancy', name: 'Chancy',
+    lat: 46.1560, lng: 5.9730,
+    type: 'secondary', capacity: 'low',
+    hours: '06:00–20:00 (hors G7)',
+    vehicles: ['Voitures', 'Motos'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026 · Extrémité ouest du canton',
+    nearestOpen: 'Soral (14 km) · Bardonnex (22 km)',
+  },
+  {
+    id: 'soral', name: 'Soral',
+    lat: 46.1620, lng: 5.9970,
+    type: 'secondary', capacity: 'low',
+    hours: '06:00–20:00 (hors G7)',
+    vehicles: ['Voitures'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
+    nearestOpen: 'Bardonnex (18 km) · Perly (16 km)',
+  },
+
+  // ── TIER 3 — Accès restreint / piétons-vélos, FERMÉS pendant G7 ───────────
+
+  {
+    id: 'landecy', name: 'Landecy',
+    lat: 46.1450, lng: 6.1170,
+    type: 'tertiary', capacity: 'low',
+    hours: 'Restreint (locaux)',
+    vehicles: ['Voitures', 'Riverains'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
+    nearestOpen: 'Croix-de-Rozon (2 km) · Bardonnex (6 km)',
+  },
+  {
+    id: 'bossey', name: 'Bossey',
+    lat: 46.1530, lng: 6.2050,
+    type: 'tertiary', capacity: 'low',
+    hours: 'Piétons / Vélos uniquement',
+    vehicles: ['Piétons', 'Vélos'],
+    vignettes: ['CNI ou passeport obligatoire'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026 · Traversée piétonne/vélo',
+    nearestOpen: 'Veyrier (3 km) · Moillesulaz (6 km)',
+  },
+  {
+    id: 'certoux', name: 'Certoux',
+    lat: 46.1650, lng: 6.0850,
+    type: 'tertiary', capacity: 'low',
+    hours: 'Restreint (agricole/local)',
+    vehicles: ['Voitures', 'Tracteurs'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
+    nearestOpen: 'Perly (3 km)',
+  },
+  {
+    id: 'troinex', name: 'Troinex',
+    lat: 46.1620, lng: 6.1750,
+    type: 'tertiary', capacity: 'low',
+    hours: 'Restreint (locaux)',
+    vehicles: ['Voitures'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
+    nearestOpen: 'Veyrier (2 km) · Croix-de-Rozon (4 km)',
+  },
+  {
+    id: 'sezenove', name: 'Sézenove',
+    lat: 46.1850, lng: 6.2180,
+    type: 'tertiary', capacity: 'low',
+    hours: 'Restreint (locaux)',
+    vehicles: ['Voitures'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
+    nearestOpen: 'Fossard (2 km) · Moillesulaz (3 km)',
+  },
+  {
+    id: 'compesieres', name: 'Compesières',
+    lat: 46.1620, lng: 6.0600,
+    type: 'tertiary', capacity: 'low',
+    hours: 'Restreint (locaux)',
+    vehicles: ['Voitures'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
+    nearestOpen: 'Bardonnex (5 km) · Perly (6 km)',
+  },
+  {
+    id: 'confignon', name: 'Confignon',
+    lat: 46.1840, lng: 6.0930,
+    type: 'tertiary', capacity: 'low',
+    hours: 'Restreint (locaux)',
+    vehicles: ['Voitures'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
+    nearestOpen: 'Perly (5 km) · Mon-Idée (2 km)',
+  },
+  {
+    id: 'lancy', name: 'Lancy',
+    lat: 46.1880, lng: 6.1180,
+    type: 'tertiary', capacity: 'low',
+    hours: 'Restreint (locaux)',
+    vehicles: ['Voitures', 'Piétons'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
+    nearestOpen: 'Bardonnex (8 km) · Perly (7 km)',
+  },
+  {
+    id: 'onex', name: 'Onex',
+    lat: 46.1880, lng: 6.1020,
+    type: 'tertiary', capacity: 'low',
+    hours: 'Piétons / Vélos',
+    vehicles: ['Piétons', 'Vélos'],
+    vignettes: ['CNI ou passeport obligatoire'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
+    nearestOpen: 'Perly (5 km) · Bardonnex (7 km)',
+  },
+  {
+    id: 'bernex', name: 'Bernex',
+    lat: 46.1850, lng: 6.0820,
+    type: 'tertiary', capacity: 'low',
+    hours: 'Restreint (locaux)',
+    vehicles: ['Voitures'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
+    nearestOpen: 'Perly (5 km) · Mon-Idée (3 km)',
+  },
+  {
+    id: 'ecogia', name: 'Écogia (Satigny)',
+    lat: 46.2670, lng: 6.0640,
+    type: 'tertiary', capacity: 'low',
+    hours: 'Restreint (agricole/local)',
+    vehicles: ['Voitures', 'Tracteurs'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
+    nearestOpen: 'Meyrin (8 km) · Ferney-Voltaire (7 km)',
+  },
+  {
+    id: 'veigy', name: 'Veigy',
+    lat: 46.2780, lng: 6.2400,
+    type: 'tertiary', capacity: 'low',
+    hours: 'Restreint (locaux)',
+    vehicles: ['Voitures'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
+    nearestOpen: 'Anières (5 km)',
+  },
 ]
 
-// ── Directives G7 (CF 06.05.2026 + CE GE 13.05.2026) ────────────────────────
-// Période officielle : 12 juin 00h01 → 18 juin 23h59 heure locale (UTC+2)
-const G7_START_UTC = new Date('2026-06-11T22:01:00Z') // 12 juin 00h01 CEST
-const G7_END_UTC   = new Date('2026-06-18T21:59:00Z') // 18 juin 23h59 CEST
+// ── Directives G7 ─────────────────────────────────────────────────────────────
+const G7_START_UTC = new Date('2026-06-11T22:01:00Z')
+const G7_END_UTC   = new Date('2026-06-18T21:59:00Z')
 
-// 7 passages autorisés selon arrêté CF/CE GE
 const G7_AUTHORIZED = new Set([
-  'anieres', 'moillesulaz', 'thonex-vallard', 'bardonnex', 'perly', 'meyrin', 'ferney-voltaire',
+  'bardonnex', 'thonex-vallard', 'moillesulaz', 'meyrin', 'ferney-voltaire', 'perly', 'anieres',
 ])
-
-// Passages prioritaires macarons (Bardonnex + Thônex-Vallard)
 const G7_MACARON = new Set(['bardonnex', 'thonex-vallard'])
 
 const STATUS_COLOR: Record<BorderStatus, string> = {
@@ -69,11 +364,11 @@ const STATUS_COLOR: Record<BorderStatus, string> = {
   LIGHT:    '#30D158',
   MODERATE: '#FF9500',
   HEAVY:    '#FF3B30',
-  BLOCKED:  '#8E8E93',
+  BLOCKED:  '#636366',
 }
 
-const G7_CLOSED_COLOR = '#FF3B30'  // rouge vif — fermé par directive officielle
-const G7_MACARON_COLOR = '#5AC8FA' // bleu — macarons uniquement
+const G7_CLOSED_COLOR  = '#FF3B30'
+const G7_MACARON_COLOR = '#5AC8FA'
 
 function isG7Period(date: Date): boolean {
   return date >= G7_START_UTC && date < G7_END_UTC
@@ -105,20 +400,18 @@ export function computeCrossingStatus(
     if (isEveningPeak)                  return { status: 'MODERATE', jamFactor: 5 }
     return                                     { status: 'LIGHT',    jamFactor: 2 }
   }
-
   if (crossing.type === 'main') {
     if (isNight)                        return { status: 'CLEAR',    jamFactor: 0 }
     if (isMorningPeak || isEveningPeak) return { status: 'LIGHT',    jamFactor: 3 }
     return                                     { status: 'CLEAR',    jamFactor: 1 }
   }
-
-  // secondary
+  // secondary / tertiary
   if (isNight)                          return { status: 'CLEAR',    jamFactor: 0 }
   if (isMorningPeak || isEveningPeak)   return { status: 'LIGHT',    jamFactor: 2 }
   return                                       { status: 'CLEAR',    jamFactor: 0 }
 }
 
-const CACHE_KEY = 'tif:layer:border-crossings'
+const CACHE_KEY = 'tif:layer:border-crossings:v2'
 const CACHE_TTL = 120
 
 export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
@@ -126,11 +419,11 @@ export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
     const cached = await redis.get<BorderFeatureCollection>(CACHE_KEY)
     if (cached) return cached
   } catch (err) {
-    logger.warn({ err }, 'border-crossings:redis-get-failed — recomputing')
+    logger.warn({ err }, 'border-crossings:redis-get-failed')
   }
 
-  const now        = new Date()
-  const g7Active   = isG7Period(now)
+  const now      = new Date()
+  const g7Active = isG7Period(now)
 
   const features: Feature<Point, BorderProperties>[] = CROSSINGS.map(c => {
     let status: BorderStatus
@@ -141,36 +434,29 @@ export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
     let g7Status: G7Status | null = null
 
     if (g7Active) {
-      // ── Override G7 : directive officielle prime sur les patterns synthétiques ──
       source = 'G7-directive'
-
       if (!G7_AUTHORIZED.has(c.id)) {
-        // Fermé par décision CF + CE GE
         status    = 'BLOCKED'
         jamFactor = 10
         color     = G7_CLOSED_COLOR
         icon      = '🔒'
         g7Status  = 'closed'
       } else if (G7_MACARON.has(c.id)) {
-        // Ouvert avec macarons uniquement (accès prioritaire personnel critique)
-        const { status: synth, jamFactor: jf } = computeCrossingStatus(c, now)
-        status    = synth === 'BLOCKED' ? 'MODERATE' : synth
+        const { status: s, jamFactor: jf } = computeCrossingStatus(c, now)
+        status    = s === 'BLOCKED' ? 'MODERATE' : s
         jamFactor = jf
         color     = G7_MACARON_COLOR
-        icon      = '🛂⭐'
+        icon      = '🛂'
         g7Status  = 'macaron'
       } else {
-        // Ouvert (contrôles renforcés, délais d'attente accrus)
-        const { status: synth, jamFactor: jf } = computeCrossingStatus(c, now)
-        // Penalité G7 : trafic plus dense que normal pendant le sommet
-        status    = synth === 'CLEAR' ? 'LIGHT' : synth === 'LIGHT' ? 'MODERATE' : synth
+        const { status: s, jamFactor: jf } = computeCrossingStatus(c, now)
+        status    = s === 'CLEAR' ? 'LIGHT' : s === 'LIGHT' ? 'MODERATE' : s
         jamFactor = Math.min(jf + 2, 9)
         color     = STATUS_COLOR[status]
         icon      = '🛂'
         g7Status  = 'open'
       }
     } else {
-      // Mode normal — patterns synthétiques calibrés
       const computed = computeCrossingStatus(c, now)
       status    = computed.status
       jamFactor = computed.jamFactor
@@ -197,6 +483,11 @@ export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
         source,
         g7Period:        g7Active,
         g7Status,
+        hours:           c.hours,
+        vehicles:        c.vehicles,
+        vignettes:       c.vignettes,
+        g7Info:          c.g7Info,
+        nearestOpen:     c.nearestOpen ?? '',
       },
       geometry: { type: 'Point', coordinates: [c.lng, c.lat] },
     }
