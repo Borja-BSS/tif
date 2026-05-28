@@ -2,19 +2,19 @@ import { redis }  from '@/lib/redis'
 import { logger } from '@/lib/logger'
 import type { TpgDisruption } from './types'
 
-const CACHE_KEY = 'tif:transport:tpg:v1'  // distinct from alerts module (tif:tpg:disruptions)
+const CACHE_KEY = 'tif:transport:tpg:v2'  // v2 — corrected stop IDs
 const CACHE_TTL = 120  // 2 minutes
 
 const STATIONBOARD_URL = 'https://transport.opendata.ch/v1/stationboard'
 const DELAY_THRESHOLD  = 3  // minutes
 
-// Key TPG stops — stop IDs from transport.opendata.ch
+// Verified TPG stop IDs from transport.opendata.ch/v1/locations
 const TPG_STOPS = [
-  { id: '8587016', name: 'Cornavin',   lat: 46.2103, lng: 6.1416 },
-  { id: '8587020', name: 'Bel-Air',    lat: 46.2021, lng: 6.1454 },
-  { id: '8587057', name: 'Rive',       lat: 46.1999, lng: 6.1513 },
-  { id: '8587019', name: 'Plainpalais',lat: 46.1986, lng: 6.1404 },
-  { id: '8500010', name: 'Annemasse',  lat: 46.1936, lng: 6.2378 },
+  { id: '8587057', name: 'Cornavin',        lat: 46.209742, lng: 6.142420 },
+  { id: '8587387', name: 'Bel-Air',         lat: 46.204747, lng: 6.143032 },
+  { id: '8587061', name: 'Rive',            lat: 46.201872, lng: 6.152792 },
+  { id: '8587907', name: 'Plainpalais',     lat: 46.198051, lng: 6.142789 },
+  { id: '8592775', name: 'Aéroport-Term.', lat: 46.230831, lng: 6.109871 },
 ]
 
 interface StationboardDep {
@@ -22,6 +22,7 @@ interface StationboardDep {
   number?:   string
   category?: string
   name?:     string
+  operator?: string
 }
 
 interface StationboardResp {
@@ -45,7 +46,9 @@ async function fetchStopDelays(
 
   for (const dep of data.stationboard ?? []) {
     const delay     = dep.stop.delay ?? 0
-    const lineNum   = dep.number ?? dep.name ?? dep.category ?? '?'
+    const lineNum   = dep.number ?? dep.category ?? '?'
+    // Only TPG-operated services
+    if ((dep.operator ?? '').toUpperCase() !== 'TPG') continue
     if (delay < DELAY_THRESHOLD) continue
 
     const type: TpgDisruption['type'] = delay >= 15 ? 'suppression' : 'retard'
