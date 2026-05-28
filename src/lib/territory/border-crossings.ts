@@ -120,7 +120,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'perly', name: 'Perly',
-    lat: 46.15234, lng: 6.09103,
+    lat: 46.15199, lng: 6.09056,
     type: 'secondary', capacity: 'low',
     hours: '24h/24, 7j/7',
     vehicles: ['Voitures', 'Motos'],
@@ -320,7 +320,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'bernex', name: 'Bernex',
-    lat: 46.18450, lng: 6.08200,
+    lat: 46.16040, lng: 6.04523,
     type: 'tertiary', capacity: 'low',
     hours: 'Restreint (locaux)',
     vehicles: ['Voitures'],
@@ -411,7 +411,7 @@ export function computeCrossingStatus(
   return                                       { status: 'CLEAR',    jamFactor: 0 }
 }
 
-const CACHE_KEY = 'tif:layer:border-crossings:v3'
+const CACHE_KEY = 'tif:layer:border-crossings:v4'
 const CACHE_TTL = 120
 
 export async function getBorderCrossings(): Promise<BorderFeatureCollection> {

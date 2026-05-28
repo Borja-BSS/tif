@@ -9,7 +9,7 @@ import type { FeatureCollection, Feature, Point } from 'geojson'
 
 export const dynamic = 'force-dynamic'
 
-const CACHE_KEY     = 'tif:layer:territory:merged:v2'
+const CACHE_KEY     = 'tif:layer:territory:merged:v3'
 const CACHE_TTL     = 60
 const TERRITORY_TYPES = new Set(['roadClosure', 'construction', 'plannedEvent'])
 
