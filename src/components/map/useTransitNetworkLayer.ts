@@ -281,8 +281,11 @@ export function useTransitNetworkLayer(map: mapboxgl.Map | null) {
       intervalRef.current = setInterval(refreshDisruptions, 120_000)
     }
 
-    if (map.loaded()) void init()
-    else map.once('load', () => void init())
+    if (map.isStyleLoaded()) {
+      void init()
+    } else {
+      map.once('style.load', () => void init())
+    }
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current)
