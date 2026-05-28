@@ -46,15 +46,16 @@ export interface BorderProperties {
 
 export type BorderFeatureCollection = FeatureCollection<Point, BorderProperties>
 
-// ── 27 postes de douane Grand Genève (CH-FR) ──────────────────────────────────
-// Tier 1/2 : coordonnées OSM vérifiées — Tier 3 : estimations géographiques
+// ── 22 postes de douane Grand Genève (CH-FR) ──────────────────────────────────
+// Coordonnées extraites des nœuds de franchissement de la frontière CH-FR dans OSM
+// (relation 51701 × routes) + douanes nommées via Overpass/Nominatim
 const CROSSINGS: Crossing[] = [
 
   // ── TIER 1 — Ouverts 24/7 (normalement et pendant G7) ─────────────────────
 
   {
     id: 'bardonnex', name: 'Bardonnex',
-    lat: 46.14953, lng: 6.09703,
+    lat: 46.14856, lng: 6.09561,
     type: 'motorway', capacity: 'high',
     hours: '24h/24, 7j/7',
     vehicles: ['Voitures', 'Camions', 'Cars', 'Motos'],
@@ -157,7 +158,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'veyrier', name: 'Veyrier',
-    lat: 46.16637, lng: 6.18851,
+    lat: 46.16940, lng: 6.18803,
     type: 'secondary', capacity: 'low',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures', 'Motos', 'Piétons'],
@@ -177,7 +178,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'mategnin', name: 'Mategnin',
-    lat: 46.25060, lng: 6.07630,
+    lat: 46.24900, lng: 6.08000,
     type: 'secondary', capacity: 'low',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures', 'Motos'],
@@ -187,13 +188,13 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'mon-idee', name: 'Mon-Idée',
-    lat: 46.18350, lng: 6.08120,
+    lat: 46.15008, lng: 6.08168,
     type: 'secondary', capacity: 'low',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '🔒 Fermé du 12 au 18 juin 2026',
-    nearestOpen: 'Perly (4 km) · Bardonnex (6 km)',
+    nearestOpen: 'Perly (1 km) · Bardonnex (1.5 km)',
   },
   {
     id: 'monniaz', name: 'Monniaz',
@@ -249,16 +250,6 @@ const CROSSINGS: Crossing[] = [
     nearestOpen: 'Veyrier (3 km) · Moillesulaz (6 km)',
   },
   {
-    id: 'certoux', name: 'Certoux',
-    lat: 46.15257, lng: 6.09052,
-    type: 'tertiary', capacity: 'low',
-    hours: 'Restreint (agricole/local)',
-    vehicles: ['Voitures', 'Tracteurs'],
-    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
-    nearestOpen: 'Perly (3 km)',
-  },
-  {
     id: 'troinex', name: 'Troinex',
     lat: 46.16150, lng: 6.17520,
     type: 'tertiary', capacity: 'low',
@@ -269,54 +260,14 @@ const CROSSINGS: Crossing[] = [
     nearestOpen: 'Veyrier (2 km) · Croix-de-Rozon (4 km)',
   },
   {
-    id: 'sezenove', name: 'Sézenove',
-    lat: 46.18750, lng: 6.21950,
-    type: 'tertiary', capacity: 'low',
-    hours: 'Restreint (locaux)',
-    vehicles: ['Voitures'],
-    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
-    nearestOpen: 'Fossard (2 km) · Moillesulaz (3 km)',
-  },
-  {
     id: 'compesieres', name: 'Compesières',
-    lat: 46.15950, lng: 6.06200,
+    lat: 46.14950, lng: 6.07338,
     type: 'tertiary', capacity: 'low',
-    hours: 'Restreint (locaux)',
+    hours: '06:00–18:00 (hors G7)',
     vehicles: ['Voitures'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '🔒 Fermé du 12 au 18 juin 2026',
-    nearestOpen: 'Bardonnex (5 km) · Perly (6 km)',
-  },
-  {
-    id: 'confignon', name: 'Confignon',
-    lat: 46.18400, lng: 6.09300,
-    type: 'tertiary', capacity: 'low',
-    hours: 'Restreint (locaux)',
-    vehicles: ['Voitures'],
-    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
-    nearestOpen: 'Perly (5 km) · Mon-Idée (2 km)',
-  },
-  {
-    id: 'lancy', name: 'Lancy',
-    lat: 46.18800, lng: 6.11800,
-    type: 'tertiary', capacity: 'low',
-    hours: 'Restreint (locaux)',
-    vehicles: ['Voitures', 'Piétons'],
-    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
-    nearestOpen: 'Bardonnex (8 km) · Perly (7 km)',
-  },
-  {
-    id: 'onex', name: 'Onex',
-    lat: 46.18750, lng: 6.09750,
-    type: 'tertiary', capacity: 'low',
-    hours: 'Piétons / Vélos',
-    vehicles: ['Piétons', 'Vélos'],
-    vignettes: ['CNI ou passeport obligatoire'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
-    nearestOpen: 'Perly (5 km) · Bardonnex (7 km)',
+    nearestOpen: 'Mon-Idée (1 km) · Perly (1.5 km)',
   },
   {
     id: 'bernex', name: 'Bernex',
@@ -330,7 +281,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'ecogia', name: 'Écogia (Satigny)',
-    lat: 46.22955, lng: 6.03859,
+    lat: 46.23427, lng: 6.02693,
     type: 'tertiary', capacity: 'low',
     hours: 'Restreint (agricole/local)',
     vehicles: ['Voitures', 'Tracteurs'],
@@ -411,7 +362,7 @@ export function computeCrossingStatus(
   return                                       { status: 'CLEAR',    jamFactor: 0 }
 }
 
-const CACHE_KEY = 'tif:layer:border-crossings:v4'
+const CACHE_KEY = 'tif:layer:border-crossings:v6'
 const CACHE_TTL = 120
 
 export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
