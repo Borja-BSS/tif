@@ -209,6 +209,8 @@ function applyMarkers(
       'position:relative',
       'width:36px', 'height:36px',
       'cursor:pointer', 'user-select:none',
+      'will-change:transform',
+      'transform:translateZ(0)',
     ].join(';')
     el.title = name
 
@@ -217,7 +219,7 @@ function applyMarkers(
     circle.style.cssText = [
       'width:36px', 'height:36px', 'border-radius:50%',
       `background:${color}`,
-      `border:2.5px solid ${borderColor}`,
+      `border:2px solid ${borderColor}`,
       'display:flex', 'align-items:center', 'justify-content:center',
       'font-size:16px',
       'box-shadow:0 2px 12px rgba(0,0,0,0.55)',
