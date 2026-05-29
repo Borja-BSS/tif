@@ -7,6 +7,7 @@ type FlowFeature = {
     jamFactor:  number
     speed:      number
     freeFlow:   number
+    confidence: number
     color:      string
     speedRatio: number
   }
@@ -47,6 +48,7 @@ export async function getTrafficFlow(): Promise<FlowFeatureCollection> {
         jamFactor:  jam,
         speed:      result.currentFlow.speed,
         freeFlow:   result.currentFlow.freeFlow,
+        confidence: result.currentFlow.confidence,
         color:      jamColor(jam),
         speedRatio: result.currentFlow.freeFlow > 0
           ? result.currentFlow.speed / result.currentFlow.freeFlow

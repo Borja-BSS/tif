@@ -122,18 +122,20 @@ function parseArr(val: unknown): string[] {
 
 // ── Popup HTML ────────────────────────────────────────────────────────────────
 function buildPopupHTML(props: Record<string, unknown>): string {
-  const name      = String(props.name ?? 'Passage frontière')
-  const status    = String(props.status ?? 'CLEAR')
-  const color     = String(props.color ?? '#8E8E93')
-  const wait      = Number(props.waitTimeMinutes ?? 0)
-  const g7Period  = Boolean(props.g7Period)
-  const g7Status  = props.g7Status ? String(props.g7Status) : null
-  const hours     = String(props.hours ?? '—')
-  const vehicles  = parseArr(props.vehicles)
-  const vignettes = parseArr(props.vignettes)
-  const g7Info    = String(props.g7Info ?? '')
-  const nearest   = String(props.nearestOpen ?? '')
-  const updated   = props.lastUpdated
+  const name        = String(props.name ?? 'Passage frontière')
+  const status      = String(props.status ?? 'CLEAR')
+  const color       = String(props.color ?? '#8E8E93')
+  const wait        = Number(props.waitTimeMinutes ?? 0)
+  const g7Period    = Boolean(props.g7Period)
+  const g7Status    = props.g7Status ? String(props.g7Status) : null
+  const hours       = String(props.hours ?? '—')
+  const vehicles    = parseArr(props.vehicles)
+  const vignettes   = parseArr(props.vignettes)
+  const g7Info      = String(props.g7Info ?? '')
+  const nearest     = String(props.nearestOpen ?? '')
+  const dataQuality = String(props.dataQuality ?? 'synthetic')
+  const confidence  = Number(props.confidence ?? 0.3)
+  const updated     = props.lastUpdated
     ? new Date(String(props.lastUpdated)).toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' })
     : '—'
 
@@ -176,7 +178,15 @@ function buildPopupHTML(props: Record<string, unknown>): string {
           <span style="color:${color};font-weight:600;font-size:13px">${statusLabel}</span>
           ${waitLine}
         </div>
-        <div style="margin-top:5px;font-size:11px;color:rgba(255,255,255,0.3)">CH ⇄ FR · Mis à jour ${updated}</div>
+        <div style="margin-top:5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          <span style="font-size:11px;color:rgba(255,255,255,0.3)">CH ⇄ FR · ${updated}</span>
+          ${dataQuality === 'live'
+            ? `<span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;background:rgba(52,199,89,0.15);color:#34C759">● Live HERE · ${Math.round(confidence * 100)}%</span>`
+            : dataQuality === 'g7-directive'
+            ? `<span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;background:rgba(90,200,250,0.15);color:#5AC8FA">● Directive G7</span>`
+            : `<span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;background:rgba(255,204,0,0.12);color:#FFCC00">● Estimé</span>`
+          }
+        </div>
       </div>
       <div class="tif-popup-section">
         <div class="tif-popup-label">Horaires & Accès</div>

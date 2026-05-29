@@ -1,5 +1,7 @@
-import { redis }  from '@/lib/redis'
-import { logger } from '@/lib/logger'
+import { redis }           from '@/lib/redis'
+import { logger }          from '@/lib/logger'
+import { getTrafficFlow }  from '@/lib/here/traffic-flow'
+import type { FlowFeatureCollection } from '@/lib/here/traffic-flow'
 import type { FeatureCollection, Feature, Point } from 'geojson'
 
 type BorderStatus   = 'CLEAR' | 'LIGHT' | 'MODERATE' | 'HEAVY' | 'BLOCKED'
@@ -34,7 +36,9 @@ export interface BorderProperties {
   icon:            string
   color:           string
   lastUpdated:     string
-  source:          'synthetic-calibrated' | 'G7-directive'
+  source:          'here-live' | 'synthetic-calibrated' | 'G7-directive'
+  confidence:      number
+  dataQuality:     'live' | 'synthetic' | 'g7-directive'
   g7Period:        boolean
   g7Status:        G7Status | null
   hours:           string
@@ -350,6 +354,43 @@ const G7_AUTHORIZED = new Set([
 ])
 const G7_MACARON = new Set(['bardonnex', 'thonex-vallard'])
 
+// ── HERE Traffic flow matching ────────────────────────────────────────────────
+
+function distM(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const dlat = (lat1 - lat2) * 111_000
+  const dlng = (lng1 - lng2) * 111_000 * Math.cos((lat1 * Math.PI) / 180)
+  return Math.sqrt(dlat * dlat + dlng * dlng)
+}
+
+// Find the nearest HERE flow segment within maxDistM metres of a given point.
+function nearestFlow(
+  lat: number, lng: number,
+  flow: FlowFeatureCollection,
+  maxDistM = 400,
+): { jamFactor: number; confidence: number } | null {
+  let bestDist = maxDistM
+  let best: { jamFactor: number; confidence: number } | null = null
+
+  for (const f of flow.features) {
+    for (const [fLng, fLat] of f.geometry.coordinates) {
+      const d = distM(lat, lng, fLat, fLng)
+      if (d < bestDist) {
+        bestDist = d
+        best = { jamFactor: f.properties.jamFactor, confidence: f.properties.confidence }
+      }
+    }
+  }
+  return best
+}
+
+// jamFactor (0–10) → BorderStatus. Never returns BLOCKED — closures come from G7 directives only.
+function jamToStatus(jam: number): BorderStatus {
+  if (jam < 1.5) return 'CLEAR'
+  if (jam < 3.5) return 'LIGHT'
+  if (jam < 6.0) return 'MODERATE'
+  return 'HEAVY'
+}
+
 const STATUS_COLOR: Record<BorderStatus, string> = {
   CLEAR:    '#34C759',
   LIGHT:    '#30D158',
@@ -416,44 +457,77 @@ export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
   const now      = new Date()
   const g7Active = isG7Period(now)
 
+  // Fetch HERE flow once for the full region (already Redis-cached internally)
+  let flow: FlowFeatureCollection | null = null
+  try {
+    flow = await getTrafficFlow()
+  } catch (err) {
+    logger.warn({ err }, 'border-crossings:here-flow-failed — falling back to synthetic')
+  }
+
+  let liveCount = 0
+
   const features: Feature<Point, BorderProperties>[] = CROSSINGS.map(c => {
     let status: BorderStatus
     let jamFactor: number
     let color: string
     let icon: string
     let source: BorderProperties['source']
+    let confidence: number
+    let dataQuality: BorderProperties['dataQuality']
     let g7Status: G7Status | null = null
 
-    if (g7Active) {
-      source = 'G7-directive'
-      if (!G7_AUTHORIZED.has(c.id)) {
-        status    = 'BLOCKED'
-        jamFactor = 10
-        color     = G7_CLOSED_COLOR
-        icon      = '🔒'
-        g7Status  = 'closed'
-      } else if (G7_MACARON.has(c.id)) {
-        const { status: s, jamFactor: jf } = computeCrossingStatus(c, now)
-        status    = s === 'BLOCKED' ? 'MODERATE' : s
-        jamFactor = jf
-        color     = G7_MACARON_COLOR
-        icon      = '🛂'
-        g7Status  = 'macaron'
-      } else {
-        const { status: s, jamFactor: jf } = computeCrossingStatus(c, now)
-        status    = s === 'CLEAR' ? 'LIGHT' : s === 'LIGHT' ? 'MODERATE' : s
-        jamFactor = Math.min(jf + 2, 9)
-        color     = STATUS_COLOR[status]
-        icon      = '🛂'
-        g7Status  = 'open'
-      }
+    if (g7Active && !G7_AUTHORIZED.has(c.id)) {
+      // Hard G7 closure — directive overrides everything
+      status      = 'BLOCKED'
+      jamFactor   = 10
+      color       = G7_CLOSED_COLOR
+      icon        = '🔒'
+      g7Status    = 'closed'
+      source      = 'G7-directive'
+      confidence  = 1.0
+      dataQuality = 'g7-directive'
     } else {
-      const computed = computeCrossingStatus(c, now)
-      status    = computed.status
-      jamFactor = computed.jamFactor
-      color     = STATUS_COLOR[status]
-      icon      = '🛂'
-      source    = 'synthetic-calibrated'
+      // Try HERE live traffic for the base status
+      const live = flow ? nearestFlow(c.lat, c.lng, flow) : null
+
+      if (live) {
+        status      = jamToStatus(live.jamFactor)
+        jamFactor   = live.jamFactor
+        confidence  = live.confidence
+        source      = g7Active ? 'G7-directive' : 'here-live'
+        dataQuality = g7Active ? 'g7-directive' : 'live'
+        liveCount++
+      } else {
+        const computed = computeCrossingStatus(c, now)
+        status      = computed.status
+        jamFactor   = computed.jamFactor
+        confidence  = 0.3
+        source      = g7Active ? 'G7-directive' : 'synthetic-calibrated'
+        dataQuality = g7Active ? 'g7-directive' : 'synthetic'
+      }
+
+      // Apply G7 adjustments on top of live/synthetic base
+      if (g7Active) {
+        if (G7_MACARON.has(c.id)) {
+          status    = status === 'BLOCKED' ? 'MODERATE' : status
+          color     = G7_MACARON_COLOR
+          icon      = '🛂'
+          g7Status  = 'macaron'
+          confidence = 1.0
+        } else {
+          // Open during G7 but without macaron — minimum LIGHT, G7 penalty +2
+          status    = status === 'CLEAR' ? 'LIGHT' : status === 'LIGHT' ? 'MODERATE' : status
+          jamFactor = Math.min(jamFactor + 2, 9)
+          color     = STATUS_COLOR[status]
+          icon      = '🛂'
+          g7Status  = 'open'
+          confidence = 1.0
+        }
+      } else {
+        color = STATUS_COLOR[status]
+        icon  = '🛂'
+      }
     }
 
     return {
@@ -472,6 +546,8 @@ export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
         color,
         lastUpdated:     now.toISOString(),
         source,
+        confidence,
+        dataQuality,
         g7Period:        g7Active,
         g7Status,
         hours:           c.hours,
@@ -492,7 +568,10 @@ export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
     logger.warn({ err }, 'border-crossings:redis-set-failed')
   }
 
-  logger.debug({ count: features.length, g7Active }, 'border-crossings:computed')
+  logger.debug(
+    { count: features.length, liveCount, synthetic: features.length - liveCount, g7Active },
+    'border-crossings:computed',
+  )
   return result
 }
 

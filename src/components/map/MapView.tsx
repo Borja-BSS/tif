@@ -19,12 +19,15 @@ const TerritoryLayer       = dynamic(() => import('./TerritoryLayer'),       { s
 const G7Overlay            = dynamic(() => import('./G7Overlay'),            { ssr: false })
 const FilterPanel          = dynamic(() => import('./FilterPanel'),          { ssr: false })
 const BorderCrossingsLayer = dynamic(() => import('./BorderCrossingsLayer'), { ssr: false })
+const RoadClosuresLayer    = dynamic(() => import('./RoadClosuresLayer'),    { ssr: false })
+const WazeLayer            = dynamic(() => import('./WazeLayer'),            { ssr: false })
 
 const DEFAULT_FILTERS: FilterState = {
   heatmap:   true,
   alerts:    true,
   transport: false,
   territory: true,
+  waze:      false,
 }
 
 const TRANSPORT_LEGEND = [
@@ -62,6 +65,9 @@ export default function MapView(props: Omit<MapGLProps, 'onMapReady'>) {
       {/* Douanes — prefetch immédiat hors garde map */}
       <BorderCrossingsLayer map={map} />
 
+      {/* Routes fermées — layer permanent, hachures rouges/blanches */}
+      <RoadClosuresLayer map={map} />
+
       {map && (
         <>
           <TerritoryLayer map={map} visible={filters.territory} />
@@ -69,6 +75,9 @@ export default function MapView(props: Omit<MapGLProps, 'onMapReady'>) {
           <AlertLayer     map={map} visible={filters.alerts} />
           <G7Overlay      map={map} />
           <FilterPanel    filters={filters} onChange={setFilters} />
+
+          {/* Waze — bouchons crowdsourcés + alertes + fermetures */}
+          <WazeLayer map={map} visible={filters.waze} />
 
           {/* Légende transport */}
           {filters.transport && (
