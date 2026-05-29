@@ -8,7 +8,11 @@ interface BorderCrossingsLayerProps {
   map: mapboxgl.Map | null
 }
 
-const REFRESH_MS = 120_000
+const REFRESH_MS    = 120_000
+const SOURCE_ID     = 'tif-border-crossings'
+const LAYER_SHADOW  = 'tif-border-shadow'
+const LAYER_CIRCLE  = 'tif-border-circle'
+const LAYER_ICON    = 'tif-border-icon'
 
 const STATUS_LABEL: Record<string, string> = {
   CLEAR:    'Libre',
@@ -62,6 +66,12 @@ async function fetchBorderData(): Promise<FeatureCollection | null> {
   }
 }
 
+function parseArr(val: unknown): string[] {
+  if (Array.isArray(val)) return val as string[]
+  if (typeof val === 'string') { try { return JSON.parse(val) } catch { return [] } }
+  return []
+}
+
 function buildPopupHTML(props: Record<string, unknown>): string {
   const name      = String(props.name ?? 'Passage frontière')
   const status    = String(props.status ?? 'CLEAR')
@@ -70,8 +80,8 @@ function buildPopupHTML(props: Record<string, unknown>): string {
   const g7Period  = Boolean(props.g7Period)
   const g7Status  = props.g7Status ? String(props.g7Status) : null
   const hours     = String(props.hours ?? '—')
-  const vehicles  = Array.isArray(props.vehicles) ? (props.vehicles as string[]) : []
-  const vignettes = Array.isArray(props.vignettes) ? (props.vignettes as string[]) : []
+  const vehicles  = parseArr(props.vehicles)
+  const vignettes = parseArr(props.vignettes)
   const g7Info    = String(props.g7Info ?? '')
   const nearest   = String(props.nearestOpen ?? '')
   const updated   = props.lastUpdated
@@ -81,7 +91,6 @@ function buildPopupHTML(props: Record<string, unknown>): string {
   const statusLabel = STATUS_LABEL[status] ?? status
   const isClosed    = status === 'BLOCKED'
 
-  // ── Header ──────────────────────────────────────────────────────────────────
   const headerBg = isClosed
     ? 'rgba(255,59,48,0.12)'
     : g7Status === 'macaron'
@@ -92,7 +101,6 @@ function buildPopupHTML(props: Record<string, unknown>): string {
     ? `<span style="color:rgba(255,255,255,0.4);font-size:11px">· ~${wait} min d'attente</span>`
     : ''
 
-  // ── G7 section ──────────────────────────────────────────────────────────────
   let g7Section = ''
   if (g7Period && g7Info) {
     const g7Bg    = g7Status === 'closed'  ? 'rgba(255,59,48,0.12)'   : 'rgba(255,149,0,0.08)'
@@ -112,22 +120,13 @@ function buildPopupHTML(props: Record<string, unknown>): string {
       </div>`
   }
 
-  // ── Vignettes section ───────────────────────────────────────────────────────
-  const vignetteRows = vignettes.map(v =>
-    `<div class="tif-popup-row">· ${v}</div>`
-  ).join('')
-
-  // ── Véhicules ───────────────────────────────────────────────────────────────
-  const vehicleList = vehicles.join(' · ')
+  const vignetteRows = vignettes.map(v => `<div class="tif-popup-row">· ${v}</div>`).join('')
+  const vehicleList  = vehicles.join(' · ')
 
   return `
     <div style="font-family:-apple-system,SF Pro Text,sans-serif">
-
-      <!-- Header -->
       <div class="tif-popup-section" style="background:${headerBg};padding:12px 14px">
-        <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:5px">
-          ${name}
-        </div>
+        <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:5px">${name}</div>
         <div style="display:flex;align-items:center;gap:7px">
           <span style="width:9px;height:9px;border-radius:50%;background:${color};display:inline-block;flex-shrink:0"></span>
           <span style="color:${color};font-weight:600;font-size:13px">${statusLabel}</span>
@@ -137,22 +136,16 @@ function buildPopupHTML(props: Record<string, unknown>): string {
           CH ⇄ FR · Mis à jour ${updated}
         </div>
       </div>
-
-      <!-- Horaires & Véhicules -->
       <div class="tif-popup-section">
         <div class="tif-popup-label">Horaires & Accès</div>
         <div class="tif-popup-row">🕐 ${hours}</div>
         ${vehicleList ? `<div class="tif-popup-row">🚗 ${vehicleList}</div>` : ''}
       </div>
-
-      <!-- Documents requis -->
       ${vignetteRows ? `
       <div class="tif-popup-section">
         <div class="tif-popup-label">Documents & Vignettes requis</div>
         ${vignetteRows}
       </div>` : ''}
-
-      <!-- Macarons / Vignettes G7 -->
       <div class="tif-popup-section" style="background:rgba(255,255,255,0.02)">
         <div class="tif-popup-label">Macarons obligatoires</div>
         <div class="tif-popup-row">
@@ -172,98 +165,92 @@ function buildPopupHTML(props: Record<string, unknown>): string {
           <span style="color:rgba(255,255,255,0.5);font-size:11px;margin-left:5px">QR code — périmètre Évian uniquement</span>
         </div>
       </div>
-
       ${g7Section}
-
     </div>`
 }
 
-function applyMarkers(
-  m: mapboxgl.Map,
-  geojson: FeatureCollection,
-  markersRef: React.MutableRefObject<mapboxgl.Marker[]>,
-) {
-  markersRef.current.forEach(mk => mk.remove())
-  markersRef.current = []
-
-  for (const feature of geojson.features) {
-    const props = feature.properties as Record<string, unknown>
-    if (props?.type !== 'border') continue
-
-    const coords   = (feature.geometry as unknown as { coordinates: [number, number] }).coordinates
-    const color    = String(props.color ?? '#8E8E93')
-    const icon     = String(props.icon ?? '🛂')
-    const name     = String(props.name ?? '')
-    const g7Status = props.g7Status ? String(props.g7Status) : null
-    const isClosed = props.status === 'BLOCKED'
-
-    // ── Marker element ─────────────────────────────────────────────────────────
-    const borderColor = isClosed
-      ? 'rgba(255,59,48,0.9)'
-      : g7Status === 'macaron'
-      ? 'rgba(90,200,250,0.9)'
-      : 'rgba(255,255,255,0.85)'
-
-    const el = document.createElement('div')
-    el.style.cssText = [
-      'position:relative',
-      'width:36px', 'height:36px',
-      'cursor:pointer', 'user-select:none',
-      'will-change:transform',
-      'transform:translateZ(0)',
-    ].join(';')
-    el.title = name
-
-    // Main circle
-    const circle = document.createElement('div')
-    circle.style.cssText = [
-      'width:36px', 'height:36px', 'border-radius:50%',
-      `background:${color}`,
-      `border:2px solid ${borderColor}`,
-      'display:flex', 'align-items:center', 'justify-content:center',
-      'font-size:16px',
-      'box-shadow:0 2px 12px rgba(0,0,0,0.55)',
-    ].join(';')
-    circle.textContent = icon
-
-    // ⓘ badge
-    const badge = document.createElement('div')
-    badge.style.cssText = [
-      'position:absolute', 'bottom:-3px', 'right:-3px',
-      'width:15px', 'height:15px', 'border-radius:50%',
-      'background:#fff',
-      'border:1.5px solid rgba(0,0,0,0.3)',
-      'display:flex', 'align-items:center', 'justify-content:center',
-      'font-size:9px', 'font-weight:700', 'color:#1c1c1e',
-      'line-height:1', 'box-shadow:0 1px 4px rgba(0,0,0,0.4)',
-    ].join(';')
-    badge.textContent = 'i'
-
-    el.appendChild(circle)
-    el.appendChild(badge)
-
-    const popup = new mapboxgl.Popup({
-      maxWidth:    '300px',
-      className:   'tif-popup',
-      closeButton: true,
-      offset:      22,
-    }).setHTML(buildPopupHTML(props))
-
-    const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
-      .setLngLat(coords)
-      .setPopup(popup)
-      .addTo(m)
-
-    markersRef.current.push(marker)
+// Filtre les features border et ajoute borderColor pour les expressions de layer
+function prepareBorderData(geojson: FeatureCollection): FeatureCollection {
+  return {
+    type: 'FeatureCollection',
+    features: geojson.features
+      .filter(f => (f.properties as Record<string, unknown>)?.type === 'border')
+      .map(f => {
+        const p        = f.properties as Record<string, unknown>
+        const isClosed = p.status === 'BLOCKED'
+        const g7Status = p.g7Status ? String(p.g7Status) : null
+        const strokeColor = isClosed ? '#FF3B30' : g7Status === 'macaron' ? '#5AC8FA' : '#FFFFFF'
+        return { ...f, properties: { ...p, strokeColor } }
+      }),
   }
 }
 
+function addLayersToMap(m: mapboxgl.Map) {
+  m.addLayer({
+    id: LAYER_SHADOW,
+    type: 'circle',
+    source: SOURCE_ID,
+    paint: {
+      'circle-radius': 20,
+      'circle-color': 'rgba(0,0,0,0.35)',
+      'circle-blur': 0.6,
+      'circle-translate': [0, 2],
+    },
+  })
+
+  m.addLayer({
+    id: LAYER_CIRCLE,
+    type: 'circle',
+    source: SOURCE_ID,
+    paint: {
+      'circle-radius': 18,
+      'circle-color': ['get', 'color'],
+      'circle-stroke-width': 2,
+      'circle-stroke-color': ['get', 'strokeColor'],
+    },
+  })
+
+  m.addLayer({
+    id: LAYER_ICON,
+    type: 'symbol',
+    source: SOURCE_ID,
+    layout: {
+      'text-field': ['get', 'icon'],
+      'text-size': 16,
+      'text-allow-overlap': true,
+      'text-ignore-placement': true,
+      'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
+    },
+    paint: {
+      'text-translate': [0, 0],
+    },
+  })
+}
+
+function applyData(m: mapboxgl.Map, geojson: FeatureCollection) {
+  const data = prepareBorderData(geojson)
+  const src  = m.getSource(SOURCE_ID) as mapboxgl.GeoJSONSource | undefined
+  if (src) {
+    src.setData(data)
+  } else {
+    m.addSource(SOURCE_ID, { type: 'geojson', data })
+    addLayersToMap(m)
+  }
+}
+
+function removeLayers(m: mapboxgl.Map) {
+  for (const id of [LAYER_ICON, LAYER_CIRCLE, LAYER_SHADOW]) {
+    if (m.getLayer(id)) m.removeLayer(id)
+  }
+  if (m.getSource(SOURCE_ID)) m.removeSource(SOURCE_ID)
+}
+
 export default function BorderCrossingsLayer({ map }: BorderCrossingsLayerProps) {
-  const markersRef   = useRef<mapboxgl.Marker[]>([])
   const timerRef     = useRef<ReturnType<typeof setInterval> | null>(null)
   const prefetchRef  = useRef<FeatureCollection | null>(null)
   const prefetchDone = useRef(false)
 
+  // Prefetch immediately so first render is instant
   useEffect(() => {
     let cancelled = false
     fetchBorderData().then(data => {
@@ -283,24 +270,38 @@ export default function BorderCrossingsLayer({ map }: BorderCrossingsLayerProps)
       if (!data) return
       prefetchRef.current  = data
       prefetchDone.current = true
-      applyMarkers(map, data, markersRef)
+      applyData(map, data)
     }
 
-    if (map.loaded()) run()
-    else map.once('load', run)
+    const setupEvents = () => {
+      map.on('click', LAYER_CIRCLE, e => {
+        if (!e.features?.length) return
+        const props = e.features[0].properties as Record<string, unknown>
+        new mapboxgl.Popup({ maxWidth: '300px', className: 'tif-popup', closeButton: true, offset: 22 })
+          .setLngLat(e.lngLat)
+          .setHTML(buildPopupHTML(props))
+          .addTo(map)
+      })
+      map.on('mouseenter', LAYER_CIRCLE, () => { map.getCanvas().style.cursor = 'pointer' })
+      map.on('mouseleave', LAYER_CIRCLE, () => { map.getCanvas().style.cursor = '' })
+    }
+
+    if (map.loaded()) {
+      run()
+      setupEvents()
+    } else {
+      map.once('load', () => { run(); setupEvents() })
+    }
 
     timerRef.current = setInterval(async () => {
       const data = await fetchBorderData()
       if (!data) return
-      prefetchRef.current  = data
-      prefetchDone.current = true
-      applyMarkers(map, data, markersRef)
+      applyData(map, data)
     }, REFRESH_MS)
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
-      markersRef.current.forEach(mk => mk.remove())
-      markersRef.current = []
+      try { removeLayers(map) } catch { /* map peut être détruite */ }
     }
   }, [map])
 
