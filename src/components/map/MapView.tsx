@@ -7,7 +7,6 @@ import type { MapGLProps } from './MapGL'
 import type { FilterState } from './FilterPanel'
 import { useTerritorialLayers }    from './useTerritorialLayers'
 import { useHereMobilityLayer }    from './useHereMobilityLayer'
-import { useHereAlertsLayer }      from './useHereAlertsLayer'
 import { useTransitNetworkLayer }  from './useTransitNetworkLayer'
 import { G7Banner }                from './transport/G7Banner'
 import { DisruptionsPanel }        from './transport/DisruptionsPanel'
@@ -20,7 +19,7 @@ const G7Overlay            = dynamic(() => import('./G7Overlay'),            { s
 const FilterPanel          = dynamic(() => import('./FilterPanel'),          { ssr: false })
 const BorderCrossingsLayer = dynamic(() => import('./BorderCrossingsLayer'), { ssr: false })
 const RoadClosuresLayer    = dynamic(() => import('./RoadClosuresLayer'),    { ssr: false })
-const WazeLayer            = dynamic(() => import('./WazeLayer'),            { ssr: false })
+const HereIncidentsLayer   = dynamic(() => import('./HereIncidentsLayer'),   { ssr: false })
 
 const DEFAULT_FILTERS: FilterState = {
   heatmap:   true,
@@ -43,9 +42,6 @@ export default function MapView(props: Omit<MapGLProps, 'onMapReady'>) {
 
   // HERE trafic : masqué quand le filtre transport est actif (le réseau UNIRESO le remplace)
   useHereMobilityLayer(filters.heatmap && !filters.transport ? map : null)
-
-  // HERE alertes incidents
-  useHereAlertsLayer(filters.alerts ? map : null)
 
   // Réseau UNIRESO — toutes lignes TPG/CFF/CEVA + perturbations
   useTransitNetworkLayer(filters.transport ? map : null)
@@ -75,8 +71,8 @@ export default function MapView(props: Omit<MapGLProps, 'onMapReady'>) {
           <G7Overlay      map={map} />
           <FilterPanel    filters={filters} onChange={setFilters} />
 
-          {/* Waze — toujours actif, masqué uniquement quand Transport est sélectionné */}
-          <WazeLayer map={map} visible={!filters.transport} />
+          {/* HERE Incidents — tous types (accident, travaux, météo, OFROU, TPG…) */}
+          <HereIncidentsLayer map={filters.alerts && !filters.transport ? map : null} />
 
           {/* Légende transport */}
           {filters.transport && (
