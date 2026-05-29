@@ -46,7 +46,7 @@ export interface BorderProperties {
 
 export type BorderFeatureCollection = FeatureCollection<Point, BorderProperties>
 
-// ── 22 postes de douane Grand Genève (CH-FR) ──────────────────────────────────
+// ── 26 postes de douane Grand Genève (CH-FR) ──────────────────────────────────
 // Coordonnées extraites des nœuds de franchissement de la frontière CH-FR dans OSM
 // (relation 51701 × routes) + douanes nommées via Overpass/Nominatim
 const CROSSINGS: Crossing[] = [
@@ -217,6 +217,46 @@ const CROSSINGS: Crossing[] = [
     nearestOpen: 'Soral (14 km) · Bardonnex (22 km)',
   },
   {
+    id: 'avully', name: 'Avully',
+    lat: 46.16215, lng: 5.98445,
+    type: 'secondary', capacity: 'low',
+    hours: '06:00–20:00 (hors G7)',
+    vehicles: ['Voitures', 'Motos'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026 · Barrière levante · Frontière Ain (FR)',
+    nearestOpen: 'La Plaine (9 km) · Chancy (8 km)',
+  },
+  {
+    id: 'la-plaine', name: 'La Plaine',
+    lat: 46.17765, lng: 5.99194,
+    type: 'secondary', capacity: 'low',
+    hours: '06:00–20:00 (hors G7)',
+    vehicles: ['Voitures', 'Motos'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026 · Route de Challex · Frontière Ain (FR)',
+    nearestOpen: 'Meyrin (20 km) · Écogia (14 km)',
+  },
+  {
+    id: 'communaux-ambilly', name: 'Communaux d\'Ambilly',
+    lat: 46.19560, lng: 6.22150,
+    type: 'secondary', capacity: 'low',
+    hours: '06:00–20:00 (hors G7)',
+    vehicles: ['Voitures', 'Riverains'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026 · Barrière levante automatique · Thônex ↔ Ambilly',
+    nearestOpen: 'Moillesulaz (2 km) · Thônex-Vallard (2 km)',
+  },
+  {
+    id: 'hermance', name: 'Hermance',
+    lat: 46.29605, lng: 6.23890,
+    type: 'secondary', capacity: 'low',
+    hours: '06:00–20:00 (hors G7)',
+    vehicles: ['Voitures', 'Piétons', 'Vélos'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026 · Rive sud du lac Léman · Hermance ↔ Douvaine',
+    nearestOpen: 'Veigy (8 km) · Anières (12 km)',
+  },
+  {
     id: 'soral', name: 'Soral',
     lat: 46.13708, lng: 6.03615,
     type: 'secondary', capacity: 'low',
@@ -362,7 +402,7 @@ export function computeCrossingStatus(
   return                                       { status: 'CLEAR',    jamFactor: 0 }
 }
 
-const CACHE_KEY = 'tif:layer:border-crossings:v6'
+const CACHE_KEY = 'tif:layer:border-crossings:v7'
 const CACHE_TTL = 120
 
 export async function getBorderCrossings(): Promise<BorderFeatureCollection> {

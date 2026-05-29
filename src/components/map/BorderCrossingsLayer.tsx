@@ -22,18 +22,19 @@ const STATUS_LABEL: Record<string, string> = {
 }
 
 // ── Canvas icon generation ────────────────────────────────────────────────────
-// Retina: generate at 72×72, declare pixelRatio:2 → rendered at 36×36 CSS px
+// Retina: generate at 72×72, declare pixelRatio:2 → rendered at 36×36 CSS px.
+// Chemin fiable : canvas → toDataURL → HTMLImageElement → map.addImage.
+// getImageData() peut rater les emoji selon browser/GPU ; toDataURL est safe.
 const IMG_SIZE = 72
 
-function makeMarkerImage(color: string, strokeColor: string, emoji: string): ImageData {
+function drawMarkerCanvas(color: string, strokeColor: string, emoji: string): HTMLCanvasElement {
   const c   = document.createElement('canvas')
   c.width   = IMG_SIZE
   c.height  = IMG_SIZE
   const ctx = c.getContext('2d')!
   const cx  = IMG_SIZE / 2
-  const r   = IMG_SIZE / 2 - 4
+  const r   = cx - 4
 
-  // Drop shadow
   ctx.shadowColor   = 'rgba(0,0,0,0.5)'
   ctx.shadowBlur    = 10
   ctx.shadowOffsetY = 2
@@ -42,25 +43,34 @@ function makeMarkerImage(color: string, strokeColor: string, emoji: string): Ima
   ctx.fillStyle = color
   ctx.fill()
 
-  // Border stroke
   ctx.shadowColor = 'transparent'
   ctx.lineWidth   = 4
   ctx.strokeStyle = strokeColor
   ctx.stroke()
 
-  // Emoji — drawn via system font on canvas (renders correctly)
-  ctx.font         = `${Math.round(IMG_SIZE * 0.42)}px Arial, sans-serif`
+  // Emoji via system color font — fillStyle ne s'applique pas aux color-emoji
+  ctx.font         = `${Math.round(IMG_SIZE * 0.46)}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Arial,sans-serif`
   ctx.textAlign    = 'center'
   ctx.textBaseline = 'middle'
-  ctx.fillStyle    = 'rgba(0,0,0,0)'  // reset fill before emoji (emoji is self-colored)
   ctx.fillText(emoji, cx, cx + 1)
 
-  return ctx.getImageData(0, 0, IMG_SIZE, IMG_SIZE)
+  return c
 }
 
-function ensureImage(m: mapboxgl.Map, id: string, color: string, strokeColor: string, emoji: string) {
-  if (m.hasImage(id)) return
-  m.addImage(id, makeMarkerImage(color, strokeColor, emoji), { pixelRatio: 2 })
+function loadMarkerImage(
+  m: mapboxgl.Map, id: string,
+  color: string, strokeColor: string, emoji: string,
+): Promise<void> {
+  return new Promise(resolve => {
+    if (m.hasImage(id)) { resolve(); return }
+    const canvas = drawMarkerCanvas(color, strokeColor, emoji)
+    const img    = new Image()
+    img.onload = () => {
+      if (!m.hasImage(id)) m.addImage(id, img, { pixelRatio: 2 })
+      resolve()
+    }
+    img.src = canvas.toDataURL()
+  })
 }
 
 // ── Popup style ───────────────────────────────────────────────────────────────
@@ -186,59 +196,64 @@ function buildPopupHTML(props: Record<string, unknown>): string {
 }
 
 // ── Layer management ──────────────────────────────────────────────────────────
-function prepareBorderData(m: mapboxgl.Map, geojson: FeatureCollection): FeatureCollection {
-  return {
-    type: 'FeatureCollection',
-    features: geojson.features
-      .filter(f => (f.properties as Record<string, unknown>)?.type === 'border')
-      .map(f => {
-        const p           = f.properties as Record<string, unknown>
-        const isClosed    = p.status === 'BLOCKED'
-        const g7Status    = p.g7Status ? String(p.g7Status) : null
-        const color       = String(p.color ?? '#8E8E93')
-        const emoji       = String(p.icon ?? '🛂')
-        const strokeColor = isClosed ? '#FF3B30' : g7Status === 'macaron' ? '#5AC8FA' : '#FFFFFF'
-        // e.g. "tif-bc-34C759-FFFFFF-ctrl"
-        const slug        = emoji === '🔒' ? 'lock' : 'ctrl'
-        const imgId       = `tif-bc-${color.replace('#','')}-${strokeColor.replace('#','')}-${slug}`
-        ensureImage(m, imgId, color, strokeColor, emoji)
-        return { ...f, properties: { ...p, strokeColor, imgId } }
-      }),
-  }
+function featureImgProps(f: { properties: unknown }) {
+  const p           = f.properties as Record<string, unknown>
+  const isClosed    = p.status === 'BLOCKED'
+  const g7Status    = p.g7Status ? String(p.g7Status) : null
+  const color       = String(p.color ?? '#8E8E93')
+  const emoji       = String(p.icon ?? '🛂')
+  const strokeColor = isClosed ? '#FF3B30' : g7Status === 'macaron' ? '#5AC8FA' : '#FFFFFF'
+  const slug        = emoji === '🔒' ? 'lock' : 'ctrl'
+  const imgId       = `tif-bc-${color.replace('#', '')}-${strokeColor.replace('#', '')}-${slug}`
+  return { color, strokeColor, emoji, imgId }
 }
 
-function applyData(m: mapboxgl.Map, geojson: FeatureCollection) {
-  const data = prepareBorderData(m, geojson)
-  const src  = m.getSource(SOURCE_ID) as mapboxgl.GeoJSONSource | undefined
-  if (src) {
-    src.setData(data)
-    return
+async function applyData(m: mapboxgl.Map, geojson: FeatureCollection) {
+  const borderFeatures = geojson.features.filter(
+    f => (f.properties as Record<string, unknown>)?.type === 'border',
+  )
+
+  // 1. Pré-charger toutes les images manquantes via toDataURL → HTMLImageElement
+  const seen   = new Set<string>()
+  const loads: Promise<void>[] = []
+  for (const f of borderFeatures) {
+    const { color, strokeColor, emoji, imgId } = featureImgProps(f)
+    if (!seen.has(imgId) && !m.hasImage(imgId)) {
+      seen.add(imgId)
+      loads.push(loadMarkerImage(m, imgId, color, strokeColor, emoji))
+    }
   }
+  await Promise.all(loads)
+
+  // 2. Préparer les features enrichies
+  const data: FeatureCollection = {
+    type: 'FeatureCollection',
+    features: borderFeatures.map(f => {
+      const { strokeColor, imgId } = featureImgProps(f)
+      return { ...f, properties: { ...(f.properties as object), strokeColor, imgId } }
+    }),
+  }
+
+  // 3. Mettre à jour ou créer source + layers
+  const src = m.getSource(SOURCE_ID) as mapboxgl.GeoJSONSource | undefined
+  if (src) { src.setData(data); return }
 
   m.addSource(SOURCE_ID, { type: 'geojson', data })
 
-  // Soft shadow behind every marker
   m.addLayer({
-    id:     LAYER_SHADOW,
-    type:   'circle',
-    source: SOURCE_ID,
-    paint:  {
-      'circle-radius':    20,
-      'circle-color':     'rgba(0,0,0,0.32)',
-      'circle-blur':      0.55,
-      'circle-translate': [0, 3],
+    id: LAYER_SHADOW, type: 'circle', source: SOURCE_ID,
+    paint: {
+      'circle-radius': 20, 'circle-color': 'rgba(0,0,0,0.32)',
+      'circle-blur': 0.55, 'circle-translate': [0, 3],
     },
   })
 
-  // Canvas-generated icons (circle + emoji), stable through zoom
   m.addLayer({
-    id:     LAYER_ICON,
-    type:   'symbol',
-    source: SOURCE_ID,
+    id: LAYER_ICON, type: 'symbol', source: SOURCE_ID,
     layout: {
-      'icon-image':            ['get', 'imgId'],
-      'icon-size':             1,
-      'icon-allow-overlap':    true,
+      'icon-image': ['get', 'imgId'],
+      'icon-size': 1,
+      'icon-allow-overlap': true,
       'icon-ignore-placement': true,
     },
   })
