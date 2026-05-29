@@ -275,10 +275,18 @@ async function applyData(m: mapboxgl.Map, geojson: FeatureCollection) {
 async function fetchAndApply(m: mapboxgl.Map) {
   try {
     const res = await fetch('/api/v1/layers/waze', { cache: 'no-store' })
-    if (!res.ok) return
+    if (!res.ok) {
+      console.warn('[Waze] API route returned', res.status)
+      return
+    }
     const data = await res.json() as FeatureCollection
+    const lines  = data.features.filter(f => f.geometry.type === 'LineString').length
+    const points = data.features.filter(f => f.geometry.type === 'Point').length
+    console.info(`[Waze] ${lines} lignes (bouchons/fermetures) + ${points} alertes`)
     applyData(m, data)
-  } catch { /* endpoint non officiel — silencieux */ }
+  } catch (err) {
+    console.warn('[Waze] fetch failed (endpoint non officiel):', err)
+  }
 }
 
 // ── Sync visibility ───────────────────────────────────────────────────────────

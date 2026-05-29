@@ -36,12 +36,19 @@ export async function fetchWazeData(): Promise<WazeResponse> {
   })
 
   if (!res.ok) {
-    logger.warn({ status: res.status }, 'waze:unofficial:http-error')
+    logger.warn({ status: res.status, url: url.toString() }, 'waze:unofficial:http-error')
     throw new Error(`Waze ${res.status}`)
   }
 
+  const contentType = res.headers.get('content-type') ?? ''
+  if (!contentType.includes('application/json') && !contentType.includes('text/plain')) {
+    const preview = (await res.text()).slice(0, 200)
+    logger.warn({ contentType, preview }, 'waze:unofficial:unexpected-content-type')
+    throw new Error(`Waze returned non-JSON: ${contentType}`)
+  }
+
   const data = await res.json() as WazeResponse
-  logger.debug(
+  logger.info(
     { jams: data.jams?.length ?? 0, alerts: data.alerts?.length ?? 0 },
     'waze:unofficial:fetched',
   )

@@ -5,7 +5,6 @@ interface FilterState {
   alerts:    boolean
   transport: boolean
   territory: boolean
-  waze:      boolean
 }
 
 interface FilterPanelProps {
@@ -14,11 +13,10 @@ interface FilterPanelProps {
 }
 
 const ITEMS: { key: keyof FilterState; label: string; color: string }[] = [
-  { key: 'heatmap',   label: 'Mobilité',   color: 'text-blue-400'   },
-  { key: 'transport', label: 'Transport',  color: 'text-cyan-400'   },
-  { key: 'territory', label: 'Territoire', color: 'text-amber-400'  },
-  { key: 'alerts',    label: 'Alertes',    color: 'text-red-400'    },
-  { key: 'waze',      label: 'Waze',       color: 'text-green-400'  },
+  { key: 'heatmap',   label: 'Mobilité',   color: 'text-blue-400'  },
+  { key: 'transport', label: 'Transport',  color: 'text-cyan-400'  },
+  { key: 'territory', label: 'Territoire', color: 'text-amber-400' },
+  { key: 'alerts',    label: 'Alertes',    color: 'text-red-400'   },
 ]
 
 export default function FilterPanel({ filters, onChange }: FilterPanelProps) {

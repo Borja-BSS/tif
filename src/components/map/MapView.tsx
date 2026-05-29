@@ -27,7 +27,6 @@ const DEFAULT_FILTERS: FilterState = {
   alerts:    true,
   transport: false,
   territory: true,
-  waze:      false,
 }
 
 const TRANSPORT_LEGEND = [
@@ -76,8 +75,8 @@ export default function MapView(props: Omit<MapGLProps, 'onMapReady'>) {
           <G7Overlay      map={map} />
           <FilterPanel    filters={filters} onChange={setFilters} />
 
-          {/* Waze — bouchons crowdsourcés + alertes + fermetures */}
-          <WazeLayer map={map} visible={filters.waze} />
+          {/* Waze — toujours actif, masqué uniquement quand Transport est sélectionné */}
+          <WazeLayer map={map} visible={!filters.transport} />
 
           {/* Légende transport */}
           {filters.transport && (
