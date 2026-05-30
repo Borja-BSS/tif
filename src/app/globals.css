@@ -1,26 +1,130 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* Dark mode basé sur classe .dark */
+@custom-variant dark (&:where(.dark, .dark *));
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@theme {
+  --font-family-sans: -apple-system, Inter, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-family-mono: "SF Mono", "Fira Code", ui-monospace, monospace;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --radius-borja-sm: 8px;
+  --radius-borja-md: 12px;
+  --radius-borja-lg: 16px;
+  --radius-borja-xl: 20px;
+  --radius-borja-2xl: 28px;
+
+  --ease-spring: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --animate-fade-up: fadeUp 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  --animate-pulse-dot: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 }
 
+/* ─── LIGHT MODE (défaut) ──────────────────────────────────────── */
+:root {
+  --bg:              #FFFFFF;
+  --bg-secondary:    #F9FAFB;
+  --bg-card:         #F9FAFB;
+  --bg-card-hover:   #F3F4F6;
+  --border:          #E5E7EB;
+  --border-hover:    #D1D5DB;
+
+  --text-primary:    #0A0A0A;
+  --text-secondary:  #6B7280;
+  --text-tertiary:   #9CA3AF;
+
+  --italic:          #0A84FF;
+  --brand:           #0A84FF;
+  --brand-subtle:    rgba(10, 132, 255, 0.08);
+  --brand-glow:      rgba(10, 132, 255, 0.20);
+
+  --green:           #16A34A;
+  --orange:          #EA580C;
+  --red:             #DC2626;
+  --yellow:          #CA8A04;
+
+  --traffic-clear:    #16A34A;
+  --traffic-light:    #CA8A04;
+  --traffic-moderate: #EA580C;
+  --traffic-heavy:    #DC2626;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 10px 40px rgba(0,0,0,0.10);
+}
+
+/* ─── DARK MODE ────────────────────────────────────────────────── */
+.dark {
+  --bg:              #000000;
+  --bg-secondary:    #0A0A0A;
+  --bg-card:         rgba(255,255,255,0.04);
+  --bg-card-hover:   rgba(255,255,255,0.07);
+  --border:          rgba(255,255,255,0.08);
+  --border-hover:    rgba(255,255,255,0.15);
+
+  --text-primary:    rgba(255,255,255,0.95);
+  --text-secondary:  rgba(255,255,255,0.55);
+  --text-tertiary:   rgba(255,255,255,0.30);
+
+  --italic:          #0A84FF;
+  --brand:           #0A84FF;
+  --brand-subtle:    rgba(10,132,255,0.12);
+  --brand-glow:      rgba(10,132,255,0.25);
+
+  --green:           #30D158;
+  --orange:          #FF9F0A;
+  --red:             #FF453A;
+  --yellow:          #FFD60A;
+
+  --traffic-clear:    #30D158;
+  --traffic-light:    #FFD60A;
+  --traffic-moderate: #FF9F0A;
+  --traffic-heavy:    #FF453A;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.40);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.40);
+  --shadow-lg: 0 10px 40px rgba(0,0,0,0.60);
+}
+
+/* ─── UTILITAIRES BORJA ──────────────────────────────────────── */
+
+.borja-title em,
+.borja-title i {
+  font-style: italic;
+  color: var(--italic);
+  font-weight: 700;
+}
+
+.borja-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.borja-stat-number {
+  font-size: 48px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.borja-stat-source {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 4px;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg);
+  color: var(--text-primary);
+  font-family: -apple-system, Inter, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }

@@ -2,6 +2,7 @@
 
 import { signIn } from 'next-auth/react'
 import { useState } from 'react'
+import Link from 'next/link'
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false)
@@ -12,31 +13,74 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-black">
-      <div className="w-full max-w-sm space-y-6 p-8">
-        <div className="text-center space-y-1">
-          <h1 className="text-2xl font-semibold text-white tracking-tight">
-            TIF · G7 Live View
+    <div
+      className="min-h-screen flex items-center justify-center px-4"
+      style={{ background: 'var(--bg)' }}
+    >
+      <div className="w-full max-w-sm">
+
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <Link
+            href="/"
+            className="text-[22px] font-bold tracking-tight"
+            style={{ color: 'var(--text-primary)', fontFamily: '-apple-system, Inter, sans-serif' }}
+          >
+            Börja
+          </Link>
+          <div
+            className="w-8 h-px mx-auto my-4"
+            style={{ background: 'var(--border)' }}
+          />
+          <h1 className="text-[28px] font-bold tracking-[-0.015em]" style={{ color: 'var(--text-primary)' }}>
+            Accès Grand{' '}
+            <em style={{ fontStyle: 'italic', color: 'var(--italic)', fontWeight: 700 }}>Genève.</em>
           </h1>
-          <p className="text-sm text-white/40">
-            Territorial Intelligence Fabric — Grand Genève
+          <p className="text-[14px] mt-2" style={{ color: 'var(--text-secondary)' }}>
+            Plateforme d'intelligence territoriale
           </p>
         </div>
 
+        {/* Google OAuth */}
         <button
           onClick={handleGoogle}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-3 rounded-xl bg-white px-4 py-3 text-sm font-medium text-black transition hover:bg-white/90 disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-3 transition-all duration-200"
+          style={{
+            background: '#FFFFFF',
+            color: '#1F2937',
+            border: '1px solid var(--border)',
+            borderRadius: '12px',
+            padding: '14px 20px',
+            fontSize: '15px',
+            fontWeight: 500,
+            cursor: loading ? 'not-allowed' : 'pointer',
+            opacity: loading ? 0.7 : 1,
+            boxShadow: 'var(--shadow-sm)',
+          }}
         >
           <GoogleIcon />
           {loading ? 'Connexion…' : 'Continuer avec Google'}
         </button>
 
-        <p className="text-center text-xs text-white/25">
+        {/* Disclaimer */}
+        <p className="text-center text-[12px] mt-6" style={{ color: 'var(--text-tertiary)' }}>
           Accès restreint — personnel autorisé uniquement
         </p>
+
+        {/* Back */}
+        <div className="text-center mt-8">
+          <Link
+            href="/"
+            className="text-[13px] transition-colors duration-150"
+            style={{ color: 'var(--text-tertiary)' }}
+          >
+            ← Retour à l'accueil
+          </Link>
+        </div>
+
       </div>
-    </main>
+    </div>
   )
 }
 
