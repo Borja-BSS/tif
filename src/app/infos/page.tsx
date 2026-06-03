@@ -1,41 +1,34 @@
 import type { Metadata } from 'next'
-import { Header }       from '@/components/layout/Header'
-import { BorjaTitle }   from '@/components/ui/BorjaTitle'
-import { SectionLabel } from '@/components/ui/SectionLabel'
-import { Card }         from '@/components/ui/Card'
-import { getTpgDisruptions } from '@/lib/transport/tpg-disruptions'
-import { getCffDisruptions } from '@/lib/transport/cff-disruptions'
-import { getG7Impact }       from '@/lib/transport/g7-impact'
+import { Suspense }      from 'react'
+import { Header }        from '@/components/layout/Header'
+import { BorjaTitle }    from '@/components/ui/BorjaTitle'
+import { SectionLabel }  from '@/components/ui/SectionLabel'
+import { Card }          from '@/components/ui/Card'
+import { getTpgDisruptions }  from '@/lib/transport/tpg-disruptions'
+import { getCffDisruptions }  from '@/lib/transport/cff-disruptions'
+import { getG7Impact }        from '@/lib/transport/g7-impact'
 import { getBorderCrossings } from '@/lib/territory/border-crossings'
-import type { TpgDisruption, CffDisruption, G7Impact } from '@/lib/transport/types'
+import type { TpgDisruption, CffDisruption } from '@/lib/transport/types'
 import type { FeatureCollection } from 'geojson'
 
 export const metadata: Metadata = { title: 'Flash Infos — TIF' }
-export const dynamic    = 'force-dynamic'
+
+// ISR: page cached at Vercel Edge for 30s — sous-50ms pour mobile après la 1re requête
 export const revalidate = 30
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
-function formatTime(iso: string): string {
+function fmt(iso: string) {
   const d = new Date(iso)
-  const h = d.getHours().toString().padStart(2, '0')
-  const m = d.getMinutes().toString().padStart(2, '0')
-  return `${h}h${m}`
+  return `${d.getHours().toString().padStart(2,'0')}h${d.getMinutes().toString().padStart(2,'0')}`
 }
 
-function relativeTime(iso: string): string {
-  const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000)
-  if (diff < 60)  return `${diff}s`
-  if (diff < 3600) return `${Math.floor(diff / 60)} min`
-  return `${Math.floor(diff / 3600)}h${Math.floor((diff % 3600) / 60).toString().padStart(2,'0')}`
-}
-
-const TYPE_LABEL: Record<string, string> = {
-  retard:       'Retard',
-  suppression:  'Suppression',
-  deviation:    'Déviation',
-  travaux:      'Travaux',
-  perturbation: 'Perturbation',
+function ago(iso: string) {
+  const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000)
+  if (s < 60)  return `${s}s`
+  if (s < 3600) return `${Math.floor(s/60)} min`
+  const h = Math.floor(s/3600), m = Math.floor((s%3600)/60)
+  return m > 0 ? `${h}h${m.toString().padStart(2,'0')}` : `${h}h`
 }
 
 const TYPE_COLOR: Record<string, string> = {
@@ -46,21 +39,247 @@ const TYPE_COLOR: Record<string, string> = {
   perturbation:'var(--orange)',
 }
 
-// ── Data fetching ──────────────────────────────────────────────────────────────
+const STATUS_COLOR: Record<string, string> = {
+  CLEAR:    'var(--green)',
+  LIGHT:    'var(--green)',
+  MODERATE: 'var(--yellow)',
+  HEAVY:    'var(--orange)',
+  BLOCKED:  'var(--red)',
+}
+
+// ── Skeleton ──────────────────────────────────────────────────────────────────
+
+function CardSkeleton({ count = 3 }: { count?: number }) {
+  return (
+    <>
+      {Array.from({ length: count }).map((_, i) => (
+        <div
+          key={i}
+          className="rounded-2xl animate-pulse"
+          style={{
+            background: 'var(--bg-secondary)',
+            height: '88px',
+            animationDelay: `${i * 60}ms`,
+          }}
+        />
+      ))}
+    </>
+  )
+}
+
+function SidebarSkeleton() {
+  return (
+    <>
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div
+          key={i}
+          className="rounded-2xl animate-pulse"
+          style={{ background: 'var(--bg-secondary)', height: '64px', animationDelay: `${i*80}ms` }}
+        />
+      ))}
+    </>
+  )
+}
+
+// ── Async server components (stream independently) ────────────────────────────
 
 interface BorderFeatureProps {
   id:              string
   name:            string
   status:          string
   waitTimeMinutes: number
-  jamFactor:       number
   lastUpdated:     string
   color:           string
   crossingType:    string
 }
 
-async function getData() {
+async function BordersSection() {
+  const borderFC: FeatureCollection = await getBorderCrossings().catch(
+    () => ({ type: 'FeatureCollection', features: [] }),
+  )
+
+  const borders = borderFC.features
+    .map(f => f.properties as BorderFeatureProps)
+    .filter(p => p.status !== 'CLEAR' || p.waitTimeMinutes > 5)
+    .sort((a, b) => b.waitTimeMinutes - a.waitTimeMinutes)
+
+  if (borders.length === 0) {
+    return (
+      <Card variant="default">
+        <div className="flex items-center gap-3 py-2">
+          <span className="text-lg">🟢</span>
+          <div>
+            <p className="text-[14px] font-medium" style={{ color: 'var(--text-primary)' }}>
+              Toutes les douanes fluides
+            </p>
+            <p className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
+              Aucune attente signalée · HERE Traffic
+            </p>
+          </div>
+        </div>
+      </Card>
+    )
+  }
+
+  return (
+    <>
+      {borders.map(b => (
+        <Card key={b.id} variant="default">
+          <div className="flex items-start gap-3">
+            <div
+              className="w-1 self-stretch rounded-full flex-shrink-0"
+              style={{ background: STATUS_COLOR[b.status] ?? 'var(--yellow)' }}
+            />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between gap-2 mb-1">
+                <div className="flex items-center gap-2">
+                  <span
+                    className="text-[11px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full"
+                    style={{ background: 'var(--bg-secondary)', color: 'var(--text-tertiary)' }}
+                  >
+                    🛂 Douane
+                  </span>
+                  <span className="text-[11px] font-medium" style={{ color: STATUS_COLOR[b.status] ?? 'var(--yellow)' }}>
+                    {b.waitTimeMinutes > 0 ? `+${b.waitTimeMinutes} min` : b.status}
+                  </span>
+                </div>
+                <span className="text-[12px] tabular-nums flex-shrink-0" style={{ color: 'var(--text-tertiary)' }}>
+                  {fmt(b.lastUpdated)}
+                </span>
+              </div>
+              <h3 className="text-[15px] font-medium mb-1" style={{ color: 'var(--text-primary)' }}>
+                Frontière {b.name}
+              </h3>
+              <p className="text-[13px] mb-1" style={{ color: 'var(--text-secondary)' }}>
+                {b.waitTimeMinutes > 0
+                  ? `Temps d'attente estimé : ${b.waitTimeMinutes} min`
+                  : 'Passage fluide'}
+              </p>
+              <span className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
+                Il y a {ago(b.lastUpdated)} · HERE Traffic
+              </span>
+            </div>
+          </div>
+        </Card>
+      ))}
+    </>
+  )
+}
+
+async function TransportSection() {
   const fetchedAt = new Date().toISOString()
+  const [tpgResult, cffResult] = await Promise.allSettled([
+    getTpgDisruptions(),
+    getCffDisruptions(),
+  ])
+
+  const tpg: TpgDisruption[] = tpgResult.status === 'fulfilled' ? tpgResult.value : []
+  const cff: CffDisruption[] = cffResult.status === 'fulfilled' ? cffResult.value : []
+
+  if (tpg.length === 0 && cff.length === 0) {
+    return (
+      <Card variant="default">
+        <div className="flex items-center gap-3 py-2">
+          <span className="text-lg">🚌</span>
+          <div>
+            <p className="text-[14px] font-medium" style={{ color: 'var(--text-primary)' }}>
+              Transports normaux
+            </p>
+            <p className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
+              Aucun retard TPG/CFF détecté · {fmt(fetchedAt)}
+            </p>
+          </div>
+        </div>
+      </Card>
+    )
+  }
+
+  return (
+    <>
+      {tpg.map(d => (
+        <Card key={d.id} variant="default">
+          <div className="flex items-start gap-3">
+            <div
+              className="w-1 self-stretch rounded-full flex-shrink-0"
+              style={{ background: TYPE_COLOR[d.type] ?? 'var(--orange)' }}
+            />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between gap-2 mb-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span
+                    className="text-[11px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full"
+                    style={{ background: 'var(--bg-secondary)', color: 'var(--text-tertiary)' }}
+                  >
+                    TPG · L{d.lineNumber}
+                  </span>
+                  <span className="text-[11px] font-medium" style={{ color: TYPE_COLOR[d.type] ?? 'var(--orange)' }}>
+                    {d.type === 'suppression' ? 'Supprimé' : d.type === 'retard' ? 'Retard' : d.type}
+                  </span>
+                </div>
+                <span className="text-[12px] tabular-nums flex-shrink-0" style={{ color: 'var(--text-tertiary)' }}>
+                  {fmt(fetchedAt)}
+                </span>
+              </div>
+              <h3 className="text-[15px] font-medium mb-1" style={{ color: 'var(--text-primary)' }}>
+                {d.description}
+              </h3>
+              {d.affectedStops.length > 0 && (
+                <p className="text-[13px] mb-1" style={{ color: 'var(--text-secondary)' }}>
+                  {d.affectedStops.join(' · ')}
+                </p>
+              )}
+              <span className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
+                Il y a {ago(fetchedAt)} · transport.opendata.ch
+              </span>
+            </div>
+          </div>
+        </Card>
+      ))}
+
+      {cff.map(d => (
+        <Card key={d.id} variant="default">
+          <div className="flex items-start gap-3">
+            <div
+              className="w-1 self-stretch rounded-full flex-shrink-0"
+              style={{ background: TYPE_COLOR[d.type] ?? 'var(--red)' }}
+            />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between gap-2 mb-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span
+                    className="text-[11px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full"
+                    style={{ background: 'var(--bg-secondary)', color: 'var(--text-tertiary)' }}
+                  >
+                    {d.isCEVA ? 'LÉMAN EXPRESS' : 'CFF'} · {d.line}
+                  </span>
+                  <span className="text-[11px] font-medium" style={{ color: TYPE_COLOR[d.type] ?? 'var(--red)' }}>
+                    {d.delayMinutes ? `+${d.delayMinutes} min` : d.type}
+                  </span>
+                </div>
+                <span className="text-[12px] tabular-nums flex-shrink-0" style={{ color: 'var(--text-tertiary)' }}>
+                  {fmt(fetchedAt)}
+                </span>
+              </div>
+              <h3 className="text-[15px] font-medium mb-1" style={{ color: 'var(--text-primary)' }}>
+                {d.description}
+              </h3>
+              <p className="text-[13px] mb-1" style={{ color: 'var(--text-secondary)' }}>
+                {d.from} → {d.to}
+              </p>
+              <span className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
+                Il y a {ago(fetchedAt)} · transport.opendata.ch
+              </span>
+            </div>
+          </div>
+        </Card>
+      ))}
+    </>
+  )
+}
+
+async function SourcesSidebar() {
+  const fetchedAt = new Date().toISOString()
+  const g7 = getG7Impact()
 
   const [tpgResult, cffResult, borderResult] = await Promise.allSettled([
     getTpgDisruptions(),
@@ -68,291 +287,187 @@ async function getData() {
     getBorderCrossings(),
   ])
 
+  const tpgCount    = tpgResult.status    === 'fulfilled' ? tpgResult.value.length : -1
+  const cffCount    = cffResult.status    === 'fulfilled' ? cffResult.value.length : -1
+  const borderFC    = borderResult.status === 'fulfilled' ? borderResult.value : null
+  const borderCount = borderFC
+    ? borderFC.features.filter(f => {
+        const p = f.properties as BorderFeatureProps
+        return p.status !== 'CLEAR' || p.waitTimeMinutes > 5
+      }).length
+    : -1
+
+  const rows = [
+    { label: 'TPG · opendata.ch',       ok: tpgCount >= 0,    info: tpgCount >= 0    ? `${tpgCount} perturbation${tpgCount!==1?'s':''}` : 'Erreur' },
+    { label: 'CFF / LÉMAN EXPRESS',      ok: cffCount >= 0,    info: cffCount >= 0    ? `${cffCount} perturbation${cffCount!==1?'s':''}` : 'Erreur' },
+    { label: 'HERE Traffic · Douanes',  ok: borderCount >= 0, info: borderCount >= 0 ? `${borderCount} poste${borderCount!==1?'s':''} actif${borderCount!==1?'s':''}` : 'Erreur' },
+  ]
+
+  return (
+    <>
+      {rows.map(r => (
+        <Card key={r.label} variant="bordered" style={{ padding: '14px 18px' }}>
+          <div className="flex items-center gap-3">
+            <span
+              className="w-2 h-2 rounded-full flex-shrink-0"
+              style={{ background: r.ok ? 'var(--green)' : 'var(--red)' }}
+            />
+            <div className="flex-1 min-w-0">
+              <div className="text-[13px] font-medium truncate" style={{ color: 'var(--text-primary)' }}>
+                {r.label}
+              </div>
+              <div className="text-[12px] mt-0.5" style={{ color: 'var(--text-tertiary)' }}>
+                {r.info} · {fmt(fetchedAt)}
+              </div>
+            </div>
+            <span className="text-[11px] flex-shrink-0" style={{ color: r.ok ? 'var(--green)' : 'var(--red)' }}>
+              {r.ok ? 'OK' : 'ERR'}
+            </span>
+          </div>
+        </Card>
+      ))}
+
+      <Card variant="bordered" style={{ padding: '14px 18px' }}>
+        <div className="flex items-center gap-3">
+          <span
+            className="w-2 h-2 rounded-full flex-shrink-0"
+            style={{ background: g7.isActive ? 'var(--orange)' : g7.isWarningPeriod ? 'var(--yellow)' : 'var(--green)' }}
+          />
+          <div className="flex-1 min-w-0">
+            <div className="text-[13px] font-medium" style={{ color: 'var(--text-primary)' }}>G7 Évian 2026</div>
+            <div className="text-[12px] mt-0.5" style={{ color: 'var(--text-tertiary)' }}>
+              {g7.isActive ? 'Actif' : g7.isWarningPeriod ? 'Pré-alerte' : 'Inactif'} · {fmt(fetchedAt)}
+            </div>
+          </div>
+          <span
+            className="text-[11px] flex-shrink-0"
+            style={{ color: g7.isActive ? 'var(--orange)' : g7.isWarningPeriod ? 'var(--yellow)' : 'var(--green)' }}
+          >
+            {g7.isActive ? 'ACT' : g7.isWarningPeriod ? 'WARN' : 'OK'}
+          </span>
+        </div>
+      </Card>
+    </>
+  )
+}
+
+// ── G7 banner (synchronous, no fetch needed) ──────────────────────────────────
+
+function G7Banner() {
   const g7 = getG7Impact()
+  if (!g7.isActive && !g7.isWarningPeriod) return null
 
-  const tpgDisruptions: TpgDisruption[] =
-    tpgResult.status === 'fulfilled' ? tpgResult.value : []
-
-  const cffDisruptions: CffDisruption[] =
-    cffResult.status === 'fulfilled' ? cffResult.value : []
-
-  const borderFC: FeatureCollection =
-    borderResult.status === 'fulfilled'
-      ? borderResult.value
-      : { type: 'FeatureCollection', features: [] }
-
-  // Only show borders with congestion or notable wait time
-  const activeBorders = borderFC.features
-    .map(f => f.properties as BorderFeatureProps)
-    .filter(p => p.waitTimeMinutes > 5 || p.status === 'HEAVY' || p.status === 'BLOCKED' || p.status === 'MODERATE')
-    .sort((a, b) => b.waitTimeMinutes - a.waitTimeMinutes)
-
-  const sources = {
-    tpg:    { ok: tpgResult.status === 'fulfilled',    label: 'TPG / transport.opendata.ch' },
-    cff:    { ok: cffResult.status === 'fulfilled',    label: 'CFF / SBB GTFS-RT'          },
-    border: { ok: borderResult.status === 'fulfilled', label: 'HERE Traffic (frontières)'  },
-  }
-
-  return { tpgDisruptions, cffDisruptions, activeBorders, g7, sources, fetchedAt }
+  return (
+    <Card variant="featured">
+      <SectionLabel className="mb-2">
+        G7 · {g7.isActive ? 'Priorité haute' : 'Pré-alerte'}
+      </SectionLabel>
+      <h3 className="text-[17px] font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+        {g7.isActive ? 'G7 Évian 2026 — Périmètre sécurisé actif' : 'G7 Évian 2026 — Pré-alerte en cours'}
+      </h3>
+      <p className="text-[15px] leading-[1.6] mb-3" style={{ color: 'var(--text-secondary)' }}>
+        {g7.suspendedLines.length > 0
+          ? `Lignes suspendues : ${g7.suspendedLines.join(', ')}. `
+          : ''}
+        {g7.affectedLines.length} lignes TPG impactées · Contrôles systématiques aux postes frontaliers.
+      </p>
+      <div className="flex items-center gap-2 text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
+        <span>Source : TPG / Autorités GE</span>
+        <span>·</span>
+        <span>Du {new Date(g7.startDate).toLocaleDateString('fr-CH')} au {new Date(g7.endDate).toLocaleDateString('fr-CH')}</span>
+      </div>
+    </Card>
+  )
 }
 
 // ── Page ───────────────────────────────────────────────────────────────────────
 
-export default async function InfosPage() {
-  const { tpgDisruptions, cffDisruptions, activeBorders, g7, sources, fetchedAt } = await getData()
-
-  const totalAlerts = tpgDisruptions.length + cffDisruptions.length + activeBorders.length
-  const hasG7       = g7.isActive || g7.isWarningPeriod
-  const isEmpty     = totalAlerts === 0 && !hasG7
+export default function InfosPage() {
+  const now = new Date().toISOString()
 
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
       <Header />
 
-      {/* Hero */}
-      <section className="px-6 md:px-8 py-16 max-w-6xl mx-auto">
+      {/* Hero — rendu immédiatement, aucune attente réseau */}
+      <section className="px-6 md:px-8 pt-16 pb-8 max-w-6xl mx-auto">
         <div className="flex items-center gap-3 mb-4">
           <SectionLabel className="mb-0">Centre de renseignement · Grand Genève</SectionLabel>
-          <span className="flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-full"
-            style={{ background: 'var(--brand-subtle)', color: 'var(--brand)', border: '1px solid var(--brand-glow)' }}>
+          <span
+            className="flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-full"
+            style={{ background: 'var(--brand-subtle)', color: 'var(--brand)', border: '1px solid var(--brand-glow)' }}
+          >
             <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: 'var(--brand)' }} />
             Live
           </span>
         </div>
-        <BorjaTitle as="h1" accent="direct." className="mb-4">
+        <BorjaTitle as="h1" accent="direct." className="mb-3">
           Informations en
         </BorjaTitle>
-        <p className="text-[17px] leading-[1.65] max-w-xl" style={{ color: 'var(--text-secondary)' }}>
-          Toutes les perturbations, alertes et informations territoriales du Grand Genève, agrégées en temps réel.
+        <p className="text-[16px] leading-[1.65] max-w-xl mb-1" style={{ color: 'var(--text-secondary)' }}>
+          Perturbations trafic, douanes et transports du Grand Genève.
         </p>
-        <p className="text-[12px] mt-2" style={{ color: 'var(--text-tertiary)' }}>
-          Actualisé à {formatTime(fetchedAt)} · {totalAlerts} alerte{totalAlerts !== 1 ? 's' : ''} active{totalAlerts !== 1 ? 's' : ''}
+        <p className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
+          Actualisé à {fmt(now)} · Données officielles
         </p>
       </section>
 
-      {/* Content */}
+      {/* G7 banner — synchrone, pas de fetch */}
+      <section className="px-6 md:px-8 max-w-6xl mx-auto mb-2">
+        <G7Banner />
+      </section>
+
+      {/* Main grid */}
       <section className="px-6 md:px-8 pb-24 max-w-6xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
 
           {/* ── Feed principal ── */}
           <div className="md:col-span-2 space-y-4">
-            <h2 className="text-[11px] font-semibold tracking-[0.08em] uppercase mb-4"
-              style={{ color: 'var(--text-tertiary)' }}>
-              Dernières informations
-            </h2>
 
-            {/* G7 alert */}
-            {hasG7 && (
-              <Card variant="featured">
-                <SectionLabel className="mb-2">
-                  G7 · {g7.isActive ? 'Priorité haute' : 'Pré-alerte'}
-                </SectionLabel>
-                <h3 className="text-[17px] font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-                  {g7.isActive
-                    ? 'G7 Évian 2026 — Périmètre sécurisé actif'
-                    : 'G7 Évian 2026 — Période de pré-alerte'}
-                </h3>
-                <p className="text-[15px] leading-[1.6] mb-3" style={{ color: 'var(--text-secondary)' }}>
-                  {g7.suspendedLines.length > 0
-                    ? `Lignes suspendues : ${g7.suspendedLines.join(', ')}. `
-                    : ''}
-                  {g7.affectedLines.length > 0
-                    ? `${g7.affectedLines.length} lignes TPG impactées (perturbations possibles).`
-                    : 'Contrôles systématiques en vigueur aux postes frontaliers.'}
-                </p>
-                <div className="flex items-center gap-4 text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
-                  <span>Source : TPG / Autorités GE</span>
-                  <span>·</span>
-                  <span>{formatTime(g7.startDate)}</span>
-                </div>
-              </Card>
-            )}
+            {/* 1. DOUANES — priorité haute, stream en premier */}
+            <div>
+              <h2
+                className="text-[11px] font-semibold tracking-[0.08em] uppercase mb-3"
+                style={{ color: 'var(--text-tertiary)' }}
+              >
+                🛂 Passages douaniers
+              </h2>
+              <div className="space-y-3">
+                <Suspense fallback={<CardSkeleton count={2} />}>
+                  <BordersSection />
+                </Suspense>
+              </div>
+            </div>
 
-            {/* TPG disruptions */}
-            {tpgDisruptions.map((d) => (
-              <Card key={d.id} variant="default">
-                <div className="flex items-start gap-3">
-                  <div className="w-1 self-stretch rounded-full flex-shrink-0"
-                    style={{ background: TYPE_COLOR[d.type] ?? 'var(--orange)' }} />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full"
-                          style={{ background: 'var(--bg-secondary)', color: 'var(--text-tertiary)' }}>
-                          TPG · Ligne {d.lineNumber}
-                        </span>
-                        <span className="text-[11px] font-medium"
-                          style={{ color: TYPE_COLOR[d.type] ?? 'var(--orange)' }}>
-                          {TYPE_LABEL[d.type] ?? d.type}
-                        </span>
-                      </div>
-                      <span className="text-[12px] tabular-nums flex-shrink-0"
-                        style={{ color: 'var(--text-tertiary)' }}>
-                        {formatTime(fetchedAt)}
-                      </span>
-                    </div>
-                    <h3 className="text-[15px] font-medium mb-1" style={{ color: 'var(--text-primary)' }}>
-                      {d.description}
-                    </h3>
-                    {d.affectedStops.length > 0 && (
-                      <p className="text-[13px] leading-[1.5] mb-2" style={{ color: 'var(--text-secondary)' }}>
-                        Arrêts : {d.affectedStops.join(', ')}
-                      </p>
-                    )}
-                    <span className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
-                      Il y a {relativeTime(fetchedAt)} · source : transport.opendata.ch
-                    </span>
-                  </div>
-                </div>
-              </Card>
-            ))}
-
-            {/* CFF disruptions */}
-            {cffDisruptions.map((d) => (
-              <Card key={d.id} variant="default">
-                <div className="flex items-start gap-3">
-                  <div className="w-1 self-stretch rounded-full flex-shrink-0"
-                    style={{ background: TYPE_COLOR[d.type] ?? 'var(--red)' }} />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full"
-                          style={{ background: 'var(--bg-secondary)', color: 'var(--text-tertiary)' }}>
-                          {d.isCEVA ? 'LÉMAN EXPRESS' : 'CFF'} · {d.line}
-                        </span>
-                        <span className="text-[11px] font-medium"
-                          style={{ color: TYPE_COLOR[d.type] ?? 'var(--red)' }}>
-                          {TYPE_LABEL[d.type] ?? d.type}
-                          {d.delayMinutes ? ` +${d.delayMinutes} min` : ''}
-                        </span>
-                      </div>
-                      <span className="text-[12px] tabular-nums flex-shrink-0"
-                        style={{ color: 'var(--text-tertiary)' }}>
-                        {formatTime(fetchedAt)}
-                      </span>
-                    </div>
-                    <h3 className="text-[15px] font-medium mb-1" style={{ color: 'var(--text-primary)' }}>
-                      {d.description}
-                    </h3>
-                    <p className="text-[13px] mb-2" style={{ color: 'var(--text-secondary)' }}>
-                      {d.from} → {d.to}
-                    </p>
-                    <span className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
-                      Il y a {relativeTime(fetchedAt)} · source : transport.opendata.ch
-                    </span>
-                  </div>
-                </div>
-              </Card>
-            ))}
-
-            {/* Border congestion */}
-            {activeBorders.map((b) => (
-              <Card key={b.id} variant="default">
-                <div className="flex items-start gap-3">
-                  <div className="w-1 self-stretch rounded-full flex-shrink-0"
-                    style={{ background: b.color ?? 'var(--yellow)' }} />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full"
-                          style={{ background: 'var(--bg-secondary)', color: 'var(--text-tertiary)' }}>
-                          Frontière
-                        </span>
-                        <span className="text-[11px] font-medium" style={{ color: b.color ?? 'var(--yellow)' }}>
-                          {b.status}
-                        </span>
-                      </div>
-                      <span className="text-[12px] tabular-nums flex-shrink-0"
-                        style={{ color: 'var(--text-tertiary)' }}>
-                        {formatTime(b.lastUpdated)}
-                      </span>
-                    </div>
-                    <h3 className="text-[15px] font-medium mb-1" style={{ color: 'var(--text-primary)' }}>
-                      Attente frontière {b.name}
-                    </h3>
-                    <p className="text-[13px] leading-[1.5] mb-2" style={{ color: 'var(--text-secondary)' }}>
-                      Temps d&apos;attente estimé : {b.waitTimeMinutes} min
-                    </p>
-                    <span className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
-                      Il y a {relativeTime(b.lastUpdated)} · source : HERE Traffic
-                    </span>
-                  </div>
-                </div>
-              </Card>
-            ))}
-
-            {/* Empty state */}
-            {isEmpty && (
-              <Card variant="default">
-                <div className="text-center py-8">
-                  <div className="text-3xl mb-3">✅</div>
-                  <h3 className="text-[17px] font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-                    Aucune perturbation détectée
-                  </h3>
-                  <p className="text-[14px]" style={{ color: 'var(--text-secondary)' }}>
-                    Trafic fluide, transports normaux, frontières dégagées.
-                  </p>
-                  <p className="text-[12px] mt-2" style={{ color: 'var(--text-tertiary)' }}>
-                    Dernière vérification à {formatTime(fetchedAt)}
-                  </p>
-                </div>
-              </Card>
-            )}
+            {/* 2. TRAFIC & TRANSPORTS */}
+            <div>
+              <h2
+                className="text-[11px] font-semibold tracking-[0.08em] uppercase mb-3 mt-6"
+                style={{ color: 'var(--text-tertiary)' }}
+              >
+                🚌 Trafic & Transports publics
+              </h2>
+              <div className="space-y-3">
+                <Suspense fallback={<CardSkeleton count={4} />}>
+                  <TransportSection />
+                </Suspense>
+              </div>
+            </div>
           </div>
 
           {/* ── Sidebar sources ── */}
-          <div className="space-y-4">
-            <h2 className="text-[11px] font-semibold tracking-[0.08em] uppercase mb-4"
-              style={{ color: 'var(--text-tertiary)' }}>
+          <div>
+            <h2
+              className="text-[11px] font-semibold tracking-[0.08em] uppercase mb-3"
+              style={{ color: 'var(--text-tertiary)' }}
+            >
               Sources actives
             </h2>
-
-            {[
-              { name: 'TPG · transport.opendata.ch', ok: sources.tpg.ok,    count: tpgDisruptions.length,    unit: 'perturbation' },
-              { name: 'CFF / SBB GTFS-RT',           ok: sources.cff.ok,    count: cffDisruptions.length,    unit: 'perturbation' },
-              { name: 'HERE Traffic (frontières)',    ok: sources.border.ok, count: activeBorders.length,     unit: 'poste actif'  },
-            ].map((src) => (
-              <Card key={src.name} variant="bordered" style={{ padding: '16px 20px' }}>
-                <div className="flex items-center gap-3">
-                  <span className="w-2 h-2 rounded-full flex-shrink-0"
-                    style={{ background: src.ok ? 'var(--green)' : 'var(--red)' }} />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[13px] font-medium" style={{ color: 'var(--text-primary)' }}>
-                      {src.name}
-                    </div>
-                    <div className="text-[12px] mt-0.5" style={{ color: 'var(--text-tertiary)' }}>
-                      {src.ok
-                        ? `${src.count} ${src.unit}${src.count !== 1 ? 's' : ''} · ${formatTime(fetchedAt)}`
-                        : 'Indisponible'}
-                    </div>
-                  </div>
-                  <span className="text-[11px]"
-                    style={{ color: src.ok ? 'var(--green)' : 'var(--red)' }}>
-                    {src.ok ? 'OK' : 'ERR'}
-                  </span>
-                </div>
-              </Card>
-            ))}
-
-            <Card variant="bordered" style={{ padding: '16px 20px' }}>
-              <div className="flex items-center gap-3">
-                <span className="w-2 h-2 rounded-full flex-shrink-0"
-                  style={{ background: g7.isActive ? 'var(--orange)' : g7.isWarningPeriod ? 'var(--yellow)' : 'var(--green)' }} />
-                <div className="flex-1 min-w-0">
-                  <div className="text-[13px] font-medium" style={{ color: 'var(--text-primary)' }}>
-                    G7 Évian 2026
-                  </div>
-                  <div className="text-[12px] mt-0.5" style={{ color: 'var(--text-tertiary)' }}>
-                    {g7.isActive ? 'Période active' : g7.isWarningPeriod ? 'Pré-alerte' : 'Inactif'}
-                    {' · '}{formatTime(fetchedAt)}
-                  </div>
-                </div>
-                <span className="text-[11px]"
-                  style={{ color: g7.isActive ? 'var(--orange)' : g7.isWarningPeriod ? 'var(--yellow)' : 'var(--green)' }}>
-                  {g7.isActive ? 'ACT' : g7.isWarningPeriod ? 'WARN' : 'OK'}
-                </span>
-              </div>
-            </Card>
+            <div className="space-y-3">
+              <Suspense fallback={<SidebarSkeleton />}>
+                <SourcesSidebar />
+              </Suspense>
+            </div>
           </div>
         </div>
       </section>
