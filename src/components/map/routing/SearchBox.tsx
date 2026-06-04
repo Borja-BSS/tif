@@ -85,6 +85,9 @@ export function SearchBox({
     setResults([])
     setIsOpen(false)
     onSelect(result)
+    window.dispatchEvent(new CustomEvent('tif:search-pin', {
+      detail: { lat: result.lat, lng: result.lng, title: result.title },
+    }))
   }
 
   const handleFocus = () => {

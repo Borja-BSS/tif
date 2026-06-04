@@ -18,9 +18,10 @@ export function RecenterButton({ map, onPositionUpdate }: RecenterButtonProps) {
     setLoading(true)
     navigator.geolocation.getCurrentPosition(
       pos => {
-        const { latitude: lat, longitude: lng } = pos.coords
+        const { latitude: lat, longitude: lng, accuracy } = pos.coords
         map?.flyTo({ center: [lng, lat], zoom: 15, duration: 800 })
         onPositionUpdate?.(lat, lng)
+        window.dispatchEvent(new CustomEvent('tif:update-user-location', { detail: { lat, lng, accuracy } }))
         setLoading(false)
       },
       () => setLoading(false),
@@ -33,48 +34,17 @@ export function RecenterButton({ map, onPositionUpdate }: RecenterButtonProps) {
       if (watchId !== null) navigator.geolocation.clearWatch(watchId)
       setWatchId(null)
       setTracking(false)
-      const src = map?.getSource('user-location') as mapboxgl.GeoJSONSource | undefined
-      src?.setData({ type: 'FeatureCollection', features: [] })
+      // Clear the blue dot
+      window.dispatchEvent(new CustomEvent('tif:update-user-location', { detail: null }))
       return
     }
 
     const id = navigator.geolocation.watchPosition(
       pos => {
-        const { latitude: lat, longitude: lng } = pos.coords
-        if (!map) return
-        const source = map.getSource('user-location') as mapboxgl.GeoJSONSource | undefined
-        const point: GeoJSON.Feature = {
-          type: 'Feature',
-          properties: { accuracy: pos.coords.accuracy },
-          geometry:   { type: 'Point', coordinates: [lng, lat] },
-        }
-        if (source) {
-          source.setData({ type: 'FeatureCollection', features: [point] })
-        } else {
-          map.addSource('user-location', {
-            type: 'geojson',
-            data: { type: 'FeatureCollection', features: [point] },
-          })
-          map.addLayer({
-            id: 'user-location-accuracy', type: 'circle', source: 'user-location',
-            paint: {
-              'circle-radius':  ['/', ['get', 'accuracy'], 2],
-              'circle-color':   '#0A84FF',
-              'circle-opacity': 0.15,
-            },
-          })
-          map.addLayer({
-            id: 'user-location-dot', type: 'circle', source: 'user-location',
-            paint: {
-              'circle-radius':       8,
-              'circle-color':        '#0A84FF',
-              'circle-stroke-width': 2.5,
-              'circle-stroke-color': '#FFFFFF',
-            },
-          })
-        }
-        map.panTo([lng, lat], { duration: 500 })
+        const { latitude: lat, longitude: lng, accuracy } = pos.coords
+        map?.panTo([lng, lat], { duration: 500 })
         onPositionUpdate?.(lat, lng)
+        window.dispatchEvent(new CustomEvent('tif:update-user-location', { detail: { lat, lng, accuracy } }))
       },
       () => setTracking(false),
       { enableHighAccuracy: true, maximumAge: 5000 },

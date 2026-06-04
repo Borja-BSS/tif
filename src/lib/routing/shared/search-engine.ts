@@ -1,6 +1,6 @@
 const PHOTON_BASE = 'https://photon.komoot.io/api'
 const GENEVE      = { lat: 46.2044, lng: 6.1432 }
-const BBOX        = { minLat: 45.8, maxLat: 46.7, minLng: 5.5, maxLng: 7.2 }
+const BBOX        = { minLat: 46.05, maxLat: 46.45, minLng: 5.85, maxLng: 6.60 }
 
 export interface SearchResult {
   id:        string
@@ -25,6 +25,7 @@ export async function searchPlaces(query: string): Promise<SearchResult[]> {
   url.searchParams.set('lon',   String(GENEVE.lng))
   url.searchParams.set('limit', '8')
   url.searchParams.set('lang',  'fr')
+  url.searchParams.set('location_bias_scale', '1.4')
   for (const l of ['house', 'street', 'city', 'district', 'locality', 'county']) {
     url.searchParams.append('layer', l)
   }
@@ -51,6 +52,7 @@ export async function searchPlaces(query: string): Promise<SearchResult[]> {
     .filter(inGeneva)
     .map(toResult)
     .filter((r): r is SearchResult => r !== null)
+    .sort((a, b) => scoreResult(b) - scoreResult(a))
     .slice(0, 7)
 
   console.log('[search-engine] filtered results:', results.length)
@@ -65,6 +67,14 @@ export async function geocodeAddress(address: string): Promise<SearchResult | nu
 interface PhotonFeature {
   geometry:   { type: 'Point'; coordinates: [number, number] }
   properties: Record<string, unknown>
+}
+
+function scoreResult(r: SearchResult): number {
+  let score = 0
+  const text = `${r.title} ${r.subtitle ?? ''}`.toLowerCase()
+  if (/gen[eè]ve|geneva/i.test(text)) score += 2
+  if (/tpg/i.test(text)) score += 1
+  return score
 }
 
 function inGeneva(f: PhotonFeature): boolean {
