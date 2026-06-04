@@ -89,6 +89,7 @@ export default function MapView(props: Omit<MapGLProps, 'onMapReady'>) {
       )}
       {routingMode === 'transport' && (
         <TransportRoutingPanel
+          map={map}
           onClose={() => setRoutingMode(null)}
         />
       )}

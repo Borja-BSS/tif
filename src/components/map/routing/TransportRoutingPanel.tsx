@@ -1,11 +1,14 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { SearchBox } from './SearchBox'
+import { SearchBox }   from './SearchBox'
 import type { SearchResult }   from '@/lib/routing/shared/search-engine'
 import type { TransportRoute } from '@/lib/routing/transport/transport-router'
 
+import type mapboxgl from 'mapbox-gl'
+
 interface TransportRoutingPanelProps {
+  map?:     mapboxgl.Map | null
   onClose?: () => void
 }
 
@@ -17,7 +20,7 @@ const LG: React.CSSProperties = {
   boxShadow:            'inset 0 0.5px 0 rgba(255,255,255,0.14), 0 -8px 40px rgba(0,0,0,0.4)',
 }
 
-export function TransportRoutingPanel({ onClose }: TransportRoutingPanelProps) {
+export function TransportRoutingPanel({ map, onClose }: TransportRoutingPanelProps) {
   const [origin,      setOrigin]      = useState<SearchResult | null>(null)
   const [destination, setDestination] = useState<SearchResult | null>(null)
   const [routes,      setRoutes]      = useState<TransportRoute[]>([])
@@ -107,8 +110,33 @@ export function TransportRoutingPanel({ onClose }: TransportRoutingPanelProps) {
 
       {/* Inputs */}
       <div className="p-3 space-y-2">
-        <SearchBox placeholder="Point de départ..." icon="🔵" onSelect={setOrigin} />
-        <SearchBox placeholder="Destination..."     icon="🔴" onSelect={setDestination} />
+        <SearchBox
+          placeholder="Point de départ…"
+          icon="🔵"
+          value={origin?.title}
+          gpsHint
+          onGPSSelect={() => {
+            if (!navigator.geolocation) return
+            navigator.geolocation.getCurrentPosition(pos => {
+              const r: SearchResult = { id: 'gps', title: 'Ma position', lat: pos.coords.latitude, lng: pos.coords.longitude, type: 'address' }
+              setOrigin(r)
+              map?.flyTo({ center: [r.lng, r.lat], zoom: 15, duration: 600, essential: true })
+            })
+          }}
+          onSelect={r => {
+            setOrigin(r)
+            map?.flyTo({ center: [r.lng, r.lat], zoom: 15, duration: 600, essential: true })
+          }}
+        />
+        <SearchBox
+          placeholder="Destination…"
+          icon="🔴"
+          value={destination?.title}
+          onSelect={r => {
+            setDestination(r)
+            if (!origin) map?.flyTo({ center: [r.lng, r.lat], zoom: 14, duration: 600, essential: true })
+          }}
+        />
       </div>
 
       {loading && (

@@ -1,11 +1,11 @@
 import { redis } from '@/lib/redis'
 
-// Photon (Komoot) — geocoder OSM open-source, sans API key, priorité région Genève
-// Docs : https://photon.komoot.io
-const PHOTON_BASE = 'https://photon.komoot.io/api'
-
-// Bounding box Grand Genève pour les résultats : SW (5.85,46.05) → NE (6.60,46.45)
-const GENEVE_CENTER = { lat: 46.2044, lng: 6.1432 }
+// Photon (Komoot/OSM) — geocoder sans API key, optimisé Grand Genève
+// https://photon.komoot.io
+const PHOTON_BASE  = 'https://photon.komoot.io/api'
+const GENEVE       = { lat: 46.2044, lng: 6.1432 }
+// Bbox Grand Genève filtre les résultats hors zone
+const BBOX = { minLat: 45.8, maxLat: 46.7, minLng: 5.5, maxLng: 7.2 }
 
 export interface SearchResult {
   id:        string
@@ -14,48 +14,52 @@ export interface SearchResult {
   lat:       number
   lng:       number
   type:      'address' | 'place' | 'street' | 'station'
-  distance?: number
 }
 
-// ── Autocomplete (live search) ────────────────────────────────────────────────
+// Valeurs osm_value qui indiquent un arrêt/gare de transport
+const TRANSIT_VALUES = new Set([
+  'bus_stop','tram_stop','station','halt','stop_position',
+  'platform','subway_entrance','ferry_terminal','aerodrome',
+])
+
 export async function searchPlaces(query: string): Promise<SearchResult[]> {
-  if (query.length < 2) return []
+  if (query.trim().length < 2) return []
 
-  const cacheKey = `tif:geocode:photon:${query.toLowerCase().trim()}`
+  const key = `tif:geocode:v3:${query.toLowerCase().trim()}`
   try {
-    const cached = await redis.get(cacheKey)
-    if (cached) return JSON.parse(cached as string)
-  } catch { /* cache miss is fine */ }
+    const hit = await redis.get(key)
+    if (hit) return JSON.parse(hit as string)
+  } catch { /* cache miss OK */ }
 
   try {
-    const url = new URL(`${PHOTON_BASE}/`)
-    url.searchParams.set('q',     query)
-    url.searchParams.set('lat',   String(GENEVE_CENTER.lat))
-    url.searchParams.set('lon',   String(GENEVE_CENTER.lng))
+    // Photon: les layers doivent être passés séparément, pas en virgule
+    const url = new URL(PHOTON_BASE + '/')
+    url.searchParams.set('q',     query.trim())
+    url.searchParams.set('lat',   String(GENEVE.lat))
+    url.searchParams.set('lon',   String(GENEVE.lng))
     url.searchParams.set('limit', '8')
     url.searchParams.set('lang',  'fr')
-    // Restrict to CH + FR (cross-border frontalier)
-    url.searchParams.set('layer', 'house,street,city,district,locality,county,state,country')
+    // Append layers individuellement (format correct Photon)
+    for (const l of ['house', 'street', 'city', 'district', 'locality', 'county']) {
+      url.searchParams.append('layer', l)
+    }
 
     const res = await fetch(url.toString(), {
-      headers: { 'Accept': 'application/json' },
+      headers: { 'User-Agent': 'TIF-G7-LiveView/1.0 (contact@borja-swiss-solutions.ch)' },
       signal:  AbortSignal.timeout(6000),
     })
     if (!res.ok) return []
 
     const data = await res.json() as { features?: PhotonFeature[] }
+
     const results = (data.features ?? [])
-      .filter(f => {
-        // Keep only results near Grand Genève area
-        const [lng, lat] = f.geometry.coordinates
-        return lat > 45.8 && lat < 46.6 && lng > 5.5 && lng < 7.0
-      })
-      .map(photonToResult)
+      .filter(inGeneva)
+      .map(toResult)
       .filter((r): r is SearchResult => r !== null)
       .slice(0, 7)
 
     if (results.length > 0) {
-      await redis.setex(cacheKey, 300, JSON.stringify(results)).catch(() => null)
+      await redis.setex(key, 300, JSON.stringify(results)).catch(() => null)
     }
     return results
   } catch {
@@ -63,73 +67,67 @@ export async function searchPlaces(query: string): Promise<SearchResult[]> {
   }
 }
 
-// ── Direct geocode (address → coords) ────────────────────────────────────────
 export async function geocodeAddress(address: string): Promise<SearchResult | null> {
-  const results = await searchPlaces(address)
-  return results[0] ?? null
+  const res = await searchPlaces(address)
+  return res[0] ?? null
 }
 
-// ── Photon types ──────────────────────────────────────────────────────────────
+// ── Photon internals ──────────────────────────────────────────────────────────
 interface PhotonFeature {
-  geometry: { type: 'Point'; coordinates: [number, number] }
-  properties: {
-    osm_id?:   number
-    osm_type?: string
-    name?:     string
-    street?:   string
-    housenumber?: string
-    city?:     string
-    postcode?: string
-    country?:  string
-    type?:     string
-    state?:    string
-  }
+  geometry:   { type: 'Point'; coordinates: [number, number] }
+  properties: Record<string, unknown>
 }
 
-function photonToResult(f: PhotonFeature): SearchResult | null {
-  const p   = f.properties
+function inGeneva(f: PhotonFeature): boolean {
+  const [lng, lat] = f.geometry.coordinates
+  return lat > BBOX.minLat && lat < BBOX.maxLat && lng > BBOX.minLng && lng < BBOX.maxLng
+}
+
+function str(v: unknown): string  { return typeof v === 'string' ? v : '' }
+function num(v: unknown): number  { return typeof v === 'number' ? v : 0  }
+
+function toResult(f: PhotonFeature): SearchResult | null {
+  const p        = f.properties
   const [lng, lat] = f.geometry.coordinates
   if (!lng || !lat) return null
 
-  const type = photonType(p.type ?? '')
-  const id   = `photon-${p.osm_type ?? 'N'}-${p.osm_id ?? Math.random()}`
+  const osmId    = num(p.osm_id)
+  const osmType  = str(p.osm_type)
+  const osmValue = str(p.osm_value)
+  const name     = str(p.name)
+  const street   = str(p.street)
+  const houseNo  = str(p.housenumber)
+  const city     = str(p.city)
+  const state    = str(p.state)
+  const country  = str(p.country)
 
-  // Build a clean display title
+  // Build title — même logique que Waze : "nom connu" > "rue n°" > "ville"
   let title = ''
-  if (p.name && p.name !== p.street) {
-    title = p.name
-  } else if (p.street) {
-    title = p.housenumber ? `${p.street} ${p.housenumber}` : p.street
-  } else if (p.city) {
-    title = p.city
+  if (name && name !== street) {
+    // Lieu nommé (gare, commerce, quartier, commune)
+    title = name
+  } else if (street) {
+    title = houseNo ? `${street} ${houseNo}` : street
+    if (city && title !== city) title = `${title}, ${city}`
+  } else if (city) {
+    title = city
   } else {
     return null
   }
 
-  // Subtitle: city + country
-  const parts = [p.city, p.state, p.country].filter(Boolean)
-  const subtitle = parts.slice(0, 2).join(', ') || undefined
+  // Subtitle : ville + pays
+  const subtitleParts = [city !== title ? city : '', country].filter(Boolean)
+  const subtitle = subtitleParts.join(', ') || undefined
 
+  // Type : transport > place > street > address
+  const type: SearchResult['type'] = TRANSIT_VALUES.has(osmValue)
+    ? 'station'
+    : (osmValue === 'city' || osmValue === 'village' || osmValue === 'town' || osmValue === 'district')
+      ? 'place'
+      : street && !houseNo
+        ? 'street'
+        : 'address'
+
+  const id = `photon-${osmType}-${osmId || Math.random().toString(36).slice(2)}`
   return { id, title, subtitle, lat, lng, type }
-}
-
-function photonType(osmType: string): SearchResult['type'] {
-  switch (osmType) {
-    case 'railway_station':
-    case 'station':
-    case 'bus_stop':
-    case 'stop':
-    case 'tram_stop':
-    case 'subway_entrance':
-      return 'station'
-    case 'amenity':
-    case 'tourism':
-    case 'shop':
-      return 'place'
-    case 'street':
-    case 'highway':
-      return 'street'
-    default:
-      return 'address'
-  }
 }

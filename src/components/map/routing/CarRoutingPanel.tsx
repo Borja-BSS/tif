@@ -133,10 +133,29 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
   }
   const fmtDist = (m: number) => m < 1000 ? `${Math.round(m)}m` : `${(m / 1000).toFixed(1)} km`
 
-  // ── GPS origin button (tap to use location) ───────────────────────────────────
+  // ── GPS origin button ─────────────────────────────────────────────────────────
   const handleGPSSelect = () => {
     if (geoState === 'ok' && origin?.id === 'gps') return
     refreshGPS()
+  }
+
+  // ── Zoom immediat sur l'adresse selectionnée (Waze/GMaps style) ──────────────
+  const handleOriginSelect = (result: SearchResult) => {
+    setOrigin(result)
+    setGeoState('idle')
+    if (map) {
+      map.flyTo({ center: [result.lng, result.lat], zoom: 15, duration: 600, essential: true })
+    }
+  }
+
+  const handleDestinationSelect = (result: SearchResult) => {
+    setDestination(result)
+    if (map) {
+      // Si l'origine est déjà définie, on reste à un zoom intermédiaire (le fitBounds du calcul prendra le relais)
+      if (!origin) {
+        map.flyTo({ center: [result.lng, result.lat], zoom: 14, duration: 600, essential: true })
+      }
+    }
   }
 
   return (
@@ -196,18 +215,14 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
             loading={geoState === 'loading'}
             gpsHint
             onGPSSelect={handleGPSSelect}
-            onSelect={result => { setOrigin(result); setGeoState('idle') }}
+            onSelect={handleOriginSelect}
           />
-
-          {/* Swap button + Destination */}
-          <div className="flex items-center gap-2">
-            <SearchBox
-              placeholder="Destination"
-              icon="🔴"
-              value={destination?.title}
-              onSelect={setDestination}
-            />
-          </div>
+          <SearchBox
+            placeholder="Destination"
+            icon="🔴"
+            value={destination?.title}
+            onSelect={handleDestinationSelect}
+          />
         </div>
 
         {/* Progress / error states */}
