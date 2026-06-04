@@ -69,6 +69,7 @@ function loadMarkerImage(
       if (!m.hasImage(id)) m.addImage(id, img, { pixelRatio: 2 })
       resolve()
     }
+    img.onerror = () => resolve()  // ne pas bloquer Promise.all si le canvas échoue
     img.src = canvas.toDataURL()
   })
 }
@@ -244,7 +245,12 @@ async function applyData(m: mapboxgl.Map, geojson: FeatureCollection) {
     }),
   }
 
-  // 3. Mettre à jour ou créer source + layers
+  // 3. Attendre que le style soit stable (setFog ou autre op. peut le rendre temporairement "not done")
+  if (!m.isStyleLoaded()) {
+    await new Promise<void>(resolve => m.once('idle', () => resolve()))
+  }
+
+  // 4. Mettre à jour ou créer source + layers
   const src = m.getSource(SOURCE_ID) as mapboxgl.GeoJSONSource | undefined
   if (src) { src.setData(data); return }
 
@@ -301,7 +307,7 @@ export default function BorderCrossingsLayer({ map }: BorderCrossingsLayerProps)
       if (!data) return
       prefetchRef.current  = data
       prefetchDone.current = true
-      applyData(map, data)
+      await applyData(map, data)
     }
 
     const setupEvents = () => {
@@ -317,7 +323,9 @@ export default function BorderCrossingsLayer({ map }: BorderCrossingsLayerProps)
       map.on('mouseleave', LAYER_ICON, () => { map.getCanvas().style.cursor = '' })
     }
 
-    if (map.loaded()) { run(); setupEvents() }
+    // isStyleLoaded() évite le piège de map.loaded() qui revient false
+    // quand les tuiles chargent (ex. après setFog dans MapGL)
+    if (map.isStyleLoaded()) { run(); setupEvents() }
     else map.once('load', () => { run(); setupEvents() })
 
     timerRef.current = setInterval(async () => {

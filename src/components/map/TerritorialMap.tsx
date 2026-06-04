@@ -1,9 +1,13 @@
 'use client'
 
 import { useRef, useEffect, useState, useCallback } from 'react'
+import dynamic from 'next/dynamic'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import type { FeatureCollection } from 'geojson'
+
+const CarRoutingPanel       = dynamic(() => import('./routing/CarRoutingPanel').then(m => ({ default: m.CarRoutingPanel })), { ssr: false })
+const TransportRoutingPanel = dynamic(() => import('./routing/TransportRoutingPanel').then(m => ({ default: m.TransportRoutingPanel })), { ssr: false })
 
 type LayerId = 'mobility' | 'transport' | 'alerts' | 'territory'
 
@@ -65,10 +69,11 @@ export function TerritorialMap() {
   const bcTimerRef    = useRef<ReturnType<typeof setInterval> | null>(null)
   const bcMarkersRef  = useRef<mapboxgl.Marker[]>([])
 
-  const [activeLayer, setActiveLayer] = useState<LayerId>('mobility')
-  const [isReady, setIsReady]         = useState(false)
-  const [lastRefresh, setLastRefresh] = useState<Date | null>(null)
-  const [secondsAgo, setSecondsAgo]   = useState(0)
+  const [activeLayer,  setActiveLayer]  = useState<LayerId>('mobility')
+  const [isReady,      setIsReady]      = useState(false)
+  const [lastRefresh,  setLastRefresh]  = useState<Date | null>(null)
+  const [secondsAgo,   setSecondsAgo]   = useState(0)
+  const [routingMode,  setRoutingMode]  = useState<'car' | 'transport' | null>(null)
 
   // ── Init Mapbox ───────────────────────────────────────────────
   useEffect(() => {
@@ -470,7 +475,57 @@ export function TerritorialMap() {
             </button>
           )
         })}
+
+        {/* Séparateur + boutons routing */}
+        <div className="border-t border-white/10 pt-2 flex flex-col gap-2">
+          <button
+            onClick={() => setRoutingMode(routingMode === 'car' ? null : 'car')}
+            className={[
+              'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium',
+              'backdrop-blur-xl border transition-all duration-200 min-w-[118px]',
+              routingMode === 'car'
+                ? 'bg-blue-500/20 border-blue-400/50 text-blue-300 shadow-lg scale-105'
+                : 'bg-black/50 border-white/10 text-white/55 hover:bg-black/65 hover:text-white/80',
+            ].join(' ')}
+          >
+            <span>🚗</span>
+            <span className="flex-1">Itinéraire</span>
+            {routingMode === 'car' && (
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+            )}
+          </button>
+
+          <button
+            onClick={() => setRoutingMode(routingMode === 'transport' ? null : 'transport')}
+            className={[
+              'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium',
+              'backdrop-blur-xl border transition-all duration-200 min-w-[118px]',
+              routingMode === 'transport'
+                ? 'bg-orange-500/20 border-orange-400/50 text-orange-300 shadow-lg scale-105'
+                : 'bg-black/50 border-white/10 text-white/55 hover:bg-black/65 hover:text-white/80',
+            ].join(' ')}
+          >
+            <span>🚌</span>
+            <span className="flex-1">Transports</span>
+            {routingMode === 'transport' && (
+              <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
+            )}
+          </button>
+        </div>
       </div>
+
+      {/* Panneaux routing — conditionnels, n'impactent pas les layers existants */}
+      {routingMode === 'car' && (
+        <CarRoutingPanel
+          map={mapRef.current}
+          onClose={() => setRoutingMode(null)}
+        />
+      )}
+      {routingMode === 'transport' && (
+        <TransportRoutingPanel
+          onClose={() => setRoutingMode(null)}
+        />
+      )}
 
       {/* Badge Live + last updated */}
       <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
