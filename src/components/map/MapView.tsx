@@ -20,6 +20,8 @@ const FilterPanel          = dynamic(() => import('./FilterPanel'),          { s
 const BorderCrossingsLayer = dynamic(() => import('./BorderCrossingsLayer'), { ssr: false })
 const RoadClosuresLayer    = dynamic(() => import('./RoadClosuresLayer'),    { ssr: false })
 const HereIncidentsLayer   = dynamic(() => import('./HereIncidentsLayer'),   { ssr: false })
+const CarRoutingPanel      = dynamic(() => import('./routing/CarRoutingPanel').then(m => ({ default: m.CarRoutingPanel })),       { ssr: false })
+const TransportRoutingPanel = dynamic(() => import('./routing/TransportRoutingPanel').then(m => ({ default: m.TransportRoutingPanel })), { ssr: false })
 
 const DEFAULT_FILTERS: FilterState = {
   heatmap:   true,
@@ -37,31 +39,23 @@ const TRANSPORT_LEGEND = [
 ]
 
 export default function MapView(props: Omit<MapGLProps, 'onMapReady'>) {
-  const [map, setMap]         = useState<mapboxgl.Map | null>(null)
-  const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS)
+  const [map,         setMap]         = useState<mapboxgl.Map | null>(null)
+  const [filters,     setFilters]     = useState<FilterState>(DEFAULT_FILTERS)
+  const [routingMode, setRoutingMode] = useState<'car' | 'transport' | null>(null)
 
-  // HERE trafic : masqué quand le filtre transport est actif (le réseau UNIRESO le remplace)
   useHereMobilityLayer(filters.heatmap && !filters.transport ? map : null)
-
-  // Réseau UNIRESO — toutes lignes TPG/CFF/CEVA + perturbations
   useTransitNetworkLayer(filters.transport ? map : null)
-
-  // TIF — événements territoriaux
   useTerritorialLayers(filters.alerts ? map : null)
 
   return (
     <>
       <MapGL {...props} onMapReady={setMap} />
 
-      {/* Bannières — montées tôt, écoutent des custom events */}
       <G7Banner />
       {filters.transport && <DisruptionsPanel />}
 
-      {/* Douanes — prefetch immédiat hors garde map */}
       <BorderCrossingsLayer map={map} />
-
-      {/* Routes fermées — layer permanent, hachures rouges/blanches */}
-      <RoadClosuresLayer map={map} />
+      <RoadClosuresLayer    map={map} />
 
       {map && (
         <>
@@ -69,44 +63,75 @@ export default function MapView(props: Omit<MapGLProps, 'onMapReady'>) {
           <RealtimeLayer  map={map} visible={filters.heatmap} showTransport={filters.transport} />
           <AlertLayer     map={map} visible={filters.alerts} />
           <G7Overlay      map={map} />
-          <FilterPanel    filters={filters} onChange={setFilters} />
-
-          {/* HERE Incidents — tous types (accident, travaux, météo, OFROU, TPG…) */}
           <HereIncidentsLayer map={filters.alerts && !filters.transport ? map : null} />
 
-          {/* Légende transport */}
+          {/* Transport legend — compact Liquid Glass badge, bottom-right */}
           {filters.transport && (
-            <div
-              className="absolute bottom-52 left-4 z-10 rounded-xl border border-white/10 px-3 py-2.5"
-              style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(12px)' }}
-            >
-              <div className="flex flex-col gap-1.5">
-                {TRANSPORT_LEGEND.map(item => (
-                  <div key={item.label} className="flex items-center gap-2">
-                    <svg width="20" height="6" className="flex-shrink-0">
-                      <line
-                        x1="0" y1="3" x2="20" y2="3"
-                        stroke={item.color}
-                        strokeWidth="3"
-                        strokeDasharray={item.dashed ? '4 2' : undefined}
-                      />
-                    </svg>
-                    <span className="text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                      {item.label}
-                    </span>
-                  </div>
-                ))}
-                <div className="flex items-center gap-2 border-t border-white/10 mt-0.5 pt-1.5">
-                  <span className="text-xs">🚧</span>
-                  <span className="text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                    Perturbation arrêt
-                  </span>
-                </div>
-              </div>
-            </div>
+            <TransportLegend />
           )}
+
+          {/* Control bar — Liquid Glass pill, bottom center */}
+          <FilterPanel
+            filters={filters}
+            onChange={setFilters}
+            routingMode={routingMode}
+            onRouting={setRoutingMode}
+          />
         </>
       )}
+
+      {/* Routing bottom sheets */}
+      {routingMode === 'car' && (
+        <CarRoutingPanel
+          map={map}
+          onClose={() => setRoutingMode(null)}
+        />
+      )}
+      {routingMode === 'transport' && (
+        <TransportRoutingPanel
+          onClose={() => setRoutingMode(null)}
+        />
+      )}
     </>
+  )
+}
+
+// ── Transport legend — compact Liquid Glass badge ─────────────────────────────
+function TransportLegend() {
+  return (
+    <div
+      className="absolute bottom-24 right-4 z-10 rounded-2xl px-3 py-2.5"
+      style={{
+        background:           'rgba(18,18,22,0.72)',
+        backdropFilter:       'blur(24px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+        border:               '1px solid rgba(255,255,255,0.11)',
+        boxShadow:            'inset 0 0.5px 0 rgba(255,255,255,0.12), 0 8px 32px rgba(0,0,0,0.4)',
+      }}
+    >
+      <div className="flex flex-col gap-1.5">
+        {TRANSPORT_LEGEND.map(item => (
+          <div key={item.label} className="flex items-center gap-2">
+            <svg width="18" height="5" className="flex-shrink-0">
+              <line
+                x1="0" y1="2.5" x2="18" y2="2.5"
+                stroke={item.color}
+                strokeWidth="2.5"
+                strokeDasharray={item.dashed ? '4 2' : undefined}
+              />
+            </svg>
+            <span className="text-[10px] font-medium" style={{ color: 'rgba(255,255,255,0.65)' }}>
+              {item.label}
+            </span>
+          </div>
+        ))}
+        <div className="flex items-center gap-2 border-t pt-1 mt-0.5" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+          <span className="text-[10px]">🚧</span>
+          <span className="text-[10px] font-medium" style={{ color: 'rgba(255,255,255,0.55)' }}>
+            Perturbation arrêt
+          </span>
+        </div>
+      </div>
+    </div>
   )
 }
