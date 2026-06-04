@@ -1,3 +1,5 @@
+// Transport public routing via transport.opendata.ch (CFF/TPG/Léman Express)
+// https://transport.opendata.ch — gratuit, pas de clé API
 const OTD_BASE = 'https://transport.opendata.ch/v1'
 
 export interface TransportRouteRequest {
@@ -8,25 +10,24 @@ export interface TransportRouteRequest {
 
 export interface TransportLeg {
   type:          'walk' | 'tpg' | 'cff' | 'ceva' | 'other'
-  line?:         string
-  direction?:    string
-  from:          string
-  to:            string
-  departure:     string
-  arrival:       string
-  duration:      number
-  platform?:     string
+  line?:         string    // "46", "L4", "18"
+  direction?:    string    // terminus
+  from:          string    // nom arrêt départ
+  to:            string    // nom arrêt arrivée
+  departure:     string    // ISO 8601
+  arrival:       string    // ISO 8601
+  duration:      number    // secondes
   disrupted:     boolean
   delayMinutes:  number
-  walkDistance?: number
+  walkDistance?: number    // mètres si type=walk
 }
 
 export interface TransportRoute {
   id:      string
   legs:    TransportLeg[]
   summary: {
-    duration:     number
-    walkDistance: number
+    duration:     number  // secondes
+    walkDistance: number  // mètres total à pied
     transfers:    number
     departure:    string
     arrival:      string
@@ -38,18 +39,15 @@ export interface TransportRoute {
 export async function calculateTransportRoute(
   req: TransportRouteRequest,
 ): Promise<TransportRoute[]> {
-  const [fromStop, toStop] = await Promise.all([
+  const [fromName, toName] = await Promise.all([
     resolveStop(req.from),
     resolveStop(req.to),
   ])
 
   const url = new URL(`${OTD_BASE}/connections`)
-  url.searchParams.set('from',      fromStop)
-  url.searchParams.set('to',        toStop)
-  url.searchParams.set('limit',     '4')
-  url.searchParams.append('fields[]', 'connections/sections')
-  url.searchParams.append('fields[]', 'connections/duration')
-  url.searchParams.append('fields[]', 'connections/transfers')
+  url.searchParams.set('from',  fromName)
+  url.searchParams.set('to',    toName)
+  url.searchParams.set('limit', '4')
 
   if (req.departureTime) {
     const d = new Date(req.departureTime)
@@ -60,19 +58,13 @@ export async function calculateTransportRoute(
   const res = await fetch(url.toString(), { signal: AbortSignal.timeout(10000) })
   if (!res.ok) return []
 
-  const data = await res.json()
+  const data = await res.json() as OtdResponse
 
-  return (data.connections ?? []).map((conn: Record<string, unknown>, idx: number) => {
-    const legs         = parseConnectionLegs((conn.sections as Record<string, unknown>[]) ?? [])
+  return (data.connections ?? []).map((conn, idx) => {
+    const legs         = parseLegs(conn.sections ?? [])
     const totalWalk    = legs.filter(l => l.type === 'walk').reduce((s, l) => s + (l.walkDistance ?? 0), 0)
     const anyDisrupted = legs.some(l => l.disrupted)
-    const durationStr  = String(conn.duration ?? '0d00:00:00')
-
-    // parse "0d00:30:00" → seconds
-    const durationSecs = parseDuration(durationStr)
-
-    const from = conn.from as Record<string, unknown> | undefined
-    const to   = conn.to   as Record<string, unknown> | undefined
+    const durationSecs = parseDuration(conn.duration ?? '')
 
     return {
       id: `transport-${idx}`,
@@ -80,9 +72,9 @@ export async function calculateTransportRoute(
       summary: {
         duration:     durationSecs,
         walkDistance: totalWalk,
-        transfers:    Number(conn.transfers ?? 0),
-        departure:    String(from?.departure ?? ''),
-        arrival:      String(to?.arrival     ?? ''),
+        transfers:    conn.transfers ?? 0,
+        departure:    conn.from?.departure ?? '',
+        arrival:      conn.to?.arrival     ?? '',
         disrupted:    anyDisrupted,
       },
       alternative: idx > 0,
@@ -90,62 +82,119 @@ export async function calculateTransportRoute(
   })
 }
 
+// ── Résolution d'arrêt le plus proche ────────────────────────────────────────
 async function resolveStop(pos: { lat: number; lng: number; name?: string }): Promise<string> {
   if (pos.name) return pos.name
 
+  // opendata.ch: x = latitude, y = longitude (convention suisse)
   const url = new URL(`${OTD_BASE}/locations`)
-  url.searchParams.set('x',     pos.lng.toString())
-  url.searchParams.set('y',     pos.lat.toString())
+  url.searchParams.set('x',     pos.lat.toString())
+  url.searchParams.set('y',     pos.lng.toString())
   url.searchParams.set('type',  'station')
   url.searchParams.set('limit', '1')
 
   try {
     const res  = await fetch(url.toString(), { signal: AbortSignal.timeout(5000) })
-    const data = await res.json()
-    return String(data.stations?.[0]?.name ?? `${pos.lat},${pos.lng}`)
+    const data = await res.json() as { stations?: { name?: string }[] }
+    return data.stations?.[0]?.name ?? `${pos.lat},${pos.lng}`
   } catch {
     return `${pos.lat},${pos.lng}`
   }
 }
 
-function parseDuration(raw: string): number {
-  // Format: "0d00:30:00" or "00:30:00"
-  const match = raw.match(/(?:\d+d)?(\d+):(\d+):(\d+)/)
-  if (!match) return 0
-  return parseInt(match[1]) * 3600 + parseInt(match[2]) * 60 + parseInt(match[3])
+// ── Parsing des sections ──────────────────────────────────────────────────────
+function parseLegs(sections: OtdSection[]): TransportLeg[] {
+  return sections
+    .filter(s => {
+      // Ignorer les segments walk de durée 0 (transition entre arrêts adjacents)
+      if (!s.journey) {
+        const dur = s.walk?.duration ?? 0
+        return dur > 30  // garder uniquement les marches > 30 secondes
+      }
+      return true
+    })
+    .map(s => {
+      const j   = s.journey
+      const dep = s.departure ?? {}
+      const arr = s.arrival   ?? {}
+
+      if (!j) {
+        // Segment à pied
+        const walkSec = s.walk?.duration ?? 0
+        return {
+          type:          'walk' as const,
+          from:          dep.station?.name ?? '',
+          to:            arr.station?.name ?? '',
+          departure:     dep.departure ?? '',
+          arrival:       arr.arrival   ?? '',
+          duration:      walkSec,
+          disrupted:     false,
+          delayMinutes:  0,
+          walkDistance:  Math.round(walkSec * 1.2),  // ~1.2 m/s vitesse marche
+        }
+      }
+
+      // Ligne numéro = journey.number ("46", "L4", "S5") — PAS journey.name (ID interne)
+      const lineNum   = j.number   ?? ''
+      const category  = j.category ?? ''  // B=bus, R=train/tram, T=tram, S=S-Bahn
+      const isCEVA    = lineNum.startsWith('L')   // Léman Express L1–L5
+      const isCFF     = category === 'IC' || category === 'IR' || category === 'RE'
+                     || category === 'S' || (category === 'R' && !isCEVA)
+      const isTPG     = category === 'B' || category === 'T'
+
+      const delayMin  = typeof dep.delay === 'number' ? dep.delay : 0
+
+      return {
+        type:         isCEVA ? 'ceva' : isCFF ? 'cff' : isTPG ? 'tpg' : 'other',
+        line:         lineNum || undefined,
+        direction:    j.to ?? undefined,
+        from:         dep.station?.name ?? '',
+        to:           arr.station?.name ?? '',
+        departure:    dep.departure ?? '',
+        arrival:      arr.arrival   ?? '',
+        duration:     0,
+        disrupted:    delayMin > 5,
+        delayMinutes: Math.max(0, delayMin),
+      }
+    })
 }
 
-function parseConnectionLegs(sections: Record<string, unknown>[]): TransportLeg[] {
-  return sections.map(section => {
-    const journey    = section.journey as Record<string, unknown> | null | undefined
-    const isWalk     = !journey
-    const line       = String(journey?.name ?? '')
-    const isCEVA     = line.startsWith('L')
-    const isCFF      = line.startsWith('IC') || line.startsWith('IR') || line.startsWith('RE') || line.startsWith('S')
-    const isTPG      = !isCEVA && !isCFF && line.length <= 2
+// ── Parseur durée "00d00:36:00" → secondes ───────────────────────────────────
+function parseDuration(raw: string): number {
+  const m = raw.match(/(?:\d+d)?(\d+):(\d+):(\d+)/)
+  if (!m) return 0
+  return parseInt(m[1]) * 3600 + parseInt(m[2]) * 60 + parseInt(m[3])
+}
 
-    const departure  = section.departure as Record<string, unknown> | undefined
-    const arrival    = section.arrival   as Record<string, unknown> | undefined
-    const deptReal   = String(departure?.realtime  ?? '')
-    const deptPlanned = String(departure?.departure ?? '')
-    const delayMin   = deptReal && deptPlanned
-      ? Math.round((new Date(deptReal).getTime() - new Date(deptPlanned).getTime()) / 60000)
-      : 0
+// ── Types opendata.ch ─────────────────────────────────────────────────────────
+interface OtdResponse {
+  connections?: OtdConnection[]
+}
 
-    const walk = section.walk as Record<string, unknown> | undefined
+interface OtdConnection {
+  from?:      OtdEndpoint
+  to?:        OtdEndpoint
+  sections?:  OtdSection[]
+  duration?:  string
+  transfers?: number
+}
 
-    return {
-      type:         isWalk ? 'walk' : isCEVA ? 'ceva' : isCFF ? 'cff' : isTPG ? 'tpg' : 'other',
-      line:         line || undefined,
-      direction:    journey ? String(journey.to ?? '') || undefined : undefined,
-      from:         String((departure?.station as Record<string, unknown>)?.name ?? ''),
-      to:           String((arrival?.station   as Record<string, unknown>)?.name ?? ''),
-      departure:    String(departure?.departure ?? ''),
-      arrival:      String(arrival?.arrival     ?? ''),
-      duration:     0,
-      disrupted:    delayMin > 5,
-      delayMinutes: Math.max(0, delayMin),
-      walkDistance: isWalk ? Number(walk?.duration ?? 0) : undefined,
-    }
-  })
+interface OtdEndpoint {
+  station?:   { name?: string }
+  departure?: string
+  arrival?:   string
+}
+
+interface OtdSection {
+  journey?:   OtdJourney | null
+  departure?: { station?: { name?: string }; departure?: string; delay?: number | null }
+  arrival?:   { station?: { name?: string }; arrival?: string }
+  walk?:      { duration?: number } | null
+}
+
+interface OtdJourney {
+  name?:     string   // ID interne — ne pas utiliser pour l'affichage
+  number?:   string   // numéro de ligne affiché ("46", "L4", "S5") ← utiliser celui-ci
+  category?: string   // "B", "R", "T", "IC", "IR", "S"
+  to?:       string   // terminus
 }

@@ -1,12 +1,13 @@
-import { redis } from '@/lib/redis'
-
-const HERE_ROUTING_BASE = 'https://router.hereapi.com/v8'
+// Car routing via OSRM (Open Source Routing Machine / OpenStreetMap)
+// Public demo server — no API key needed, real road geometry
+// https://project-osrm.org
+const OSRM_BASE = 'https://router.project-osrm.org/route/v1/driving'
 
 export interface CarRouteRequest {
   from: { lat: number; lng: number }
   to:   { lat: number; lng: number }
   departureTime?: string
-  avoidAreas?: string[]
+  avoidAreas?:    string[]
 }
 
 export interface RouteStep {
@@ -17,133 +18,96 @@ export interface RouteStep {
 }
 
 export interface CarRoute {
-  id: string
+  id:      string
   summary: {
-    duration:          number
+    duration:          number   // secondes
     durationInTraffic: number
-    distance:          number
+    distance:          number   // mètres
     arrivalTime:       string
   }
   steps:        RouteStep[]
-  geometry:     [number, number][]
+  geometry:     [number, number][]  // [lng, lat] pour Mapbox
   trafficDelay: number
   alternative:  boolean
   warnings:     string[]
 }
 
 export async function calculateCarRoute(req: CarRouteRequest): Promise<CarRoute[]> {
-  const url = new URL(`${HERE_ROUTING_BASE}/routes`)
-  url.searchParams.set('apiKey', process.env.HERE_API_KEY!)
-  url.searchParams.set('origin',        `${req.from.lat},${req.from.lng}`)
-  url.searchParams.set('destination',   `${req.to.lat},${req.to.lng}`)
-  url.searchParams.set('transportMode', 'car')
-  url.searchParams.set('routingMode',   'fast')
-  url.searchParams.set('departureTime', req.departureTime ?? 'now')
-  url.searchParams.set('return',        'polyline,summary,actions,instructions')
-  url.searchParams.set('alternatives',  '2')
+  // OSRM: coords are lng,lat
+  const coords = `${req.from.lng},${req.from.lat};${req.to.lng},${req.to.lat}`
+  const url     = new URL(`${OSRM_BASE}/${coords}`)
+  url.searchParams.set('overview',     'full')
+  url.searchParams.set('geometries',   'geojson')
+  url.searchParams.set('steps',        'false')
+  url.searchParams.set('alternatives', 'true')
 
   const res = await fetch(url.toString(), { signal: AbortSignal.timeout(10000) })
+  if (!res.ok) return fallback(req)
 
-  if (!res.ok) return calculateCarRouteFallback(req)
+  const data = await res.json() as OsrmResponse
+  if (data.code !== 'Ok' || !data.routes?.length) return fallback(req)
 
-  const data = await res.json()
-
-  return (data.routes ?? []).map((route: Record<string, unknown>, idx: number) => {
-    const sections = route.sections as Record<string, unknown>[] | undefined
-    const section  = sections?.[0] ?? {}
-    const summary  = (section.summary as Record<string, unknown>) ?? {}
-
+  return data.routes.map((route, idx) => {
+    const duration = Math.round(route.duration)
+    const distance = Math.round(route.distance)
     return {
-      id: `route-${idx}`,
+      id:      `route-${idx}`,
       summary: {
-        duration:          Number(summary.duration ?? 0),
-        durationInTraffic: Number(summary.duration ?? 0),
-        distance:          Number(summary.length   ?? 0),
-        arrivalTime:       String(summary.arrivalTime ?? new Date().toISOString()),
+        duration,
+        durationInTraffic: duration,  // OSRM ne donne pas le trafic live
+        distance,
+        arrivalTime: new Date(Date.now() + duration * 1000).toISOString(),
       },
-      steps:        parseHereActions((section.actions as Record<string, unknown>[]) ?? []),
-      geometry:     decodeHerePolyline(String(section.polyline ?? '')),
-      trafficDelay: Number((summary as Record<string, unknown>).delay ?? 0),
+      steps:        [],
+      geometry:     route.geometry.coordinates as [number, number][],
+      trafficDelay: 0,
       alternative:  idx > 0,
-      warnings:     extractWarnings((section.notices as Record<string, unknown>[]) ?? []),
+      warnings:     [],
     }
   })
 }
 
+// Gardé pour les routes qui évitent des zones — sans impact visuel
 export async function getActiveIncidentAreas(): Promise<string[]> {
-  const keys = await redis.keys('tif:consensus:*')
-  const incidentZones: string[] = []
-
-  for (const key of keys.slice(0, 20)) {
-    const raw = await redis.get(key)
-    if (!raw) continue
-    const consensus = JSON.parse(raw as string) as Record<string, unknown>
-    if (
-      (consensus.realityStatus === 'HEAVY' || consensus.realityStatus === 'BLOCKED')
-      && Number(consensus.confidence ?? 0) > 0.65
-    ) {
-      incidentZones.push(String(consensus.geohash6 ?? ''))
-    }
-  }
-
-  return incidentZones.filter(Boolean)
+  return []
 }
 
-function calculateCarRouteFallback(req: CarRouteRequest): CarRoute[] {
-  const duration = estimateDuration(req.from, req.to)
+// ── Fallback ligne droite si OSRM down ───────────────────────────────────────
+function fallback(req: CarRouteRequest): CarRoute[] {
+  const dist = haversine(req.from, req.to)
+  const dur  = Math.round((dist / 1000 / 40) * 3600)  // estimation 40 km/h
   return [{
-    id: 'fallback-0',
+    id:      'fallback-0',
     summary: {
-      duration,
-      durationInTraffic: duration,
-      distance:          estimateDistance(req.from, req.to),
-      arrivalTime:       new Date(Date.now() + duration * 1000).toISOString(),
+      duration: dur, durationInTraffic: dur, distance: dist,
+      arrivalTime: new Date(Date.now() + dur * 1000).toISOString(),
     },
     steps:        [],
     geometry:     [[req.from.lng, req.from.lat], [req.to.lng, req.to.lat]],
     trafficDelay: 0,
     alternative:  false,
-    warnings:     ['Données trafic temps réel indisponibles'],
+    warnings:     ['Service de routage temporairement indisponible'],
   }]
 }
 
-function estimateDuration(from: { lat: number; lng: number }, to: { lat: number; lng: number }): number {
-  return Math.round((estimateDistance(from, to) / 1000 / 40) * 3600)
-}
-
-function estimateDistance(from: { lat: number; lng: number }, to: { lat: number; lng: number }): number {
+function haversine(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
   const R    = 6371000
-  const dLat = (to.lat - from.lat) * Math.PI / 180
-  const dLng = (to.lng - from.lng) * Math.PI / 180
-  const a    = Math.sin(dLat / 2) ** 2
-    + Math.cos(from.lat * Math.PI / 180) * Math.cos(to.lat * Math.PI / 180) * Math.sin(dLng / 2) ** 2
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  const dLat = (b.lat - a.lat) * Math.PI / 180
+  const dLng = (b.lng - a.lng) * Math.PI / 180
+  const x    = Math.sin(dLat / 2) ** 2
+    + Math.cos(a.lat * Math.PI / 180) * Math.cos(b.lat * Math.PI / 180) * Math.sin(dLng / 2) ** 2
+  return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x))
 }
 
-function parseHereActions(actions: Record<string, unknown>[]): RouteStep[] {
-  return actions.map(action => ({
-    instruction: String(action.instruction ?? ''),
-    duration:    Number(action.duration   ?? 0),
-    distance:    Number(action.length     ?? 0),
-    coordinates: [],
-  }))
+// ── OSRM response types ───────────────────────────────────────────────────────
+interface OsrmResponse {
+  code:    string
+  routes?: OsrmRoute[]
 }
 
-function decodeHerePolyline(encoded: string): [number, number][] {
-  if (!encoded) return []
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { decode } = require('@here/flexpolyline') as { decode: (s: string) => { polyline: [number, number][] } }
-    const { polyline } = decode(encoded)
-    return polyline.map(([lat, lng]: [number, number]) => [lng, lat])
-  } catch {
-    return []
-  }
-}
-
-function extractWarnings(notices: Record<string, unknown>[]): string[] {
-  return notices
-    .filter(n => n.code !== 'violation')
-    .map(n => String(n.title ?? ''))
-    .filter(Boolean)
+interface OsrmRoute {
+  duration: number
+  distance: number
+  geometry: { type: 'LineString'; coordinates: number[][] }
+  legs:     { duration: number; distance: number }[]
 }
