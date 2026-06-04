@@ -1,8 +1,8 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { useState } from 'react'
-import type mapboxgl from 'mapbox-gl'
+import { useState, useEffect, useRef } from 'react'
+import mapboxgl from 'mapbox-gl'
 import type { MapGLProps } from './MapGL'
 import type { FilterState } from './FilterPanel'
 import { useTerritorialLayers }    from './useTerritorialLayers'
@@ -42,10 +42,39 @@ export default function MapView(props: Omit<MapGLProps, 'onMapReady'>) {
   const [map,         setMap]         = useState<mapboxgl.Map | null>(null)
   const [filters,     setFilters]     = useState<FilterState>(DEFAULT_FILTERS)
   const [routingMode, setRoutingMode] = useState<'car' | 'transport' | null>(null)
+  const searchPinRef = useRef<mapboxgl.Marker | null>(null)
 
   useHereMobilityLayer(filters.heatmap && !filters.transport ? map : null)
   useTransitNetworkLayer(filters.transport ? map : null)
   useTerritorialLayers(filters.alerts ? map : null)
+
+  // Listen for tif:search-pin events and place a red marker on the map
+  useEffect(() => {
+    if (!map) return
+
+    const handleSearchPin = (e: Event) => {
+      const { lat, lng } = (e as CustomEvent<{ lat: number; lng: number; title: string }>).detail
+
+      // Remove previous search pin if any
+      if (searchPinRef.current) {
+        searchPinRef.current.remove()
+        searchPinRef.current = null
+      }
+
+      // Create Liquid Glass red dot marker element
+      const el = document.createElement('div')
+      el.style.cssText = 'width:28px;height:28px;border-radius:50%;background:rgba(255,69,58,0.9);border:2.5px solid white;box-shadow:0 0 12px rgba(255,69,58,0.5)'
+
+      const marker = new mapboxgl.Marker({ element: el })
+        .setLngLat([lng, lat])
+        .addTo(map)
+
+      searchPinRef.current = marker
+    }
+
+    window.addEventListener('tif:search-pin', handleSearchPin)
+    return () => window.removeEventListener('tif:search-pin', handleSearchPin)
+  }, [map])
 
   return (
     <>

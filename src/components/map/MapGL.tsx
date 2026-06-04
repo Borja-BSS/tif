@@ -45,13 +45,71 @@ export default function MapGL({
       // Atmosphère subtile en mode globe
       map.setFog({ color: '#0d0d10', 'space-color': '#000005', 'star-intensity': 0.4 })
 
+      // User location source & layers (created once on load)
+      map.addSource('user-location', {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features: [] },
+      })
+
+      // Halo de précision GPS (cercle semi-transparent bleu)
+      map.addLayer({
+        id: 'user-location-accuracy',
+        type: 'circle',
+        source: 'user-location',
+        paint: {
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, ['/', ['get', 'accuracy'], 8], 16, ['/', ['get', 'accuracy'], 1]],
+          'circle-color': '#0A84FF',
+          'circle-opacity': 0.15,
+          'circle-stroke-width': 0,
+        },
+      })
+
+      // Point bleu avec halo blanc
+      map.addLayer({
+        id: 'user-location-dot',
+        type: 'circle',
+        source: 'user-location',
+        paint: {
+          'circle-radius': 8,
+          'circle-color': '#0A84FF',
+          'circle-stroke-width': 3,
+          'circle-stroke-color': '#FFFFFF',
+          'circle-opacity': 1,
+        },
+      })
+
+      // Notify external components that the map is ready with user-location source
+      window.dispatchEvent(new CustomEvent('tif:user-location-ready', { detail: map }))
+
       setReady(true)
       onMapReady?.(map)
     })
 
+    // Listen for location update events from RecenterButton or other components
+    const handleLocationUpdate = (e: Event) => {
+      const detail = (e as CustomEvent<{ lat: number; lng: number; accuracy: number } | null>).detail
+      const source = map.getSource('user-location') as mapboxgl.GeoJSONSource | undefined
+      if (!source) return
+      if (!detail) {
+        source.setData({ type: 'FeatureCollection', features: [] })
+        return
+      }
+      const { lat, lng, accuracy } = detail
+      source.setData({
+        type: 'FeatureCollection',
+        features: [{
+          type: 'Feature',
+          properties: { accuracy },
+          geometry: { type: 'Point', coordinates: [lng, lat] },
+        }],
+      })
+    }
+    window.addEventListener('tif:update-user-location', handleLocationUpdate)
+
     mapRef.current = map
 
     return () => {
+      window.removeEventListener('tif:update-user-location', handleLocationUpdate)
       map.remove()
       mapRef.current = null
     }
