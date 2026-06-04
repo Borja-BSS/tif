@@ -82,24 +82,10 @@ export async function calculateTransportRoute(
   })
 }
 
-// ── Résolution d'arrêt le plus proche ────────────────────────────────────────
+// ── Résolution d'arrêt ───────────────────────────────────────────────────────
+// opendata.ch accepte directement "lat,lng" comme paramètre from/to
 async function resolveStop(pos: { lat: number; lng: number; name?: string }): Promise<string> {
-  if (pos.name) return pos.name
-
-  // opendata.ch: x = latitude, y = longitude (convention suisse)
-  const url = new URL(`${OTD_BASE}/locations`)
-  url.searchParams.set('x',     pos.lat.toString())
-  url.searchParams.set('y',     pos.lng.toString())
-  url.searchParams.set('type',  'station')
-  url.searchParams.set('limit', '1')
-
-  try {
-    const res  = await fetch(url.toString(), { signal: AbortSignal.timeout(5000) })
-    const data = await res.json() as { stations?: { name?: string }[] }
-    return data.stations?.[0]?.name ?? `${pos.lat},${pos.lng}`
-  } catch {
-    return `${pos.lat},${pos.lng}`
-  }
+  return pos.name ?? `${pos.lat},${pos.lng}`
 }
 
 // ── Parsing des sections ──────────────────────────────────────────────────────
