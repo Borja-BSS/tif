@@ -42,11 +42,8 @@ export default function MapPage() {
             <Link href="/admin"  className="text-white/45 hover:text-white/80 transition-colors">Admin</Link>
           </nav>
 
-          {/* Live badge — always visible */}
-          <span className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-emerald-400/75">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="hidden sm:inline">Live</span>
-          </span>
+          {/* Live indicator dot — minimal, text is in MapControls pill */}
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
 
           {/* Mobile menu button — shows nav links on tap */}
           <MobileMenu />
