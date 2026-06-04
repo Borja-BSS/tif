@@ -7,23 +7,22 @@ const QuerySchema = z.object({
 })
 
 export async function GET(req: Request) {
-  const startMs = Date.now()
   try {
-    const ip          = req.headers.get('x-forwarded-for') ?? 'anonymous'
-    const { success } = await ratelimit.limit(`geocode:${ip}`)
-    if (!success) return Response.json([], { status: 429 })
+    // Rate-limit — fail-open if Redis is unavailable (dev Redis vs prod Upstash mismatch)
+    try {
+      const ip          = req.headers.get('x-forwarded-for') ?? 'anonymous'
+      const { success } = await ratelimit.limit(`geocode:${ip}`)
+      if (!success) return Response.json([], { status: 429 })
+    } catch { /* proceed without rate-limit if Redis unreachable */ }
 
     const { searchParams } = new URL(req.url)
-    const q = searchParams.get('q') ?? ''
-    const parsed = QuerySchema.safeParse({ q })
+    const parsed = QuerySchema.safeParse({ q: searchParams.get('q') })
     if (!parsed.success) return Response.json([])
 
-    console.log(`[geocode] query="${parsed.data.q}"`)
     const results = await searchPlaces(parsed.data.q)
-    console.log(`[geocode] query="${parsed.data.q}" → ${results.length} results in ${Date.now()-startMs}ms`)
     return Response.json(results)
   } catch (err) {
-    console.error('[geocode] CAUGHT ERROR:', String(err), err instanceof Error ? err.cause : '')
-    return Response.json([], { status: 200 })
+    console.error('[geocode] error:', err)
+    return Response.json([])
   }
 }
