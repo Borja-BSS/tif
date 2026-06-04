@@ -39,10 +39,22 @@ const TRANSPORT_LEGEND = [
 ]
 
 export default function MapView(props: Omit<MapGLProps, 'onMapReady'>) {
-  const [map,         setMap]         = useState<mapboxgl.Map | null>(null)
-  const [filters,     setFilters]     = useState<FilterState>(DEFAULT_FILTERS)
-  const [routingMode, setRoutingMode] = useState<'car' | 'transport' | null>(null)
-  const searchPinRef = useRef<mapboxgl.Marker | null>(null)
+  const [map,             setMap]             = useState<mapboxgl.Map | null>(null)
+  const [filters,         setFilters]         = useState<FilterState>(DEFAULT_FILTERS)
+  const [routingMode,     setRoutingMode]     = useState<'car' | 'transport' | null>(null)
+  const [territoryToast,  setTerritoryToast]  = useState(false)
+  const territoryShownRef = useRef(false)
+  const searchPinRef      = useRef<mapboxgl.Marker | null>(null)
+
+  // ── Territory toast — shown once per session on first activation ──────────────
+  useEffect(() => {
+    if (filters.territory && !territoryShownRef.current) {
+      territoryShownRef.current = true
+      setTerritoryToast(true)
+      const t = setTimeout(() => setTerritoryToast(false), 3000)
+      return () => clearTimeout(t)
+    }
+  }, [filters.territory])
 
   useHereMobilityLayer(filters.heatmap && !filters.transport ? map : null)
   useTransitNetworkLayer(filters.transport ? map : null)
@@ -121,6 +133,29 @@ export default function MapView(props: Omit<MapGLProps, 'onMapReady'>) {
           map={map}
           onClose={() => setRoutingMode(null)}
         />
+      )}
+
+      {/* Territory toast — first activation of the session */}
+      {territoryToast && (
+        <div
+          className="absolute top-4 left-1/2 -translate-x-1/2 z-40 px-4 py-3 rounded-2xl
+                     text-sm font-medium text-white/90 text-center max-w-xs
+                     animate-in fade-in slide-in-from-top-2 duration-300"
+          style={{
+            background:           'rgba(18,18,22,0.88)',
+            backdropFilter:       'blur(20px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+            border:               '1px solid rgba(255,196,0,0.35)',
+            boxShadow:            'inset 0 0.5px 0 rgba(255,255,255,0.12), 0 8px 32px rgba(0,0,0,0.5)',
+          }}
+        >
+          <span className="mr-1">🗺️</span>
+          <span style={{ color: 'rgba(255,196,0,0.9)' }}>Zones G7</span>
+          <span className="text-white/60"> — </span>
+          <span className="text-[12px] text-white/75">
+            Périmètres de sécurité, restrictions d&apos;accès et conditions d&apos;entrée pour le Grand Genève du 8 au 18 juin 2026.
+          </span>
+        </div>
       )}
     </>
   )

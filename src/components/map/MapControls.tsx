@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import type { FilterState } from './FilterPanel'
 
 // ── Liquid Glass system token ─────────────────────────────────────────────────
@@ -12,12 +12,14 @@ export const LG_STYLE: React.CSSProperties = {
   boxShadow:              'inset 0 0.5px 0 rgba(255,255,255,0.14), 0 16px 56px rgba(0,0,0,0.55), 0 2px 6px rgba(0,0,0,0.3)',
 }
 
+const TERRITORY_TOOLTIP = 'La rubrique Territoire regroupe les zones de restriction, périmètres de sécurité et conditions d\'accès liées au G7.'
+
 // ── Layer definitions ─────────────────────────────────────────────────────────
 const LAYERS = [
-  { key: 'heatmap'   as keyof FilterState, icon: '⚡', label: 'Mobilité',  accent: 'rgba(10,132,255,0.9)'  },
-  { key: 'transport' as keyof FilterState, icon: '🚌', label: 'Transport', accent: 'rgba(50,215,75,0.9)'   },
-  { key: 'territory' as keyof FilterState, icon: '🗺️', label: 'Territoire',accent: 'rgba(255,196,0,0.9)'   },
-  { key: 'alerts'    as keyof FilterState, icon: '⚠️', label: 'Alertes',   accent: 'rgba(255,69,58,0.9)'   },
+  { key: 'heatmap'   as keyof FilterState, icon: '🚦', label: 'Trafic',  accent: 'rgba(10,132,255,0.9)'  },
+  { key: 'transport' as keyof FilterState, icon: '🚌', label: 'TPG',     accent: 'rgba(50,215,75,0.9)'   },
+  { key: 'territory' as keyof FilterState, icon: '🗺️', label: 'Zones',   accent: 'rgba(255,196,0,0.9)'   },
+  { key: 'alerts'    as keyof FilterState, icon: '⚠️', label: 'Alertes', accent: 'rgba(255,69,58,0.9)'   },
 ]
 
 interface MapControlsProps {
@@ -28,13 +30,27 @@ interface MapControlsProps {
 }
 
 export default function MapControls({ filters, onChange, routingMode, onRouting }: MapControlsProps) {
-  const [tooltip, setTooltip] = useState<string | null>(null)
+  const [tooltip,           setTooltip]           = useState<string | null>(null)
+  const [territoryTooltip,  setTerritoryTooltip]  = useState(false)
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const toggle = (key: keyof FilterState) =>
     onChange({ ...filters, [key]: !filters[key] })
 
   const toggleRouting = (mode: 'car' | 'transport') =>
     onRouting(routingMode === mode ? null : mode)
+
+  // Long-press for territory tooltip on mobile
+  const handleTerritoryPressStart = () => {
+    longPressTimer.current = setTimeout(() => setTerritoryTooltip(true), 500)
+  }
+  const handleTerritoryPressEnd = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current)
+      longPressTimer.current = null
+    }
+  }
+  const dismissTerritoryTooltip = () => setTerritoryTooltip(false)
 
   return (
     <div
@@ -44,12 +60,26 @@ export default function MapControls({ filters, onChange, routingMode, onRouting 
       {/* ── Layer toggles ── */}
       {LAYERS.map(({ key, icon, label, accent }) => {
         const active = filters[key]
+        const isTerritory = key === 'territory'
+
         return (
           <button
             key={key}
-            onClick={() => toggle(key)}
-            onMouseEnter={() => setTooltip(label)}
-            onMouseLeave={() => setTooltip(null)}
+            onClick={() => {
+              toggle(key)
+              if (isTerritory) setTerritoryTooltip(false)
+            }}
+            onMouseEnter={() => {
+              setTooltip(isTerritory ? null : label)
+              if (isTerritory) setTerritoryTooltip(true)
+            }}
+            onMouseLeave={() => {
+              setTooltip(null)
+              if (isTerritory) setTerritoryTooltip(false)
+            }}
+            onTouchStart={isTerritory ? handleTerritoryPressStart : undefined}
+            onTouchEnd={isTerritory ? handleTerritoryPressEnd : undefined}
+            onTouchCancel={isTerritory ? handleTerritoryPressEnd : undefined}
             className="relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90"
             style={{
               background: active ? 'rgba(255,255,255,0.10)' : 'transparent',
@@ -123,7 +153,24 @@ export default function MapControls({ filters, onChange, routingMode, onRouting 
         </span>
       </button>
 
-      {/* ── Tooltip (desktop hover) ── */}
+      {/* ── Separator ── */}
+      <div className="w-px h-6 mx-1 rounded-full" style={{ background: 'rgba(255,255,255,0.12)' }} />
+
+      {/* ── Live badge ── */}
+      <div className="flex items-center gap-1 px-2">
+        <span
+          className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse flex-shrink-0"
+          style={{ width: 6, height: 6 }}
+        />
+        <span
+          className="font-medium"
+          style={{ fontSize: 9, color: 'rgba(52,199,89,0.85)', lineHeight: 1 }}
+        >
+          Live
+        </span>
+      </div>
+
+      {/* ── Tooltip: generic (desktop hover) ── */}
       {tooltip && (
         <div
           className="absolute -top-9 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-lg
@@ -132,6 +179,24 @@ export default function MapControls({ filters, onChange, routingMode, onRouting 
           style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}
         >
           {tooltip}
+        </div>
+      )}
+
+      {/* ── Tooltip: territoire (hover desktop + long-press mobile) ── */}
+      {territoryTooltip && (
+        <div
+          onClick={dismissTerritoryTooltip}
+          className="absolute -top-16 left-1/2 -translate-x-1/2 px-3 py-2 rounded-xl
+                     text-[11px] font-medium text-white/80 pointer-events-auto
+                     max-w-[260px] text-center"
+          style={{
+            background: 'rgba(0,0,0,0.85)',
+            backdropFilter: 'blur(12px)',
+            lineHeight: 1.4,
+            whiteSpace: 'normal',
+          }}
+        >
+          {TERRITORY_TOOLTIP}
         </div>
       )}
     </div>
