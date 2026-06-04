@@ -13,8 +13,24 @@ interface RouteDisplayProps {
   destination?:   SearchResult | null
 }
 
-const LAYERS  = ['route-alt', 'route-glow', 'route-outline', 'route-main']
-const SOURCES = ['route', 'route-alt']
+type RouteType = 'fastest' | 'alternative' | 'safe'
+
+const LAYERS  = ['route-alt-2', 'route-alt-1', 'route-glow', 'route-outline', 'route-main']
+const SOURCES = ['route', 'route-alt-1', 'route-alt-2']
+
+// ── Derive route display type from warnings ────────────────────────────────────
+function routeType(route: CarRoute): RouteType {
+  if (route.warnings.includes('Évite les zones G7')) return 'safe'
+  if (route.alternative) return 'alternative'
+  return 'fastest'
+}
+
+// ── Route paint config by type ────────────────────────────────────────────────
+const ROUTE_STYLE: Record<RouteType, { color: string; width: number; opacity: number; dasharray?: number[] }> = {
+  fastest:     { color: '#0A84FF', width: 5,  opacity: 0.96 },
+  alternative: { color: 'rgba(255,255,255,0.3)', width: 3, opacity: 0.5, dasharray: [4, 3] },
+  safe:        { color: '#34C759', width: 3,  opacity: 0.85, dasharray: [5, 2] },
+}
 
 // ── Marker HTML factory ────────────────────────────────────────────────────────
 function buildMarkerEl(type: 'origin' | 'destination'): HTMLElement {
@@ -46,7 +62,7 @@ function buildMarkerEl(type: 'origin' | 'destination'): HTMLElement {
         @keyframes tif-pulse {
           0%   { transform: scale(1);   opacity: 0.4; }
           50%  { transform: scale(1.4); opacity: 0.15; }
-          100% { transform: scale(1);   opacity: 0.4; }
+          100%  { transform: scale(1);   opacity: 0.4; }
         }
       `
       document.head.appendChild(style)
@@ -147,27 +163,38 @@ export function RouteDisplay({
 
     if (!geo || geo.length < 2) return
 
-    // ── Alternative route (drawn first, behind) ───────────────────────────────
-    const altRoutes = routes.filter((_, i) => i !== selectedIndex)
-    if (altRoutes.length > 0 && altRoutes[0].geometry.length > 1) {
-      map.addSource('route-alt', {
+    // ── Alternative routes (drawn first, behind main) ─────────────────────────
+    const altRoutes = routes
+      .map((r, i) => ({ route: r, origIdx: i }))
+      .filter(({ origIdx }) => origIdx !== selectedIndex)
+
+    altRoutes.forEach(({ route }, slotIdx) => {
+      if (route.geometry.length < 2) return
+      const sourceId = `route-alt-${slotIdx + 1}` as 'route-alt-1' | 'route-alt-2'
+      const layerId  = sourceId
+      const style    = ROUTE_STYLE[routeType(route)]
+
+      map.addSource(sourceId, {
         type: 'geojson',
         data: {
           type: 'Feature', properties: {},
-          geometry: { type: 'LineString', coordinates: altRoutes[0].geometry },
+          geometry: { type: 'LineString', coordinates: route.geometry },
         },
       })
+
+      const paint: mapboxgl.LinePaint = {
+        'line-color':   style.color,
+        'line-width':   style.width,
+        'line-opacity': style.opacity,
+      }
+      if (style.dasharray) paint['line-dasharray'] = style.dasharray
+
       map.addLayer({
-        id: 'route-alt', type: 'line', source: 'route-alt',
+        id: layerId, type: 'line', source: sourceId,
         layout: { 'line-join': 'round', 'line-cap': 'round' },
-        paint:  {
-          'line-color':     'rgba(255,255,255,0.25)',
-          'line-width':     3,
-          'line-opacity':   0.5,
-          'line-dasharray': [4, 3],
-        },
+        paint,
       })
-    }
+    })
 
     // ── Main route source (starts with just first 2 coords for animation) ─────
     map.addSource('route', {
@@ -178,38 +205,48 @@ export function RouteDisplay({
       },
     })
 
+    // Determine main route type for coloring
+    const mainStyle = ROUTE_STYLE[routeType(mainRoute)]
+    const isBlue    = routeType(mainRoute) === 'fastest'
+    const glowColor = routeType(mainRoute) === 'safe' ? '#34C759' : '#0A84FF'
+
     // Glow layer — blurred, wide
     map.addLayer({
       id: 'route-glow', type: 'line', source: 'route',
       layout: { 'line-join': 'round', 'line-cap': 'round' },
       paint: {
-        'line-color':   '#0A84FF',
-        'line-width':   14,
+        'line-color':   glowColor,
+        'line-width':   isBlue ? 14 : 10,
         'line-opacity': 0.22,
         'line-blur':    6,
       },
     })
 
-    // White outline
-    map.addLayer({
-      id: 'route-outline', type: 'line', source: 'route',
-      layout: { 'line-join': 'round', 'line-cap': 'round' },
-      paint: {
-        'line-color':   '#FFFFFF',
-        'line-width':   7,
-        'line-opacity': 0.18,
-      },
-    })
+    // White outline (only for fastest/most visible routes)
+    if (routeType(mainRoute) !== 'alternative') {
+      map.addLayer({
+        id: 'route-outline', type: 'line', source: 'route',
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
+        paint: {
+          'line-color':   '#FFFFFF',
+          'line-width':   7,
+          'line-opacity': 0.18,
+        },
+      })
+    }
 
-    // Main blue line
+    // Main line (color varies by route type)
+    const mainPaint: mapboxgl.LinePaint = {
+      'line-color':   mainStyle.color,
+      'line-width':   mainStyle.width,
+      'line-opacity': mainStyle.opacity,
+    }
+    if (mainStyle.dasharray) mainPaint['line-dasharray'] = mainStyle.dasharray
+
     map.addLayer({
       id: 'route-main', type: 'line', source: 'route',
       layout: { 'line-join': 'round', 'line-cap': 'round' },
-      paint: {
-        'line-color':   '#0A84FF',
-        'line-width':   5,
-        'line-opacity': 0.96,
-      },
+      paint: mainPaint,
     })
 
     // ── Animate drawing ────────────────────────────────────────────────────────
