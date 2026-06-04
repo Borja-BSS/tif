@@ -1,5 +1,3 @@
-// Photon (Komoot/OSM) — geocoder open-source, sans API key
-// https://photon.komoot.io
 const PHOTON_BASE = 'https://photon.komoot.io/api'
 const GENEVE      = { lat: 46.2044, lng: 6.1432 }
 const BBOX        = { minLat: 45.8, maxLat: 46.7, minLng: 5.5, maxLng: 7.2 }
@@ -21,7 +19,6 @@ const TRANSIT_VALUES = new Set([
 export async function searchPlaces(query: string): Promise<SearchResult[]> {
   if (query.trim().length < 2) return []
 
-  // Photon: layers must be appended individually (comma-separated breaks the param)
   const url = new URL(PHOTON_BASE + '/')
   url.searchParams.set('q',     query.trim())
   url.searchParams.set('lat',   String(GENEVE.lat))
@@ -32,20 +29,32 @@ export async function searchPlaces(query: string): Promise<SearchResult[]> {
     url.searchParams.append('layer', l)
   }
 
-  const res = await fetch(url.toString(), {
+  const finalUrl = url.toString()
+  console.log('[search-engine] fetching:', finalUrl)
+
+  const res = await fetch(finalUrl, {
     headers: { 'User-Agent': 'TIF-G7-LiveView/1.0' },
-    // No AbortSignal — let Vercel handle the timeout natively
+    cache:   'no-store',
   })
 
-  if (!res.ok) return []
+  console.log('[search-engine] Photon status:', res.status)
+  if (!res.ok) {
+    console.error('[search-engine] Photon error:', res.status, res.statusText)
+    return []
+  }
 
   const data = await res.json() as { features?: PhotonFeature[] }
+  const total = data.features?.length ?? 0
+  console.log('[search-engine] Photon features:', total)
 
-  return (data.features ?? [])
+  const results = (data.features ?? [])
     .filter(inGeneva)
     .map(toResult)
     .filter((r): r is SearchResult => r !== null)
     .slice(0, 7)
+
+  console.log('[search-engine] filtered results:', results.length)
+  return results
 }
 
 export async function geocodeAddress(address: string): Promise<SearchResult | null> {
@@ -53,7 +62,6 @@ export async function geocodeAddress(address: string): Promise<SearchResult | nu
   return res[0] ?? null
 }
 
-// ── Photon internals ──────────────────────────────────────────────────────────
 interface PhotonFeature {
   geometry:   { type: 'Point'; coordinates: [number, number] }
   properties: Record<string, unknown>
@@ -61,16 +69,17 @@ interface PhotonFeature {
 
 function inGeneva(f: PhotonFeature): boolean {
   const [lng, lat] = f.geometry.coordinates
-  return lat > BBOX.minLat && lat < BBOX.maxLat && lng > BBOX.minLng && lng < BBOX.maxLng
+  const pass = lat > BBOX.minLat && lat < BBOX.maxLat && lng > BBOX.minLng && lng < BBOX.maxLng
+  if (!pass) console.log('[search-engine] filtered OUT:', f.properties.name, [lng,lat])
+  return pass
 }
 
 function str(v: unknown): string { return typeof v === 'string' ? v : '' }
 function num(v: unknown): number { return typeof v === 'number' ? v : 0  }
 
 function toResult(f: PhotonFeature): SearchResult | null {
-  const p             = f.properties
-  const [lng, lat]    = f.geometry.coordinates
-  if (!lng || !lat)   return null
+  const p          = f.properties
+  const [lng, lat] = f.geometry.coordinates
 
   const osmId    = num(p.osm_id)
   const osmType  = str(p.osm_type)
@@ -81,7 +90,6 @@ function toResult(f: PhotonFeature): SearchResult | null {
   const city     = str(p.city)
   const country  = str(p.country)
 
-  // Build title — named place > street + number > city
   let title = ''
   if (name && name !== street) {
     title = name
@@ -91,6 +99,7 @@ function toResult(f: PhotonFeature): SearchResult | null {
   } else if (city) {
     title = city
   } else {
+    console.log('[search-engine] toResult returning null for:', p)
     return null
   }
 
