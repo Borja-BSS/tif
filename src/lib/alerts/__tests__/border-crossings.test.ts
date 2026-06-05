@@ -75,10 +75,10 @@ describe('getBorderCrossings — GeoJSON output', () => {
     expect(Array.isArray(result.features)).toBe(true)
   })
 
-  it('contains all 8 border crossings', async () => {
+  it('contains all 26 border crossings', async () => {
     const { getBorderCrossings } = await import('@/lib/territory/border-crossings')
     const result = await getBorderCrossings()
-    expect(result.features).toHaveLength(8)
+    expect(result.features).toHaveLength(26)
   })
 
   it('every feature has required border properties', async () => {

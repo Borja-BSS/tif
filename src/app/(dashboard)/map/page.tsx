@@ -1,9 +1,11 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useState }             from 'react'
 import { useSession }           from 'next-auth/react'
 import { useQuery }             from '@tanstack/react-query'
-import dynamic                  from 'next/dynamic'
+import dynamicImport            from 'next/dynamic'
 import { SearchBar }            from '@/components/map/ui/SearchBar'
 import { QuickFilters }         from '@/components/map/ui/QuickFilters'
 import { FloatingControls }     from '@/components/map/ui/FloatingControls'
@@ -15,7 +17,7 @@ import type { FilterId }        from '@/components/map/ui/QuickFilters'
 
 // Keep MapView dynamic (no SSR) — preserve existing behavior
 // MapView manages its own filters and map instance internally
-const MapView = dynamic(() => import('@/components/map/MapView'), { ssr: false })
+const MapView = dynamicImport(() => import('@/components/map/MapView'), { ssr: false })
 
 interface DashboardData {
   globalStatus: string
@@ -25,7 +27,7 @@ interface DashboardData {
 
 export default function MapPage() {
   const [activeFilter, setActiveFilter] = useState<FilterId>('all')
-  const { data: session }               = useSession()
+  const session                         = useSession()?.data ?? null
   const isG7Active                      = useG7Active()
 
   const { data: dashboard } = useQuery<DashboardData>({
