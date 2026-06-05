@@ -139,13 +139,18 @@ export default function RealtimeLayer({ map, visible = true, showTransport = tru
     }
   }, [map, initLayers, flushToMap])
 
+  // Ne pas afficher le badge si la clé Ably n'est pas configurée
+  const ablyConfigured = typeof process.env.NEXT_PUBLIC_ABLY_KEY === 'string' && process.env.NEXT_PUBLIC_ABLY_KEY.length > 0
+
   return (
-    <div className="absolute bottom-10 right-4 flex flex-col gap-1.5 items-end">
-      {/* Badge connexion */}
-      <div className="flex items-center gap-2 rounded-lg bg-black/70 backdrop-blur px-3 py-1.5 text-[11px] font-mono">
-        <span className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-emerald-400 animate-pulse' : 'bg-red-500'}`} />
-        <span className="text-white/50">{connected ? 'Ably · live' : 'reconnecting…'}</span>
-      </div>
+    <div className="absolute flex flex-col gap-1.5 items-end" style={{ bottom: 'calc(56px + 54px)', right: 16 }}>
+      {/* Badge connexion — visible uniquement si Ably est configuré */}
+      {ablyConfigured && (
+        <div className="flex items-center gap-2 rounded-lg bg-black/70 backdrop-blur px-3 py-1.5 text-[11px] font-mono">
+          <span className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-emerald-400 animate-pulse' : 'bg-yellow-400'}`} />
+          <span className="text-white/50">{connected ? 'live' : 'limité'}</span>
+        </div>
+      )}
 
       {/* Stats signaux */}
       {stats.total > 0 && (

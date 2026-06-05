@@ -38,8 +38,7 @@ export default function MapGL({
       antialias:  true,
     })
 
-    map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right')
-    map.addControl(new mapboxgl.ScaleControl({ unit: 'metric' }), 'bottom-left')
+    // Contrôles natifs Mapbox supprimés — UI custom gère GPS + zoom
 
     map.on('load', () => {
       // Atmosphère subtile en mode globe
