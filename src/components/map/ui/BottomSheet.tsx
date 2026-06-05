@@ -318,8 +318,8 @@ function DouanesDetail({ onSelect, map }: {
 }
 
 // ── Transport ─────────────────────────────────────────────────────────────────
-interface TpgDisruptionItem { lineNumber: string; type: string; description: string }
-interface CffDisruptionItem { line: string; type: string; description: string; isCEVA?: boolean; delayMinutes?: number }
+interface TpgDisruptionItem { lineNumber: string; type: string; description: string; detectedAt?: string }
+interface CffDisruptionItem { line: string; type: string; description: string; isCEVA?: boolean; delayMinutes?: number; detectedAt?: string }
 interface TransportData {
   disruptions: { tpg: TpgDisruptionItem[]; cff: CffDisruptionItem[] }
 }
@@ -391,12 +391,19 @@ function TransportDetail() {
             <div key={i} className="flex gap-3 rounded-xl px-3 py-2.5"
               style={{ background: 'rgba(255,149,0,0.08)', border: '1px solid rgba(255,149,0,0.15)' }}>
               <span className="text-base flex-shrink-0">{TYPE_ICON[d.type] ?? '⏱️'}</span>
-              <div className="min-w-0">
-                <span className="text-[11px] font-bold px-1.5 py-0.5 rounded mr-1"
-                  style={{ background: '#FF9500', color: '#000' }}>
-                  {d.lineNumber}
-                </span>
-                <span className="text-[12px]" style={{ color: 'var(--text-primary)' }}>{d.description}</span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] font-bold px-1.5 py-0.5 rounded"
+                    style={{ background: '#FF9500', color: '#000' }}>
+                    {d.lineNumber}
+                  </span>
+                  {d.detectedAt && (
+                    <span className="text-[10px] flex-shrink-0" style={{ color: 'var(--text-tertiary)' }}>
+                      {new Date(d.detectedAt).toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Zurich' })}
+                    </span>
+                  )}
+                </div>
+                <p className="text-[12px] mt-0.5" style={{ color: 'var(--text-primary)' }}>{d.description}</p>
               </div>
             </div>
           ))}
@@ -412,12 +419,19 @@ function TransportDetail() {
             <div key={i} className="flex gap-3 rounded-xl px-3 py-2.5"
               style={{ background: 'rgba(0,64,255,0.08)', border: '1px solid rgba(0,64,255,0.15)' }}>
               <span className="text-base flex-shrink-0">{TYPE_ICON[d.type] ?? '⏱️'}</span>
-              <div className="min-w-0">
-                <span className="text-[11px] font-bold px-1.5 py-0.5 rounded mr-1"
-                  style={{ background: d.isCEVA ? '#AF52DE' : '#0040FF', color: '#fff' }}>
-                  {d.line}
-                </span>
-                <span className="text-[12px]" style={{ color: 'var(--text-primary)' }}>{d.description}</span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] font-bold px-1.5 py-0.5 rounded"
+                    style={{ background: d.isCEVA ? '#AF52DE' : '#0040FF', color: '#fff' }}>
+                    {d.line}
+                  </span>
+                  {d.detectedAt && (
+                    <span className="text-[10px] flex-shrink-0" style={{ color: 'var(--text-tertiary)' }}>
+                      {new Date(d.detectedAt).toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Zurich' })}
+                    </span>
+                  )}
+                </div>
+                <p className="text-[12px] mt-0.5" style={{ color: 'var(--text-primary)' }}>{d.description}</p>
               </div>
             </div>
           ))}

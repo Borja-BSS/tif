@@ -10,6 +10,7 @@ export interface TpgDisruption {
   affectedStops: string[]
   direction?:    string
   coordinates?:  [number, number]  // [lat, lng]
+  detectedAt?:   string            // ISO — heure du départ concerné
 }
 
 export interface CffDisruption {
@@ -22,6 +23,7 @@ export interface CffDisruption {
   description:   string
   coordinates:   [number, number]  // [lat, lng]
   isCEVA:        boolean
+  detectedAt?:   string            // ISO — heure du départ concerné
 }
 
 export interface G7Impact {

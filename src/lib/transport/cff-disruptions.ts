@@ -31,7 +31,8 @@ interface StationboardEntry {
   number?:   string
   to?:       string
   stop?: {
-    delay?: number | null
+    delay?:     number | null
+    departure?: string | null
   }
 }
 
@@ -90,6 +91,7 @@ export async function getCffDisruptions(): Promise<CffDisruption[]> {
         description:  `${line} → ${entry.to ?? '?'} : retard de ${delay} min`,
         coordinates:  stationCoords(station),
         isCEVA,
+        detectedAt:   entry.stop?.departure ?? new Date().toISOString(),
       })
     }
   }

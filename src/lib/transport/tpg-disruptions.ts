@@ -61,6 +61,7 @@ async function fetchStopDelays(
       affectedStops: [stop.name],
       direction:     undefined,
       coordinates:   [stop.lat, stop.lng],
+      detectedAt:    dep.stop.departure ?? new Date().toISOString(),
     })
   }
 
