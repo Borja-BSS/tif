@@ -103,7 +103,7 @@ function getCrossingSources(id: string, isG7: boolean): OfficialSource[] {
   if (JURA_IDS.has(id)) {
     sources.push({ label: 'Préfecture du Jura', url: 'https://www.jura.gouv.fr' })
   }
-  sources.push({ label: 'Inforoute.ch — trafic live', url: 'https://www.inforoute.ch' })
+  sources.push({ label: 'TCS — Info trafic Suisse', url: 'https://www.tcs.ch/fr/routes-voyages/info-trafic/' })
   if (isG7) {
     sources.push({ label: 'G7 Évian 2026 — Élysée', url: 'https://www.elysee.fr' })
     sources.push({ label: 'Confédération suisse', url: 'https://www.admin.ch' })
@@ -374,9 +374,28 @@ function AlertesDetail({ alerts }: { alerts: DashboardData['alerts'] }) {
           </div>
         </div>
       ))}
-      <p className="text-[11px] text-center pt-1" style={{ color: 'var(--text-tertiary)' }}>
-        TIF · inforoute.ch · Waze · HERE Maps
-      </p>
+      {/* Sources alertes cliquables */}
+      <div className="mt-3 space-y-2">
+        <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>
+          Sources
+        </p>
+        {[
+          { label: 'RTS — Info Trafic', url: 'https://www.rts.ch/info/trafic/' },
+          { label: 'TCS — Info trafic Suisse', url: 'https://www.tcs.ch/fr/routes-voyages/info-trafic/' },
+          { label: 'Inforoute — ASTRA', url: 'https://www.astra.admin.ch' },
+          { label: 'Börja Swiss Solutions', url: 'https://borja-swiss-solutions.ch' },
+        ].map(src => (
+          <a key={src.url} href={src.url} target="_blank" rel="noopener noreferrer"
+            className="flex items-center justify-between rounded-xl px-3 py-2.5 active:scale-[0.98] transition-transform"
+            style={{ background: 'var(--bg)', border: '1px solid var(--border)' }}>
+            <span className="text-[13px] font-medium" style={{ color: 'var(--brand)' }}>{src.label}</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2.5" strokeLinecap="round" className="flex-shrink-0 ml-2">
+              <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
+              <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+            </svg>
+          </a>
+        ))}
+      </div>
     </div>
   )
 }
