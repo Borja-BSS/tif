@@ -113,8 +113,16 @@ export function useHereMobilityLayer(map: mapboxgl.Map | null) {
       }
     }
 
-    if (map.isStyleLoaded()) addTraffic()
-    else map.once('style.load', addTraffic)
+    // Fallback multi-event : style.load peut avoir déjà tiré quand cet effet s'exécute
+    if (map.isStyleLoaded()) {
+      addTraffic()
+    } else {
+      map.once('style.load', addTraffic)
+    }
+    // Garantie : si les deux ont raté, on réessaie au premier idle
+    map.once('idle', () => {
+      if (!map.getLayer(LAYER_FLOW)) addTraffic()
+    })
 
     return () => {
       try {
