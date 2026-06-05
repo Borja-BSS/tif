@@ -3,6 +3,7 @@ import { getIncidents }             from '@/lib/here/incidents'
 import { getTpgDisruptions }        from '@/lib/alerts/tpg-disruptions'
 import { getOverpassRoadworks }     from '@/lib/alerts/overpass-roadworks'
 import { getWeatherAlerts }         from '@/lib/alerts/openmeteo-weather'
+import { getWazeIncidents }         from '@/lib/waze/incidents'
 import { withMetrics }              from '@/lib/route-utils'
 import { redis }                    from '@/lib/redis'
 import { logger }                   from '@/lib/logger'
@@ -14,11 +15,19 @@ export const dynamic = 'force-dynamic'
 const CACHE_KEY = 'tif:layer:alerts:merged'
 const CACHE_TTL = 60
 
-// Two features are considered duplicates if they're within ~200m
-function areDuplicates(
-  a: Feature<Point>,
-  b: Feature<Point>,
-): boolean {
+// Two features are duplicates only if: same source type AND within ~200m
+// Weather features (multiple per location) are never deduplicated against each other
+function areDuplicates(a: Feature<Point>, b: Feature<Point>): boolean {
+  const typeA = (a.properties as Record<string, unknown>)?.type as string | undefined
+  const typeB = (b.properties as Record<string, unknown>)?.type as string | undefined
+
+  // Never deduplicate weather or tpg features — multiple per location are intentional
+  if (typeA === 'weather' || typeB === 'weather') return false
+  if (typeA === 'tpg'     || typeB === 'tpg')     return false
+
+  // For road/traffic features: deduplicate if within ~200m and same type
+  if (typeA !== typeB) return false
+
   const [lngA, latA] = a.geometry.coordinates
   const [lngB, latB] = b.geometry.coordinates
   const dlat = (latA - latB) * 111_000
@@ -48,40 +57,48 @@ async function handler(_req: NextRequest): Promise<NextResponse> {
     logger.warn({ err }, 'alerts:redis-get-failed — skipping cache')
   }
 
-  // Sources parallèles — toutes avec fallback silencieux
-  const [hereResult, tpgResult, overpassResult, weatherResult] = await Promise.allSettled([
-    getIncidents(),           // HERE Maps accidents/congestion (si clé disponible)
+  // 5 sources en parallèle — toutes avec fallback silencieux
+  const [hereResult, wazeResult, tpgResult, overpassResult, weatherResult] = await Promise.allSettled([
+    getIncidents(),           // HERE Maps accidents/congestion
+    getWazeIncidents(),       // Waze live — accidents, bouchons, dangers
     getTpgDisruptions(),      // opendata.ch — retards TPG/CFF
-    getOverpassRoadworks(),   // OpenStreetMap — travaux/chantiers (gratuit, garanti)
-    getWeatherAlerts(),       // OpenMeteo — météo 48h (gratuit, garanti)
+    getOverpassRoadworks(),   // OpenStreetMap — travaux (gratuit)
+    getWeatherAlerts(),       // OpenMeteo — météo 48h (gratuit)
   ])
 
   const allFeatures: Feature<Point>[] = []
 
   if (hereResult.status === 'fulfilled') {
     allFeatures.push(...hereResult.value.features as Feature<Point>[])
-    logger.debug({ count: hereResult.value.features.length }, 'alerts:here-ok')
+    logger.info({ count: hereResult.value.features.length }, 'alerts:here-ok')
   } else {
     logger.warn({ err: hereResult.reason }, 'alerts:here-failed')
   }
 
+  if (wazeResult.status === 'fulfilled') {
+    allFeatures.push(...wazeResult.value.features as Feature<Point>[])
+    logger.info({ count: wazeResult.value.features.length }, 'alerts:waze-ok')
+  } else {
+    logger.warn({ err: wazeResult.reason }, 'alerts:waze-failed')
+  }
+
   if (tpgResult.status === 'fulfilled') {
     allFeatures.push(...tpgResult.value.features as Feature<Point>[])
-    logger.debug({ count: tpgResult.value.features.length }, 'alerts:tpg-ok')
+    logger.info({ count: tpgResult.value.features.length }, 'alerts:tpg-ok')
   } else {
     logger.warn({ err: tpgResult.reason }, 'alerts:tpg-failed')
   }
 
   if (overpassResult.status === 'fulfilled') {
     allFeatures.push(...overpassResult.value.features as Feature<Point>[])
-    logger.debug({ count: overpassResult.value.features.length }, 'alerts:overpass-ok')
+    logger.info({ count: overpassResult.value.features.length }, 'alerts:overpass-ok')
   } else {
     logger.warn({ err: overpassResult.reason }, 'alerts:overpass-failed')
   }
 
   if (weatherResult.status === 'fulfilled') {
     allFeatures.push(...weatherResult.value.features as Feature<Point>[])
-    logger.debug({ count: weatherResult.value.features.length }, 'alerts:weather-ok')
+    logger.info({ count: weatherResult.value.features.length }, 'alerts:weather-ok')
   } else {
     logger.warn({ err: weatherResult.reason }, 'alerts:weather-failed')
   }
