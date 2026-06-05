@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react'
 import mapboxgl from 'mapbox-gl'
 import type { FeatureCollection } from 'geojson'
+import { buildInstantGeoJSON } from '@/lib/territory/border-crossings-client'
 
 interface BorderCrossingsLayerProps {
   map: mapboxgl.Map | null
@@ -324,10 +325,18 @@ export default function BorderCrossingsLayer({ map }: BorderCrossingsLayerProps)
       map.on('mouseleave', LAYER_ICON, () => { map.getCanvas().style.cursor = '' })
     }
 
-    // isStyleLoaded() évite le piège de map.loaded() qui revient false
-    // quand les tuiles chargent (ex. après setFog dans MapGL)
-    if (map.isStyleLoaded()) { run(); setupEvents() }
-    else map.once('load', () => { run(); setupEvents() })
+    const runWithFallback = async () => {
+      // 1. Show static data INSTANTLY — zero network wait
+      const instant = buildInstantGeoJSON(new Date())
+      await applyData(map, instant as unknown as FeatureCollection)
+      setupEvents()
+      // 2. Then fetch live data from API in background
+      const live = await fetchBorderData()
+      if (live) await applyData(map, live)
+    }
+
+    if (map.isStyleLoaded()) { runWithFallback() }
+    else map.once('style.load', () => { runWithFallback() })
 
     timerRef.current = setInterval(async () => {
       const data = await fetchBorderData()

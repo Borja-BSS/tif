@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState, useCallback }  from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { useSession }             from 'next-auth/react'
 import { useQuery }               from '@tanstack/react-query'
 import dynamicImport              from 'next/dynamic'
@@ -50,7 +50,7 @@ export default function MapPage() {
     placeholderData: { globalStatus: 'calm', alerts: [] },
   })
 
-  const filterState = toFilterState(activeFilter)
+  const filterState = useMemo(() => toFilterState(activeFilter), [activeFilter])
 
   return (
     <div className="h-screen w-full overflow-hidden relative" style={{ background: '#000' }}>

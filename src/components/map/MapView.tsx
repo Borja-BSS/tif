@@ -8,7 +8,6 @@ import type { FilterState } from './FilterPanel'
 import { useTerritorialLayers }    from './useTerritorialLayers'
 import { useHereMobilityLayer }    from './useHereMobilityLayer'
 import { useTransitNetworkLayer }  from './useTransitNetworkLayer'
-import { G7Banner }                from './transport/G7Banner'
 import { DisruptionsPanel }        from './transport/DisruptionsPanel'
 
 const MapGL                = dynamic(() => import('./MapGL'),                { ssr: false })
@@ -95,7 +94,6 @@ export default function MapView({ filters: externalFilters, onMapReady, ...props
     <>
       <MapGL {...props} onMapReady={m => { setMap(m); onMapReady?.(m) }} />
 
-      <G7Banner />
       {filters.transport && <DisruptionsPanel />}
 
       <BorderCrossingsLayer map={map} />
@@ -154,7 +152,7 @@ export default function MapView({ filters: externalFilters, onMapReady, ...props
 function TransportLegend() {
   return (
     <div
-      className="absolute bottom-24 right-4 z-10 rounded-2xl px-3 py-2.5"
+      className="absolute bottom-24 left-4 z-10 rounded-2xl px-3 py-2.5"
       style={{
         background:           'rgba(18,18,22,0.72)',
         backdropFilter:       'blur(24px) saturate(180%)',
