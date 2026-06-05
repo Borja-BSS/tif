@@ -14,7 +14,7 @@ const MapGL                = dynamic(() => import('./MapGL'),                { s
 const RealtimeLayer        = dynamic(() => import('./RealtimeLayer'),        { ssr: false })
 const AlertLayer           = dynamic(() => import('./AlertLayer'),           { ssr: false })
 const TerritoryLayer       = dynamic(() => import('./TerritoryLayer'),       { ssr: false })
-const G7Overlay            = dynamic(() => import('./G7Overlay'),            { ssr: false })
+// G7Overlay supprimé — countdown remplacé par la carte G7 dans le BottomSheet
 const FilterPanel          = dynamic(() => import('./FilterPanel'),          { ssr: false })
 const BorderCrossingsLayer = dynamic(() => import('./BorderCrossingsLayer'), { ssr: false })
 const RoadClosuresLayer    = dynamic(() => import('./RoadClosuresLayer'),    { ssr: false })
@@ -104,7 +104,6 @@ export default function MapView({ filters: externalFilters, onMapReady, ...props
           <TerritoryLayer map={map} visible={filters.territory} />
           <RealtimeLayer  map={map} visible={filters.heatmap} showTransport={filters.transport} />
           <AlertLayer     map={map} visible={filters.alerts} />
-          <G7Overlay      map={map} />
           <HereIncidentsLayer map={filters.alerts && !filters.transport ? map : null} />
 
           {/* Transport legend — compact Liquid Glass badge, bottom-right */}
