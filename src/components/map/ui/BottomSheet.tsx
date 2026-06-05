@@ -333,7 +333,7 @@ function TransportDetail() {
   })
 
   const byTime = <T extends { detectedAt?: string }>(arr: T[]) =>
-    [...arr].sort((a, b) => (b.detectedAt ?? '').localeCompare(a.detectedAt ?? ''))
+    [...arr].sort((a, b) => (a.detectedAt ?? '').localeCompare(b.detectedAt ?? ''))
 
   const tpgDisruptions  = byTime(data?.disruptions.tpg ?? [])
   const cffDisruptions  = byTime(data?.disruptions.cff?.filter(d => !d.isCEVA) ?? [])
