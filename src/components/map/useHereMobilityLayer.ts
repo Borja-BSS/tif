@@ -33,7 +33,7 @@ export function useHereMobilityLayer(map: mapboxgl.Map | null) {
         url:  'mapbox://mapbox.mapbox-traffic-v1',
       })
 
-      // Halo lumineux sous les lignes (effet de profondeur)
+      // Halo lumineux (visible même à zoom 9)
       map.addLayer({
         id:   LAYER_GLOW,
         type: 'line',
@@ -42,13 +42,13 @@ export function useHereMobilityLayer(map: mapboxgl.Map | null) {
         layout: { 'line-join': 'round', 'line-cap': 'round' },
         paint: {
           'line-color':   CONGESTION_COLOR,
-          'line-width':   ['interpolate', ['linear'], ['zoom'], 9, 4, 12, 8, 15, 14],
-          'line-opacity': 0.25,
-          'line-blur':    3,
+          'line-width':   ['interpolate', ['linear'], ['zoom'], 8, 5, 10, 8, 14, 14],
+          'line-opacity': 0.30,
+          'line-blur':    4,
         },
       })
 
-      // Ligne principale traffic
+      // Ligne principale — épaisseur doublée à zoom 9 pour lisibilité Grand Genève
       map.addLayer({
         id:   LAYER_FLOW,
         type: 'line',
@@ -57,8 +57,8 @@ export function useHereMobilityLayer(map: mapboxgl.Map | null) {
         layout: { 'line-join': 'round', 'line-cap': 'round' },
         paint: {
           'line-color':   CONGESTION_COLOR,
-          'line-width':   ['interpolate', ['linear'], ['zoom'], 9, 1.5, 12, 3.5, 15, 6],
-          'line-opacity': 0.9,
+          'line-width':   ['interpolate', ['linear'], ['zoom'], 8, 2, 10, 3.5, 14, 6],
+          'line-opacity': 0.95,
         },
       })
     }

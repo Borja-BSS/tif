@@ -108,10 +108,14 @@ function injectPopupStyle() {
   document.head.appendChild(s)
 }
 
-// ── Data fetch ────────────────────────────────────────────────────────────────
+// ── Data fetch — 4s timeout strict ────────────────────────────────────────────
+// Si Redis ou HERE sont lents, on ne bloque PAS l'affichage statique
 async function fetchBorderData(): Promise<FeatureCollection | null> {
   try {
-    const res = await fetch('/api/v1/layers/territory', { cache: 'no-store' })
+    const res = await fetch('/api/v1/layers/territory', {
+      cache:  'no-store',
+      signal: AbortSignal.timeout(4000),  // 4s max — sinon on garde le statique
+    })
     if (!res.ok) return null
     return res.json() as Promise<FeatureCollection>
   } catch { return null }

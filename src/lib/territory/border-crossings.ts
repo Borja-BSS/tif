@@ -343,6 +343,153 @@ const CROSSINGS: Crossing[] = [
     g7Info: '🔒 Fermé du 12 au 18 juin 2026',
     nearestOpen: 'Anières (5 km)',
   },
+
+  // ── Extension Grand Genève — Pays de Gex ────────────────────────────────────
+  {
+    id: 'prevessin-moens', name: 'Prévessin-Moëns',
+    lat: 46.25600, lng: 6.06700, type: 'main', capacity: 'medium',
+    hours: '24h/24', vehicles: ['Voitures', 'Motos'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '✓ Ouvert · Zone CERN · Contrôles fréquents',
+  },
+  {
+    id: 'sauverny', name: 'Sauverny',
+    lat: 46.28200, lng: 6.01700, type: 'secondary', capacity: 'low',
+    hours: '06:00–22:00', vehicles: ['Voitures', 'Motos'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '⚠️ Contrôles renforcés pendant G7', nearestOpen: 'Meyrin (5 km)',
+  },
+  {
+    id: 'thoiry', name: 'Thoiry / Saint-Jean-de-Gonville',
+    lat: 46.26600, lng: 5.98800, type: 'secondary', capacity: 'low',
+    hours: '06:00–22:00', vehicles: ['Voitures', 'Motos'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '⚠️ Contrôles renforcés pendant G7', nearestOpen: 'La Plaine (12 km)',
+  },
+  {
+    id: 'peron', name: 'Péron',
+    lat: 46.19600, lng: 5.92900, type: 'secondary', capacity: 'low',
+    hours: '06:00–20:00', vehicles: ['Voitures'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '⚠️ Contrôles renforcés pendant G7', nearestOpen: 'La Plaine (15 km)',
+  },
+  {
+    id: 'divonne', name: 'Divonne-les-Bains',
+    lat: 46.35700, lng: 6.13800, type: 'main', capacity: 'medium',
+    hours: '24h/24', vehicles: ['Voitures', 'Motos', 'Piétons'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '✓ Ouvert 24/7 · Accès lac et casino',
+  },
+  {
+    id: 'leaz', name: 'Léaz / Longeray',
+    lat: 45.93400, lng: 5.81200, type: 'main', capacity: 'medium',
+    hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Motos'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '✓ Ouvert · Entrée A40 côté français',
+  },
+
+  // ── Extension Grand Genève — Vaud-France ────────────────────────────────────
+  {
+    id: 'la-cure', name: 'La Cure / Les Rousses',
+    lat: 46.45600, lng: 6.06800, type: 'main', capacity: 'medium',
+    hours: '24h/24 (sauf neige)', vehicles: ['Voitures', 'Motos', 'Piétons', 'Vélos'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '✓ Ouvert · Route D1084 ↔ Givrine · Fermé si neige abondante',
+  },
+  {
+    id: 'saint-cergue', name: 'Saint-Cergue (Col de la Givrine)',
+    lat: 46.44700, lng: 6.15400, type: 'secondary', capacity: 'low',
+    hours: '24h/24 (saison)', vehicles: ['Voitures', 'Motos', 'Vélos', 'Piétons'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '✓ Ouvert · Passage Nyon ↔ Morez FR', nearestOpen: 'La Cure (15 km)',
+  },
+  {
+    id: 'vallorbe', name: 'Vallorbe',
+    lat: 46.70600, lng: 6.37500, type: 'main', capacity: 'high',
+    hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Train', 'Motos'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise', 'Vignette CH recommandée'],
+    g7Info: '✓ Ouvert · Douane principale Vaud · Ligne CFF Lausanne-Paris',
+  },
+  {
+    id: 'bois-d-amont', name: "Bois-d'Amont (Les Rousses)",
+    lat: 46.52200, lng: 5.98700, type: 'secondary', capacity: 'low',
+    hours: '24h/24 (saison ski)', vehicles: ['Voitures', 'Motos', 'Piétons'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '✓ Ouvert · Zone ski transfrontalière Les Rousses ↔ Suisse',
+  },
+  {
+    id: 'saint-Laurent', name: 'Saint-Laurent-en-Grandvaux',
+    lat: 46.57600, lng: 5.96000, type: 'secondary', capacity: 'low',
+    hours: '06:00–22:00', vehicles: ['Voitures', 'Motos'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '✓ Ouvert · Jura ↔ Vaud · Vers Champagnole', nearestOpen: 'La Cure (20 km)',
+  },
+  {
+    id: 'les-hopitaux-neufs', name: 'Les Hôpitaux-Neufs / Pontarlier',
+    lat: 46.80500, lng: 6.35600, type: 'main', capacity: 'medium',
+    hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Motos'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '✓ Ouvert · Axe RN57 Pontarlier ↔ Vallorbe (CH)',
+  },
+
+  // ── Extension Grand Genève — Haute-Savoie ───────────────────────────────────
+  {
+    id: 'douvaine', name: 'Douvaine',
+    lat: 46.31400, lng: 6.31700, type: 'main', capacity: 'medium',
+    hours: '24h/24', vehicles: ['Voitures', 'Motos', 'Camions'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '✓ Ouvert · Axe Annemasse ↔ Thonon · Surveillance renforcée G7',
+  },
+  {
+    id: 'sciez', name: 'Sciez / Ballaison',
+    lat: 46.29000, lng: 6.29000, type: 'secondary', capacity: 'low',
+    hours: '06:00–22:00', vehicles: ['Voitures', 'Motos'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '⚠️ Contrôles pendant G7', nearestOpen: 'Douvaine (8 km)',
+  },
+  {
+    id: 'excenevex', name: 'Excenevex / Yvoire',
+    lat: 46.35200, lng: 6.32900, type: 'tertiary', capacity: 'low',
+    hours: 'Piétons / Vélos / Riverains', vehicles: ['Piétons', 'Vélos', 'Voitures riverains'],
+    vignettes: ['CNI ou passeport obligatoire'],
+    g7Info: '⚠️ Contrôles renforcés G7 · Rive lac Léman', nearestOpen: 'Douvaine (9 km)',
+  },
+  {
+    id: 'thonon', name: 'Thonon-les-Bains',
+    lat: 46.37100, lng: 6.47700, type: 'main', capacity: 'medium',
+    hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Motos'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '✓ Ouvert · Axe vers Évian et Valais · Renforcé G7',
+  },
+  {
+    id: 'evian', name: 'Évian-les-Bains',
+    lat: 46.40100, lng: 6.58700, type: 'main', capacity: 'medium',
+    hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Motos'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise', 'Pass G7 requis 12-18 juin'],
+    g7Info: '🏛️ SITE G7 · Contrôles maximaux 8-18 juin · Accès très restreint sans accréditation',
+    nearestOpen: 'Thonon (15 km)',
+  },
+  {
+    id: 'annemasse-gaillard', name: 'Annemasse / Gaillard',
+    lat: 46.19400, lng: 6.23400, type: 'main', capacity: 'high',
+    hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Motos', 'Piétons', 'Tram'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise', "Crit'Air / Stick'AIR (ZFE Annemasse)"],
+    g7Info: '✓ Ouvert · Axe principal Genève ↔ Annecy · Contrôles renforcés G7',
+  },
+  {
+    id: 'saint-julien', name: 'Saint-Julien-en-Genevois',
+    lat: 46.14200, lng: 6.07700, type: 'main', capacity: 'high',
+    hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Cars', 'Motos'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '✓ Ouvert 24/7 · Axe A41 vers Annecy · Renforcé G7',
+  },
+  {
+    id: 'collonges', name: 'Collonges-sous-Salève',
+    lat: 45.99800, lng: 6.05200, type: 'secondary', capacity: 'medium',
+    hours: '24h/24', vehicles: ['Voitures', 'Motos'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '✓ Ouvert · A40 direction Annecy / Sallanches',
+  },
 ]
 
 // ── Directives G7 ─────────────────────────────────────────────────────────────
@@ -350,7 +497,12 @@ const G7_START_UTC = new Date('2026-06-11T22:01:00Z')
 const G7_END_UTC   = new Date('2026-06-18T21:59:00Z')
 
 const G7_AUTHORIZED = new Set([
+  // Genève — 24/7 pendant G7
   'bardonnex', 'thonex-vallard', 'moillesulaz', 'meyrin', 'ferney-voltaire', 'perly', 'anieres',
+  // Extension Grand Genève — ouverts pendant G7
+  'prevessin-moens', 'divonne', 'leaz', 'la-cure', 'vallorbe', 'bois-d-amont',
+  'les-hopitaux-neufs', 'saint-Laurent', 'douvaine', 'thonon',
+  'annemasse-gaillard', 'saint-julien', 'collonges',
 ])
 const G7_MACARON = new Set(['bardonnex', 'thonex-vallard'])
 
