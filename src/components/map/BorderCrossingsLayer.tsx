@@ -12,6 +12,7 @@ interface BorderCrossingsLayerProps {
 const REFRESH_MS   = 120_000
 const SOURCE_ID    = 'tif-border-crossings'
 const LAYER_SHADOW = 'tif-border-shadow'
+const LAYER_DOT    = 'tif-border-dot'     // cercle coloré — toujours visible, aucune image
 const LAYER_ICON   = 'tif-border-icon'
 
 const STATUS_LABEL: Record<string, string> = {
@@ -250,19 +251,7 @@ async function applyData(m: mapboxgl.Map, geojson: FeatureCollection) {
     f => (f.properties as Record<string, unknown>)?.type === 'border',
   )
 
-  // 1. Pré-charger toutes les images manquantes via toDataURL → HTMLImageElement
-  const seen   = new Set<string>()
-  const loads: Promise<void>[] = []
-  for (const f of borderFeatures) {
-    const { color, strokeColor, emoji, imgId } = featureImgProps(f)
-    if (!seen.has(imgId) && !m.hasImage(imgId)) {
-      seen.add(imgId)
-      loads.push(loadMarkerImage(m, imgId, color, strokeColor, emoji))
-    }
-  }
-  await Promise.all(loads)
-
-  // 2. Préparer les features enrichies
+  // 1. Préparer les features — pas besoin d'attendre les images pour afficher les cercles
   const data: FeatureCollection = {
     type: 'FeatureCollection',
     features: borderFeatures.map(f => {
@@ -271,38 +260,74 @@ async function applyData(m: mapboxgl.Map, geojson: FeatureCollection) {
     }),
   }
 
-  // 3. Ajouter source + layers — pas d'attente idle (cause de lenteur extrême)
-  // Le style est garanti chargé car on vérifie isStyleLoaded() avant d'appeler applyData
   const src = m.getSource(SOURCE_ID) as mapboxgl.GeoJSONSource | undefined
-  if (src) { src.setData(data); return }
+  if (src) {
+    // Mise à jour des données uniquement — les layers existent déjà
+    src.setData(data)
+    // Charger les nouvelles images emoji en arrière-plan (non-bloquant)
+    void loadMissingImages(m, borderFeatures)
+    return
+  }
 
+  // 2. Ajouter source + layers cercles IMMÉDIATEMENT (pas d'images requises)
   m.addSource(SOURCE_ID, { type: 'geojson', data })
 
+  // Ombre portée
   m.addLayer({
     id: LAYER_SHADOW, type: 'circle', source: SOURCE_ID,
     paint: {
-      'circle-radius': 20, 'circle-color': 'rgba(0,0,0,0.32)',
-      'circle-blur': 0.55, 'circle-translate': [0, 3],
+      'circle-radius': 18, 'circle-color': 'rgba(0,0,0,0.35)',
+      'circle-blur': 0.6, 'circle-translate': [0, 3],
     },
   })
 
+  // Cercle coloré selon le statut — TOUJOURS visible, aucune image requise
+  m.addLayer({
+    id: LAYER_DOT, type: 'circle', source: SOURCE_ID,
+    paint: {
+      'circle-radius':       16,
+      'circle-color':        ['get', 'color'],
+      'circle-stroke-width': 3,
+      'circle-stroke-color': ['get', 'strokeColor'],
+      'circle-opacity':      0.92,
+    },
+  })
+
+  // Emoji par-dessus — chargé en arrière-plan, s'affiche quand prêt
   m.addLayer({
     id: LAYER_ICON, type: 'symbol', source: SOURCE_ID,
     layout: {
-      'icon-image': ['get', 'imgId'],
-      'icon-size': 1,
-      'icon-allow-overlap': true,
+      'icon-image':            ['get', 'imgId'],
+      'icon-size':             1,
+      'icon-allow-overlap':    true,
       'icon-ignore-placement': true,
     },
   })
 
   // Toujours au-dessus du trafic
   m.moveLayer(LAYER_SHADOW)
+  m.moveLayer(LAYER_DOT)
   m.moveLayer(LAYER_ICON)
+
+  // Charger les images emoji en arrière-plan (non-bloquant)
+  void loadMissingImages(m, borderFeatures)
+}
+
+async function loadMissingImages(m: mapboxgl.Map, features: FeatureCollection['features']) {
+  const seen  = new Set<string>()
+  const loads: Promise<void>[] = []
+  for (const f of features) {
+    const { color, strokeColor, emoji, imgId } = featureImgProps(f as { properties: unknown })
+    if (!seen.has(imgId) && !m.hasImage(imgId)) {
+      seen.add(imgId)
+      loads.push(loadMarkerImage(m, imgId, color, strokeColor, emoji))
+    }
+  }
+  if (loads.length) await Promise.all(loads)
 }
 
 function removeLayers(m: mapboxgl.Map) {
-  for (const id of [LAYER_ICON, LAYER_SHADOW]) {
+  for (const id of [LAYER_ICON, LAYER_DOT, LAYER_SHADOW]) {
     if (m.getLayer(id)) m.removeLayer(id)
   }
   if (m.getSource(SOURCE_ID)) m.removeSource(SOURCE_ID)
@@ -338,6 +363,7 @@ export default function BorderCrossingsLayer({ map }: BorderCrossingsLayerProps)
 
     const ensureOnTop = () => {
       if (map.getLayer(LAYER_SHADOW)) map.moveLayer(LAYER_SHADOW)
+      if (map.getLayer(LAYER_DOT))    map.moveLayer(LAYER_DOT)
       if (map.getLayer(LAYER_ICON))   map.moveLayer(LAYER_ICON)
     }
 
@@ -354,27 +380,27 @@ export default function BorderCrossingsLayer({ map }: BorderCrossingsLayerProps)
 
       // Écoute sur les deux layers : shadow (cercle, toujours visible) ET icon
       map.on('click', LAYER_SHADOW, dispatchClick)
+      map.on('click', LAYER_DOT,    dispatchClick)
       map.on('click', LAYER_ICON,   dispatchClick)
-      map.on('mouseenter', LAYER_SHADOW, () => { map.getCanvas().style.cursor = 'pointer' })
-      map.on('mouseleave', LAYER_SHADOW, () => { map.getCanvas().style.cursor = '' })
-      map.on('mouseenter', LAYER_ICON,   () => { map.getCanvas().style.cursor = 'pointer' })
-      map.on('mouseleave', LAYER_ICON,   () => { map.getCanvas().style.cursor = '' })
+      for (const layer of [LAYER_SHADOW, LAYER_DOT, LAYER_ICON]) {
+        map.on('mouseenter', layer, () => { map.getCanvas().style.cursor = 'pointer' })
+        map.on('mouseleave', layer, () => { map.getCanvas().style.cursor = '' })
+      }
 
       // Re-monter au-dessus si de nouveaux layers sont ajoutés après nous
       map.on('styledata', ensureOnTop)
     }
 
     const runWithFallback = async () => {
-      // 0. Pré-charger les images communes EN PARALLÈLE avec les données statiques
-      const [instant] = await Promise.all([
-        Promise.resolve(buildInstantGeoJSON(new Date())),
-        preloadCommonImages(map),  // images prêtes avant applyData
-      ])
-      // 1. Affichage immédiat avec données statiques
+      // 1. Affichage IMMÉDIAT des cercles colorés (pas d'images requises)
+      const instant = buildInstantGeoJSON(new Date())
       await applyData(map, instant as unknown as FeatureCollection)
       setupEvents()
-      // 2. Données live en arrière-plan
-      const live = await fetchBorderData()
+      // 2. Pré-charger les images emoji en parallèle + données live
+      const [live] = await Promise.all([
+        fetchBorderData(),
+        preloadCommonImages(map),
+      ])
       if (live) await applyData(map, live)
     }
 
