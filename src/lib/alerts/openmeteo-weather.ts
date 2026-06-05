@@ -24,18 +24,6 @@ const WMO_LABEL: Record<number, { label: string; icon: string; severity: 'major'
   99:  { label: 'Orage violent avec grêle',   icon: '⛈️', severity: 'major' },
 }
 
-interface OpenMeteoResponse {
-  hourly: {
-    time:                     string[]
-    precipitation_probability: number[]
-    weather_code:             number[]
-  }
-  daily: {
-    time:             string[]
-    precipitation_sum: number[]
-    wind_speed_10m_max: number[]
-  }
-}
 
 export interface WeatherProperties {
   id:          string
@@ -54,79 +42,110 @@ export type WeatherFeatureCollection = FeatureCollection<Point, WeatherPropertie
 // Coordonnées Genève-ville pour ancrer les alertes météo
 const GE_CENTER: [number, number] = [6.1432, 46.2044]
 
+interface OpenMeteoFull {
+  current: {
+    weather_code:    number
+    precipitation:   number
+    wind_speed_10m:  number
+  }
+  hourly: {
+    time:                      string[]
+    precipitation_probability: number[]
+    weather_code:              number[]
+  }
+  daily: {
+    time:                        string[]
+    precipitation_probability_max: number[]
+    wind_speed_10m_max:          number[]
+    weather_code:                number[]
+  }
+}
+
 export async function getWeatherAlerts(): Promise<WeatherFeatureCollection> {
   const url = new URL('https://api.open-meteo.com/v1/forecast')
-  url.searchParams.set('latitude',   '46.2044')
-  url.searchParams.set('longitude',  '6.1432')
-  url.searchParams.set('hourly',     'precipitation_probability,weather_code')
-  url.searchParams.set('daily',      'precipitation_sum,wind_speed_10m_max')
-  url.searchParams.set('forecast_days', '2')
-  url.searchParams.set('timezone',   'Europe/Zurich')
+  url.searchParams.set('latitude',      '46.2044')
+  url.searchParams.set('longitude',     '6.1432')
+  url.searchParams.set('current',       'weather_code,precipitation,wind_speed_10m')
+  url.searchParams.set('hourly',        'precipitation_probability,weather_code')
+  url.searchParams.set('daily',         'precipitation_probability_max,wind_speed_10m_max,weather_code')
+  url.searchParams.set('forecast_days', '3')
+  url.searchParams.set('timezone',      'Europe/Zurich')
 
   const res = await fetch(url.toString(), { signal: AbortSignal.timeout(6000) })
   if (!res.ok) throw new Error(`OpenMeteo HTTP ${res.status}`)
 
-  const data = await res.json() as OpenMeteoResponse
+  const data = await res.json() as OpenMeteoFull
   const features: Feature<Point, WeatherProperties>[] = []
-  const now = new Date()
 
-  // Alertes horaires — 12 prochaines heures uniquement
-  const times = data.hourly.time
-  for (let i = 0; i < Math.min(times.length, 12); i++) {
-    const t       = new Date(times[i])
-    if (t < now) continue
-
-    const prob    = data.hourly.precipitation_probability[i]
-    const wmo     = data.hourly.weather_code[i]
-    const info    = WMO_LABEL[wmo]
-
-    // Alerter si risque de précipitation > 60% ou code météo significatif
-    if (prob < 60 && (!info || info.severity === 'lowImpact')) continue
-
-    const label = info?.label ?? 'Conditions météo'
-    const icon  = info?.icon  ?? '⛅'
-    const sev   = info?.severity ?? 'minor'
-
-    const hh = t.toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Zurich' })
-    const dd = t.toLocaleDateString('fr-CH', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Europe/Zurich' })
+  // --- 1. Conditions actuelles (toujours affichées si code connu) ---
+  const curWmo  = data.current.weather_code
+  const curInfo = WMO_LABEL[curWmo]
+  if (curInfo) {
+    const precip = data.current.precipitation
+    const wind   = data.current.wind_speed_10m
+    let desc = `${curInfo.icon} ${curInfo.label} à Genève`
+    if (precip > 0)  desc += ` · ${precip.toFixed(1)} mm`
+    if (wind > 40)   desc += ` · Vent ${Math.round(wind)} km/h`
 
     features.push({
       type: 'Feature',
       properties: {
-        id:          `meteo-${i}`,
+        id:          'meteo-now',
         type:        'weather',
-        criticality: sev,
-        description: `${label} prévu — ${dd} à ${hh} · Risque ${prob}%`,
-        icon,
-        color:       sev === 'major' ? '#5856D6' : '#007AFF',
-        startTime:   t.toISOString(),
-        endTime:     null,
-        source:      'OpenMeteo',
-      },
-      geometry: { type: 'Point', coordinates: GE_CENTER },
-    })
-
-    if (features.length >= 3) break  // max 3 alertes météo
-  }
-
-  // Alerte vent si > 50 km/h
-  const wind = data.daily.wind_speed_10m_max[0]
-  if (wind > 50) {
-    features.push({
-      type: 'Feature',
-      properties: {
-        id:          'meteo-wind',
-        type:        'weather',
-        criticality: wind > 70 ? 'major' : 'minor',
-        description: `💨 Rafales jusqu'à ${Math.round(wind)} km/h prévues sur le Grand Genève`,
-        icon:        '💨',
-        color:       '#5856D6',
+        criticality: curInfo.severity,
+        description: desc,
+        icon:        curInfo.icon,
+        color:       curInfo.severity === 'major' ? '#5856D6' : curInfo.severity === 'minor' ? '#007AFF' : '#8E8E93',
         startTime:   new Date().toISOString(),
         endTime:     null,
         source:      'OpenMeteo',
       },
       geometry: { type: 'Point', coordinates: GE_CENTER },
     })
+  }
+
+  // --- 2. Prévisions journalières — 3 prochains jours (seuil 25%) ---
+  const dailyTimes = data.daily.time
+  const today = new Date().toISOString().slice(0, 10)
+
+  for (let i = 0; i < dailyTimes.length; i++) {
+    if (dailyTimes[i] === today) continue  // aujourd'hui déjà en "courant"
+
+    const prob  = data.daily.precipitation_probability_max[i]
+    const wmo   = data.daily.weather_code[i]
+    const wind  = data.daily.wind_speed_10m_max[i]
+    const info  = WMO_LABEL[wmo]
+
+    // Toujours afficher si pluie > 25% ou vent > 50 km/h ou code connu
+    if (prob < 25 && wind <= 50 && !info) continue
+
+    const dayLabel = new Date(dailyTimes[i] + 'T12:00:00').toLocaleDateString('fr-CH', {
+      weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/Zurich',
+    })
+
+    const icon  = info?.icon ?? (prob > 50 ? '🌧️' : '⛅')
+    const sev   = info?.severity ?? (prob > 60 ? 'minor' : 'lowImpact')
+    let desc = `${icon} ${info?.label ?? 'Risque météo'} — ${dayLabel}`
+    if (prob >= 25) desc += ` · Risque pluie ${prob}%`
+    if (wind > 50)  desc += ` · Rafales ${Math.round(wind)} km/h`
+
+    features.push({
+      type: 'Feature',
+      properties: {
+        id:          `meteo-day-${i}`,
+        type:        'weather',
+        criticality: sev,
+        description: desc,
+        icon,
+        color:       sev === 'major' ? '#5856D6' : '#007AFF',
+        startTime:   new Date(dailyTimes[i] + 'T06:00:00').toISOString(),
+        endTime:     new Date(dailyTimes[i] + 'T22:00:00').toISOString(),
+        source:      'OpenMeteo',
+      },
+      geometry: { type: 'Point', coordinates: GE_CENTER },
+    })
+
+    if (features.length >= 4) break
   }
 
   return { type: 'FeatureCollection', features }

@@ -7,14 +7,19 @@ import type { FeatureCollection, Feature, Point } from 'geojson'
 const BBOX = '46.05,5.75,46.95,7.00'  // Grand Genève étendu
 
 const QUERY = `
-[out:json][timeout:12];
+[out:json][timeout:10];
 (
   way["highway"="construction"](${BBOX});
   way["construction"~"."](${BBOX});
   node["highway"="construction"](${BBOX});
+  node["construction"~"."](${BBOX});
   way["access"="no"]["temporary"="yes"](${BBOX});
+  node["access"="no"]["temporary"="yes"](${BBOX});
+  way["barrier"="construction"](${BBOX});
+  way["hazard"~"."](${BBOX});
+  node["hazard"~"."](${BBOX});
 );
-out center tags 30;
+out center tags 50;
 `.trim()
 
 export interface OverpassProperties {
