@@ -57,7 +57,7 @@ async function fetchStopDelays(
       id:            `tpg-${stop.id}-${lineNum}-${dep.stop.departure ?? Date.now()}`,
       lineNumber:    lineNum,
       type,
-      description:   `Ligne ${lineNum} — retard ${delay} min (${stop.name})`,
+      description:   `Départ retardé de ${delay} min · Ligne ${lineNum} (${stop.name})`,
       affectedStops: [stop.name],
       direction:     undefined,
       coordinates:   [stop.lat, stop.lng],

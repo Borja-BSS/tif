@@ -323,6 +323,11 @@ interface CffDisruptionItem { line: string; type: string; description: string; i
 interface TransportData {
   disruptions: { tpg: TpgDisruptionItem[]; cff: CffDisruptionItem[] }
 }
+interface TpgLineStatus {
+  line: string; status: 'normal' | 'delayed' | 'disrupted'
+  delayMin: number; direction: string; stopName: string; departure: string | null
+}
+interface TpgLinesData { lines: TpgLineStatus[]; generatedAt: string }
 
 function TransportDetail() {
   const { data, isLoading } = useQuery<TransportData>({
@@ -330,6 +335,13 @@ function TransportDetail() {
     queryFn:         () => fetch('/api/v1/layers/transport', { signal: AbortSignal.timeout(8000) }).then(r => r.json()),
     refetchInterval: 30_000,
     staleTime:       15_000,
+  })
+
+  const { data: tpgLines, isLoading: linesLoading } = useQuery<TpgLinesData>({
+    queryKey:        ['tpg-lines'],
+    queryFn:         () => fetch('/api/v1/tpg-lines', { signal: AbortSignal.timeout(10000) }).then(r => r.json()),
+    refetchInterval: 60_000,
+    staleTime:       20_000,
   })
 
   // Garde uniquement les départs dans les 45 prochaines minutes, triés par heure croissante
@@ -387,6 +399,39 @@ function TransportDetail() {
           </div>
         )
       })}
+
+      {/* Section lignes TPG par ligne */}
+      <div className="pt-1">
+        <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-tertiary)' }}>
+          Lignes TPG · opendata.ch
+        </p>
+        {linesLoading && (
+          <div className="flex items-center gap-2 py-2">
+            {[0,1,2].map(i => <span key={i} className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" style={{ animationDelay: `${i*150}ms` }} />)}
+          </div>
+        )}
+        {!linesLoading && (tpgLines?.lines ?? []).length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {(tpgLines?.lines ?? []).map(l => {
+              const c = l.status === 'disrupted' ? '#FF453A' : l.status === 'delayed' ? '#FF9F0A' : '#30D158'
+              return (
+                <div key={l.line}
+                  title={l.status !== 'normal' ? `+${l.delayMin} min vers ${l.direction} (${l.stopName})` : `Normal · ${l.direction}`}
+                  className="flex items-center gap-1 rounded-lg px-2 py-1"
+                  style={{ background: `${c}15`, border: `1px solid ${c}35` }}>
+                  <span className="text-[12px] font-bold" style={{ color: c }}>{l.line}</span>
+                  {l.status !== 'normal' && (
+                    <span className="text-[10px]" style={{ color: c }}>+{l.delayMin}</span>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
+        {!linesLoading && (tpgLines?.lines ?? []).length === 0 && (
+          <p className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>Aucune ligne détectée</p>
+        )}
+      </div>
 
       {/* Disruption details */}
       {tpgDisruptions.length > 0 && (

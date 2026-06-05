@@ -88,7 +88,7 @@ export async function getCffDisruptions(): Promise<CffDisruption[]> {
         from:         station,
         to:           entry.to ?? '—',
         delayMinutes: delay,
-        description:  `${line} → ${entry.to ?? '?'} : retard de ${delay} min`,
+        description:  `Départ retardé de ${delay} min · ${line} → ${entry.to ?? '?'}`,
         coordinates:  stationCoords(station),
         isCEVA,
         detectedAt:   entry.stop?.departure ?? new Date().toISOString(),
