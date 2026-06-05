@@ -57,24 +57,26 @@ async function handler(_req: NextRequest): Promise<NextResponse> {
     byStop[id] = results[i].status === 'fulfilled' ? results[i].value : []
   })
 
-  // Build per-line status from next departure of that line at the reference stop
-  const lines: TpgLineStatus[] = []
-  const seenLines = new Set<string>()
+  // Build per-line status — toutes les lignes configurées, normal par défaut si non trouvée
+  const lineMap = new Map<string, TpgLineStatus>()
 
+  // Initialise toutes les lignes à "normal"
+  for (const { line, stopName } of TPG_LINE_STOPS) {
+    if (!lineMap.has(line)) {
+      lineMap.set(line, { line, status: 'normal', delayMin: 0, direction: '—', stopName, departure: null })
+    }
+  }
+
+  // Met à jour depuis les données stationboard (sans filtre opérateur strict)
   for (const { line, stopId, stopName } of TPG_LINE_STOPS) {
-    if (seenLines.has(line)) continue
+    if (lineMap.get(line)?.status !== 'normal') continue  // déjà mis à jour avec un retard
 
     const entries = byStop[stopId] ?? []
-    const next = entries.find(e => {
-      const num = (e.number ?? e.category ?? '').trim()
-      return num === line && (e.operator ?? '').toUpperCase() === 'TPG'
-    })
-
+    const next = entries.find(e => (e.number ?? e.category ?? '').trim() === line)
     if (!next) continue
-    seenLines.add(line)
 
     const delay = next.stop?.delay ?? 0
-    lines.push({
+    lineMap.set(line, {
       line,
       status:    delay >= 10 ? 'disrupted' : delay >= 3 ? 'delayed' : 'normal',
       delayMin:  delay,
@@ -83,6 +85,8 @@ async function handler(_req: NextRequest): Promise<NextResponse> {
       departure: next.stop?.departure ?? null,
     })
   }
+
+  const lines = [...lineMap.values()]
 
   // Sort: disrupted → delayed → normal, then by line number
   lines.sort((a, b) => {
