@@ -1,0 +1,2 @@
+Add UserJourney and PushSubscription tables with PreferredMode enum.
+Migration created manually (DB unreachable at generation time).

@@ -172,7 +172,7 @@ model UserJourney {
   departureMinute Int
   flexMinutes     Int   @default(15)
 
-  preferredMode       String @default("both")
+  preferredMode       PreferredMode @default(BOTH)
   notifyMinutesBefore Int    @default(15)
 
   active    Boolean  @default(true)
@@ -350,6 +350,12 @@ model G7WatchAlert {
 
   @@index([detectedAt])
   @@index([sourceId])
+}
+
+enum PreferredMode {
+  CAR
+  TRANSIT
+  BOTH
 }
 
 enum G7DirectiveCategory {
