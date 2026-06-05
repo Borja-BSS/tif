@@ -84,28 +84,29 @@ interface OfficialSource { label: string; url: string }
 
 function getCrossingSources(id: string, isG7: boolean): OfficialSource[] {
   const sources: OfficialSource[] = [
-    { label: 'Douanes suisses (BAZG)', url: 'https://www.bazg.admin.ch/bazg/fr/home/services/fuer_reisende.html' },
+    { label: 'TIF · Börja Swiss Solutions', url: 'https://borja-swiss-solutions.ch' },
+    { label: 'Douanes suisses (BAZG)', url: 'https://www.bazg.admin.ch' },
   ]
   if (GENEVA_IDS.has(id)) {
-    sources.push({ label: 'Canton de Genève — mobilité', url: 'https://www.ge.ch/mobilite-deplacements-grand-geneve' })
-    sources.push({ label: 'Ville de Genève — circulation', url: 'https://www.ville-geneve.ch/themes/mobilite-circulation/' })
+    sources.push({ label: 'Canton de Genève', url: 'https://www.ge.ch' })
+    sources.push({ label: 'Ville de Genève', url: 'https://www.ville-geneve.ch' })
   }
   if (VAUD_IDS.has(id)) {
-    sources.push({ label: 'Canton de Vaud — mobilité', url: 'https://www.vd.ch/themes/mobilite' })
+    sources.push({ label: 'Canton de Vaud', url: 'https://www.vd.ch' })
   }
   if (HAUTE_SAVOIE_IDS.has(id)) {
-    sources.push({ label: 'Préfecture Haute-Savoie', url: 'https://www.haute-savoie.gouv.fr/Politiques-publiques/Transports-et-securite-routiere' })
+    sources.push({ label: 'Préfecture Haute-Savoie', url: 'https://www.haute-savoie.gouv.fr' })
   }
   if (AIN_IDS.has(id)) {
-    sources.push({ label: 'Préfecture de l\'Ain', url: 'https://www.ain.gouv.fr/Actions-de-l-Etat/Transports-et-deplacement' })
+    sources.push({ label: "Préfecture de l'Ain", url: 'https://www.ain.gouv.fr' })
   }
   if (JURA_IDS.has(id)) {
-    sources.push({ label: 'Préfecture du Jura', url: 'https://www.jura.gouv.fr/Politiques-publiques/Transports-securite-routiere' })
+    sources.push({ label: 'Préfecture du Jura', url: 'https://www.jura.gouv.fr' })
   }
   sources.push({ label: 'Inforoute.ch — trafic live', url: 'https://www.inforoute.ch' })
   if (isG7) {
-    sources.push({ label: 'G7 Évian 2026 — Restrictions', url: 'https://www.elysee.fr/g7' })
-    sources.push({ label: 'Admin.ch — mesures G7', url: 'https://www.admin.ch/gov/fr/accueil.html' })
+    sources.push({ label: 'G7 Évian 2026 — Élysée', url: 'https://www.elysee.fr' })
+    sources.push({ label: 'Confédération suisse', url: 'https://www.admin.ch' })
   }
   return sources
 }
