@@ -318,34 +318,114 @@ function DouanesDetail({ onSelect, map }: {
 }
 
 // ── Transport ─────────────────────────────────────────────────────────────────
-function TransportDetail({ network }: { network?: DashboardData['network'] }) {
-  const lines = [
-    { name: 'TPG — Tram & Bus', key: 'tpg' as const, icon: '🚌' },
-    { name: 'CFF / SBB', key: 'cff' as const, icon: '🚂' },
-    { name: 'Léman Express CEVA', key: 'ceva' as const, icon: '🚆' },
-  ]
+interface TpgDisruptionItem { lineNumber: string; type: string; description: string }
+interface CffDisruptionItem { line: string; type: string; description: string; isCEVA?: boolean; delayMinutes?: number }
+interface TransportData {
+  disruptions: { tpg: TpgDisruptionItem[]; cff: CffDisruptionItem[] }
+}
+
+function TransportDetail() {
+  const { data, isLoading } = useQuery<TransportData>({
+    queryKey:        ['transport-layer'],
+    queryFn:         () => fetch('/api/v1/layers/transport', { signal: AbortSignal.timeout(8000) }).then(r => r.json()),
+    refetchInterval: 30_000,
+    staleTime:       15_000,
+  })
+
+  const tpgDisruptions = data?.disruptions.tpg ?? []
+  const cffDisruptions = data?.disruptions.cff?.filter(d => !d.isCEVA) ?? []
+  const cevaDisruptions = data?.disruptions.cff?.filter(d => d.isCEVA) ?? []
+
+  const tpgStatus  = tpgDisruptions.length  === 0 ? 'normal' : 'delayed'
+  const cffStatus  = cffDisruptions.length  === 0 ? 'normal' : 'delayed'
+  const cevaStatus = cevaDisruptions.length === 0 ? 'normal' : 'delayed'
+
+  const statusColor = (s: string) => s === 'normal' ? '#30D158' : '#FF9F0A'
+  const statusLabel = (s: string) => s === 'normal' ? 'Normal' : 'Retards'
+
+  const TYPE_ICON: Record<string, string> = {
+    travaux: '🚧', deviation: '🔀', suppression: '🚫', retard: '⏱️', perturbation: '⚠️',
+  }
+
   return (
     <div className="space-y-3">
-      <p className="text-[10px] font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-tertiary)' }}>
+      <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>
         Statut réseau temps réel
       </p>
-      {lines.map(l => {
-        const st = network?.[l.key] ?? 'normal'
-        const c  = st === 'normal' ? '#30D158' : st === 'delayed' ? '#FF9F0A' : '#FF453A'
+
+      {isLoading && (
+        <div className="flex items-center gap-2 py-3">
+          {[0,1,2].map(i => (
+            <span key={i} className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" style={{ animationDelay: `${i*150}ms` }} />
+          ))}
+        </div>
+      )}
+
+      {/* Status rows */}
+      {[
+        { icon: '🚌', name: 'TPG — Tram & Bus', status: tpgStatus },
+        { icon: '🚂', name: 'CFF / SBB',         status: cffStatus },
+        { icon: '🚆', name: 'Léman Express CEVA', status: cevaStatus },
+      ].map(l => {
+        const c = statusColor(l.status)
         return (
-          <div key={l.key} className="flex items-center gap-3 rounded-2xl px-4 py-3"
+          <div key={l.name} className="flex items-center gap-3 rounded-2xl px-4 py-3"
             style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
             <span className="text-xl">{l.icon}</span>
             <p className="flex-1 text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{l.name}</p>
             <span className="text-[11px] font-bold px-2 py-0.5 rounded-full"
               style={{ background: `${c}18`, color: c }}>
-              {st === 'normal' ? 'Normal' : st === 'delayed' ? 'Retards' : 'Perturbé'}
+              {statusLabel(l.status)}
             </span>
           </div>
         )
       })}
-      <p className="text-[11px] text-center pt-2" style={{ color: 'var(--text-tertiary)' }}>
-        opendata.ch · TPG.ch · CFF.ch
+
+      {/* Disruption details */}
+      {tpgDisruptions.length > 0 && (
+        <div className="space-y-1.5">
+          <p className="text-[10px] font-semibold uppercase tracking-wider pt-1" style={{ color: 'var(--text-tertiary)' }}>
+            Retards TPG détectés
+          </p>
+          {tpgDisruptions.map((d, i) => (
+            <div key={i} className="flex gap-3 rounded-xl px-3 py-2.5"
+              style={{ background: 'rgba(255,149,0,0.08)', border: '1px solid rgba(255,149,0,0.15)' }}>
+              <span className="text-base flex-shrink-0">{TYPE_ICON[d.type] ?? '⏱️'}</span>
+              <div className="min-w-0">
+                <span className="text-[11px] font-bold px-1.5 py-0.5 rounded mr-1"
+                  style={{ background: '#FF9500', color: '#000' }}>
+                  {d.lineNumber}
+                </span>
+                <span className="text-[12px]" style={{ color: 'var(--text-primary)' }}>{d.description}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {[...cffDisruptions, ...cevaDisruptions].length > 0 && (
+        <div className="space-y-1.5">
+          <p className="text-[10px] font-semibold uppercase tracking-wider pt-1" style={{ color: 'var(--text-tertiary)' }}>
+            Retards CFF / CEVA
+          </p>
+          {[...cffDisruptions, ...cevaDisruptions].map((d, i) => (
+            <div key={i} className="flex gap-3 rounded-xl px-3 py-2.5"
+              style={{ background: 'rgba(0,64,255,0.08)', border: '1px solid rgba(0,64,255,0.15)' }}>
+              <span className="text-base flex-shrink-0">{TYPE_ICON[d.type] ?? '⏱️'}</span>
+              <div className="min-w-0">
+                <span className="text-[11px] font-bold px-1.5 py-0.5 rounded mr-1"
+                  style={{ background: d.isCEVA ? '#AF52DE' : '#0040FF', color: '#fff' }}>
+                  {d.line}
+                </span>
+                <span className="text-[12px]" style={{ color: 'var(--text-primary)' }}>{d.description}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <p className="text-[11px] text-center pt-1" style={{ color: 'var(--text-tertiary)' }}>
+        Retards temps réel · opendata.ch
       </p>
     </div>
   )
@@ -667,12 +747,12 @@ export function BottomSheet({ session: _session, activeFilter, map }: BottomShee
           ) : activeFilter === 'all' ? (
             detailView === 'overview'   ? <ToutOverview data={data} onSelect={openDetail} />
             : detailView === 'douanes'  ? <DouanesDetail onSelect={openCrossing} map={map} />
-            : detailView === 'transport'? <TransportDetail network={data?.network} />
+            : detailView === 'transport'? <TransportDetail />
             : detailView === 'alertes'  ? <AlertesDetail map={map} />
             : <G7Detail />
           ) : (
             <div className="space-y-3">
-              {activeFilter === 'transit'  && <TransportDetail network={data?.network} />}
+              {activeFilter === 'transit'  && <TransportDetail />}
               {activeFilter === 'borders'  && <DouanesDetail onSelect={openCrossing} map={map} />}
               {activeFilter === 'alerts'   && <AlertesDetail map={map} />}
               {activeFilter === 'g7'       && <G7Detail />}

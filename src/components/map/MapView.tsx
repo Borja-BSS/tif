@@ -8,7 +8,6 @@ import type { FilterState } from './FilterPanel'
 import { useTerritorialLayers }    from './useTerritorialLayers'
 import { useHereMobilityLayer }    from './useHereMobilityLayer'
 import { useTransitNetworkLayer }  from './useTransitNetworkLayer'
-import { DisruptionsPanel }        from './transport/DisruptionsPanel'
 
 const MapGL                = dynamic(() => import('./MapGL'),                { ssr: false })
 const RealtimeLayer        = dynamic(() => import('./RealtimeLayer'),        { ssr: false })
@@ -93,8 +92,6 @@ export default function MapView({ filters: externalFilters, onMapReady, ...props
   return (
     <>
       <MapGL {...props} onMapReady={m => { setMap(m); onMapReady?.(m) }} />
-
-      {filters.transport && <DisruptionsPanel />}
 
       <BorderCrossingsLayer map={map} />
       <RoadClosuresLayer    map={map} />
