@@ -332,8 +332,12 @@ function TransportDetail() {
     staleTime:       15_000,
   })
 
+  // Garde uniquement les départs dans les 45 prochaines minutes, triés par heure croissante
+  const now45 = Date.now() + 45 * 60 * 1000
   const byTime = <T extends { detectedAt?: string }>(arr: T[]) =>
-    [...arr].sort((a, b) => (a.detectedAt ?? '').localeCompare(b.detectedAt ?? ''))
+    [...arr]
+      .filter(d => !d.detectedAt || new Date(d.detectedAt).getTime() <= now45)
+      .sort((a, b) => (a.detectedAt ?? '').localeCompare(b.detectedAt ?? ''))
 
   const tpgDisruptions  = byTime(data?.disruptions.tpg ?? [])
   const cffDisruptions  = byTime(data?.disruptions.cff?.filter(d => !d.isCEVA) ?? [])
@@ -402,7 +406,7 @@ function TransportDetail() {
                   </span>
                   {d.detectedAt && (
                     <span className="text-[10px] flex-shrink-0" style={{ color: 'var(--text-tertiary)' }}>
-                      {new Date(d.detectedAt).toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Zurich' })}
+                      dép. {new Date(d.detectedAt).toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Zurich' })}
                     </span>
                   )}
                 </div>
@@ -430,7 +434,7 @@ function TransportDetail() {
                   </span>
                   {d.detectedAt && (
                     <span className="text-[10px] flex-shrink-0" style={{ color: 'var(--text-tertiary)' }}>
-                      {new Date(d.detectedAt).toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Zurich' })}
+                      dép. {new Date(d.detectedAt).toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Zurich' })}
                     </span>
                   )}
                 </div>
