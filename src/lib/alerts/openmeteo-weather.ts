@@ -3,25 +3,31 @@
  */
 import type { FeatureCollection, Feature, Point } from 'geojson'
 
-// WMO weather codes → description + icon
+// WMO weather codes → description + icon (codes complets 0-99)
 const WMO_LABEL: Record<number, { label: string; icon: string; severity: 'major' | 'minor' | 'lowImpact' }> = {
-  51:  { label: 'Bruine légère',              icon: '🌦️', severity: 'lowImpact' },
-  53:  { label: 'Bruine modérée',             icon: '🌦️', severity: 'minor' },
-  55:  { label: 'Bruine dense',               icon: '🌧️', severity: 'minor' },
-  61:  { label: 'Pluie faible',               icon: '🌧️', severity: 'lowImpact' },
-  63:  { label: 'Pluie modérée',              icon: '🌧️', severity: 'minor' },
-  65:  { label: 'Pluie forte',                icon: '🌧️', severity: 'major' },
-  71:  { label: 'Chute de neige faible',      icon: '❄️', severity: 'minor' },
-  73:  { label: 'Chute de neige modérée',     icon: '❄️', severity: 'major' },
-  75:  { label: 'Chute de neige forte',       icon: '❄️', severity: 'major' },
-  77:  { label: 'Grêle',                      icon: '🌨️', severity: 'major' },
-  80:  { label: 'Averses faibles',            icon: '🌦️', severity: 'lowImpact' },
-  81:  { label: 'Averses modérées',           icon: '🌧️', severity: 'minor' },
-  82:  { label: 'Averses violentes',          icon: '⛈️', severity: 'major' },
-  85:  { label: 'Averses de neige',           icon: '❄️', severity: 'major' },
-  95:  { label: 'Orage',                      icon: '⛈️', severity: 'major' },
-  96:  { label: 'Orage avec grêle',           icon: '⛈️', severity: 'major' },
-  99:  { label: 'Orage violent avec grêle',   icon: '⛈️', severity: 'major' },
+  0:   { label: 'Ciel dégagé',               icon: '☀️',  severity: 'lowImpact' },
+  1:   { label: 'Principalement dégagé',     icon: '🌤️', severity: 'lowImpact' },
+  2:   { label: 'Partiellement nuageux',     icon: '⛅',  severity: 'lowImpact' },
+  3:   { label: 'Couvert',                   icon: '☁️',  severity: 'lowImpact' },
+  45:  { label: 'Brouillard',                icon: '🌫️', severity: 'minor' },
+  48:  { label: 'Brouillard givrant',        icon: '🌫️', severity: 'minor' },
+  51:  { label: 'Bruine légère',             icon: '🌦️', severity: 'lowImpact' },
+  53:  { label: 'Bruine modérée',            icon: '🌦️', severity: 'minor' },
+  55:  { label: 'Bruine dense',              icon: '🌧️', severity: 'minor' },
+  61:  { label: 'Pluie faible',              icon: '🌧️', severity: 'lowImpact' },
+  63:  { label: 'Pluie modérée',             icon: '🌧️', severity: 'minor' },
+  65:  { label: 'Pluie forte',               icon: '🌧️', severity: 'major' },
+  71:  { label: 'Chute de neige faible',     icon: '❄️',  severity: 'minor' },
+  73:  { label: 'Chute de neige modérée',    icon: '❄️',  severity: 'major' },
+  75:  { label: 'Chute de neige forte',      icon: '❄️',  severity: 'major' },
+  77:  { label: 'Grêle',                     icon: '🌨️', severity: 'major' },
+  80:  { label: 'Averses faibles',           icon: '🌦️', severity: 'lowImpact' },
+  81:  { label: 'Averses modérées',          icon: '🌧️', severity: 'minor' },
+  82:  { label: 'Averses violentes',         icon: '⛈️', severity: 'major' },
+  85:  { label: 'Averses de neige',          icon: '❄️',  severity: 'major' },
+  95:  { label: 'Orage',                     icon: '⛈️', severity: 'major' },
+  96:  { label: 'Orage avec grêle',          icon: '⛈️', severity: 'major' },
+  99:  { label: 'Orage violent avec grêle',  icon: '⛈️', severity: 'major' },
 }
 
 
@@ -77,75 +83,63 @@ export async function getWeatherAlerts(): Promise<WeatherFeatureCollection> {
   const data = await res.json() as OpenMeteoFull
   const features: Feature<Point, WeatherProperties>[] = []
 
-  // --- 1. Conditions actuelles (toujours affichées si code connu) ---
+  // --- 1. Conditions actuelles — toujours affichées (fallback si code inconnu) ---
   const curWmo  = data.current.weather_code
-  const curInfo = WMO_LABEL[curWmo]
-  if (curInfo) {
-    const precip = data.current.precipitation
-    const wind   = data.current.wind_speed_10m
-    let desc = `${curInfo.icon} ${curInfo.label} à Genève`
-    if (precip > 0)  desc += ` · ${precip.toFixed(1)} mm`
-    if (wind > 40)   desc += ` · Vent ${Math.round(wind)} km/h`
+  const curInfo = WMO_LABEL[curWmo] ?? { label: 'Conditions météo', icon: '⛅', severity: 'lowImpact' as const }
+  const precip  = data.current.precipitation
+  const curWind = data.current.wind_speed_10m
+  let curDesc = `${curInfo.icon} ${curInfo.label} à Genève`
+  if (precip > 0)   curDesc += ` · ${precip.toFixed(1)} mm`
+  if (curWind > 40) curDesc += ` · Vent ${Math.round(curWind)} km/h`
 
-    features.push({
-      type: 'Feature',
-      properties: {
-        id:          'meteo-now',
-        type:        'weather',
-        criticality: curInfo.severity,
-        description: desc,
-        icon:        curInfo.icon,
-        color:       curInfo.severity === 'major' ? '#5856D6' : curInfo.severity === 'minor' ? '#007AFF' : '#8E8E93',
-        startTime:   new Date().toISOString(),
-        endTime:     null,
-        source:      'OpenMeteo',
-      },
-      geometry: { type: 'Point', coordinates: GE_CENTER },
-    })
-  }
+  features.push({
+    type: 'Feature',
+    properties: {
+      id:          'meteo-now',
+      type:        'weather',
+      criticality: curInfo.severity,
+      description: curDesc,
+      icon:        curInfo.icon,
+      color:       curInfo.severity === 'major' ? '#5856D6' : curInfo.severity === 'minor' ? '#007AFF' : '#8E8E93',
+      startTime:   new Date().toISOString(),
+      endTime:     null,
+      source:      'OpenMeteo',
+    },
+    geometry: { type: 'Point', coordinates: GE_CENTER },
+  })
 
-  // --- 2. Prévisions journalières — 3 prochains jours (seuil 25%) ---
+  // --- 2. Prévisions journalières — aujourd'hui + 2 prochains jours ---
   const dailyTimes = data.daily.time
-  const today = new Date().toISOString().slice(0, 10)
 
   for (let i = 0; i < dailyTimes.length; i++) {
-    if (dailyTimes[i] === today) continue  // aujourd'hui déjà en "courant"
-
-    const prob  = data.daily.precipitation_probability_max[i]
-    const wmo   = data.daily.weather_code[i]
-    const wind  = data.daily.wind_speed_10m_max[i]
-    const info  = WMO_LABEL[wmo]
-
-    // Toujours afficher si pluie > 25% ou vent > 50 km/h ou code connu
-    if (prob < 25 && wind <= 50 && !info) continue
+    const prob = data.daily.precipitation_probability_max[i]
+    const wmo  = data.daily.weather_code[i]
+    const wind = data.daily.wind_speed_10m_max[i]
+    const info = WMO_LABEL[wmo] ?? { label: 'Conditions variables', icon: '⛅', severity: 'lowImpact' as const }
 
     const dayLabel = new Date(dailyTimes[i] + 'T12:00:00').toLocaleDateString('fr-CH', {
       weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/Zurich',
     })
 
-    const icon  = info?.icon ?? (prob > 50 ? '🌧️' : '⛅')
-    const sev   = info?.severity ?? (prob > 60 ? 'minor' : 'lowImpact')
-    let desc = `${icon} ${info?.label ?? 'Risque météo'} — ${dayLabel}`
-    if (prob >= 25) desc += ` · Risque pluie ${prob}%`
-    if (wind > 50)  desc += ` · Rafales ${Math.round(wind)} km/h`
+    let desc = `${info.icon} ${info.label} — ${dayLabel}`
+    if (prob > 0)  desc += ` · Risque pluie ${prob}%`
+    if (wind > 50) desc += ` · Rafales ${Math.round(wind)} km/h`
 
     features.push({
       type: 'Feature',
       properties: {
         id:          `meteo-day-${i}`,
         type:        'weather',
-        criticality: sev,
+        criticality: prob >= 60 ? 'minor' : info.severity,
         description: desc,
-        icon,
-        color:       sev === 'major' ? '#5856D6' : '#007AFF',
+        icon:        info.icon,
+        color:       prob >= 60 ? '#007AFF' : '#8E8E93',
         startTime:   new Date(dailyTimes[i] + 'T06:00:00').toISOString(),
         endTime:     new Date(dailyTimes[i] + 'T22:00:00').toISOString(),
         source:      'OpenMeteo',
       },
       geometry: { type: 'Point', coordinates: GE_CENTER },
     })
-
-    if (features.length >= 4) break
   }
 
   return { type: 'FeatureCollection', features }
