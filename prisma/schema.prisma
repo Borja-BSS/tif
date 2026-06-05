@@ -21,7 +21,9 @@ model User {
   sessions        Session[]
   accounts        Account[]
   mfaConfig       MfaConfig?
-  mobilityConsent MobilityConsent?
+  mobilityConsent   MobilityConsent?
+  journeys          UserJourney[]
+  pushSubscriptions PushSubscription[]
 
   @@index([status])
   @@index([createdAt])
@@ -150,6 +152,57 @@ model MobilityConsent {
   consentedAt    DateTime @db.Timestamptz
   updatedAt      DateTime @updatedAt @db.Timestamptz
   consentVersion String
+}
+
+model UserJourney {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name      String @db.VarChar(100)
+  fromLat   Float
+  fromLng   Float
+  fromLabel String @db.VarChar(200)
+  toLat     Float
+  toLng     Float
+  toLabel   String @db.VarChar(200)
+
+  dayOfWeek       Int[]
+  departureHour   Int
+  departureMinute Int
+  flexMinutes     Int   @default(15)
+
+  preferredMode       String @default("both")
+  notifyMinutesBefore Int    @default(15)
+
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  pushSubscriptions PushSubscription[]
+
+  @@index([userId])
+  @@index([active])
+}
+
+model PushSubscription {
+  id       String @id @default(cuid())
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  journeyId String?
+  journey   UserJourney? @relation(fields: [journeyId], references: [id], onDelete: SetNull)
+
+  endpoint String @db.Text
+  p256dh   String @db.Text
+  auth     String @db.Text
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  lastUsed  DateTime @updatedAt @db.Timestamptz
+
+  @@unique([userId, endpoint])
+  @@index([userId])
+  @@index([journeyId])
 }
 
 model TrafficZone {
