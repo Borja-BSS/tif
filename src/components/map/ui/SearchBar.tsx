@@ -71,10 +71,9 @@ export function SearchBar({ map }: SearchBarProps) {
     setRecentSearches(updated)
     try { localStorage.setItem('tif:recent-searches', JSON.stringify(updated)) } catch { /* ignore */ }
 
-    map?.flyTo({ center: [result.lng, result.lat], zoom: 15, duration: 700, essential: true })
-    window.dispatchEvent(new CustomEvent('tif:search-pin', {
-      detail: { lat: result.lat, lng: result.lng, title: result.title },
-    }))
+    // Déclenche le calcul d'itinéraire depuis ma position → destination
+    window.dispatchEvent(new CustomEvent('tif:route-to', { detail: result }))
+    map?.flyTo({ center: [result.lng, result.lat], zoom: 14, duration: 700, essential: true })
     setIsOpen(false)
     setQuery('')
     setResults([])

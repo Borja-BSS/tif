@@ -7,6 +7,7 @@ import { useSession }             from 'next-auth/react'
 import dynamicImport              from 'next/dynamic'
 import mapboxgl                   from 'mapbox-gl'
 import { SearchBar }              from '@/components/map/ui/SearchBar'
+import SearchHandle              from '@/components/map/SearchHandle'
 import { QuickFilters }           from '@/components/map/ui/QuickFilters'
 import { FloatingControls }       from '@/components/map/ui/FloatingControls'
 import { BottomSheet }            from '@/components/map/ui/BottomSheet'
@@ -67,6 +68,9 @@ export default function MapPage() {
 
       {/* Layer 7: BottomSheet */}
       <BottomSheet session={session ?? null} activeFilter={activeFilter} map={mapRef} />
+
+      {/* Layer 8: SearchHandle — itinéraire (activé par tif:route-to) */}
+      <SearchHandle map={mapRef} />
 
     </div>
   )

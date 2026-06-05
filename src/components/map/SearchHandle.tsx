@@ -2,9 +2,10 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react'
 import type mapboxgl from 'mapbox-gl'
-import { SearchBox } from './routing/SearchBox'
-import type { SearchResult } from '@/lib/routing/shared/search-engine'
-import type { CarRoute }     from '@/lib/routing/car/here-router'
+import { SearchBox }    from './routing/SearchBox'
+import { RouteDisplay } from './routing/RouteDisplay'
+import type { SearchResult }   from '@/lib/routing/shared/search-engine'
+import type { CarRoute }       from '@/lib/routing/car/here-router'
 import type { TransportRoute } from '@/lib/routing/transport/transport-router'
 
 type HandleState = 'idle' | 'search' | 'route'
@@ -79,6 +80,29 @@ export default function SearchHandle({ map }: SearchHandleProps) {
     })
   }, [map])
 
+  // Écoute tif:route-to depuis SearchBar — destination pré-remplie, GPS auto
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const dest = (e as CustomEvent<SearchResult>).detail
+      setDestination(dest)
+      setState('search')
+      setSheetSize('peek')
+      // Auto-fill GPS origin
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          pos => {
+            const gps: SearchResult = { id: 'gps', title: 'Ma position', lat: pos.coords.latitude, lng: pos.coords.longitude, type: 'address' }
+            setOrigin(gps)
+          },
+          () => setOrigin(null),
+          { timeout: 4000, maximumAge: 30000 }
+        )
+      }
+    }
+    window.addEventListener('tif:route-to', handler)
+    return () => window.removeEventListener('tif:route-to', handler)
+  }, [])
+
   // Calculate both route types when origin + destination ready
   useEffect(() => {
     if (!origin || !destination) return
@@ -135,40 +159,20 @@ export default function SearchHandle({ map }: SearchHandleProps) {
   const fmtDist = (m: number) => m < 1000 ? `${Math.round(m)}m` : `${(m/1000).toFixed(1)} km`
   const fmtTime = (iso: string) => iso ? iso.slice(11, 16) : '—'
 
-  // ── IDLE STATE ───────────────────────────────────────────────────────────────
-  if (state === 'idle') {
-    return (
-      <button
-        onClick={() => { setState('search'); setSheetSize('half') }}
-        className="fixed z-30 flex items-center gap-3 rounded-full px-4 cursor-text"
-        style={{
-          ...LG,
-          bottom: 'max(24px, env(safe-area-inset-bottom, 24px))',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: 'min(90%, 440px)',
-          height: 56,
-          transition: SPRING,
-        }}
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2.5" strokeLinecap="round">
-          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-        </svg>
-        <span className="flex-1 text-left text-sm" style={{ color: 'rgba(255,255,255,0.35)', fontFamily: '-apple-system, sans-serif' }}>
-          Rechercher un lieu ou une adresse…
-        </span>
-        <button
-          onClick={e => { e.stopPropagation(); handleGPSSelect() }}
-          className="w-8 h-8 rounded-full flex items-center justify-center transition-colors active:bg-white/10"
-          style={{ background: 'rgba(10,132,255,0.15)' }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0A84FF" strokeWidth="2.5" strokeLinecap="round">
-            <circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/>
-          </svg>
-        </button>
-      </button>
-    )
-  }
+  // Bouton "Y aller" — ouvre la navigation native
+  const launchNav = useCallback((lat: number, lng: number, label: string, mode: 'driving' | 'transit' = 'driving') => {
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent)
+    const enc   = encodeURIComponent(label)
+    if (isIOS && mode === 'driving') {
+      window.location.href = `maps:0,0?daddr=${lat},${lng}`
+    } else {
+      const tm = mode === 'transit' ? 'r' : 'd'
+      window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&destination_place_id=${enc}&travelmode=${mode === 'transit' ? 'transit' : 'driving'}&dir_action=navigate`, '_blank')
+    }
+  }, [])
+
+  // ── IDLE STATE — invisible, activé par tif:route-to ──────────────────────────
+  if (state === 'idle') return null
 
   // ── SEARCH STATE ──────────────────────────────────────────────────────────────
   if (state === 'search') {
@@ -248,6 +252,14 @@ export default function SearchHandle({ map }: SearchHandleProps) {
 
   // ── ROUTE STATE ───────────────────────────────────────────────────────────────
   return (
+    <>
+    {/* Tracé de l'itinéraire sur la carte */}
+    <RouteDisplay
+      map={map}
+      routes={carRoutes}
+      origin={origin}
+      destination={destination}
+    />
     <div
       className="fixed bottom-0 left-0 right-0 z-30 rounded-t-3xl overflow-hidden flex flex-col"
       style={{ ...LG, height: SHEET_H[sheetSize], transition: SPRING_HEIGHT }}
@@ -338,9 +350,18 @@ export default function SearchHandle({ map }: SearchHandleProps) {
                   <span className="text-base font-bold" style={{ color: i === 0 ? '#0A84FF' : 'rgba(255,255,255,0.6)' }}>{fmt(route.summary.durationInTraffic)}</span>
                   <span className="text-xs text-white/35">{fmtDist(route.summary.distance)}</span>
                 </div>
-                <div className="flex flex-col gap-0.5">
+                <div className="flex flex-col gap-0.5 mb-2">
                   {reasons.map(r => <span key={r} className="text-[10px] text-white/40">✓ {r}</span>)}
                 </div>
+                {destination && (
+                  <button
+                    onClick={() => launchNav(destination.lat, destination.lng, destination.title, 'driving')}
+                    className="w-full py-2 rounded-xl text-xs font-semibold transition-colors active:scale-[0.98]"
+                    style={{ background: 'rgba(10,132,255,0.18)', color: '#0A84FF', border: '1px solid rgba(10,132,255,0.3)' }}
+                  >
+                    🧭 Y aller · Voiture
+                  </button>
+                )}
               </div>
             )
           })}
@@ -354,7 +375,7 @@ export default function SearchHandle({ map }: SearchHandleProps) {
                 </div>
                 <span className="text-xs font-semibold" style={{ color: '#34C759' }}>{fmt(route.summary.duration)}</span>
               </div>
-              <div className="flex items-center gap-1.5 flex-wrap">
+              <div className="flex items-center gap-1.5 flex-wrap mb-2">
                 {route.legs.filter(l => l.type !== 'walk').map((leg, li) => (
                   <span key={li} className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{
                     background: leg.type === 'ceva' ? 'rgba(175,82,222,0.2)' : leg.type === 'cff' ? 'rgba(10,132,255,0.2)' : 'rgba(255,159,10,0.2)',
@@ -363,6 +384,15 @@ export default function SearchHandle({ map }: SearchHandleProps) {
                 ))}
                 {route.summary.transfers > 0 && <span className="text-[10px] text-white/30">{route.summary.transfers} corresp.</span>}
               </div>
+              {destination && i === 0 && (
+                <button
+                  onClick={() => launchNav(destination.lat, destination.lng, destination.title, 'transit')}
+                  className="w-full py-2 rounded-xl text-xs font-semibold transition-colors active:scale-[0.98]"
+                  style={{ background: 'rgba(50,215,75,0.15)', color: '#34C759', border: '1px solid rgba(50,215,75,0.3)' }}
+                >
+                  🧭 Y aller · Transports publics
+                </button>
+              )}
             </div>
           ))}
         </div>
@@ -370,5 +400,6 @@ export default function SearchHandle({ map }: SearchHandleProps) {
 
       <div className="h-[env(safe-area-inset-bottom,0px)] flex-shrink-0" />
     </div>
+    </>
   )
 }
