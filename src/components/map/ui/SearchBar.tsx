@@ -59,7 +59,7 @@ export function SearchBar({ map }: SearchBarProps) {
       try {
         const res  = await fetch(`/api/v1/routing/geocode?q=${encodeURIComponent(query)}&bbox=5.9,46.1,6.5,46.5`)
         const data = await res.json()
-        setResults((data.results ?? []).slice(0, 6))
+        setResults((Array.isArray(data) ? data : (data.results ?? [])).slice(0, 6))
       } catch { setResults([]) }
       finally { setLoading(false) }
     }, 300)

@@ -322,16 +322,23 @@ export default function BorderCrossingsLayer({ map }: BorderCrossingsLayerProps)
     }
 
     const setupEvents = () => {
-      // Clic → dispatch event vers le BottomSheet (pas de popup carte)
-      map.on('click', LAYER_ICON, e => {
+      const dispatchClick = (e: mapboxgl.MapLayerMouseEvent) => {
         if (!e.features?.length) return
         const props = e.features[0].properties as Record<string, unknown>
-        window.dispatchEvent(new CustomEvent('tif:crossing-select', {
-          detail: { id: String(props.id ?? '') },
-        }))
-      })
-      map.on('mouseenter', LAYER_ICON, () => { map.getCanvas().style.cursor = 'pointer' })
-      map.on('mouseleave', LAYER_ICON, () => { map.getCanvas().style.cursor = '' })
+        const id = String(props.id ?? '')
+        if (!id) return
+        // Empêche double-fire si les deux layers répondent
+        e.originalEvent.stopPropagation()
+        window.dispatchEvent(new CustomEvent('tif:crossing-select', { detail: { id } }))
+      }
+
+      // Écoute sur les deux layers : shadow (cercle, toujours visible) ET icon
+      map.on('click', LAYER_SHADOW, dispatchClick)
+      map.on('click', LAYER_ICON,   dispatchClick)
+      map.on('mouseenter', LAYER_SHADOW, () => { map.getCanvas().style.cursor = 'pointer' })
+      map.on('mouseleave', LAYER_SHADOW, () => { map.getCanvas().style.cursor = '' })
+      map.on('mouseenter', LAYER_ICON,   () => { map.getCanvas().style.cursor = 'pointer' })
+      map.on('mouseleave', LAYER_ICON,   () => { map.getCanvas().style.cursor = '' })
 
       // Re-monter au-dessus si de nouveaux layers sont ajoutés après nous
       map.on('styledata', ensureOnTop)

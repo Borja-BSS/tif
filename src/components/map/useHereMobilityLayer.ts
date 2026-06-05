@@ -69,29 +69,48 @@ export function useHereMobilityLayer(map: mapboxgl.Map | null) {
         },
       })
 
-      // Flèches de direction — visibles à partir du zoom 12
-      map.addLayer({
-        id:   LAYER_ARROW,
-        type: 'symbol',
-        source: SOURCE_ID,
-        'source-layer': 'traffic',
-        minzoom: 12,
-        layout: {
-          'symbol-placement':        'line',
-          'symbol-spacing':          120,
-          'text-field':              '▶',
-          'text-size':               ['interpolate', ['linear'], ['zoom'], 12, 9, 15, 13],
-          'text-keep-upright':       false,
-          'text-rotation-alignment': 'map',
-          'text-pitch-alignment':    'map',
-          'text-allow-overlap':      false,
-        },
-        paint: {
-          'text-color': CONGESTION_COLOR,
-          'text-opacity': ['interpolate', ['linear'], ['zoom'], 12, 0.5, 14, 0.8],
-          'text-halo-width': 0,
-        },
-      })
+      // Flèches de direction via image SVG — ▶ n'est pas dans la police Mapbox GL
+      const ARROW_ID = 'tif-arrow'
+      if (!map.hasImage(ARROW_ID)) {
+        const size = 24
+        const svg  = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24"><polygon points="6,4 18,12 6,20" fill="white" opacity="0.85"/></svg>`
+        const blob = new Blob([svg], { type: 'image/svg+xml' })
+        const url  = URL.createObjectURL(blob)
+        const img  = new Image(size, size)
+        img.onload = () => {
+          if (!map.hasImage(ARROW_ID)) map.addImage(ARROW_ID, img, { sdf: true })
+          URL.revokeObjectURL(url)
+          if (!map.getLayer(LAYER_ARROW)) addArrowLayer()
+        }
+        img.onerror = () => URL.revokeObjectURL(url)
+        img.src = url
+      } else {
+        addArrowLayer()
+      }
+
+      function addArrowLayer() {
+        if (!map || map.getLayer(LAYER_ARROW)) return
+        map.addLayer({
+          id:   LAYER_ARROW,
+          type: 'symbol',
+          source: SOURCE_ID,
+          'source-layer': 'traffic',
+          minzoom: 11,
+          layout: {
+            'symbol-placement':    'line',
+            'symbol-spacing':      100,
+            'icon-image':          ARROW_ID,
+            'icon-size':           ['interpolate', ['linear'], ['zoom'], 11, 0.4, 14, 0.65],
+            'icon-keep-upright':   false,
+            'icon-rotation-alignment': 'map',
+            'icon-allow-overlap':  false,
+          },
+          paint: {
+            'icon-color':   CONGESTION_COLOR,
+            'icon-opacity': ['interpolate', ['linear'], ['zoom'], 11, 0.4, 14, 0.75],
+          },
+        })
+      }
     }
 
     if (map.isStyleLoaded()) addTraffic()
