@@ -4,20 +4,26 @@ import { useEffect, useRef, useState } from 'react'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 
+// ── Grand Genève — bbox complète ───────────────────────────────────────────────
+// Délimité par : Lausanne (NE) · Sallanches (SE) · Annecy (S) · Champagnole (W) · Pontarlier (NW)
+export const GRAND_GENEVE_BOUNDS: [[number, number], [number, number]] = [
+  [5.75, 45.75],  // SW — au-delà de Champagnole / Annecy
+  [7.00, 46.95],  // NE — au-delà de Lausanne / Pontarlier
+]
+
 export interface MapGLProps {
-  initialLat?: number
-  initialLng?: number
-  initialZoom?: number
-  onMapReady?: (map: mapboxgl.Map) => void
+  initialLat?:    number
+  initialLng?:    number
+  initialZoom?:   number
+  initialBounds?: [[number, number], [number, number]]
+  onMapReady?:    (map: mapboxgl.Map) => void
 }
 
-// Grand Genève centroid
-const GENEVA_CENTER: [number, number] = [6.1432, 46.2044]
-
 export default function MapGL({
-  initialLat = GENEVA_CENTER[1],
-  initialLng = GENEVA_CENTER[0],
-  initialZoom = 11,
+  initialLat    = 46.38,
+  initialLng    = 6.30,
+  initialZoom   = 9,
+  initialBounds,
   onMapReady,
 }: MapGLProps) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -32,10 +38,13 @@ export default function MapGL({
     const map = new mapboxgl.Map({
       container:    containerRef.current,
       style:        'mapbox://styles/mapbox/dark-v11',
-      center:       [initialLng, initialLat],
-      zoom:         initialZoom,
-      antialias:    false,  // désactivé — réduit la charge GPU, pas visible à ce zoom
-      fadeDuration: 0,      // tuiles s'affichent sans fondu — instantané
+      // Si des bounds sont fournis, on les utilise pour cadrer toute la zone
+      ...(initialBounds
+        ? { bounds: initialBounds, fitBoundsOptions: { padding: 0 } }
+        : { center: [initialLng, initialLat], zoom: initialZoom }
+      ),
+      antialias:    false,
+      fadeDuration: 0,
     })
 
     // Contrôles natifs Mapbox supprimés — UI custom gère GPS + zoom

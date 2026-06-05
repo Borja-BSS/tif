@@ -40,10 +40,8 @@ export default function MapPage() {
     <div className="h-screen w-full overflow-hidden relative" style={{ background: '#000' }}>
 
       {/* Layer 1: Carte — reçoit les filtres depuis la page + expose le map ref */}
+      {/* MapView cadre automatiquement sur le Grand Genève complet au chargement */}
       <MapView
-        initialLat={46.2044}
-        initialLng={6.1432}
-        initialZoom={11}
         filters={filterState}
         onMapReady={handleMapReady}
       />

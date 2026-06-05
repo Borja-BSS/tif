@@ -70,6 +70,19 @@ export const ALL_CROSSINGS: CrossingStatic[] = [
   // ── NOUVEAU — Haute-Savoie (vers Thonon/Évian) ──────────────────────────────
   { id: 'douvaine', name: 'Douvaine', lat: 46.31400, lng: 6.31700, type: 'main', capacity: 'medium', hours: '24h/24', vehicles: ['Voitures', 'Motos', 'Camions'], pedestrian: false, g7Info: '✓ Ouvert · Axe Annemasse ↔ Thonon · Surveillance renforcée G7', nearestOpen: undefined },
   { id: 'sciez', name: 'Sciez / Ballaison', lat: 46.29000, lng: 6.29000, type: 'secondary', capacity: 'low', hours: '06:00–22:00', vehicles: ['Voitures', 'Motos'], pedestrian: false, g7Info: '⚠️ Contrôles pendant G7', nearestOpen: 'Douvaine (8 km)' },
+  { id: 'excenevex', name: 'Excenevex / Yvoire', lat: 46.35200, lng: 6.32900, type: 'tertiary', capacity: 'low', hours: 'Piétons / Vélos / Riverains', vehicles: ['Piétons', 'Vélos', 'Voitures riverains'], pedestrian: true, g7Info: '⚠️ Contrôles renforcés G7 · Rive lac Léman', nearestOpen: 'Douvaine (9 km)' },
+  { id: 'thonon', name: 'Thonon-les-Bains', lat: 46.37100, lng: 6.47700, type: 'main', capacity: 'medium', hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Motos'], pedestrian: false, g7Info: '✓ Ouvert · Axe vers Évian et Valais · Renforcé G7', nearestOpen: undefined },
+  { id: 'evian', name: 'Évian-les-Bains', lat: 46.40100, lng: 6.58700, type: 'main', capacity: 'medium', hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Motos'], pedestrian: false, g7Info: '🏛️ SITE G7 · Contrôles maximaux 8-18 juin · Accès très restreint sans accréditation', nearestOpen: 'Thonon (15 km)' },
+
+  // ── NOUVEAU — Zone Annecy / Sud Haute-Savoie ────────────────────────────────
+  { id: 'annemasse-gaillard', name: 'Annemasse / Gaillard', lat: 46.19400, lng: 6.23400, type: 'main', capacity: 'high', hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Motos', 'Piétons', 'Tram'], pedestrian: true, g7Info: '✓ Ouvert · Axe principal Genève ↔ Annecy · Contrôles renforcés G7', nearestOpen: undefined },
+  { id: 'saint-julien', name: 'Saint-Julien-en-Genevois', lat: 46.14200, lng: 6.07700, type: 'main', capacity: 'high', hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Cars', 'Motos'], pedestrian: false, g7Info: '✓ Ouvert 24/7 · Axe A41 vers Annecy · Renforcé G7', nearestOpen: undefined },
+  { id: 'collonges', name: 'Collonges-sous-Salève', lat: 45.99800, lng: 6.05200, type: 'secondary', capacity: 'medium', hours: '24h/24', vehicles: ['Voitures', 'Motos'], pedestrian: false, g7Info: '✓ Ouvert · A40 direction Annecy / Sallanches', nearestOpen: undefined },
+
+  // ── NOUVEAU — Zone Jura / Pontarlier / Champagnole ──────────────────────────
+  { id: 'les-hopitaux-neufs', name: 'Les Hôpitaux-Neufs / Pontarlier', lat: 46.80500, lng: 6.35600, type: 'main', capacity: 'medium', hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Motos'], pedestrian: false, g7Info: '✓ Ouvert · Axe RN57 Pontarlier ↔ Vallorbe (CH)', nearestOpen: undefined },
+  { id: 'saint-Laurent', name: 'Saint-Laurent-en-Grandvaux', lat: 46.57600, lng: 5.96000, type: 'secondary', capacity: 'low', hours: '06:00–22:00', vehicles: ['Voitures', 'Motos'], pedestrian: false, g7Info: '✓ Ouvert · Jura ↔ Vaud · Vers Champagnole', nearestOpen: 'La Cure (20 km)' },
+  { id: 'bois-d-amont', name: 'Bois-d\'Amont (Jura)', lat: 46.52200, lng: 5.98700, type: 'secondary', capacity: 'low', hours: '24h/24 (saison ski)', vehicles: ['Voitures', 'Motos', 'Piétons'], pedestrian: true, g7Info: '✓ Ouvert · Station Les Rousses ↔ Suisse · Zone ski transfrontalière', nearestOpen: 'La Cure (5 km)' },
 ]
 
 const G7_START = new Date('2026-06-11T22:01:00Z')
