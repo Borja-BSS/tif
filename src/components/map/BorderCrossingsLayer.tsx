@@ -275,6 +275,10 @@ async function applyData(m: mapboxgl.Map, geojson: FeatureCollection) {
       'icon-ignore-placement': true,
     },
   })
+
+  // Toujours au-dessus du trafic
+  m.moveLayer(LAYER_SHADOW)
+  m.moveLayer(LAYER_ICON)
 }
 
 function removeLayers(m: mapboxgl.Map) {
@@ -312,17 +316,25 @@ export default function BorderCrossingsLayer({ map }: BorderCrossingsLayerProps)
       await applyData(map, data)
     }
 
+    const ensureOnTop = () => {
+      if (map.getLayer(LAYER_SHADOW)) map.moveLayer(LAYER_SHADOW)
+      if (map.getLayer(LAYER_ICON))   map.moveLayer(LAYER_ICON)
+    }
+
     const setupEvents = () => {
+      // Clic → dispatch event vers le BottomSheet (pas de popup carte)
       map.on('click', LAYER_ICON, e => {
         if (!e.features?.length) return
         const props = e.features[0].properties as Record<string, unknown>
-        new mapboxgl.Popup({ maxWidth: '300px', className: 'tif-popup', closeButton: true, offset: 22 })
-          .setLngLat(e.lngLat)
-          .setHTML(buildPopupHTML(props))
-          .addTo(map)
+        window.dispatchEvent(new CustomEvent('tif:crossing-select', {
+          detail: { id: String(props.id ?? '') },
+        }))
       })
       map.on('mouseenter', LAYER_ICON, () => { map.getCanvas().style.cursor = 'pointer' })
       map.on('mouseleave', LAYER_ICON, () => { map.getCanvas().style.cursor = '' })
+
+      // Re-monter au-dessus si de nouveaux layers sont ajoutés après nous
+      map.on('styledata', ensureOnTop)
     }
 
     const runWithFallback = async () => {
@@ -346,7 +358,13 @@ export default function BorderCrossingsLayer({ map }: BorderCrossingsLayerProps)
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
-      try { removeLayers(map) } catch { /* map détruite */ }
+      try {
+        map.off('styledata', () => {
+          if (map.getLayer(LAYER_SHADOW)) map.moveLayer(LAYER_SHADOW)
+          if (map.getLayer(LAYER_ICON))   map.moveLayer(LAYER_ICON)
+        })
+        removeLayers(map)
+      } catch { /* map détruite */ }
     }
   }, [map])
 

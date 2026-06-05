@@ -7,6 +7,7 @@ import mapboxgl     from 'mapbox-gl'
 const SOURCE_ID    = 'mapbox-traffic-native'
 const LAYER_FLOW   = 'tif-traffic-flow'
 const LAYER_GLOW   = 'tif-traffic-glow'
+const LAYER_ARROW  = 'tif-traffic-arrows'
 
 // Palette couleurs cohérente avec le design system TIF
 const CONGESTION_COLOR = [
@@ -48,17 +49,47 @@ export function useHereMobilityLayer(map: mapboxgl.Map | null) {
         },
       })
 
-      // Ligne principale — épaisseur doublée à zoom 9 pour lisibilité Grand Genève
+      // Ligne principale — sort-key : rouge/sévère au-dessus du vert
       map.addLayer({
         id:   LAYER_FLOW,
         type: 'line',
         source: SOURCE_ID,
         'source-layer': 'traffic',
-        layout: { 'line-join': 'round', 'line-cap': 'round' },
+        layout: {
+          'line-join': 'round',
+          'line-cap':  'round',
+          'line-sort-key': ['match', ['get', 'congestion'],
+            'severe', 4, 'heavy', 3, 'moderate', 2, 'low', 1, 0,
+          ] as unknown as mapboxgl.Expression,
+        },
         paint: {
           'line-color':   CONGESTION_COLOR,
           'line-width':   ['interpolate', ['linear'], ['zoom'], 8, 2, 10, 3.5, 14, 6],
           'line-opacity': 0.95,
+        },
+      })
+
+      // Flèches de direction — visibles à partir du zoom 12
+      map.addLayer({
+        id:   LAYER_ARROW,
+        type: 'symbol',
+        source: SOURCE_ID,
+        'source-layer': 'traffic',
+        minzoom: 12,
+        layout: {
+          'symbol-placement':        'line',
+          'symbol-spacing':          120,
+          'text-field':              '▶',
+          'text-size':               ['interpolate', ['linear'], ['zoom'], 12, 9, 15, 13],
+          'text-keep-upright':       false,
+          'text-rotation-alignment': 'map',
+          'text-pitch-alignment':    'map',
+          'text-allow-overlap':      false,
+        },
+        paint: {
+          'text-color': CONGESTION_COLOR,
+          'text-opacity': ['interpolate', ['linear'], ['zoom'], 12, 0.5, 14, 0.8],
+          'text-halo-width': 0,
         },
       })
     }
@@ -68,8 +99,9 @@ export function useHereMobilityLayer(map: mapboxgl.Map | null) {
 
     return () => {
       try {
-        if (map.getLayer(LAYER_FLOW)) map.removeLayer(LAYER_FLOW)
-        if (map.getLayer(LAYER_GLOW)) map.removeLayer(LAYER_GLOW)
+        if (map.getLayer(LAYER_ARROW)) map.removeLayer(LAYER_ARROW)
+        if (map.getLayer(LAYER_FLOW))  map.removeLayer(LAYER_FLOW)
+        if (map.getLayer(LAYER_GLOW))  map.removeLayer(LAYER_GLOW)
         if (map.getSource(SOURCE_ID)) map.removeSource(SOURCE_ID)
       } catch { /* map détruite */ }
     }

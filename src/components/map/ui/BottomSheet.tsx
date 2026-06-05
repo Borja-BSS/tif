@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { springs } from '@/lib/animations/springs'
 import { ALL_CROSSINGS, computeInstantStatus } from '@/lib/territory/border-crossings-client'
@@ -724,8 +724,20 @@ export function BottomSheet({ session: _session, activeFilter, map }: BottomShee
 
   const openCrossing = useCallback((c: CrossingStatic) => {
     setSelectedCrossing(c)
+    setDetailView('overview')
     setSnap('full')
   }, [])
+
+  // Écoute les clics sur les pastilles de douane depuis la carte
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const { id } = (e as CustomEvent<{ id: string }>).detail
+      const crossing = ALL_CROSSINGS.find(c => c.id === id)
+      if (crossing) openCrossing(crossing)
+    }
+    window.addEventListener('tif:crossing-select', handler)
+    return () => window.removeEventListener('tif:crossing-select', handler)
+  }, [openCrossing])
 
   const locateCrossing = useCallback((c: CrossingStatic) => {
     if (!map) return
