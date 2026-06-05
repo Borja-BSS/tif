@@ -20,8 +20,7 @@ const FilterPanel          = dynamic(() => import('./FilterPanel'),          { s
 const BorderCrossingsLayer = dynamic(() => import('./BorderCrossingsLayer'), { ssr: false })
 const RoadClosuresLayer    = dynamic(() => import('./RoadClosuresLayer'),    { ssr: false })
 const HereIncidentsLayer   = dynamic(() => import('./HereIncidentsLayer'),   { ssr: false })
-const CarRoutingPanel      = dynamic(() => import('./routing/CarRoutingPanel').then(m => ({ default: m.CarRoutingPanel })),       { ssr: false })
-const TransportRoutingPanel = dynamic(() => import('./routing/TransportRoutingPanel').then(m => ({ default: m.TransportRoutingPanel })), { ssr: false })
+const SearchHandle         = dynamic(() => import('./SearchHandle'),         { ssr: false })
 
 const DEFAULT_FILTERS: FilterState = {
   heatmap:   true,
@@ -41,7 +40,6 @@ const TRANSPORT_LEGEND = [
 export default function MapView(props: Omit<MapGLProps, 'onMapReady'>) {
   const [map,             setMap]             = useState<mapboxgl.Map | null>(null)
   const [filters,         setFilters]         = useState<FilterState>(DEFAULT_FILTERS)
-  const [routingMode,     setRoutingMode]     = useState<'car' | 'transport' | null>(null)
   const [territoryToast,  setTerritoryToast]  = useState(false)
   const territoryShownRef = useRef(false)
   const searchPinRef      = useRef<mapboxgl.Marker | null>(null)
@@ -115,25 +113,12 @@ export default function MapView(props: Omit<MapGLProps, 'onMapReady'>) {
           <FilterPanel
             filters={filters}
             onChange={setFilters}
-            routingMode={routingMode}
-            onRouting={setRoutingMode}
           />
         </>
       )}
 
-      {/* Routing bottom sheets */}
-      {routingMode === 'car' && (
-        <CarRoutingPanel
-          map={map}
-          onClose={() => setRoutingMode(null)}
-        />
-      )}
-      {routingMode === 'transport' && (
-        <TransportRoutingPanel
-          map={map}
-          onClose={() => setRoutingMode(null)}
-        />
-      )}
+      {/* SearchHandle — primary mobile interaction */}
+      <SearchHandle map={map} />
 
       {/* Territory toast — first activation of the session */}
       {territoryToast && (
