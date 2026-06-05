@@ -351,30 +351,82 @@ function TransportDetail({ network }: { network?: DashboardData['network'] }) {
   )
 }
 
-// ── Alertes ───────────────────────────────────────────────────────────────────
-function AlertesDetail({ alerts }: { alerts: DashboardData['alerts'] }) {
+// ── Alertes — fetch direct depuis layers/alerts (HERE + OFROU + TPG + météo) ───
+function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
+  const { data: geoJson, isLoading } = useQuery<{ type: string; features: { properties: Record<string, unknown>; geometry: { coordinates: number[] } }[] }>({
+    queryKey:        ['layers-alerts'],
+    queryFn:         () => fetch('/api/v1/layers/alerts', { signal: AbortSignal.timeout(6000) }).then(r => r.json()),
+    refetchInterval: 60000,
+    staleTime:       60000,
+  })
+
+  const alerts = (geoJson?.features ?? []).map((f, i) => ({
+    id:          String(f.properties.id ?? i),
+    icon:        String(f.properties.icon ?? '⚠️'),
+    title:       String(f.properties.description ?? f.properties.label ?? 'Incident'),
+    type:        String(f.properties.type ?? ''),
+    lng:         f.geometry?.coordinates?.[0],
+    lat:         f.geometry?.coordinates?.[1],
+  }))
+
+  const typeLabel = (t: string) =>
+    t === 'ACCIDENT'     ? '🚗 Accident'
+    : t === 'CONSTRUCTION' ? '🚧 Travaux'
+    : t === 'CONGESTION'   ? '🚦 Bouchon'
+    : t === 'ROAD_CLOSURE' ? '🚫 Route fermée'
+    : t === 'tpg'          ? '🚌 Perturbation TPG'
+    : t === 'weather'      ? '⛈️ Météo'
+    : '⚠️ Incident'
+
+  const flyTo = (lng: number, lat: number) => {
+    if (!map || !lng || !lat) return
+    map.flyTo({ center: [lng, lat], zoom: 14, duration: 900, essential: true })
+  }
+
   return (
     <div className="space-y-2">
       <p className="text-[10px] font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-tertiary)' }}>
-        Incidents · Accidents · Travaux
+        Incidents · Accidents · Travaux · Grand Genève
       </p>
-      {alerts.length === 0 ? (
+
+      {isLoading && (
+        <div className="flex items-center justify-center py-8 gap-2">
+          {[0,1,2].map(i => (
+            <span key={i} className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" style={{ animationDelay: `${i * 150}ms` }} />
+          ))}
+        </div>
+      )}
+
+      {!isLoading && alerts.length === 0 && (
         <div className="rounded-2xl p-6 text-center" style={{ background: 'var(--bg-card)' }}>
           <p className="text-2xl mb-2">✅</p>
           <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Aucun incident actif</p>
           <p className="text-[12px] mt-1" style={{ color: 'var(--text-secondary)' }}>Grand Genève · Trafic normal</p>
         </div>
-      ) : alerts.map(a => (
-        <div key={a.id} className="flex items-start gap-3 rounded-2xl p-3"
+      )}
+
+      {alerts.map(a => (
+        <button key={a.id}
+          onClick={() => flyTo(a.lng, a.lat)}
+          className="w-full flex items-start gap-3 rounded-2xl p-3 text-left active:scale-[0.98] transition-transform"
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-          <span className="text-base flex-shrink-0">{a.icon}</span>
+          <span className="text-xl flex-shrink-0 mt-0.5">{a.icon}</span>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{a.title}</p>
-            <p className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>{a.timeAgo}</p>
+            <p className="text-[11px] font-bold mb-0.5" style={{ color: 'var(--text-tertiary)' }}>
+              {typeLabel(a.type)}
+            </p>
+            <p className="text-sm leading-snug" style={{ color: 'var(--text-primary)' }}>{a.title}</p>
           </div>
-        </div>
+          {a.lng && (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" strokeWidth="2" strokeLinecap="round" className="flex-shrink-0 mt-1">
+              <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+          )}
+        </button>
       ))}
-      {/* Sources alertes cliquables */}
+
+      {/* Sources */}
       <div className="mt-3 space-y-2">
         <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>
           Sources
@@ -616,13 +668,13 @@ export function BottomSheet({ session: _session, activeFilter, map }: BottomShee
             detailView === 'overview'   ? <ToutOverview data={data} onSelect={openDetail} />
             : detailView === 'douanes'  ? <DouanesDetail onSelect={openCrossing} map={map} />
             : detailView === 'transport'? <TransportDetail network={data?.network} />
-            : detailView === 'alertes'  ? <AlertesDetail alerts={data?.alerts ?? []} />
+            : detailView === 'alertes'  ? <AlertesDetail map={map} />
             : <G7Detail />
           ) : (
             <div className="space-y-3">
               {activeFilter === 'transit'  && <TransportDetail network={data?.network} />}
               {activeFilter === 'borders'  && <DouanesDetail onSelect={openCrossing} map={map} />}
-              {activeFilter === 'alerts'   && <AlertesDetail alerts={data?.alerts ?? []} />}
+              {activeFilter === 'alerts'   && <AlertesDetail map={map} />}
               {activeFilter === 'g7'       && <G7Detail />}
               {activeFilter === 'traffic'  && (
                 <div className="rounded-2xl p-6 text-center" style={{ background: 'var(--bg-card)' }}>
