@@ -1,12 +1,12 @@
-import { NextResponse }           from 'next/server'
-import { getIncidents }          from '@/lib/here/incidents'
-import { getOfrouIncidents }     from '@/lib/alerts/ofrou-fetcher'
-import { getTpgDisruptions }     from '@/lib/alerts/tpg-disruptions'
-import { getWeatherImpactAlerts }from '@/lib/alerts/weather-impact'
-import { withMetrics }           from '@/lib/route-utils'
-import { redis }                 from '@/lib/redis'
-import { logger }                from '@/lib/logger'
-import type { NextRequest }      from 'next/server'
+import { NextResponse }              from 'next/server'
+import { getIncidents }             from '@/lib/here/incidents'
+import { getTpgDisruptions }        from '@/lib/alerts/tpg-disruptions'
+import { getOverpassRoadworks }     from '@/lib/alerts/overpass-roadworks'
+import { getWeatherAlerts }         from '@/lib/alerts/openmeteo-weather'
+import { withMetrics }              from '@/lib/route-utils'
+import { redis }                    from '@/lib/redis'
+import { logger }                   from '@/lib/logger'
+import type { NextRequest }         from 'next/server'
 import type { FeatureCollection, Feature, Point } from 'geojson'
 
 export const dynamic = 'force-dynamic'
@@ -48,37 +48,42 @@ async function handler(_req: NextRequest): Promise<NextResponse> {
     logger.warn({ err }, 'alerts:redis-get-failed — skipping cache')
   }
 
-  const [hereResult, ofrouResult, tpgResult, weatherResult] = await Promise.allSettled([
-    getIncidents(),
-    getOfrouIncidents(),
-    getTpgDisruptions(),
-    getWeatherImpactAlerts(),
+  // Sources parallèles — toutes avec fallback silencieux
+  const [hereResult, tpgResult, overpassResult, weatherResult] = await Promise.allSettled([
+    getIncidents(),           // HERE Maps accidents/congestion (si clé disponible)
+    getTpgDisruptions(),      // opendata.ch — retards TPG/CFF
+    getOverpassRoadworks(),   // OpenStreetMap — travaux/chantiers (gratuit, garanti)
+    getWeatherAlerts(),       // OpenMeteo — météo 48h (gratuit, garanti)
   ])
 
   const allFeatures: Feature<Point>[] = []
 
   if (hereResult.status === 'fulfilled') {
     allFeatures.push(...hereResult.value.features as Feature<Point>[])
+    logger.debug({ count: hereResult.value.features.length }, 'alerts:here-ok')
   } else {
-    logger.warn({ err: hereResult.reason }, 'alerts:merge:here-failed')
-  }
-
-  if (ofrouResult.status === 'fulfilled') {
-    allFeatures.push(...ofrouResult.value.features as Feature<Point>[])
-  } else {
-    logger.warn({ err: ofrouResult.reason }, 'alerts:merge:ofrou-failed')
+    logger.warn({ err: hereResult.reason }, 'alerts:here-failed')
   }
 
   if (tpgResult.status === 'fulfilled') {
     allFeatures.push(...tpgResult.value.features as Feature<Point>[])
+    logger.debug({ count: tpgResult.value.features.length }, 'alerts:tpg-ok')
   } else {
-    logger.warn({ err: tpgResult.reason }, 'alerts:merge:tpg-failed')
+    logger.warn({ err: tpgResult.reason }, 'alerts:tpg-failed')
+  }
+
+  if (overpassResult.status === 'fulfilled') {
+    allFeatures.push(...overpassResult.value.features as Feature<Point>[])
+    logger.debug({ count: overpassResult.value.features.length }, 'alerts:overpass-ok')
+  } else {
+    logger.warn({ err: overpassResult.reason }, 'alerts:overpass-failed')
   }
 
   if (weatherResult.status === 'fulfilled') {
     allFeatures.push(...weatherResult.value.features as Feature<Point>[])
+    logger.debug({ count: weatherResult.value.features.length }, 'alerts:weather-ok')
   } else {
-    logger.warn({ err: weatherResult.reason }, 'alerts:merge:weather-failed')
+    logger.warn({ err: weatherResult.reason }, 'alerts:weather-failed')
   }
 
   const features = deduplicateFeatures(allFeatures)
