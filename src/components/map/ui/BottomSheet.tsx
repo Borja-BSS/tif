@@ -68,8 +68,50 @@ function CategoryCard({ icon, title, subtitle, badge, badgeColor, onPress }: {
   )
 }
 
+// ── Sources officielles par douane ────────────────────────────────────────────
+const GENEVA_IDS = new Set([
+  'bardonnex','thonex-vallard','moillesulaz','meyrin','ferney-voltaire','perly','anieres',
+  'croix-de-rozon','veyrier','fossard','mategnin','mon-idee','monniaz','chancy','avully',
+  'la-plaine','communaux-ambilly','hermance','soral','landecy','bossey','troinex',
+  'compesieres','bernex','ecogia','veigy',
+])
+const VAUD_IDS = new Set(['la-cure','saint-cergue','vallorbe','bois-d-amont','saint-Laurent','les-hopitaux-neufs'])
+const HAUTE_SAVOIE_IDS = new Set(['douvaine','sciez','excenevex','thonon','evian','annemasse-gaillard','collonges'])
+const AIN_IDS = new Set(['prevessin-moens','sauverny','thoiry','peron','divonne','leaz','saint-julien'])
+const JURA_IDS = new Set(['bois-d-amont','saint-Laurent'])
+
+interface OfficialSource { label: string; url: string }
+
+function getCrossingSources(id: string, isG7: boolean): OfficialSource[] {
+  const sources: OfficialSource[] = [
+    { label: 'Douanes suisses (BAZG)', url: 'https://www.bazg.admin.ch/bazg/fr/home/services/fuer_reisende.html' },
+  ]
+  if (GENEVA_IDS.has(id)) {
+    sources.push({ label: 'Canton de Genève — mobilité', url: 'https://www.ge.ch/mobilite-deplacements-grand-geneve' })
+    sources.push({ label: 'Ville de Genève — circulation', url: 'https://www.ville-geneve.ch/themes/mobilite-circulation/' })
+  }
+  if (VAUD_IDS.has(id)) {
+    sources.push({ label: 'Canton de Vaud — mobilité', url: 'https://www.vd.ch/themes/mobilite' })
+  }
+  if (HAUTE_SAVOIE_IDS.has(id)) {
+    sources.push({ label: 'Préfecture Haute-Savoie', url: 'https://www.haute-savoie.gouv.fr/Politiques-publiques/Transports-et-securite-routiere' })
+  }
+  if (AIN_IDS.has(id)) {
+    sources.push({ label: 'Préfecture de l\'Ain', url: 'https://www.ain.gouv.fr/Actions-de-l-Etat/Transports-et-deplacement' })
+  }
+  if (JURA_IDS.has(id)) {
+    sources.push({ label: 'Préfecture du Jura', url: 'https://www.jura.gouv.fr/Politiques-publiques/Transports-securite-routiere' })
+  }
+  sources.push({ label: 'Inforoute.ch — trafic live', url: 'https://www.inforoute.ch' })
+  if (isG7) {
+    sources.push({ label: 'G7 Évian 2026 — Restrictions', url: 'https://www.elysee.fr/g7' })
+    sources.push({ label: 'Admin.ch — mesures G7', url: 'https://www.admin.ch/gov/fr/accueil.html' })
+  }
+  return sources
+}
+
 // ── Fiche détail d'une douane ─────────────────────────────────────────────────
-function CrossingDetail({ crossing, onBack, onLocate }: {
+function CrossingDetail({ crossing, onBack: _onBack, onLocate }: {
   crossing: CrossingStatic
   onBack:   () => void
   onLocate: (c: CrossingStatic) => void
@@ -77,9 +119,11 @@ function CrossingDetail({ crossing, onBack, onLocate }: {
   const now = new Date()
   const s   = computeInstantStatus(crossing, now)
 
-  const G7_START  = new Date('2026-06-08T00:00:00Z')
-  const G7_END    = new Date('2026-06-18T23:59:59Z')
+  const G7_START   = new Date('2026-06-08T00:00:00Z')
+  const G7_END     = new Date('2026-06-18T23:59:59Z')
   const isG7Period = now >= G7_START && now <= G7_END
+
+  const sources = getCrossingSources(crossing.id, isG7Period)
 
   const statusLabel = s.status === 'BLOCKED'  ? 'Fermé'
     : s.status === 'HEAVY'    ? `Chargé · ~${s.waitMinutes} min d'attente`
@@ -179,18 +223,30 @@ function CrossingDetail({ crossing, onBack, onLocate }: {
         </div>
       )}
 
-      {/* Sources officielles */}
-      <div className="rounded-2xl p-3" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-        <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-tertiary)' }}>
+      {/* Sources officielles — liens cliquables */}
+      <div className="rounded-2xl p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+        <p className="text-[10px] font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-tertiary)' }}>
           Sources officielles
         </p>
-        <div className="space-y-1">
-          {[
-            'Canton de Genève — ge.ch',
-            'Ville de Genève — ville-ge.ch',
-            isG7Period ? 'Directives G7 — Évian 2026' : 'G7 Évian 2026 — informations à venir',
-          ].map(s => (
-            <p key={s} className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>· {s}</p>
+        <div className="space-y-2">
+          {sources.map(src => (
+            <a
+              key={src.url}
+              href={src.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-between rounded-xl px-3 py-2.5 active:scale-[0.98] transition-transform"
+              style={{ background: 'var(--bg)', border: '1px solid var(--border)' }}
+            >
+              <span className="text-[13px] font-medium" style={{ color: 'var(--brand)' }}>
+                {src.label}
+              </span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2.5" strokeLinecap="round" className="flex-shrink-0 ml-2">
+                <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
+                <polyline points="15 3 21 3 21 9"/>
+                <line x1="10" y1="14" x2="21" y2="3"/>
+              </svg>
+            </a>
           ))}
         </div>
       </div>
