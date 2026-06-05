@@ -58,21 +58,41 @@ function drawMarkerCanvas(color: string, strokeColor: string, emoji: string): HT
   return c
 }
 
-function loadMarkerImage(
+async function loadMarkerImage(
   m: mapboxgl.Map, id: string,
   color: string, strokeColor: string, emoji: string,
 ): Promise<void> {
-  return new Promise(resolve => {
-    if (m.hasImage(id)) { resolve(); return }
-    const canvas = drawMarkerCanvas(color, strokeColor, emoji)
-    const img    = new Image()
-    img.onload = () => {
-      if (!m.hasImage(id)) m.addImage(id, img, { pixelRatio: 2 })
-      resolve()
-    }
-    img.onerror = () => resolve()  // ne pas bloquer Promise.all si le canvas échoue
-    img.src = canvas.toDataURL()
-  })
+  if (m.hasImage(id)) return
+  const canvas = drawMarkerCanvas(color, strokeColor, emoji)
+  try {
+    // createImageBitmap : natif, pas de base64, 3-5× plus rapide que toDataURL→Image
+    const bitmap = await createImageBitmap(canvas)
+    if (!m.hasImage(id)) m.addImage(id, bitmap, { pixelRatio: 2 })
+  } catch {
+    // Fallback : ancien chemin toDataURL pour les navigateurs qui ne supportent pas createImageBitmap
+    await new Promise<void>(resolve => {
+      const img = new Image()
+      img.onload  = () => { if (!m.hasImage(id)) m.addImage(id, img, { pixelRatio: 2 }); resolve() }
+      img.onerror = () => resolve()
+      img.src = canvas.toDataURL()
+    })
+  }
+}
+
+// Images pré-générées au chargement de la carte (avant l'arrivée des données)
+const PRELOAD_MARKERS = [
+  { color: '#34C759', strokeColor: '#FFFFFF', emoji: '🛂', slug: 'ctrl' },  // CLEAR
+  { color: '#636366', strokeColor: '#FF3B30', emoji: '🔒', slug: 'lock' },  // BLOCKED
+  { color: '#FF9500', strokeColor: '#FFFFFF', emoji: '🛂', slug: 'ctrl' },  // MODERATE
+  { color: '#FF3B30', strokeColor: '#FF3B30', emoji: '🛂', slug: 'ctrl' },  // HEAVY
+  { color: '#34C759', strokeColor: '#5AC8FA', emoji: '🛂', slug: 'ctrl' },  // CLEAR macaron
+]
+
+async function preloadCommonImages(m: mapboxgl.Map) {
+  await Promise.all(PRELOAD_MARKERS.map(({ color, strokeColor, emoji, slug }) => {
+    const imgId = `tif-bc-${color.replace('#','')}-${strokeColor.replace('#','')}-${slug}`
+    return loadMarkerImage(m, imgId, color, strokeColor, emoji)
+  }))
 }
 
 // ── Popup style ───────────────────────────────────────────────────────────────
@@ -345,11 +365,15 @@ export default function BorderCrossingsLayer({ map }: BorderCrossingsLayerProps)
     }
 
     const runWithFallback = async () => {
-      // 1. Show static data INSTANTLY — zero network wait
-      const instant = buildInstantGeoJSON(new Date())
+      // 0. Pré-charger les images communes EN PARALLÈLE avec les données statiques
+      const [instant] = await Promise.all([
+        Promise.resolve(buildInstantGeoJSON(new Date())),
+        preloadCommonImages(map),  // images prêtes avant applyData
+      ])
+      // 1. Affichage immédiat avec données statiques
       await applyData(map, instant as unknown as FeatureCollection)
       setupEvents()
-      // 2. Then fetch live data from API in background
+      // 2. Données live en arrière-plan
       const live = await fetchBorderData()
       if (live) await applyData(map, live)
     }
