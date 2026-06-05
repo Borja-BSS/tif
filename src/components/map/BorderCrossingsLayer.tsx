@@ -247,12 +247,8 @@ async function applyData(m: mapboxgl.Map, geojson: FeatureCollection) {
     }),
   }
 
-  // 3. Attendre que le style soit stable (setFog ou autre op. peut le rendre temporairement "not done")
-  if (!m.isStyleLoaded()) {
-    await new Promise<void>(resolve => m.once('idle', () => resolve()))
-  }
-
-  // 4. Mettre à jour ou créer source + layers
+  // 3. Ajouter source + layers — pas d'attente idle (cause de lenteur extrême)
+  // Le style est garanti chargé car on vérifie isStyleLoaded() avant d'appeler applyData
   const src = m.getSource(SOURCE_ID) as mapboxgl.GeoJSONSource | undefined
   if (src) { src.setData(data); return }
 

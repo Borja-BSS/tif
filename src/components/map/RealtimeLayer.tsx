@@ -104,8 +104,12 @@ export default function RealtimeLayer({ map, visible = true, showTransport = tru
     const channel = client.channels.get(CHANNELS.signals)
     channelRef.current = channel
 
+    // Vérifier l'état initial immédiatement (pas uniquement les changements futurs)
+    if (client.connection.state === 'connected') setConnected(true)
+
     client.connection.on('connected',    () => setConnected(true))
     client.connection.on('disconnected', () => setConnected(false))
+    client.connection.on('suspended',    () => setConnected(false))
     client.connection.on('failed',       () => setConnected(false))
 
     // Reçoit soit un signal unique, soit un batch

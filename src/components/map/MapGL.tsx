@@ -30,20 +30,17 @@ export default function MapGL({
     mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!
 
     const map = new mapboxgl.Map({
-      container: containerRef.current,
-      style:     'mapbox://styles/mapbox/dark-v11',
-      center:    [initialLng, initialLat],
-      zoom:      initialZoom,
-      projection: 'globe',
-      antialias:  true,
+      container:    containerRef.current,
+      style:        'mapbox://styles/mapbox/dark-v11',
+      center:       [initialLng, initialLat],
+      zoom:         initialZoom,
+      antialias:    false,  // désactivé — réduit la charge GPU, pas visible à ce zoom
+      fadeDuration: 0,      // tuiles s'affichent sans fondu — instantané
     })
 
     // Contrôles natifs Mapbox supprimés — UI custom gère GPS + zoom
 
     map.on('load', () => {
-      // Atmosphère subtile en mode globe
-      map.setFog({ color: '#0d0d10', 'space-color': '#000005', 'star-intensity': 0.4 })
-
       // User location source & layers (created once on load)
       map.addSource('user-location', {
         type: 'geojson',
