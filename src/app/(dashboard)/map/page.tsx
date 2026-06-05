@@ -66,7 +66,7 @@ export default function MapPage() {
       {isG7Active && <G7Mode map={mapRef} />}
 
       {/* Layer 7: BottomSheet */}
-      <BottomSheet session={session ?? null} activeFilter={activeFilter} />
+      <BottomSheet session={session ?? null} activeFilter={activeFilter} map={mapRef} />
 
     </div>
   )

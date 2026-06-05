@@ -4,23 +4,25 @@ import { useState, useRef, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { springs } from '@/lib/animations/springs'
 import { ALL_CROSSINGS, computeInstantStatus } from '@/lib/territory/border-crossings-client'
+import type { CrossingStatic } from '@/lib/territory/border-crossings-client'
 import type { Session } from 'next-auth'
 import type { FilterId } from './QuickFilters'
 import type { JourneyStatusResult } from '@/lib/my-journey/types'
+import type mapboxgl from 'mapbox-gl'
 
-type SnapSize  = 'compact' | 'mid' | 'full'
+type SnapSize   = 'compact' | 'mid' | 'full'
 type DetailView = 'overview' | 'douanes' | 'transport' | 'alertes' | 'g7'
 
 const SNAP_HEIGHT: Record<SnapSize, string> = {
   compact: '56px',
-  mid:     '45vh',
+  mid:     '50vh',
   full:    '92vh',
 }
 
 const LG: React.CSSProperties = {
-  background:           'color-mix(in srgb, var(--bg) 95%, transparent)',
-  backdropFilter:       'blur(24px) saturate(160%)',
-  WebkitBackdropFilter: 'blur(24px) saturate(160%)',
+  background:           'color-mix(in srgb, var(--bg) 96%, transparent)',
+  backdropFilter:       'blur(28px) saturate(160%)',
+  WebkitBackdropFilter: 'blur(28px) saturate(160%)',
   borderTop:            '1px solid var(--border)',
   borderRadius:         '20px 20px 0 0',
 }
@@ -36,33 +38,18 @@ interface DashboardData {
 interface BottomSheetProps {
   session:      Session | null
   activeFilter: FilterId
-}
-
-// ── Badge statut réseau ───────────────────────────────────────────────────────
-function NetBadge({ name, status }: { name: string; status: string }) {
-  const color = status === 'normal' ? '#30D158' : status === 'delayed' ? '#FF9F0A' : '#FF453A'
-  return (
-    <span className="flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold"
-      style={{ background: `${color}18`, color }}>
-      <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: color }} />
-      {name}
-    </span>
-  )
+  map:          mapboxgl.Map | null
 }
 
 // ── Carte catégorie cliquable ─────────────────────────────────────────────────
-function CategoryCard({
-  icon, title, subtitle, badge, badgeColor, onPress,
-}: {
+function CategoryCard({ icon, title, subtitle, badge, badgeColor, onPress }: {
   icon: string; title: string; subtitle: string
   badge?: string; badgeColor?: string; onPress: () => void
 }) {
   return (
-    <button
-      onClick={onPress}
+    <button onClick={onPress}
       className="w-full flex items-center gap-3 rounded-2xl p-4 text-left active:scale-[0.98] transition-transform"
-      style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
-    >
+      style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
       <span className="text-2xl flex-shrink-0">{icon}</span>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{title}</p>
@@ -81,8 +68,141 @@ function CategoryCard({
   )
 }
 
-// ── Détail Douanes ────────────────────────────────────────────────────────────
-function DouanesDetail() {
+// ── Fiche détail d'une douane ─────────────────────────────────────────────────
+function CrossingDetail({ crossing, onBack, onLocate }: {
+  crossing: CrossingStatic
+  onBack:   () => void
+  onLocate: (c: CrossingStatic) => void
+}) {
+  const now = new Date()
+  const s   = computeInstantStatus(crossing, now)
+
+  const G7_START  = new Date('2026-06-08T00:00:00Z')
+  const G7_END    = new Date('2026-06-18T23:59:59Z')
+  const isG7Period = now >= G7_START && now <= G7_END
+
+  const statusLabel = s.status === 'BLOCKED'  ? 'Fermé'
+    : s.status === 'HEAVY'    ? `Chargé · ~${s.waitMinutes} min d'attente`
+    : s.status === 'MODERATE' ? `Ralenti · ~${s.waitMinutes} min d'attente`
+    : s.status === 'LIGHT'    ? `Fluide · ~${s.waitMinutes} min`
+    : 'Libre · Sans attente'
+
+  const typeLabel = crossing.type === 'motorway' ? 'Autoroute'
+    : crossing.type === 'main'      ? 'Route principale'
+    : crossing.type === 'secondary' ? 'Route secondaire'
+    : 'Voie locale / piétonne'
+
+  return (
+    <div>
+      {/* Header */}
+      <div className="rounded-2xl p-4 mb-3"
+        style={{ background: `${s.color}10`, border: `1px solid ${s.color}35` }}>
+        <div className="flex items-start gap-3">
+          <span className="text-3xl">{s.icon}</span>
+          <div className="flex-1">
+            <h2 className="text-lg font-bold leading-tight" style={{ color: 'var(--text-primary)' }}>
+              {crossing.name}
+            </h2>
+            <p className="text-[12px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>{typeLabel}</p>
+          </div>
+        </div>
+        <div className="mt-3 flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: s.color }} />
+          <span className="text-sm font-semibold" style={{ color: s.color }}>{statusLabel}</span>
+        </div>
+      </div>
+
+      {/* Bouton localiser sur la carte */}
+      <button
+        onClick={() => onLocate(crossing)}
+        className="w-full flex items-center justify-center gap-2 rounded-2xl py-3 mb-3 font-semibold text-sm"
+        style={{ background: 'var(--brand)', color: '#fff' }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+          <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+        Voir sur la carte
+      </button>
+
+      {/* Infos pratiques */}
+      <div className="rounded-2xl p-4 mb-3 space-y-2.5"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+        <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>
+          Infos pratiques
+        </p>
+        <div className="flex items-start gap-2.5">
+          <span className="text-base flex-shrink-0">🕐</span>
+          <div>
+            <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Horaires</p>
+            <p className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>{crossing.hours}</p>
+          </div>
+        </div>
+        <div className="flex items-start gap-2.5">
+          <span className="text-base flex-shrink-0">🚗</span>
+          <div>
+            <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Véhicules autorisés</p>
+            <p className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
+              {crossing.vehicles.join(' · ')}
+            </p>
+          </div>
+        </div>
+        {crossing.pedestrian && (
+          <div className="flex items-center gap-2.5">
+            <span className="text-base">🚶</span>
+            <p className="text-sm" style={{ color: 'var(--text-primary)' }}>Passage piétons / vélos autorisé</p>
+          </div>
+        )}
+      </div>
+
+      {/* Info G7 */}
+      {crossing.g7Info && (
+        <div className="rounded-2xl p-4 mb-3"
+          style={{
+            background: s.status === 'BLOCKED' ? 'rgba(255,69,58,0.08)' : 'rgba(255,149,0,0.08)',
+            border:     s.status === 'BLOCKED' ? '1px solid rgba(255,69,58,0.25)' : '1px solid rgba(255,149,0,0.25)',
+          }}>
+          <p className="text-[10px] font-semibold uppercase tracking-wider mb-2"
+            style={{ color: s.status === 'BLOCKED' ? '#FF453A' : '#FF9F0A' }}>
+            🏛️ G7 · 12 au 18 juin 2026
+          </p>
+          <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+            {crossing.g7Info}
+          </p>
+          {crossing.nearestOpen && s.status === 'BLOCKED' && (
+            <div className="mt-2 pt-2" style={{ borderTop: '1px solid rgba(255,69,58,0.15)' }}>
+              <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>
+                <span style={{ color: '#30D158' }}>✓ Alternative : </span>
+                {crossing.nearestOpen}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Sources officielles */}
+      <div className="rounded-2xl p-3" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+        <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-tertiary)' }}>
+          Sources officielles
+        </p>
+        <div className="space-y-1">
+          {[
+            'Canton de Genève — ge.ch',
+            'Ville de Genève — ville-ge.ch',
+            isG7Period ? 'Directives G7 — Évian 2026' : 'G7 Évian 2026 — informations à venir',
+          ].map(s => (
+            <p key={s} className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>· {s}</p>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Liste des douanes ─────────────────────────────────────────────────────────
+function DouanesDetail({ onSelect, map }: {
+  onSelect: (c: CrossingStatic) => void
+  map:      mapboxgl.Map | null
+}) {
   const now      = new Date()
   const crossings = ALL_CROSSINGS.map(c => ({ c, s: computeInstantStatus(c, now) }))
     .sort((a, b) => {
@@ -90,88 +210,102 @@ function DouanesDetail() {
       return order[a.s.status] - order[b.s.status]
     })
 
+  const handleTap = (c: CrossingStatic) => {
+    // Fly to crossing on map
+    if (map) {
+      map.flyTo({ center: [c.lng, c.lat], zoom: 14, duration: 800, essential: true })
+    }
+    onSelect(c)
+  }
+
+  const open24  = crossings.filter(x => x.c.type === 'motorway' || x.c.type === 'main').length
+  const blocked = crossings.filter(x => x.s.status === 'BLOCKED').length
+
   return (
     <div className="space-y-2">
       <p className="text-[10px] font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-tertiary)' }}>
-        {crossings.length} passages frontière · Grand Genève
+        {crossings.length} passages · {open24} ouverts 24h/24
+        {blocked > 0 ? ` · ${blocked} fermés G7` : ''}
       </p>
       {crossings.map(({ c, s }) => (
-        <div key={c.id} className="flex items-center gap-3 rounded-2xl px-4 py-3"
-          style={{ background: 'var(--bg-card)', border: `1px solid ${s.color}30` }}>
-          <span className="text-base">{s.icon}</span>
+        <button
+          key={c.id}
+          onClick={() => handleTap(c)}
+          className="w-full flex items-center gap-3 rounded-2xl px-4 py-3 text-left active:scale-[0.98] transition-transform"
+          style={{ background: 'var(--bg-card)', border: `1px solid ${s.color}25` }}>
+          <span className="text-base flex-shrink-0">{s.icon}</span>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{c.name}</p>
             <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>
-              {c.hours} · {c.vehicles[0]}
+              {c.hours}
               {c.pedestrian ? ' · 🚶' : ''}
             </p>
           </div>
-          <div className="text-right flex-shrink-0">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <span className="text-[11px] font-bold px-2 py-0.5 rounded-full"
               style={{ background: `${s.color}18`, color: s.color }}>
               {s.status === 'BLOCKED' ? 'Fermé'
-                : s.status === 'HEAVY' ? 'Chargé'
-                : s.status === 'MODERATE' ? 'Ralenti'
+                : s.status === 'HEAVY' ? `${s.waitMinutes} min`
+                : s.status === 'MODERATE' ? `${s.waitMinutes} min`
                 : s.status === 'LIGHT' ? `${s.waitMinutes} min`
                 : 'Libre'}
             </span>
+            <svg width="6" height="10" viewBox="0 0 6 10" fill="none" stroke="var(--text-tertiary)" strokeWidth="1.5" strokeLinecap="round">
+              <path d="M1 1l4 4-4 4"/>
+            </svg>
           </div>
-        </div>
+        </button>
       ))}
     </div>
   )
 }
 
-// ── Détail Transport ──────────────────────────────────────────────────────────
+// ── Transport ─────────────────────────────────────────────────────────────────
 function TransportDetail({ network }: { network?: DashboardData['network'] }) {
   const lines = [
-    { name: 'TPG — Tram & Bus', key: 'tpg' as const, icon: '🚌', color: '#FF9500' },
-    { name: 'CFF / SBB', key: 'cff' as const, icon: '🚂', color: '#0040FF' },
-    { name: 'Léman Express CEVA', key: 'ceva' as const, icon: '🚆', color: '#AF52DE' },
+    { name: 'TPG — Tram & Bus', key: 'tpg' as const, icon: '🚌' },
+    { name: 'CFF / SBB', key: 'cff' as const, icon: '🚂' },
+    { name: 'Léman Express CEVA', key: 'ceva' as const, icon: '🚆' },
   ]
-
   return (
     <div className="space-y-3">
       <p className="text-[10px] font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-tertiary)' }}>
         Statut réseau temps réel
       </p>
       {lines.map(l => {
-        const st    = network?.[l.key] ?? 'normal'
-        const color = st === 'normal' ? '#30D158' : st === 'delayed' ? '#FF9F0A' : '#FF453A'
-        const label = st === 'normal' ? 'Normal' : st === 'delayed' ? 'Retards' : 'Perturbé'
+        const st = network?.[l.key] ?? 'normal'
+        const c  = st === 'normal' ? '#30D158' : st === 'delayed' ? '#FF9F0A' : '#FF453A'
         return (
           <div key={l.key} className="flex items-center gap-3 rounded-2xl px-4 py-3"
             style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
             <span className="text-xl">{l.icon}</span>
             <p className="flex-1 text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{l.name}</p>
             <span className="text-[11px] font-bold px-2 py-0.5 rounded-full"
-              style={{ background: `${color}18`, color }}>
-              {label}
+              style={{ background: `${c}18`, color: c }}>
+              {st === 'normal' ? 'Normal' : st === 'delayed' ? 'Retards' : 'Perturbé'}
             </span>
           </div>
         )
       })}
       <p className="text-[11px] text-center pt-2" style={{ color: 'var(--text-tertiary)' }}>
-        Source : opendata.ch · TPG · CFF en temps réel
+        opendata.ch · TPG.ch · CFF.ch
       </p>
     </div>
   )
 }
 
-// ── Détail Alertes ────────────────────────────────────────────────────────────
+// ── Alertes ───────────────────────────────────────────────────────────────────
 function AlertesDetail({ alerts }: { alerts: DashboardData['alerts'] }) {
   return (
     <div className="space-y-2">
       <p className="text-[10px] font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-tertiary)' }}>
-        Incidents routes · Accidents · Travaux
+        Incidents · Accidents · Travaux
       </p>
       {alerts.length === 0 ? (
         <div className="rounded-2xl p-6 text-center" style={{ background: 'var(--bg-card)' }}>
           <p className="text-2xl mb-2">✅</p>
           <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Aucun incident actif</p>
-          <p className="text-[12px] mt-1" style={{ color: 'var(--text-secondary)' }}>
-            Grand Genève · Trafic normal
-          </p>
+          <p className="text-[12px] mt-1" style={{ color: 'var(--text-secondary)' }}>Grand Genève · Trafic normal</p>
         </div>
       ) : alerts.map(a => (
         <div key={a.id} className="flex items-start gap-3 rounded-2xl p-3"
@@ -181,134 +315,88 @@ function AlertesDetail({ alerts }: { alerts: DashboardData['alerts'] }) {
             <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{a.title}</p>
             <p className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>{a.timeAgo}</p>
           </div>
-          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0"
-            style={{
-              background: a.severity === 'CRITICAL' ? 'rgba(255,69,58,0.15)' : 'rgba(255,159,10,0.15)',
-              color:      a.severity === 'CRITICAL' ? '#FF453A' : '#FF9F0A',
-            }}>
-            {a.severity === 'CRITICAL' ? 'CRITIQUE' : a.severity === 'HIGH' ? 'ÉLEVÉ' : ''}
-          </span>
         </div>
       ))}
       <p className="text-[11px] text-center pt-1" style={{ color: 'var(--text-tertiary)' }}>
-        Sources : TIF · inforoute.ch · Waze · HERE Maps
+        TIF · inforoute.ch · Waze · HERE Maps
       </p>
     </div>
   )
 }
 
-// ── Détail G7 ─────────────────────────────────────────────────────────────────
+// ── G7 ────────────────────────────────────────────────────────────────────────
 function G7Detail() {
-  const g7Start = new Date('2026-06-08')
-  const g7End   = new Date('2026-06-17')
   const now     = new Date()
-  const isActive = now >= g7Start && now <= g7End
-
-  if (isActive) {
-    return (
-      <div className="space-y-3">
-        <div className="rounded-2xl p-4" style={{ background: 'rgba(255,69,58,0.08)', border: '1px solid rgba(255,69,58,0.25)' }}>
-          <p className="text-sm font-bold mb-1" style={{ color: '#FF453A' }}>🏛️ G7 EN COURS · 8–18 juin 2026</p>
-          <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-            Des restrictions de circulation sont en vigueur dans le Grand Genève. Consultez les directives officielles avant tout déplacement.
-          </p>
-        </div>
-        <div className="rounded-2xl p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-          <p className="text-[11px] font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-tertiary)' }}>Postes macaron</p>
-          <p className="text-sm" style={{ color: 'var(--text-primary)' }}>Bardonnex · Thônex-Vallard</p>
-          <p className="text-[12px] mt-1" style={{ color: 'var(--text-secondary)' }}>Voie rapide réservée personnel indispensable</p>
-        </div>
+  const isActive = now >= new Date('2026-06-08') && now <= new Date('2026-06-18')
+  return isActive ? (
+    <div className="space-y-3">
+      <div className="rounded-2xl p-4" style={{ background: 'rgba(255,69,58,0.08)', border: '1px solid rgba(255,69,58,0.25)' }}>
+        <p className="text-sm font-bold mb-1" style={{ color: '#FF453A' }}>🏛️ G7 EN COURS · 8–18 juin 2026</p>
+        <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+          Restrictions de circulation en vigueur dans le Grand Genève.
+        </p>
       </div>
-    )
-  }
-
-  return (
+      <div className="rounded-2xl p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+        <p className="text-[11px] font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-tertiary)' }}>Postes macaron</p>
+        <p className="text-sm" style={{ color: 'var(--text-primary)' }}>Bardonnex · Thônex-Vallard</p>
+        <p className="text-[12px] mt-1" style={{ color: 'var(--text-secondary)' }}>Voie rapide · Personnel indispensable uniquement</p>
+      </div>
+    </div>
+  ) : (
     <div className="rounded-2xl p-6" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
       <p className="text-xl mb-3">🏛️</p>
-      <p className="text-sm font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-        G7 — Grand Genève · 8–18 juin 2026
-      </p>
+      <p className="text-sm font-bold mb-2" style={{ color: 'var(--text-primary)' }}>G7 — Grand Genève · 8–18 juin 2026</p>
       <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
         Cette bannière sera disponible pour mieux vous aider à anticiper vos déplacements durant le G7.
         Directives officielles, postes de contrôle et restrictions d'accès en temps réel.
       </p>
       <div className="mt-4 flex items-center gap-2">
         <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#FF9F0A' }} />
-        <p className="text-[11px]" style={{ color: '#FF9F0A' }}>
-          Activation le 8 juin 2026
-        </p>
+        <p className="text-[11px]" style={{ color: '#FF9F0A' }}>Activation le 8 juin 2026</p>
       </div>
     </div>
   )
 }
 
 // ── Vue d'ensemble "Tout" — 4 cartes ─────────────────────────────────────────
-function ToutOverview({
-  data, onSelect,
-}: {
+function ToutOverview({ data, onSelect }: {
   data?: DashboardData
   onSelect: (v: DetailView) => void
 }) {
-  const alertCount  = data?.alerts.length ?? 0
-  const netStatus   = data?.network
-  const hasNetIssue = netStatus && (netStatus.tpg !== 'normal' || netStatus.cff !== 'normal' || netStatus.ceva !== 'normal')
-
-  const now = new Date()
-  const open24    = ALL_CROSSINGS.filter(c => c.type === 'motorway' || c.type === 'main').length
-  const topCrossing = ALL_CROSSINGS.find(c => {
+  const now       = new Date()
+  const alertCount = data?.alerts.length ?? 0
+  const hasIssue   = data?.network && Object.values(data.network).some(v => v !== 'normal')
+  const blocked    = ALL_CROSSINGS.filter(c => computeInstantStatus(c, now).status === 'BLOCKED').length
+  const heavy      = ALL_CROSSINGS.find(c => {
     const s = computeInstantStatus(c, now)
     return s.status === 'HEAVY' || s.status === 'MODERATE'
   })
 
   return (
     <div className="space-y-2.5 pt-1">
-      {/* Douanes */}
-      <CategoryCard
-        icon="🛂"
-        title="Douanes"
-        subtitle={topCrossing
-          ? `⚠️ ${topCrossing.name} · trafic chargé`
-          : `${ALL_CROSSINGS.length} postes · ${open24} ouverts 24h/24`}
-        onPress={() => onSelect('douanes')}
-      />
-
-      {/* Transport */}
-      <CategoryCard
-        icon="🚌"
-        title="Transport public"
+      <CategoryCard icon="🛂" title="Douanes"
+        subtitle={heavy ? `⚠️ ${heavy.name} · trafic chargé` : `${ALL_CROSSINGS.length} postes · ${blocked > 0 ? `${blocked} fermés G7` : 'tous ouverts'}`}
+        onPress={() => onSelect('douanes')} />
+      <CategoryCard icon="🚌" title="Transport public"
         subtitle="TPG · CFF · Léman Express · CEVA"
-        badge={hasNetIssue ? 'Perturbation' : undefined}
-        badgeColor={hasNetIssue ? '#FF9F0A' : undefined}
-        onPress={() => onSelect('transport')}
-      />
-
-      {/* Alertes */}
-      <CategoryCard
-        icon="⚠️"
-        title="Alertes & Incidents"
-        subtitle={alertCount > 0
-          ? `${alertCount} incident${alertCount > 1 ? 's' : ''} actif${alertCount > 1 ? 's' : ''} · Accidents · Travaux`
-          : 'Aucun incident · Trafic normal'}
-        badge={alertCount > 0 ? String(alertCount) : undefined}
-        badgeColor="#FF453A"
-        onPress={() => onSelect('alertes')}
-      />
-
-      {/* G7 */}
-      <CategoryCard
-        icon="🏛️"
-        title="G7 — 8 au 18 juin 2026"
+        badge={hasIssue ? 'Perturbation' : undefined} badgeColor="#FF9F0A"
+        onPress={() => onSelect('transport')} />
+      <CategoryCard icon="⚠️" title="Alertes & Incidents"
+        subtitle={alertCount > 0 ? `${alertCount} incident${alertCount > 1 ? 's' : ''} actif${alertCount > 1 ? 's' : ''}` : 'Aucun incident · Trafic normal'}
+        badge={alertCount > 0 ? String(alertCount) : undefined} badgeColor="#FF453A"
+        onPress={() => onSelect('alertes')} />
+      <CategoryCard icon="🏛️" title="G7 — 8 au 18 juin 2026"
         subtitle="Directives officielles · Restrictions d'accès"
-        onPress={() => onSelect('g7')}
-      />
+        onPress={() => onSelect('g7')} />
     </div>
   )
 }
 
 // ── Composant principal ───────────────────────────────────────────────────────
-export function BottomSheet({ session: _session, activeFilter }: BottomSheetProps) {
-  const [snap,       setSnap]       = useState<SnapSize>('compact')
-  const [detailView, setDetailView] = useState<DetailView>('overview')
+export function BottomSheet({ session: _session, activeFilter, map }: BottomSheetProps) {
+  const [snap,             setSnap]             = useState<SnapSize>('compact')
+  const [detailView,       setDetailView]       = useState<DetailView>('overview')
+  const [selectedCrossing, setSelectedCrossing] = useState<CrossingStatic | null>(null)
 
   const touchStartY    = useRef(0)
   const touchStartSnap = useRef<SnapSize>('compact')
@@ -356,26 +444,42 @@ export function BottomSheet({ session: _session, activeFilter }: BottomSheetProp
 
   const openDetail = useCallback((v: DetailView) => {
     setDetailView(v)
-    setSnap('full')
-  }, [])
-
-  const backToOverview = useCallback(() => {
-    setDetailView('overview')
+    setSelectedCrossing(null)
     setSnap('mid')
   }, [])
 
+  const openCrossing = useCallback((c: CrossingStatic) => {
+    setSelectedCrossing(c)
+    setSnap('full')
+  }, [])
+
+  const locateCrossing = useCallback((c: CrossingStatic) => {
+    if (!map) return
+    map.flyTo({ center: [c.lng, c.lat], zoom: 15, duration: 900, essential: true })
+    setSnap('compact')  // réduit le sheet pour voir la carte
+  }, [map])
+
+  const goBack = useCallback(() => {
+    if (selectedCrossing) {
+      setSelectedCrossing(null)
+      setSnap('full')
+    } else {
+      setDetailView('overview')
+      setSnap('mid')
+    }
+  }, [selectedCrossing])
+
   // Compact headline
-  const alertCount = data?.alerts.length ?? 0
-  const compactText = activeFilter === 'all'
-    ? (alertCount > 0 ? `Grand Genève · ${alertCount} alerte${alertCount > 1 ? 's' : ''} ⚠️` : 'Grand Genève · Trafic + Douanes + Alertes')
-    : activeFilter === 'transit' ? 'Transport public · TPG · CFF · CEVA'
-    : activeFilter === 'traffic' ? 'Trafic routier · Grand Genève'
-    : activeFilter === 'alerts'  ? 'Alertes & Incidents routes'
-    : activeFilter === 'borders' ? 'Douanes · 47 passages frontière'
-    : activeFilter === 'g7'      ? 'G7 · 8–18 juin 2026 · Évian'
+  const alertCount  = data?.alerts.length ?? 0
+  const compactText = activeFilter === 'all'     ? (alertCount > 0 ? `Grand Genève · ${alertCount} alerte${alertCount > 1 ? 's' : ''} ⚠️` : 'Tout · Trafic · Douanes · Alertes')
+    : activeFilter === 'transit'  ? 'Transport public · TPG · CFF · CEVA'
+    : activeFilter === 'traffic'  ? 'Trafic routier · Grand Genève'
+    : activeFilter === 'alerts'   ? 'Alertes & Incidents routes'
+    : activeFilter === 'borders'  ? 'Douanes · 47 passages frontière'
+    : activeFilter === 'g7'       ? 'G7 · 8–18 juin 2026 · Évian'
     : 'Grand Genève'
 
-  const compactColor = alertCount > 0 ? '#FF9F0A' : 'var(--text-secondary)'
+  const showBack = detailView !== 'overview' || selectedCrossing !== null
 
   return (
     <div
@@ -390,16 +494,15 @@ export function BottomSheet({ session: _session, activeFilter }: BottomSheetProp
         className="flex justify-center pt-2.5 pb-1 flex-shrink-0"
         onClick={() => {
           if (snap === 'compact') setSnap('mid')
-          else { setSnap('compact'); setDetailView('overview') }
+          else { setSnap('compact'); setDetailView('overview'); setSelectedCrossing(null) }
         }}
-        aria-label="Ouvrir/fermer"
-      >
+        aria-label="Ouvrir/fermer">
         <div className="w-9 h-1 rounded-full" style={{ background: 'var(--border)' }} />
       </button>
 
       {/* Compact row */}
       <div className="flex items-center justify-between px-4 py-1 flex-shrink-0">
-        <span className="text-sm font-medium truncate" style={{ color: compactColor }}>
+        <span className="text-sm font-medium truncate" style={{ color: alertCount > 0 ? '#FF9F0A' : 'var(--text-secondary)' }}>
           {compactText}
         </span>
         {alertCount > 0 && snap === 'compact' && (
@@ -412,50 +515,45 @@ export function BottomSheet({ session: _session, activeFilter }: BottomSheetProp
 
       {/* Expanded content */}
       {snap !== 'compact' && (
-        <div className="flex-1 overflow-y-auto px-4 pb-4" style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
+        <div className="flex-1 overflow-y-auto px-4 pb-6" style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
 
-          {/* Back button quand on est dans le détail */}
-          {detailView !== 'overview' && (
-            <button
-              onClick={backToOverview}
+          {/* Bouton retour */}
+          {showBack && (
+            <button onClick={goBack}
               className="flex items-center gap-2 mb-4 text-sm font-medium"
-              style={{ color: 'var(--brand)' }}
-            >
+              style={{ color: 'var(--brand)' }}>
               <svg width="8" height="13" viewBox="0 0 8 13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <path d="M7 1L1 6.5 7 12"/>
               </svg>
-              Retour
+              {selectedCrossing ? 'Toutes les douanes' : 'Retour'}
             </button>
           )}
 
-          {/* Contenu selon activeFilter et detailView */}
-          {activeFilter === 'all' ? (
-            detailView === 'overview' ? (
-              <ToutOverview data={data} onSelect={openDetail} />
-            ) : detailView === 'douanes' ? (
-              <DouanesDetail />
-            ) : detailView === 'transport' ? (
-              <TransportDetail network={data?.network} />
-            ) : detailView === 'alertes' ? (
-              <AlertesDetail alerts={data?.alerts ?? []} />
-            ) : (
-              <G7Detail />
-            )
+          {/* Fiche douane sélectionnée */}
+          {selectedCrossing ? (
+            <CrossingDetail
+              crossing={selectedCrossing}
+              onBack={goBack}
+              onLocate={locateCrossing}
+            />
+          ) : activeFilter === 'all' ? (
+            detailView === 'overview'   ? <ToutOverview data={data} onSelect={openDetail} />
+            : detailView === 'douanes'  ? <DouanesDetail onSelect={openCrossing} map={map} />
+            : detailView === 'transport'? <TransportDetail network={data?.network} />
+            : detailView === 'alertes'  ? <AlertesDetail alerts={data?.alerts ?? []} />
+            : <G7Detail />
           ) : (
-            /* Autres filtres — vue générique */
             <div className="space-y-3">
-              {data?.network && activeFilter === 'transit' && (
-                <TransportDetail network={data.network} />
-              )}
-              {activeFilter === 'borders' && <DouanesDetail />}
-              {activeFilter === 'alerts'  && <AlertesDetail alerts={data?.alerts ?? []} />}
-              {activeFilter === 'g7'      && <G7Detail />}
-              {activeFilter === 'traffic' && (
+              {activeFilter === 'transit'  && <TransportDetail network={data?.network} />}
+              {activeFilter === 'borders'  && <DouanesDetail onSelect={openCrossing} map={map} />}
+              {activeFilter === 'alerts'   && <AlertesDetail alerts={data?.alerts ?? []} />}
+              {activeFilter === 'g7'       && <G7Detail />}
+              {activeFilter === 'traffic'  && (
                 <div className="rounded-2xl p-6 text-center" style={{ background: 'var(--bg-card)' }}>
                   <p className="text-2xl mb-2">🚦</p>
                   <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Trafic routier</p>
                   <p className="text-[12px] mt-1" style={{ color: 'var(--text-secondary)' }}>
-                    Données Mapbox · HERE Maps · Mise à jour temps réel
+                    Mapbox Traffic · HERE Maps · Temps réel
                   </p>
                 </div>
               )}
