@@ -86,7 +86,12 @@ export function SmartAlertManager() {
             {alert.headline}
           </span>
           {alert.action && (
-            <a href={alert.action.href} className="text-[12px] font-bold flex-shrink-0" style={{ color: 'var(--brand)' }}>
+            <a
+              href={/^https?:\/\//i.test(alert.action.href) || alert.action.href.startsWith('/') ? alert.action.href : '#'}
+              className="text-[12px] font-bold flex-shrink-0"
+              style={{ color: 'var(--brand)' }}
+              rel="noopener noreferrer"
+            >
               {alert.action.label}
             </a>
           )}
