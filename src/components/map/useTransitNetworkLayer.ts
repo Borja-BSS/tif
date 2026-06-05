@@ -45,7 +45,10 @@ if (typeof window !== 'undefined') fetchNetwork()
 
 async function fetchDisruptions(): Promise<TransportLayerResponse | null> {
   try {
-    const res = await fetch('/api/v1/layers/transport', { cache: 'no-store' })
+    const res = await fetch('/api/v1/layers/transport', {
+      cache:  'no-store',
+      signal: AbortSignal.timeout(5000),  // 5s max — ne bloque pas la carte
+    })
     if (!res.ok) return null
     return await res.json() as TransportLayerResponse
   } catch {

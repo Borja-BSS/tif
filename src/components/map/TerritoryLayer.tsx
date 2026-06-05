@@ -79,7 +79,7 @@ export default function TerritoryLayer({ map, visible }: TerritoryLayerProps) {
 
   // Chargement de l'état initial depuis l'API au montage
   useEffect(() => {
-    fetch('/api/territory/zones')
+    fetch('/api/territory/zones', { signal: AbortSignal.timeout(5000) })
       .then(r => r.ok ? r.json() : [])
       .then((zones: ZoneEntry[]) => {
         zones.forEach(z => zonesRef.current.set(z.geohash6, z))

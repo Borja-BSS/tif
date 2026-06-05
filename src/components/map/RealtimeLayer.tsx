@@ -156,16 +156,7 @@ export default function RealtimeLayer({ map, visible = true, showTransport = tru
         </div>
       )}
 
-      {/* Stats signaux */}
-      {stats.total > 0 && (
-        <div className="flex gap-2 rounded-lg bg-black/70 backdrop-blur px-3 py-1.5 text-[10px] font-mono">
-          <span className="text-blue-400">{stats.traffic} trafic</span>
-          <span className="text-white/20">·</span>
-          <span className="text-cyan-400">{stats.transport} transport</span>
-          <span className="text-white/20">·</span>
-          <span className="text-white/40">{stats.total} total</span>
-        </div>
-      )}
+      {/* Stats signaux supprimées — affichage mobile propre */}
     </div>
   )
 }

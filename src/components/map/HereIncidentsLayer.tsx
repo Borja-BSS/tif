@@ -193,7 +193,7 @@ async function applyData(m: mapboxgl.Map, geojson: FeatureCollection) {
 
 async function fetchAndApply(m: mapboxgl.Map) {
   try {
-    const res = await fetch('/api/v1/layers/alerts', { cache: 'no-store' })
+    const res = await fetch('/api/v1/layers/alerts', { cache: 'no-store', signal: AbortSignal.timeout(5000) })
     if (!res.ok) return
     const data = await res.json() as FeatureCollection
     applyData(m, data)
