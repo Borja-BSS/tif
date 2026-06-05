@@ -332,9 +332,12 @@ function TransportDetail() {
     staleTime:       15_000,
   })
 
-  const tpgDisruptions = data?.disruptions.tpg ?? []
-  const cffDisruptions = data?.disruptions.cff?.filter(d => !d.isCEVA) ?? []
-  const cevaDisruptions = data?.disruptions.cff?.filter(d => d.isCEVA) ?? []
+  const byTime = <T extends { detectedAt?: string }>(arr: T[]) =>
+    [...arr].sort((a, b) => (b.detectedAt ?? '').localeCompare(a.detectedAt ?? ''))
+
+  const tpgDisruptions  = byTime(data?.disruptions.tpg ?? [])
+  const cffDisruptions  = byTime(data?.disruptions.cff?.filter(d => !d.isCEVA) ?? [])
+  const cevaDisruptions = byTime(data?.disruptions.cff?.filter(d =>  d.isCEVA) ?? [])
 
   const tpgStatus  = tpgDisruptions.length  === 0 ? 'normal' : 'delayed'
   const cffStatus  = cffDisruptions.length  === 0 ? 'normal' : 'delayed'
