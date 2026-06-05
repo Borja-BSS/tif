@@ -20,7 +20,6 @@ const FilterPanel          = dynamic(() => import('./FilterPanel'),          { s
 const BorderCrossingsLayer = dynamic(() => import('./BorderCrossingsLayer'), { ssr: false })
 const RoadClosuresLayer    = dynamic(() => import('./RoadClosuresLayer'),    { ssr: false })
 const HereIncidentsLayer   = dynamic(() => import('./HereIncidentsLayer'),   { ssr: false })
-const SearchHandle         = dynamic(() => import('./SearchHandle'),         { ssr: false })
 
 const DEFAULT_FILTERS: FilterState = {
   heatmap:   true,
@@ -37,9 +36,15 @@ const TRANSPORT_LEGEND = [
   { color: '#FF3B30', label: 'Ligne perturbée', dashed: true },
 ]
 
-export default function MapView(props: Omit<MapGLProps, 'onMapReady'>) {
+interface MapViewProps extends Omit<MapGLProps, 'onMapReady'> {
+  filters?:     FilterState
+  onMapReady?:  (map: mapboxgl.Map) => void
+}
+
+export default function MapView({ filters: externalFilters, onMapReady, ...props }: MapViewProps) {
   const [map,             setMap]             = useState<mapboxgl.Map | null>(null)
-  const [filters,         setFilters]         = useState<FilterState>(DEFAULT_FILTERS)
+  const [internalFilters, setInternalFilters] = useState<FilterState>(DEFAULT_FILTERS)
+  const filters = externalFilters ?? internalFilters
   const [territoryToast,  setTerritoryToast]  = useState(false)
   const territoryShownRef = useRef(false)
   const searchPinRef      = useRef<mapboxgl.Marker | null>(null)
@@ -88,7 +93,7 @@ export default function MapView(props: Omit<MapGLProps, 'onMapReady'>) {
 
   return (
     <>
-      <MapGL {...props} onMapReady={setMap} />
+      <MapGL {...props} onMapReady={m => { setMap(m); onMapReady?.(m) }} />
 
       <G7Banner />
       {filters.transport && <DisruptionsPanel />}
@@ -109,16 +114,15 @@ export default function MapView(props: Omit<MapGLProps, 'onMapReady'>) {
             <TransportLegend />
           )}
 
-          {/* Control bar — Liquid Glass pill, bottom center */}
-          <FilterPanel
-            filters={filters}
-            onChange={setFilters}
-          />
+          {/* FilterPanel — affiché seulement si pas de filtres externes */}
+          {!externalFilters && (
+            <FilterPanel
+              filters={internalFilters}
+              onChange={setInternalFilters}
+            />
+          )}
         </>
       )}
-
-      {/* SearchHandle — primary mobile interaction */}
-      <SearchHandle map={map} />
 
       {/* Territory toast — first activation of the session */}
       {territoryToast && (

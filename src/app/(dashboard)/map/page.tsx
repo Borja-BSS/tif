@@ -2,21 +2,21 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState }             from 'react'
-import { useSession }           from 'next-auth/react'
-import { useQuery }             from '@tanstack/react-query'
-import dynamicImport            from 'next/dynamic'
-import { SearchBar }            from '@/components/map/ui/SearchBar'
-import { QuickFilters }         from '@/components/map/ui/QuickFilters'
-import { FloatingControls }     from '@/components/map/ui/FloatingControls'
-import { BottomSheet }          from '@/components/map/ui/BottomSheet'
-import { SmartAlertManager }    from '@/components/map/ui/SmartAlert'
-import { G7Mode, useG7Active }  from '@/components/map/modes/G7Mode'
-import { VoiceStatus }          from '@/components/accessibility/VoiceStatus'
-import type { FilterId }        from '@/components/map/ui/QuickFilters'
+import { useState, useCallback }  from 'react'
+import { useSession }             from 'next-auth/react'
+import { useQuery }               from '@tanstack/react-query'
+import dynamicImport              from 'next/dynamic'
+import mapboxgl                   from 'mapbox-gl'
+import { SearchBar }              from '@/components/map/ui/SearchBar'
+import { QuickFilters }           from '@/components/map/ui/QuickFilters'
+import { FloatingControls }       from '@/components/map/ui/FloatingControls'
+import { BottomSheet }            from '@/components/map/ui/BottomSheet'
+import { SmartAlertManager }      from '@/components/map/ui/SmartAlert'
+import { G7Mode, useG7Active }    from '@/components/map/modes/G7Mode'
+import { VoiceStatus }            from '@/components/accessibility/VoiceStatus'
+import type { FilterId }          from '@/components/map/ui/QuickFilters'
+import type { FilterState }       from '@/components/map/FilterPanel'
 
-// Keep MapView dynamic (no SSR) — preserve existing behavior
-// MapView manages its own filters and map instance internally
 const MapView = dynamicImport(() => import('@/components/map/MapView'), { ssr: false })
 
 interface DashboardData {
@@ -25,10 +25,22 @@ interface DashboardData {
   myJourney?:   { headline: string }
 }
 
+function toFilterState(active: FilterId): FilterState {
+  return {
+    heatmap:   active === 'all' || active === 'traffic',
+    alerts:    active === 'all' || active === 'alerts',
+    transport: active === 'transit',
+    territory: active === 'all' || active === 'borders' || active === 'g7',
+  }
+}
+
 export default function MapPage() {
   const [activeFilter, setActiveFilter] = useState<FilterId>('all')
+  const [mapRef,       setMapRef]       = useState<mapboxgl.Map | null>(null)
   const session                         = useSession()?.data ?? null
   const isG7Active                      = useG7Active()
+
+  const handleMapReady = useCallback((m: mapboxgl.Map) => setMapRef(m), [])
 
   const { data: dashboard } = useQuery<DashboardData>({
     queryKey: ['dashboard'],
@@ -38,14 +50,22 @@ export default function MapPage() {
     placeholderData: { globalStatus: 'calm', alerts: [] },
   })
 
+  const filterState = toFilterState(activeFilter)
+
   return (
     <div className="h-screen w-full overflow-hidden relative" style={{ background: '#000' }}>
 
-      {/* Layer 1: Map (background) — MapView owns its own filters and map ref */}
-      <MapView initialLat={46.2044} initialLng={6.1432} initialZoom={11} />
+      {/* Layer 1: Carte — reçoit les filtres depuis la page + expose le map ref */}
+      <MapView
+        initialLat={46.2044}
+        initialLng={6.1432}
+        initialZoom={11}
+        filters={filterState}
+        onMapReady={handleMapReady}
+      />
 
       {/* Layer 2: SearchBar */}
-      <SearchBar map={null} />
+      <SearchBar map={mapRef} />
 
       {/* Layer 3: QuickFilters */}
       <QuickFilters
@@ -58,17 +78,17 @@ export default function MapPage() {
       <SmartAlertManager />
 
       {/* Layer 5: FloatingControls + VoiceStatus */}
-      <div className="fixed z-20 flex flex-col gap-2.5" style={{ right: 16, bottom: 'calc(56px + 80px)' }}>
+      <FloatingControls map={mapRef} />
+      <div className="fixed z-20" style={{ right: 16, bottom: 'calc(56px + 80px + 54px + 10px)' }}>
         <VoiceStatus
           globalStatus={dashboard?.globalStatus ?? 'calm'}
           alertCount={dashboard?.alerts?.length ?? 0}
           journeyHeadline={dashboard?.myJourney?.headline}
         />
-        <FloatingControls map={null} />
       </div>
 
       {/* Layer 6: G7Mode overlay */}
-      {isG7Active && <G7Mode map={null} />}
+      {isG7Active && <G7Mode map={mapRef} />}
 
       {/* Layer 7: BottomSheet */}
       <BottomSheet session={session ?? null} activeFilter={activeFilter} />
