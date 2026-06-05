@@ -4,7 +4,6 @@ import dynamic from 'next/dynamic'
 import { useState, useEffect, useRef } from 'react'
 import mapboxgl from 'mapbox-gl'
 import type { MapGLProps } from './MapGL'
-import { GRAND_GENEVE_BOUNDS } from './MapGL'
 import type { FilterState } from './FilterPanel'
 import { useTerritorialLayers }    from './useTerritorialLayers'
 import { useHereMobilityLayer }    from './useHereMobilityLayer'
@@ -93,11 +92,7 @@ export default function MapView({ filters: externalFilters, onMapReady, ...props
 
   return (
     <>
-      <MapGL
-        {...props}
-        initialBounds={GRAND_GENEVE_BOUNDS}
-        onMapReady={m => { setMap(m); onMapReady?.(m) }}
-      />
+      <MapGL {...props} onMapReady={m => { setMap(m); onMapReady?.(m) }} />
 
       {filters.transport && <DisruptionsPanel />}
 

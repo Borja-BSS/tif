@@ -5,25 +5,23 @@ import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 
 // ── Grand Genève — bbox complète ───────────────────────────────────────────────
-// Délimité par : Lausanne (NE) · Sallanches (SE) · Annecy (S) · Champagnole (W) · Pontarlier (NW)
-export const GRAND_GENEVE_BOUNDS: [[number, number], [number, number]] = [
-  [5.75, 45.75],  // SW — au-delà de Champagnole / Annecy
-  [7.00, 46.95],  // NE — au-delà de Lausanne / Pontarlier
+// Lausanne (NE) · Sallanches (SE) · Annecy (S) · Champagnole (W) · Pontarlier (NW)
+const GRAND_GENEVE_BOUNDS: mapboxgl.LngLatBoundsLike = [
+  [5.75, 45.75],  // SW
+  [7.00, 46.95],  // NE
 ]
 
 export interface MapGLProps {
-  initialLat?:    number
-  initialLng?:    number
-  initialZoom?:   number
-  initialBounds?: [[number, number], [number, number]]
-  onMapReady?:    (map: mapboxgl.Map) => void
+  initialLat?:  number
+  initialLng?:  number
+  initialZoom?: number
+  onMapReady?:  (map: mapboxgl.Map) => void
 }
 
 export default function MapGL({
-  initialLat    = 46.38,
-  initialLng    = 6.30,
-  initialZoom   = 9,
-  initialBounds,
+  initialLat  = 46.35,
+  initialLng  = 6.30,
+  initialZoom = 9,
   onMapReady,
 }: MapGLProps) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -38,11 +36,8 @@ export default function MapGL({
     const map = new mapboxgl.Map({
       container:    containerRef.current,
       style:        'mapbox://styles/mapbox/dark-v11',
-      // Si des bounds sont fournis, on les utilise pour cadrer toute la zone
-      ...(initialBounds
-        ? { bounds: initialBounds, fitBoundsOptions: { padding: 0 } }
-        : { center: [initialLng, initialLat], zoom: initialZoom }
-      ),
+      center:       [initialLng, initialLat],
+      zoom:         initialZoom,
       antialias:    false,
       fadeDuration: 0,
     })
@@ -50,6 +45,9 @@ export default function MapGL({
     // Contrôles natifs Mapbox supprimés — UI custom gère GPS + zoom
 
     map.on('load', () => {
+      // Cadrer sur le Grand Genève complet après le chargement du style
+      map.fitBounds(GRAND_GENEVE_BOUNDS, { duration: 0, padding: 0 })
+
       // User location source & layers (created once on load)
       map.addSource('user-location', {
         type: 'geojson',
