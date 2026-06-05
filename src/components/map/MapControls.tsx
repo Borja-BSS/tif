@@ -5,198 +5,132 @@ import type { FilterState } from './FilterPanel'
 
 // ── Liquid Glass system token ─────────────────────────────────────────────────
 export const LG_STYLE: React.CSSProperties = {
-  background:             'rgba(18, 18, 22, 0.72)',
-  backdropFilter:         'blur(28px) saturate(180%)',
-  WebkitBackdropFilter:   'blur(28px) saturate(180%)',
-  border:                 '1px solid rgba(255,255,255,0.13)',
-  boxShadow:              'inset 0 0.5px 0 rgba(255,255,255,0.14), 0 16px 56px rgba(0,0,0,0.55), 0 2px 6px rgba(0,0,0,0.3)',
+  background:           'rgba(18, 18, 22, 0.75)',
+  backdropFilter:       'blur(28px) saturate(180%)',
+  WebkitBackdropFilter: 'blur(28px) saturate(180%)',
+  border:               '1px solid rgba(255,255,255,0.13)',
+  boxShadow:            'inset 0 0.5px 0 rgba(255,255,255,0.14), 0 8px 32px rgba(0,0,0,0.45)',
 }
 
-const TERRITORY_TOOLTIP = 'La rubrique Territoire regroupe les zones de restriction, périmètres de sécurité et conditions d\'accès liées au G7.'
+const TERRITORY_TOOLTIP = "Périmètres G7, zones de restriction et conditions d'accès — 8 au 18 juin 2026"
 
 // ── Layer definitions ─────────────────────────────────────────────────────────
 const LAYERS = [
-  { key: 'heatmap'   as keyof FilterState, icon: '🚦', label: 'Trafic',  accent: 'rgba(10,132,255,0.9)'  },
-  { key: 'transport' as keyof FilterState, icon: '🚌', label: 'TPG',     accent: 'rgba(50,215,75,0.9)'   },
-  { key: 'territory' as keyof FilterState, icon: '🗺️', label: 'Zones',   accent: 'rgba(255,196,0,0.9)'   },
-  { key: 'alerts'    as keyof FilterState, icon: '⚠️', label: 'Alertes', accent: 'rgba(255,69,58,0.9)'   },
+  { key: 'heatmap'   as keyof FilterState, icon: '🚦', label: 'Trafic',  accent: '#0A84FF'  },
+  { key: 'transport' as keyof FilterState, icon: '🚌', label: 'TPG',     accent: '#34C759'  },
+  { key: 'territory' as keyof FilterState, icon: '🗺️', label: 'Zones',   accent: '#FFD60A'  },
+  { key: 'alerts'    as keyof FilterState, icon: '⚠️', label: 'Alertes', accent: '#FF453A'  },
 ]
 
 interface MapControlsProps {
-  filters:     FilterState
-  onChange:    (next: FilterState) => void
-  routingMode: 'car' | 'transport' | null
-  onRouting:   (mode: 'car' | 'transport' | null) => void
+  filters:      FilterState
+  onChange:     (next: FilterState) => void
+  routingMode?: 'car' | 'transport' | null      // kept for API compat, ignored
+  onRouting?:   (mode: 'car' | 'transport' | null) => void  // kept for compat
 }
 
-export default function MapControls({ filters, onChange, routingMode, onRouting }: MapControlsProps) {
-  const [tooltip,           setTooltip]           = useState<string | null>(null)
-  const [territoryTooltip,  setTerritoryTooltip]  = useState(false)
+export default function MapControls({ filters, onChange }: MapControlsProps) {
+  const [tooltip,          setTooltip]          = useState<string | null>(null)
+  const [territoryTooltip, setTerritoryTooltip] = useState(false)
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [expanded, setExpanded] = useState(true)
 
-  const toggle = (key: keyof FilterState) =>
-    onChange({ ...filters, [key]: !filters[key] })
-
-  const toggleRouting = (mode: 'car' | 'transport') =>
-    onRouting(routingMode === mode ? null : mode)
-
-  // Long-press for territory tooltip on mobile
-  const handleTerritoryPressStart = () => {
-    longPressTimer.current = setTimeout(() => setTerritoryTooltip(true), 500)
-  }
-  const handleTerritoryPressEnd = () => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current)
-      longPressTimer.current = null
-    }
-  }
-  const dismissTerritoryTooltip = () => setTerritoryTooltip(false)
+  const toggle = (key: keyof FilterState) => onChange({ ...filters, [key]: !filters[key] })
 
   return (
     <div
-      className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 rounded-full px-2 py-2"
-      style={LG_STYLE}
+      className="absolute z-20"
+      style={{
+        bottom: 'max(88px, calc(env(safe-area-inset-bottom, 0px) + 88px))',
+        left: '16px',
+      }}
     >
-      {/* ── Layer toggles ── */}
-      {LAYERS.map(({ key, icon, label, accent }) => {
-        const active = filters[key]
-        const isTerritory = key === 'territory'
-
-        return (
+      {/* Collapsed state: single icon button */}
+      {!expanded ? (
+        <button
+          onClick={() => setExpanded(true)}
+          className="w-11 h-11 rounded-full flex items-center justify-center transition-all active:scale-90"
+          style={{ ...LG_STYLE, fontSize: 18 }}
+          aria-label="Afficher les layers"
+        >
+          ⚡
+        </button>
+      ) : (
+        /* Expanded: vertical pill with layer icons */
+        <div
+          className="flex flex-col items-center gap-0.5 rounded-3xl py-2 px-1.5"
+          style={LG_STYLE}
+        >
+          {/* Collapse button at top */}
           <button
-            key={key}
-            onClick={() => {
-              toggle(key)
-              if (isTerritory) setTerritoryTooltip(false)
-            }}
-            onMouseEnter={() => {
-              setTooltip(isTerritory ? null : label)
-              if (isTerritory) setTerritoryTooltip(true)
-            }}
-            onMouseLeave={() => {
-              setTooltip(null)
-              if (isTerritory) setTerritoryTooltip(false)
-            }}
-            onTouchStart={isTerritory ? handleTerritoryPressStart : undefined}
-            onTouchEnd={isTerritory ? handleTerritoryPressEnd : undefined}
-            onTouchCancel={isTerritory ? handleTerritoryPressEnd : undefined}
-            className="relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90"
-            style={{
-              background: active ? 'rgba(255,255,255,0.10)' : 'transparent',
-            }}
-            aria-label={label}
+            onClick={() => setExpanded(false)}
+            className="w-8 h-6 flex items-center justify-center rounded-full mb-0.5 transition-colors active:bg-white/10"
+            style={{ color: 'rgba(255,255,255,0.25)' }}
           >
-            <span className="text-[18px] leading-none" style={{ opacity: active ? 1 : 0.35 }}>
-              {icon}
-            </span>
-            {/* Active indicator dot */}
-            {active && (
-              <span
-                className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
-                style={{ background: accent }}
-              />
-            )}
+            <svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <path d="M1 5l4-4 4 4"/>
+            </svg>
           </button>
-        )
-      })}
 
-      {/* ── Separator ── */}
-      <div className="w-px h-6 mx-1 rounded-full" style={{ background: 'rgba(255,255,255,0.12)' }} />
+          {/* Layer toggles */}
+          {LAYERS.map(({ key, icon, label, accent }) => {
+            const active = filters[key]
+            const isTerritory = key === 'territory'
+            return (
+              <button
+                key={key}
+                onClick={() => toggle(key)}
+                onMouseEnter={() => setTooltip(label)}
+                onMouseLeave={() => { setTooltip(null); if (isTerritory) setTerritoryTooltip(false) }}
+                onTouchStart={() => {
+                  if (isTerritory) longPressTimer.current = setTimeout(() => setTerritoryTooltip(true), 500)
+                }}
+                onTouchEnd={() => {
+                  if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null }
+                }}
+                className="relative w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90"
+                style={{ background: active ? 'rgba(255,255,255,0.10)' : 'transparent' }}
+                aria-label={label}
+              >
+                <span style={{ fontSize: 17, opacity: active ? 1 : 0.3 }}>{icon}</span>
+                {active && (
+                  <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full" style={{ background: accent }} />
+                )}
+              </button>
+            )
+          })}
 
-      {/* ── Routing: Voiture ── */}
-      <button
-        onClick={() => toggleRouting('car')}
-        onMouseEnter={() => setTooltip('Itinéraire voiture')}
-        onMouseLeave={() => setTooltip(null)}
-        className="flex items-center gap-1.5 h-11 rounded-full px-3 transition-all duration-200 active:scale-90"
-        style={{
-          background: routingMode === 'car'
-            ? 'rgba(10,132,255,0.22)'
-            : 'transparent',
-          border: routingMode === 'car' ? '1px solid rgba(10,132,255,0.45)' : '1px solid transparent',
-        }}
-        aria-label="Itinéraire voiture"
-      >
-        <span className="text-[16px] leading-none" style={{ opacity: routingMode === 'car' ? 1 : 0.45 }}>
-          🚗
-        </span>
-        <span
-          className="text-[11px] font-medium hidden sm:inline"
-          style={{ color: routingMode === 'car' ? 'rgba(10,132,255,1)' : 'rgba(255,255,255,0.45)' }}
-        >
-          Voiture
-        </span>
-      </button>
+          {/* Separator */}
+          <div className="w-5 h-px my-0.5 rounded-full" style={{ background: 'rgba(255,255,255,0.1)' }} />
 
-      {/* ── Routing: Transports ── */}
-      <button
-        onClick={() => toggleRouting('transport')}
-        onMouseEnter={() => setTooltip('Itinéraire transports')}
-        onMouseLeave={() => setTooltip(null)}
-        className="flex items-center gap-1.5 h-11 rounded-full px-3 transition-all duration-200 active:scale-90"
-        style={{
-          background: routingMode === 'transport'
-            ? 'rgba(50,215,75,0.18)'
-            : 'transparent',
-          border: routingMode === 'transport' ? '1px solid rgba(50,215,75,0.4)' : '1px solid transparent',
-        }}
-        aria-label="Itinéraire transports"
-      >
-        <span className="text-[16px] leading-none" style={{ opacity: routingMode === 'transport' ? 1 : 0.45 }}>
-          🧭
-        </span>
-        <span
-          className="text-[11px] font-medium hidden sm:inline"
-          style={{ color: routingMode === 'transport' ? 'rgba(50,215,75,1)' : 'rgba(255,255,255,0.45)' }}
-        >
-          Transports
-        </span>
-      </button>
+          {/* Live badge */}
+          <div className="flex flex-col items-center gap-0.5 py-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span style={{ fontSize: 8, color: 'rgba(52,199,89,0.7)', fontWeight: 600, letterSpacing: '0.05em' }}>LIVE</span>
+          </div>
 
-      {/* ── Separator ── */}
-      <div className="w-px h-6 mx-1 rounded-full" style={{ background: 'rgba(255,255,255,0.12)' }} />
+          {/* Desktop hover tooltip */}
+          {tooltip && (
+            <div
+              className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-lg
+                         text-[11px] font-medium text-white/80 whitespace-nowrap hidden sm:block pointer-events-none"
+              style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
+            >
+              {tooltip}
+            </div>
+          )}
 
-      {/* ── Live badge ── */}
-      <div className="flex items-center gap-1 px-2">
-        <span
-          className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse flex-shrink-0"
-          style={{ width: 6, height: 6 }}
-        />
-        <span
-          className="font-medium"
-          style={{ fontSize: 9, color: 'rgba(52,199,89,0.85)', lineHeight: 1 }}
-        >
-          Live
-        </span>
-      </div>
-
-      {/* ── Tooltip: generic (desktop hover) ── */}
-      {tooltip && (
-        <div
-          className="absolute -top-9 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-lg
-                     text-[11px] font-medium text-white/80 whitespace-nowrap pointer-events-none
-                     hidden sm:block"
-          style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}
-        >
-          {tooltip}
-        </div>
-      )}
-
-      {/* ── Tooltip: territoire (hover desktop + long-press mobile) ── */}
-      {territoryTooltip && (
-        <div
-          onClick={dismissTerritoryTooltip}
-          className="absolute -top-16 left-1/2 -translate-x-1/2 px-3 py-2 rounded-xl
-                     text-[11px] font-medium text-white/80 pointer-events-auto
-                     max-w-[260px] text-center"
-          style={{
-            background: 'rgba(0,0,0,0.85)',
-            backdropFilter: 'blur(12px)',
-            lineHeight: 1.4,
-            whiteSpace: 'normal',
-          }}
-        >
-          {TERRITORY_TOOLTIP}
+          {/* Territory tooltip */}
+          {territoryTooltip && (
+            <div
+              className="absolute left-full ml-2 bottom-0 w-56 p-3 rounded-2xl z-50 text-[11px] leading-relaxed"
+              style={{ ...LG_STYLE, color: 'rgba(255,255,255,0.65)' }}
+              onClick={() => setTerritoryTooltip(false)}
+            >
+              <div className="font-semibold text-amber-400 mb-1">🗺️ Zones G7</div>
+              {TERRITORY_TOOLTIP}
+            </div>
+          )}
         </div>
       )}
     </div>

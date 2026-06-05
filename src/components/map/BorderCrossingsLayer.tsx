@@ -83,13 +83,14 @@ function injectPopupStyle() {
     .tif-popup .mapboxgl-popup-content {
       background: rgba(12,12,18,0.96);
       border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 14px;
+      border-radius: 20px;
       padding: 0;
       backdrop-filter: blur(16px);
       box-shadow: 0 8px 32px rgba(0,0,0,0.6);
       overflow: hidden;
       min-width: 280px;
       max-width: 300px;
+      font-family: -apple-system, 'SF Pro Text', sans-serif;
     }
     .tif-popup .mapboxgl-popup-tip { border-top-color: rgba(12,12,18,0.96); }
     .tif-popup .mapboxgl-popup-close-button {
@@ -171,14 +172,14 @@ function buildPopupHTML(props: Record<string, unknown>): string {
   const vehicleList  = vehicles.join(' · ')
 
   return `
-    <div style="font-family:-apple-system,SF Pro Text,sans-serif">
+    <div style="font-family:-apple-system,'SF Pro Text',sans-serif">
       <div class="tif-popup-section" style="background:${headerBg};padding:12px 14px">
         <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:5px">${name}</div>
-        <div style="display:flex;align-items:center;gap:7px">
-          <span style="width:9px;height:9px;border-radius:50%;background:${color};display:inline-block;flex-shrink:0"></span>
-          <span style="color:${color};font-weight:600;font-size:13px">${statusLabel}</span>
-          ${waitLine}
+        <div style="display:inline-flex;align-items:center;gap:5px;background:${color}18;border:1px solid ${color}40;border-radius:20px;padding:3px 10px;margin-top:6px">
+          <span style="width:6px;height:6px;border-radius:50%;background:${color};display:inline-block"></span>
+          <span style="color:${color};font-size:11px;font-weight:700">${statusLabel}</span>
         </div>
+        ${waitLine ? `<div style="margin-top:4px">${waitLine}</div>` : ''}
         <div style="margin-top:5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
           <span style="font-size:11px;color:rgba(255,255,255,0.3)">CH ⇄ FR · ${updated}</span>
           ${dataQuality === 'live'

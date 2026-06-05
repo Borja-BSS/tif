@@ -21,8 +21,8 @@ export default function FilterPanel({ filters, onChange, routingMode, onRouting 
     <MapControls
       filters={filters}
       onChange={onChange}
-      routingMode={routingMode ?? null}
-      onRouting={onRouting ?? (() => {})}
+      routingMode={routingMode}
+      onRouting={onRouting}
     />
   )
 }
