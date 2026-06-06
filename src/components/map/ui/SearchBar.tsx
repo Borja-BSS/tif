@@ -81,19 +81,38 @@ export function SearchBar({ map }: SearchBarProps) {
 
   if (!isOpen) {
     return (
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed top-0 left-0 right-0 z-30 flex items-center gap-3 mx-4 mt-3 px-4 cursor-text"
-        style={{ ...LG, height: 52, borderRadius: 16, transition: springs.search }}
-        aria-label="Rechercher un lieu"
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2.5" strokeLinecap="round">
-          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-        </svg>
-        <span className="flex-1 text-left text-sm" style={{ color: 'rgba(255,255,255,0.35)', fontFamily: '-apple-system, sans-serif' }}>
-          {PLACEHOLDERS[placeholderIdx]}
-        </span>
-      </button>
+      <div className="fixed top-0 left-0 right-0 z-30 flex items-center gap-2 mx-4 mt-3">
+        <button
+          onClick={() => setIsOpen(true)}
+          className="flex-1 flex items-center gap-3 px-4 cursor-text"
+          style={{ ...LG, height: 52, borderRadius: 16, transition: springs.search }}
+          aria-label="Rechercher un lieu"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2.5" strokeLinecap="round">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <span className="flex-1 text-left text-sm" style={{ color: 'rgba(255,255,255,0.35)', fontFamily: '-apple-system, sans-serif' }}>
+            {PLACEHOLDERS[placeholderIdx]}
+          </span>
+        </button>
+        <a
+          href="/"
+          className="flex-shrink-0 flex items-center justify-center"
+          style={{
+            ...LG,
+            width: 52,
+            height: 52,
+            borderRadius: 16,
+            transition: springs.search,
+          }}
+          aria-label="Accueil"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.75)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+        </a>
+      </div>
     )
   }
 
@@ -124,7 +143,7 @@ export function SearchBar({ map }: SearchBarProps) {
             onChange={e => setQuery(e.target.value)}
             placeholder={PLACEHOLDERS[0]}
             className="flex-1 bg-transparent text-sm outline-none"
-            style={{ color: 'rgba(255,255,255,0.9)', caretColor: 'var(--brand)' }}
+            style={{ color: 'rgba(255,255,255,0.9)', caretColor: 'var(--brand)', fontSize: '16px' }}
           />
           {loading && (
             <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white/70 animate-spin flex-shrink-0" />
