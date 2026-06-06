@@ -8,6 +8,7 @@ import dynamicImport              from 'next/dynamic'
 import mapboxgl                   from 'mapbox-gl'
 import { SearchBar }              from '@/components/map/ui/SearchBar'
 import SearchHandle              from '@/components/map/SearchHandle'
+import TpgLineStopsLayer         from '@/components/map/TpgLineStopsLayer'
 import { QuickFilters }           from '@/components/map/ui/QuickFilters'
 import { FloatingControls }       from '@/components/map/ui/FloatingControls'
 import { BottomSheet }            from '@/components/map/ui/BottomSheet'
@@ -71,6 +72,9 @@ export default function MapPage() {
 
       {/* Layer 8: SearchHandle — itinéraire (activé par tif:route-to) */}
       <SearchHandle map={mapRef} />
+
+      {/* Layer 9: TPG line stop pins (activé par tif:line-select) */}
+      <TpgLineStopsLayer map={mapRef} />
 
     </div>
   )

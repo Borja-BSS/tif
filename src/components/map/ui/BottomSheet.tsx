@@ -330,7 +330,75 @@ interface TpgLineStatus {
 }
 interface TpgLinesData { lines: TpgLineStatus[]; generatedAt: string }
 
-function TransportDetail() {
+interface StopDeparture { time: string | null; direction: string; delay: number }
+interface StopDeparturesData { stopName: string; departures: StopDeparture[] }
+
+function StopDeparturesPanel({ name, line, onClose }: { name: string; line: string; onClose: () => void }) {
+  const { data, isLoading } = useQuery<StopDeparturesData>({
+    queryKey:  ['tpg-stop-departures', name, line],
+    queryFn:   () => fetch(`/api/v1/tpg-stop-departures?stopName=${encodeURIComponent(name)}&line=${line}`, { signal: AbortSignal.timeout(10000) }).then(r => r.json()),
+    staleTime: 15_000,
+  })
+
+  const fmt = (iso: string | null) => iso
+    ? new Date(iso).toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Zurich' })
+    : '—'
+
+  return (
+    <div className="rounded-2xl p-4 space-y-3" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>Arrêt · Ligne {line}</p>
+          <p className="text-sm font-bold mt-0.5" style={{ color: 'var(--text-primary)' }}>{name}</p>
+        </div>
+        <button onClick={onClose} className="text-[18px] leading-none" style={{ color: 'var(--text-tertiary)' }}>×</button>
+      </div>
+      {isLoading && (
+        <div className="flex gap-2 py-1">
+          {[0,1,2].map(i => <span key={i} className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" style={{ animationDelay: `${i*150}ms` }} />)}
+        </div>
+      )}
+      {!isLoading && (data?.departures ?? []).length === 0 && (
+        <p className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>Aucun départ trouvé</p>
+      )}
+      {!isLoading && (data?.departures ?? []).map((d, i) => {
+        const delay = d.delay ?? 0
+        const c = delay >= 10 ? '#FF453A' : delay >= 3 ? '#FF9F0A' : '#30D158'
+        return (
+          <div key={i} className="flex items-center gap-3">
+            <span className="text-sm font-bold tabular-nums" style={{ color: 'var(--text-primary)', minWidth: 40 }}>{fmt(d.time)}</span>
+            {delay > 0 && <span className="text-[11px] font-semibold" style={{ color: c }}>+{delay}&apos;</span>}
+            <span className="text-[12px] flex-1 truncate" style={{ color: 'var(--text-secondary)' }}>→ {d.direction}</span>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function TransportDetail({ onExpand }: { onExpand?: () => void }) {
+  const [selectedLine, setSelectedLine] = useState<string | null>(null)
+  const [selectedStop, setSelectedStop] = useState<{ name: string; coord: [number, number]; line: string } | null>(null)
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ name: string; coord: [number, number]; line: string }>).detail
+      setSelectedStop(detail)
+      onExpand?.()
+    }
+    window.addEventListener('tif:stop-select', handler)
+    return () => window.removeEventListener('tif:stop-select', handler)
+  }, [onExpand])
+
+  const handleLineBadgeClick = (l: TpgLineStatus) => {
+    const c = l.status === 'disrupted' ? '#FF453A' : l.status === 'delayed' ? '#FF9F0A' : '#30D158'
+    const newLine = selectedLine === l.line ? null : l.line
+    setSelectedLine(newLine)
+    setSelectedStop(null)
+    window.dispatchEvent(new CustomEvent('tif:line-select', { detail: { line: newLine, color: c } }))
+    if (newLine) onExpand?.()
+  }
+
   const { data, isLoading } = useQuery<TransportData>({
     queryKey:        ['transport-layer'],
     queryFn:         () => fetch('/api/v1/layers/transport', { signal: AbortSignal.timeout(8000) }).then(r => r.json()),
@@ -414,20 +482,65 @@ function TransportDetail() {
         {!linesLoading && (tpgLines?.lines ?? []).length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {(tpgLines?.lines ?? []).map(l => {
-              const c = l.status === 'disrupted' ? '#FF453A' : l.status === 'delayed' ? '#FF9F0A' : '#30D158'
+              const c       = l.status === 'disrupted' ? '#FF453A' : l.status === 'delayed' ? '#FF9F0A' : '#30D158'
+              const active  = selectedLine === l.line
               return (
-                <div key={l.line}
-                  title={l.status !== 'normal' ? `+${l.delayMin} min vers ${l.direction} (${l.stopName})` : `Normal · ${l.direction}`}
-                  className="flex items-center gap-1 rounded-lg px-2 py-1"
-                  style={{ background: `${c}15`, border: `1px solid ${c}35` }}>
-                  <span className="text-[12px] font-bold" style={{ color: c }}>{l.line}</span>
+                <button key={l.line}
+                  onClick={() => handleLineBadgeClick(l)}
+                  title={l.status !== 'normal' ? `+${l.delayMin} min vers ${l.direction}` : `Normal · ${l.direction}`}
+                  className="flex items-center gap-1 rounded-lg px-2 py-1 transition-all active:scale-95"
+                  style={{
+                    background: active ? c : `${c}15`,
+                    border:     `1px solid ${active ? c : `${c}35`}`,
+                    cursor:     'pointer',
+                  }}>
+                  <span className="text-[12px] font-bold" style={{ color: active ? '#000' : c }}>{l.line}</span>
                   {l.status !== 'normal' && (
-                    <span className="text-[10px]" style={{ color: c }}>+{l.delayMin}</span>
+                    <span className="text-[10px]" style={{ color: active ? '#000' : c }}>+{l.delayMin}</span>
                   )}
-                </div>
+                </button>
               )
             })}
           </div>
+        )}
+
+        {/* Ligne sélectionnée — info terminus */}
+        {selectedLine && !selectedStop && (() => {
+          const cfg = (tpgLines?.lines ?? []).find(l => l.line === selectedLine)
+          const c   = cfg ? (cfg.status === 'disrupted' ? '#FF453A' : cfg.status === 'delayed' ? '#FF9F0A' : '#30D158') : '#30D158'
+          return (
+            <div className="rounded-2xl p-4 space-y-2" style={{ background: `${c}10`, border: `1px solid ${c}25` }}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-[13px] font-bold px-2 py-0.5 rounded" style={{ background: c, color: '#000' }}>
+                    {selectedLine}
+                  </span>
+                  <p className="text-[12px] font-semibold" style={{ color: 'var(--text-primary)' }}>
+                    {cfg?.stopName ? `Observé depuis ${cfg.stopName}` : 'Ligne TPG'}
+                  </p>
+                </div>
+                <button onClick={() => {
+                  setSelectedLine(null)
+                  window.dispatchEvent(new CustomEvent('tif:line-clear'))
+                }} className="text-[18px] leading-none" style={{ color: 'var(--text-tertiary)' }}>×</button>
+              </div>
+              <p className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
+                Direction → {cfg?.direction ?? '—'}
+              </p>
+              <p className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
+                Touchez un arrêt sur la carte pour voir les prochains départs
+              </p>
+            </div>
+          )
+        })()}
+
+        {/* Arrêt sélectionné — prochains départs */}
+        {selectedStop && (
+          <StopDeparturesPanel
+            name={selectedStop.name}
+            line={selectedStop.line}
+            onClose={() => setSelectedStop(null)}
+          />
         )}
         {!linesLoading && (tpgLines?.lines ?? []).length === 0 && (
           <p className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>Aucune ligne détectée</p>
@@ -701,6 +814,8 @@ export function BottomSheet({ session: _session, activeFilter, map }: BottomShee
   const [detailView,       setDetailView]       = useState<DetailView>('overview')
   const [selectedCrossing, setSelectedCrossing] = useState<CrossingStatic | null>(null)
 
+  const expandToFull = useCallback(() => setSnap('full'), [])
+
   const touchStartY    = useRef(0)
   const touchStartSnap = useRef<SnapSize>('compact')
   const lastTouchY     = useRef(0)
@@ -854,12 +969,12 @@ export function BottomSheet({ session: _session, activeFilter, map }: BottomShee
           ) : activeFilter === 'all' ? (
             detailView === 'overview'   ? <ToutOverview data={data} onSelect={openDetail} />
             : detailView === 'douanes'  ? <DouanesDetail onSelect={openCrossing} map={map} />
-            : detailView === 'transport'? <TransportDetail />
+            : detailView === 'transport'? <TransportDetail onExpand={expandToFull} />
             : detailView === 'alertes'  ? <AlertesDetail map={map} />
             : <G7Detail />
           ) : (
             <div className="space-y-3">
-              {activeFilter === 'transit'  && <TransportDetail />}
+              {activeFilter === 'transit'  && <TransportDetail onExpand={expandToFull} />}
               {activeFilter === 'borders'  && <DouanesDetail onSelect={openCrossing} map={map} />}
               {activeFilter === 'alerts'   && <AlertesDetail map={map} />}
               {activeFilter === 'g7'       && <G7Detail />}
