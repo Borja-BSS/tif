@@ -31,6 +31,163 @@ const SHEET_H: Record<SheetSize, string> = {
   full: '88vh',
 }
 
+// ── NavModal types & helpers ──────────────────────────────────────────────────
+
+interface NavPending {
+  lat: number
+  lng: number
+  label: string
+  mode: 'driving' | 'transit'
+  waypoints?: [number, number][]
+}
+
+function buildNavLinks(
+  orig: { lat: number; lng: number } | null,
+  dest: { lat: number; lng: number; label: string },
+  mode: 'driving' | 'transit',
+  waypoints?: [number, number][]
+) {
+  const destLatLng = `${dest.lat},${dest.lng}`
+
+  // Google Maps — supporte les waypoints voiture
+  const wpParam = (waypoints && waypoints.length > 0)
+    ? `&waypoints=${waypoints.map(([lng, lat]) => `${lat},${lng}`).join('|')}`
+    : ''
+  const origParam = orig ? `&origin=${orig.lat},${orig.lng}` : ''
+  const gm = `https://www.google.com/maps/dir/?api=1${origParam}&destination=${destLatLng}${wpParam}&travelmode=${mode === 'transit' ? 'transit' : 'driving'}&dir_action=navigate`
+
+  // Apple Maps — origine + destination (dirflg=d voiture, r transit)
+  const appleMode = mode === 'transit' ? 'r' : 'd'
+  const appleSrc = orig ? `&saddr=${orig.lat},${orig.lng}` : ''
+  const apple = `maps://?${appleSrc}&daddr=${destLatLng}&dirflg=${appleMode}`
+
+  // Waze — destination uniquement (pas de waypoints API publique)
+  const waze = `https://waze.com/ul?ll=${destLatLng}&navigate=yes${orig ? `&from=${orig.lat},${orig.lng}` : ''}`
+
+  return { gm, apple, waze }
+}
+
+function NavModal({ pending, origin, onClose }: {
+  pending: NavPending
+  origin: { lat: number; lng: number } | null
+  onClose: () => void
+}) {
+  const links = buildNavLinks(
+    origin,
+    { lat: pending.lat, lng: pending.lng, label: pending.label },
+    pending.mode,
+    pending.waypoints
+  )
+
+  const modalLG: React.CSSProperties = {
+    background:           'rgba(255,255,255,0.06)',
+    backdropFilter:       'blur(48px) saturate(200%)',
+    WebkitBackdropFilter: 'blur(48px) saturate(200%)',
+    border:               '0.5px solid rgba(255,255,255,0.22)',
+    borderRadius:         20,
+    boxShadow:            'inset 0 0.5px 0 rgba(255,255,255,0.25)',
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center pb-8 px-4"
+      onClick={onClose}
+    >
+      <div
+        style={modalLG}
+        className="w-full max-w-sm p-5 space-y-3"
+        onClick={e => e.stopPropagation()}
+      >
+        <p
+          className="text-xs font-semibold uppercase tracking-wider text-center"
+          style={{ color: 'rgba(255,255,255,0.4)' }}
+        >
+          Ouvrir dans…
+        </p>
+
+        {/* Bouton Google Maps */}
+        <a
+          href={links.gm}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={onClose}
+          className="flex items-center gap-3 w-full rounded-2xl px-4 py-3 active:scale-[0.98] transition-transform"
+          style={{ background: 'rgba(66,133,244,0.15)', border: '1px solid rgba(66,133,244,0.3)' }}
+        >
+          <span className="text-xl">🗺️</span>
+          <div className="flex-1 text-left">
+            <p className="text-sm font-semibold text-white">Google Maps</p>
+            <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.45)' }}>
+              Avec la route exacte {pending.waypoints?.length ? '(waypoints inclus)' : ''}
+            </p>
+          </div>
+        </a>
+
+        {pending.mode === 'driving' && (
+          /* Bouton Plans (Apple Maps) */
+          <a
+            href={links.apple}
+            onClick={onClose}
+            className="flex items-center gap-3 w-full rounded-2xl px-4 py-3 active:scale-[0.98] transition-transform"
+            style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.14)' }}
+          >
+            <span className="text-xl">🍎</span>
+            <div className="flex-1 text-left">
+              <p className="text-sm font-semibold text-white">Plans</p>
+              <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.45)' }}>Apple Maps · iOS uniquement</p>
+            </div>
+          </a>
+        )}
+
+        {pending.mode === 'driving' ? (
+          /* Bouton Waze */
+          <a
+            href={links.waze}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={onClose}
+            className="flex items-center gap-3 w-full rounded-2xl px-4 py-3 active:scale-[0.98] transition-transform"
+            style={{ background: 'rgba(0,199,177,0.12)', border: '1px solid rgba(0,199,177,0.25)' }}
+          >
+            <span className="text-xl">🚗</span>
+            <div className="flex-1 text-left">
+              <p className="text-sm font-semibold text-white">Waze</p>
+              <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.45)' }}>Navigation communautaire</p>
+            </div>
+          </a>
+        ) : (
+          /* Bouton TPG (transit seulement) */
+          <a
+            href="tpg://"
+            onClick={e => {
+              setTimeout(() => { window.location.href = 'https://www.tpg.ch/fr/horaires' }, 1500)
+              onClose()
+            }}
+            className="flex items-center gap-3 w-full rounded-2xl px-4 py-3 active:scale-[0.98] transition-transform"
+            style={{ background: 'rgba(255,159,10,0.12)', border: '1px solid rgba(255,159,10,0.25)' }}
+          >
+            <span className="text-xl">🚌</span>
+            <div className="flex-1 text-left">
+              <p className="text-sm font-semibold text-white">App TPG</p>
+              <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.45)' }}>Horaires & billets TPG</p>
+            </div>
+          </a>
+        )}
+
+        <button
+          onClick={onClose}
+          className="w-full py-2.5 text-sm text-center rounded-2xl active:scale-[0.98]"
+          style={{ color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.04)' }}
+        >
+          Annuler
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ── SearchHandle ──────────────────────────────────────────────────────────────
+
 interface SearchHandleProps {
   map: mapboxgl.Map | null
 }
@@ -51,6 +208,9 @@ export default function SearchHandle({ map }: SearchHandleProps) {
   const [transLoading,     setTransLoading]     = useState(false)
   const [selectedCarIdx,   setSelectedCarIdx]   = useState(0)
   const [editingOrigin,    setEditingOrigin]    = useState(false)
+
+  // Navigation modal
+  const [navPending, setNavPending] = useState<NavPending | null>(null)
 
   // Swipe handling
   const touchStartY = useRef<number>(0)
@@ -154,6 +314,7 @@ export default function SearchHandle({ map }: SearchHandleProps) {
     setTransRoutes([])
     setSelectedCarIdx(0)
     setEditingOrigin(false)
+    setNavPending(null)
   }
 
   const fmt = (s: number) => {
@@ -162,18 +323,6 @@ export default function SearchHandle({ map }: SearchHandleProps) {
   }
   const fmtDist = (m: number) => m < 1000 ? `${Math.round(m)}m` : `${(m/1000).toFixed(1)} km`
   const fmtTime = (iso: string) => iso ? iso.slice(11, 16) : '—'
-
-  // Bouton "Y aller" — ouvre la navigation native
-  const launchNav = useCallback((lat: number, lng: number, label: string, mode: 'driving' | 'transit' = 'driving') => {
-    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent)
-    const enc   = encodeURIComponent(label)
-    if (isIOS && mode === 'driving') {
-      window.location.href = `maps:0,0?daddr=${lat},${lng}`
-    } else {
-      const tm = mode === 'transit' ? 'r' : 'd'
-      window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&destination_place_id=${enc}&travelmode=${mode === 'transit' ? 'transit' : 'driving'}&dir_action=navigate`, '_blank')
-    }
-  }, [])
 
   // ── IDLE STATE — invisible, activé par tif:route-to ──────────────────────────
   if (state === 'idle') return null
@@ -423,7 +572,21 @@ export default function SearchHandle({ map }: SearchHandleProps) {
                 </div>
                 {isSelected && destination && (
                   <button
-                    onClick={e => { e.stopPropagation(); launchNav(destination.lat, destination.lng, destination.title, 'driving') }}
+                    onClick={e => {
+                      e.stopPropagation()
+                      const geom = carRoutes[selectedCarIdx].geometry
+                      const step = Math.max(1, Math.floor(geom.length / 10))
+                      const waypoints = geom
+                        .filter((_, idx) => idx > 0 && idx < geom.length - 1 && idx % step === 0)
+                        .slice(0, 8) as [number, number][]
+                      setNavPending({
+                        lat: destination.lat,
+                        lng: destination.lng,
+                        label: destination.title,
+                        mode: 'driving',
+                        waypoints,
+                      })
+                    }}
                     className="w-full py-2 rounded-xl text-xs font-semibold transition-colors active:scale-[0.98]"
                     style={{ background: 'rgba(10,132,255,0.18)', color: '#0A84FF', border: '1px solid rgba(10,132,255,0.3)' }}
                   >
@@ -454,7 +617,12 @@ export default function SearchHandle({ map }: SearchHandleProps) {
               </div>
               {destination && i === 0 && (
                 <button
-                  onClick={() => launchNav(destination.lat, destination.lng, destination.title, 'transit')}
+                  onClick={() => setNavPending({
+                    lat: destination.lat,
+                    lng: destination.lng,
+                    label: destination.title,
+                    mode: 'transit',
+                  })}
                   className="w-full py-2 rounded-xl text-xs font-semibold transition-colors active:scale-[0.98]"
                   style={{ background: 'rgba(50,215,75,0.15)', color: '#34C759', border: '1px solid rgba(50,215,75,0.3)' }}
                 >
@@ -468,6 +636,13 @@ export default function SearchHandle({ map }: SearchHandleProps) {
 
       <div className="h-[env(safe-area-inset-bottom,0px)] flex-shrink-0" />
     </div>
+    {navPending && (
+      <NavModal
+        pending={navPending}
+        origin={origin ? { lat: origin.lat, lng: origin.lng } : null}
+        onClose={() => setNavPending(null)}
+      />
+    )}
     </>
   )
 }
