@@ -23,9 +23,10 @@ interface QuickFiltersProps {
 }
 
 const PILL_BASE: React.CSSProperties = {
-  backdropFilter:       'blur(12px) saturate(160%)',
-  WebkitBackdropFilter: 'blur(12px) saturate(160%)',
-  border:               '1px solid rgba(255,255,255,0.10)',
+  backdropFilter:       'blur(32px) saturate(200%) brightness(1.05)',
+  WebkitBackdropFilter: 'blur(32px) saturate(200%) brightness(1.05)',
+  border:               '0.5px solid rgba(255,255,255,0.20)',
+  boxShadow:            'inset 0 0.5px 0 rgba(255,255,255,0.25)',
   whiteSpace:           'nowrap',
 }
 
@@ -47,7 +48,7 @@ export function QuickFilters({ active, onChange, showJourney = false }: QuickFil
             style={{
               ...PILL_BASE,
               height: 36,
-              background: isActive ? 'var(--brand)' : 'rgba(28,28,30,0.88)',
+              background: isActive ? 'var(--brand)' : 'rgba(255,255,255,0.07)',
               color:      isActive ? '#fff'          : 'rgba(255,255,255,0.65)',
               transition: springs.filter,
               transform:  isActive ? 'scale(1.04)'  : 'scale(1)',

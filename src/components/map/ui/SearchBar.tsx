@@ -5,11 +5,11 @@ import type mapboxgl from 'mapbox-gl'
 import { springs } from '@/lib/animations/springs'
 
 const LG: React.CSSProperties = {
-  background:           'rgba(18,18,22,0.88)',
-  backdropFilter:       'blur(32px) saturate(180%)',
-  WebkitBackdropFilter: 'blur(32px) saturate(180%)',
-  border:               '1px solid rgba(255,255,255,0.13)',
-  boxShadow:            '0 2px 12px rgba(0,0,0,0.20)',
+  background:           'rgba(255,255,255,0.05)',
+  backdropFilter:       'blur(40px) saturate(200%) brightness(1.06)',
+  WebkitBackdropFilter: 'blur(40px) saturate(200%) brightness(1.06)',
+  border:               '0.5px solid rgba(255,255,255,0.22)',
+  boxShadow:            'inset 0 0.5px 0 rgba(255,255,255,0.30), 0 4px 24px rgba(0,0,0,0.10)',
 }
 
 const PLACEHOLDERS = [

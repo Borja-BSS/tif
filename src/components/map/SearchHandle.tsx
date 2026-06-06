@@ -12,13 +12,13 @@ type HandleState = 'idle' | 'search' | 'route'
 type RouteTab    = 'car' | 'transport'
 type SheetSize   = 'peek' | 'half' | 'full'
 
-// Liquid Glass base style
+// Liquid Glass base style — iOS 26
 const LG: React.CSSProperties = {
-  background:           'rgba(18,18,22,0.78)',
-  backdropFilter:       'blur(32px) saturate(180%)',
-  WebkitBackdropFilter: 'blur(32px) saturate(180%)',
-  border:               '1px solid rgba(255,255,255,0.13)',
-  boxShadow:            'inset 0 0.5px 0 rgba(255,255,255,0.13), 0 -4px 32px rgba(0,0,0,0.4)',
+  background:           'rgba(255,255,255,0.04)',
+  backdropFilter:       'blur(48px) saturate(200%) brightness(1.05)',
+  WebkitBackdropFilter: 'blur(48px) saturate(200%) brightness(1.05)',
+  borderTop:            '0.5px solid rgba(255,255,255,0.25)',
+  boxShadow:            'inset 0 0.5px 0 rgba(255,255,255,0.28), 0 -8px 48px rgba(0,0,0,0.06)',
 }
 
 // Spring animation

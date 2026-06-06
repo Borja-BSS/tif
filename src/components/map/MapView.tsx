@@ -150,11 +150,11 @@ function TransportLegend() {
     <div
       className="absolute bottom-24 left-4 z-10 rounded-2xl px-3 py-2.5"
       style={{
-        background:           'rgba(18,18,22,0.72)',
-        backdropFilter:       'blur(24px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-        border:               '1px solid rgba(255,255,255,0.11)',
-        boxShadow:            'inset 0 0.5px 0 rgba(255,255,255,0.12), 0 8px 32px rgba(0,0,0,0.4)',
+        background:           'rgba(255,255,255,0.05)',
+        backdropFilter:       'blur(40px) saturate(200%) brightness(1.05)',
+        WebkitBackdropFilter: 'blur(40px) saturate(200%) brightness(1.05)',
+        border:               '0.5px solid rgba(255,255,255,0.20)',
+        boxShadow:            'inset 0 0.5px 0 rgba(255,255,255,0.25), 0 4px 20px rgba(0,0,0,0.08)',
       }}
     >
       <div className="flex flex-col gap-1.5">

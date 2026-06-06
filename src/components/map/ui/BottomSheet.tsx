@@ -20,11 +20,12 @@ const SNAP_HEIGHT: Record<SnapSize, string> = {
 }
 
 const LG: React.CSSProperties = {
-  background:           'color-mix(in srgb, var(--bg) 96%, transparent)',
-  backdropFilter:       'blur(28px) saturate(160%)',
-  WebkitBackdropFilter: 'blur(28px) saturate(160%)',
-  borderTop:            '1px solid var(--border)',
-  borderRadius:         '20px 20px 0 0',
+  background:           'rgba(255,255,255,0.04)',
+  backdropFilter:       'blur(48px) saturate(200%) brightness(1.05)',
+  WebkitBackdropFilter: 'blur(48px) saturate(200%) brightness(1.05)',
+  borderTop:            '0.5px solid rgba(255,255,255,0.25)',
+  borderRadius:         '24px 24px 0 0',
+  boxShadow:            'inset 0 0.5px 0 rgba(255,255,255,0.28), 0 -8px 48px rgba(0,0,0,0.08)',
 }
 
 interface DashboardData {
@@ -662,6 +663,34 @@ function ToutOverview({ data, onSelect }: {
       <CategoryCard icon="🏛️" title="G7 — 8 au 18 juin 2026"
         subtitle="Directives officielles · Restrictions d'accès"
         onPress={() => onSelect('g7')} />
+
+      {/* Carte Borja Swiss Solutions */}
+      <a
+        href="https://borja-swiss-solutions.ch"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-full flex flex-col gap-2 rounded-2xl p-4 text-left active:scale-[0.98] transition-transform"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+      >
+        <div className="flex items-center gap-3">
+          <span className="text-2xl flex-shrink-0">🇨🇭</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>Börja Swiss Solutions</p>
+            <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Ingénieurs informatiques · Genève</p>
+          </div>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2.5" strokeLinecap="round" className="flex-shrink-0">
+            <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+        </div>
+        <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+          Cette application a été conçue par notre équipe d'ingénieurs pour aider les habitant·e·s
+          du Grand Genève à se déplacer sereinement durant le G7 d'Évian 2026 — douanes, trafic,
+          transports publics et alertes en temps réel, tout en un seul endroit.
+        </p>
+        <span className="text-[11px] font-medium" style={{ color: 'var(--brand)' }}>
+          En savoir plus → borja-swiss-solutions.ch
+        </span>
+      </a>
     </div>
   )
 }
