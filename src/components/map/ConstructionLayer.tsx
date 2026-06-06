@@ -14,13 +14,41 @@ const LAYER_GLOW = 'tif-constr-glow'
 const LAYER_DOT  = 'tif-constr-dot'
 const LAYER_ICON = 'tif-constr-icon'
 
+// Grand Genève + Vaud + Haute-Savoie
+const BBOX = '45.85,5.70,46.60,7.10'
+const QUERY = `[out:json][timeout:20];(way["highway"="construction"](${BBOX});way["construction"~"."](${BBOX});node["highway"="construction"](${BBOX});relation["construction"~"."](${BBOX}););out center tags 100;`
+
+// Fetch direct côté navigateur — les IPs Vercel sont bloquées par Overpass
 async function fetchConstruction(): Promise<FeatureCollection | null> {
   try {
-    const res = await fetch('/api/v1/layers/construction', {
-      cache: 'no-store', signal: AbortSignal.timeout(18000),
+    const res = await fetch('https://overpass-api.de/api/interpreter', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body:    `data=${encodeURIComponent(QUERY)}`,
+      signal:  AbortSignal.timeout(22000),
     })
     if (!res.ok) return null
-    return res.json() as Promise<FeatureCollection>
+    const data = await res.json() as { elements: Array<{
+      type: string; id: number
+      lat?: number; lon?: number
+      center?: { lat: number; lon: number }
+      tags?: Record<string, string>
+    }> }
+    const features = data.elements
+      .filter(el => el.lat != null || el.center != null)
+      .map(el => {
+        const lat  = el.lat ?? el.center!.lat
+        const lng  = el.lon ?? el.center!.lon
+        const tags = el.tags ?? {}
+        const name = tags.name ?? tags.description ?? tags.ref ?? ''
+        const desc = name ? `${name}` : `Chantier (${tags.construction ?? tags.highway ?? 'travaux'})`
+        return {
+          type: 'Feature' as const,
+          properties: { id: `osm-${el.id}`, description: desc, name },
+          geometry:   { type: 'Point' as const, coordinates: [lng, lat] },
+        }
+      })
+    return { type: 'FeatureCollection', features }
   } catch { return null }
 }
 
