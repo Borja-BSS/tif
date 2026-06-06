@@ -813,6 +813,7 @@ export function BottomSheet({ session: _session, activeFilter, map }: BottomShee
   const [snap,             setSnap]             = useState<SnapSize>('compact')
   const [detailView,       setDetailView]       = useState<DetailView>('overview')
   const [selectedCrossing, setSelectedCrossing] = useState<CrossingStatic | null>(null)
+  const [isDragging,       setIsDragging]       = useState(false)
 
   const expandToFull = useCallback(() => setSnap('full'), [])
 
@@ -821,6 +822,7 @@ export function BottomSheet({ session: _session, activeFilter, map }: BottomShee
   const lastTouchY     = useRef(0)
   const lastTouchTime  = useRef(0)
   const velocity       = useRef(0)
+  const containerRef   = useRef<HTMLDivElement>(null)
 
   const { data } = useQuery<DashboardData>({
     queryKey:        ['dashboard'],
@@ -832,24 +834,43 @@ export function BottomSheet({ session: _session, activeFilter, map }: BottomShee
 
   const snapOrder: SnapSize[] = ['compact', 'mid', 'full']
 
+  // Attache un listener natif non-passif pour bloquer le scroll Mapbox pendant le drag
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const prevent = (e: TouchEvent) => { e.preventDefault() }
+    el.addEventListener('touchmove', prevent, { passive: false })
+    return () => el.removeEventListener('touchmove', prevent)
+  }, [])
+
   const onTouchStart = useCallback((e: React.TouchEvent) => {
     touchStartY.current    = e.touches[0].clientY
     touchStartSnap.current = snap
     lastTouchY.current     = e.touches[0].clientY
     lastTouchTime.current  = Date.now()
     velocity.current       = 0
+    setIsDragging(true)
+    if (containerRef.current) containerRef.current.style.transform = ''
   }, [snap])
 
   const onTouchMove = useCallback((e: React.TouchEvent) => {
-    const now = Date.now()
-    const dy  = lastTouchY.current - e.touches[0].clientY
-    const dt  = now - lastTouchTime.current
+    const now   = Date.now()
+    const dy    = lastTouchY.current - e.touches[0].clientY
+    const dt    = now - lastTouchTime.current
     velocity.current      = dt > 0 ? dy / dt : 0
     lastTouchY.current    = e.touches[0].clientY
     lastTouchTime.current = now
+
+    const delta   = e.touches[0].clientY - touchStartY.current
+    const clamped = Math.max(-60, Math.min(120, delta))
+    if (containerRef.current) {
+      containerRef.current.style.transform = `translateY(${clamped}px)`
+    }
   }, [])
 
   const onTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (containerRef.current) containerRef.current.style.transform = ''
+    setIsDragging(false)
     const delta = touchStartY.current - e.changedTouches[0].clientY
     const v     = velocity.current
     if (v > 1.5)  { setSnap('full');    return }
@@ -912,9 +933,18 @@ export function BottomSheet({ session: _session, activeFilter, map }: BottomShee
   const showBack = detailView !== 'overview' || selectedCrossing !== null
 
   return (
+    <>
+    {snap !== 'compact' && (
+      <div
+        className="fixed inset-0 z-20"
+        style={{ background: 'transparent' }}
+        onClick={() => setSnap('compact')}
+      />
+    )}
     <div
+      ref={containerRef}
       className="fixed bottom-0 left-0 right-0 z-30 flex flex-col overflow-hidden"
-      style={{ ...LG, height: SNAP_HEIGHT[snap], transition: `height ${springs.sheet}` }}
+      style={{ ...LG, height: SNAP_HEIGHT[snap], transition: isDragging ? 'none' : `height ${springs.sheet}` }}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
@@ -994,5 +1024,6 @@ export function BottomSheet({ session: _session, activeFilter, map }: BottomShee
 
       <div className="flex-shrink-0" style={{ height: 'env(safe-area-inset-bottom, 0px)' }} />
     </div>
+    </>
   )
 }
