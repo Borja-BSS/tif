@@ -404,8 +404,15 @@ export default function BorderCrossingsLayer({ map }: BorderCrossingsLayerProps)
       if (live) await applyData(map, live)
     }
 
-    if (map.isStyleLoaded()) { runWithFallback() }
-    else map.once('style.load', () => { runWithFallback() })
+    if (map.isStyleLoaded()) {
+      runWithFallback()
+    } else {
+      map.once('style.load', () => runWithFallback())
+    }
+    // Fallback : si style.load a déjà tiré et isStyleLoaded() est false
+    map.once('idle', () => {
+      if (!map.getSource(SOURCE_ID)) runWithFallback()
+    })
 
     timerRef.current = setInterval(async () => {
       const data = await fetchBorderData()
