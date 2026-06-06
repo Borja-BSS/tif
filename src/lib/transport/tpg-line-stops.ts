@@ -455,27 +455,4 @@ export const TPG_LINES: Record<string, TpgLineConfig> = {
     ],
   },
 
-  // Ligne 36 désactivée (source: tpg.ch/fr/lignes/36 — absente du réseau 2025-2026)
-  // Données indicatives basées sur les derniers horaires connus (tronçon via ligne 14)
-  '36': {
-    terminusA: 'Bernex, Vailly',
-    terminusB: 'Lancy-Bachet, gare',
-    stops: [
-      { name: 'Bernex, Vailly',                   coord: [6.060736, 46.175011] },
-      { name: 'Bernex, Hainard',                  coord: [6.066473, 46.176052] },
-      { name: 'Bernex, Luchepelet',               coord: [6.073214, 46.178392] },
-      { name: 'Bernex, Pré-Marais',               coord: [6.077898, 46.1796]   },
-      { name: 'Bernex, P+R',                      coord: [6.081997, 46.17938]  },
-      { name: 'Confignon, croisée',               coord: [6.089409, 46.178713] },
-      { name: 'Confignon, La Dode',               coord: [6.094668, 46.180791] },
-      { name: 'Onex, Salle communale',            coord: [6.100109, 46.183374] },
-      { name: 'Onex, Bandol',                     coord: [6.106368, 46.185913] },
-      { name: 'Petit-Lancy, Les Esserts',         coord: [6.113076, 46.188107] },
-      { name: 'Petit-Lancy, place',               coord: [6.119316, 46.190402] },
-      { name: 'Petit-Lancy, Quidort',             coord: [6.123884, 46.193838] },
-      { name: 'Genève, Jonction',                 coord: [6.129676, 46.200797] },
-      { name: 'Carouge GE, Rondeau',              coord: [6.138377, 46.179872] },
-      { name: 'Lancy-Bachet, gare',               coord: [6.129588, 46.173733] },
-    ],
-  },
 }

@@ -13,7 +13,6 @@ const TPG_LINE_STOPS: { line: string; stopId: string; stopName: string }[] = [
   { line: '25', stopId: '8587057', stopName: 'Cornavin'    },
   { line: '6',  stopId: '8587387', stopName: 'Bel-Air'     },
   { line: '7',  stopId: '8587387', stopName: 'Bel-Air'     },
-  { line: '36', stopId: '8587387', stopName: 'Bel-Air'     },
   { line: '1',  stopId: '8587061', stopName: 'Rive'        },
   { line: '2',  stopId: '8587061', stopName: 'Rive'        },
   { line: '5',  stopId: '8587061', stopName: 'Rive'        },
