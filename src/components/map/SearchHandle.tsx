@@ -45,10 +45,12 @@ export default function SearchHandle({ map }: SearchHandleProps) {
   const [destination, setDestination] = useState<SearchResult | null>(null)
 
   // Route results
-  const [carRoutes,   setCarRoutes]   = useState<CarRoute[]>([])
-  const [transRoutes, setTransRoutes] = useState<TransportRoute[]>([])
-  const [carLoading,  setCarLoading]  = useState(false)
-  const [transLoading,setTransLoading]= useState(false)
+  const [carRoutes,        setCarRoutes]        = useState<CarRoute[]>([])
+  const [transRoutes,      setTransRoutes]      = useState<TransportRoute[]>([])
+  const [carLoading,       setCarLoading]       = useState(false)
+  const [transLoading,     setTransLoading]     = useState(false)
+  const [selectedCarIdx,   setSelectedCarIdx]   = useState(0)
+  const [editingOrigin,    setEditingOrigin]    = useState(false)
 
   // Swipe handling
   const touchStartY = useRef<number>(0)
@@ -150,6 +152,8 @@ export default function SearchHandle({ map }: SearchHandleProps) {
     setDestination(null)
     setCarRoutes([])
     setTransRoutes([])
+    setSelectedCarIdx(0)
+    setEditingOrigin(false)
   }
 
   const fmt = (s: number) => {
@@ -253,10 +257,11 @@ export default function SearchHandle({ map }: SearchHandleProps) {
   // ── ROUTE STATE ───────────────────────────────────────────────────────────────
   return (
     <>
-    {/* Tracé de l'itinéraire sur la carte */}
+    {/* Tracé de tous les itinéraires voiture sur la carte */}
     <RouteDisplay
       map={map}
       routes={carRoutes}
+      selectedIndex={selectedCarIdx}
       origin={origin}
       destination={destination}
     />
@@ -271,16 +276,58 @@ export default function SearchHandle({ map }: SearchHandleProps) {
         <div className="w-10 h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.2)' }} />
       </div>
 
-      {/* Route summary header */}
-      <div className="flex items-center justify-between px-4 py-2.5 flex-shrink-0">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="text-sm font-semibold text-white/85 truncate">
-            {origin?.title ?? '?'} → {destination?.title ?? '?'}
-          </span>
-        </div>
-        <button onClick={reset} className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ml-2" style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.4)' }}>
-          <svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M1 1l8 8M9 1L1 9"/></svg>
-        </button>
+      {/* Header : départ éditable + destination + fermer */}
+      <div className="px-4 pt-2 pb-2.5 flex-shrink-0">
+        {editingOrigin ? (
+          <div className="flex items-center gap-2">
+            <SearchBox
+              placeholder="Adresse de départ"
+              icon="🔵"
+              value={origin?.title}
+              gpsHint
+              onGPSSelect={() => { handleGPSSelect(); setEditingOrigin(false) }}
+              loading={false}
+              onSelect={r => {
+                setOrigin(r)
+                setEditingOrigin(false)
+                map?.flyTo({ center: [r.lng, r.lat], zoom: 13, duration: 500, essential: true })
+              }}
+            />
+            <button onClick={() => setEditingOrigin(false)}
+              className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center"
+              style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.4)' }}>
+              <svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M1 1l8 8M9 1L1 9"/></svg>
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <div className="flex-1 min-w-0">
+              {/* Départ — tappable pour modifier */}
+              <button
+                onClick={() => { setEditingOrigin(true); setSheetSize('half') }}
+                className="flex items-center gap-1.5 w-full text-left mb-0.5 active:opacity-60"
+              >
+                <span className="text-[10px]">🔵</span>
+                <span className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                  {origin?.title ?? 'Modifier le départ…'}
+                </span>
+                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2.5" strokeLinecap="round" className="flex-shrink-0">
+                  <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/>
+                </svg>
+              </button>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px]">🔴</span>
+                <span className="text-xs font-semibold truncate" style={{ color: 'rgba(255,255,255,0.85)' }}>
+                  {destination?.title ?? '?'}
+                </span>
+              </div>
+            </div>
+            <button onClick={reset} className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center"
+              style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.4)' }}>
+              <svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M1 1l8 8M9 1L1 9"/></svg>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Quick summary row — always visible in peek state */}
@@ -339,30 +386,51 @@ export default function SearchHandle({ map }: SearchHandleProps) {
       {sheetSize !== 'peek' && (
         <div className="flex-1 overflow-y-auto px-4 py-3">
           {activeTab === 'car' && carRoutes.map((route, i) => {
+            const isSelected = i === selectedCarIdx
             const reasons = i === 0
               ? ['Itinéraire le plus rapide', route.trafficDelay === 0 ? 'Trafic fluide' : null].filter(Boolean) as string[]
               : route.warnings.includes('Évite les zones G7')
                 ? ['Évite périmètres G7', 'Recommandé 12-18 juin']
                 : ['Via centre-ville', `+${Math.ceil((route.summary.duration - carRoutes[0].summary.duration)/60)} min`]
+            const routeColor = route.warnings.includes('Évite les zones G7') ? '#34C759' : isSelected ? '#0A84FF' : 'rgba(255,255,255,0.45)'
             return (
-              <div key={route.id} className="mb-3 rounded-2xl p-3" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <button
+                key={route.id}
+                onClick={() => {
+                  setSelectedCarIdx(i)
+                  // Recentrer la carte sur cet itinéraire
+                  if (map && route.geometry?.length > 1) {
+                    const lngs = route.geometry.map((c: number[]) => c[0])
+                    const lats = route.geometry.map((c: number[]) => c[1])
+                    map.fitBounds([[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]], { padding: { top: 80, bottom: 220, left: 40, right: 40 }, duration: 600, essential: true })
+                  }
+                }}
+                className="w-full mb-3 rounded-2xl p-3 text-left active:scale-[0.99] transition-transform"
+                style={{
+                  background: isSelected ? 'rgba(10,132,255,0.1)' : 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${isSelected ? 'rgba(10,132,255,0.4)' : 'rgba(255,255,255,0.06)'}`,
+                }}
+              >
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-base font-bold" style={{ color: i === 0 ? '#0A84FF' : 'rgba(255,255,255,0.6)' }}>{fmt(route.summary.durationInTraffic)}</span>
+                  <div className="flex items-center gap-2">
+                    {isSelected && <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: routeColor }} />}
+                    <span className="text-base font-bold" style={{ color: routeColor }}>{fmt(route.summary.durationInTraffic)}</span>
+                  </div>
                   <span className="text-xs text-white/35">{fmtDist(route.summary.distance)}</span>
                 </div>
                 <div className="flex flex-col gap-0.5 mb-2">
                   {reasons.map(r => <span key={r} className="text-[10px] text-white/40">✓ {r}</span>)}
                 </div>
-                {destination && (
+                {isSelected && destination && (
                   <button
-                    onClick={() => launchNav(destination.lat, destination.lng, destination.title, 'driving')}
+                    onClick={e => { e.stopPropagation(); launchNav(destination.lat, destination.lng, destination.title, 'driving') }}
                     className="w-full py-2 rounded-xl text-xs font-semibold transition-colors active:scale-[0.98]"
                     style={{ background: 'rgba(10,132,255,0.18)', color: '#0A84FF', border: '1px solid rgba(10,132,255,0.3)' }}
                   >
                     🧭 Y aller · Voiture
                   </button>
                 )}
-              </div>
+              </button>
             )
           })}
           {activeTab === 'transport' && transRoutes.slice(0, 3).map((route, i) => (
