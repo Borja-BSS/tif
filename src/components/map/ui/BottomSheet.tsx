@@ -542,7 +542,7 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
               )}
 
               {/* Liste des arrêts */}
-              <div className="max-h-52 overflow-y-auto divide-y" style={{ divideColor: 'rgba(255,255,255,0.05)' }}>
+              <div className="max-h-52 overflow-y-auto divide-y divide-white/5">
                 {(lineCfg?.stops ?? []).map((stop, i) => {
                   const isFirst = i === 0
                   const isLast  = i === (lineCfg?.stops.length ?? 1) - 1
