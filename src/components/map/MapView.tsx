@@ -17,6 +17,7 @@ const TerritoryLayer       = dynamic(() => import('./TerritoryLayer'),       { s
 const FilterPanel          = dynamic(() => import('./FilterPanel'),          { ssr: false })
 const BorderCrossingsLayer = dynamic(() => import('./BorderCrossingsLayer'), { ssr: false })
 const RoadClosuresLayer    = dynamic(() => import('./RoadClosuresLayer'),    { ssr: false })
+const ConstructionLayer    = dynamic(() => import('./ConstructionLayer'),    { ssr: false })
 const HereIncidentsLayer   = dynamic(() => import('./HereIncidentsLayer'),   { ssr: false })
 
 const DEFAULT_FILTERS: FilterState = {
@@ -95,6 +96,7 @@ export default function MapView({ filters: externalFilters, onMapReady, ...props
 
       <BorderCrossingsLayer map={map} />
       <RoadClosuresLayer    map={map} />
+      <ConstructionLayer    map={map} />
 
       {map && (
         <>
