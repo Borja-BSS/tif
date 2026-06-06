@@ -14,13 +14,12 @@ const CACHE_TTL = 300  // 5 min
 const BBOX = '45.85,5.70,46.60,7.10'
 
 const QUERY = `
-[out:json][timeout:14];
+[out:json][timeout:12];
 (
   way["highway"="construction"](${BBOX});
   way["construction"~"."](${BBOX});
   node["highway"="construction"](${BBOX});
   relation["construction"~"."](${BBOX});
-  way["road_condition"="bad"]["highway"~"."](${BBOX});
 );
 out center tags 100;
 `.trim()

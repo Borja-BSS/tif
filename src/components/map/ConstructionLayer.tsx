@@ -84,28 +84,23 @@ export default function ConstructionLayer({ map }: ConstructionLayerProps) {
     const setupPopup = () => {
       const popup = new mapboxgl.Popup({ maxWidth: '280px', closeButton: true, offset: 10 })
 
-      map.on('click', LAYER_DOT, e => {
+      const esc = (s: string) => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+
+      const showPopup = (e: mapboxgl.MapLayerMouseEvent | mapboxgl.MapLayerTouchEvent) => {
         if (!e.features?.length) return
-        const p = e.features[0].properties as Record<string, unknown>
+        const p    = e.features[0].properties as Record<string, unknown>
+        const desc = esc(String(p.description ?? p.name ?? 'Chantier en cours'))
         popup.setLngLat(e.lngLat).setHTML(`
           <div style="font-family:-apple-system,sans-serif;padding:10px 12px;min-width:200px">
             <div style="font-size:13px;font-weight:700;color:#FF9500;margin-bottom:4px">🚧 Travaux</div>
-            <div style="font-size:12px;color:rgba(255,255,255,0.85);line-height:1.5">${String(p.description ?? p.name ?? 'Chantier en cours')}</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.85);line-height:1.5">${desc}</div>
             <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:6px">Source : OpenStreetMap</div>
           </div>
         `).addTo(map)
-      })
-      map.on('touchend', LAYER_DOT, e => {
-        if (!e.features?.length) return
-        const p = e.features[0].properties as Record<string, unknown>
-        popup.setLngLat(e.lngLat).setHTML(`
-          <div style="font-family:-apple-system,sans-serif;padding:10px 12px;min-width:200px">
-            <div style="font-size:13px;font-weight:700;color:#FF9500;margin-bottom:4px">🚧 Travaux</div>
-            <div style="font-size:12px;color:rgba(255,255,255,0.85);line-height:1.5">${String(p.description ?? p.name ?? 'Chantier en cours')}</div>
-            <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:6px">Source : OpenStreetMap</div>
-          </div>
-        `).addTo(map)
-      })
+      }
+
+      map.on('click',    LAYER_DOT, showPopup)
+      map.on('touchend', LAYER_DOT, showPopup)
       map.on('mouseenter', LAYER_DOT, () => { map.getCanvas().style.cursor = 'pointer' })
       map.on('mouseleave', LAYER_DOT, () => { map.getCanvas().style.cursor = '' })
     }
