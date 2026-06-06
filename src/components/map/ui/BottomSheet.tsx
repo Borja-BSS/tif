@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { springs } from '@/lib/animations/springs'
+import { TPG_LINES } from '@/lib/transport/tpg-line-stops'
 import { ALL_CROSSINGS, computeInstantStatus } from '@/lib/territory/border-crossings-client'
 import type { CrossingStatic } from '@/lib/territory/border-crossings-client'
 import type { Session } from 'next-auth'
@@ -506,29 +507,74 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
 
         {/* Ligne sélectionnée — info terminus */}
         {selectedLine && !selectedStop && (() => {
-          const cfg = (tpgLines?.lines ?? []).find(l => l.line === selectedLine)
-          const c   = cfg ? (cfg.status === 'disrupted' ? '#FF453A' : cfg.status === 'delayed' ? '#FF9F0A' : '#30D158') : '#30D158'
+          const cfg      = (tpgLines?.lines ?? []).find(l => l.line === selectedLine)
+          const lineCfg  = TPG_LINES[selectedLine]
+          const c        = cfg ? (cfg.status === 'disrupted' ? '#FF453A' : cfg.status === 'delayed' ? '#FF9F0A' : '#30D158') : '#30D158'
+          const termA    = lineCfg?.terminusA ?? '—'
+          const termB    = lineCfg?.terminusB ?? '—'
           return (
-            <div className="rounded-2xl p-4 space-y-2" style={{ background: `${c}10`, border: `1px solid ${c}25` }}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-[13px] font-bold px-2 py-0.5 rounded" style={{ background: c, color: '#000' }}>
+            <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${c}30` }}>
+              {/* Header */}
+              <div className="flex items-center justify-between px-4 pt-3 pb-2" style={{ background: `${c}12` }}>
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-[13px] font-bold px-2 py-0.5 rounded flex-shrink-0" style={{ background: c, color: '#000' }}>
                     {selectedLine}
                   </span>
-                  <p className="text-[12px] font-semibold" style={{ color: 'var(--text-primary)' }}>
-                    {cfg?.stopName ? `Observé depuis ${cfg.stopName}` : 'Ligne TPG'}
+                  <p className="text-[12px] font-bold truncate" style={{ color: 'var(--text-primary)' }}>
+                    {termA} ↔ {termB}
                   </p>
                 </div>
                 <button onClick={() => {
                   setSelectedLine(null)
+                  setSelectedStop(null)
                   window.dispatchEvent(new CustomEvent('tif:line-clear'))
-                }} className="text-[18px] leading-none" style={{ color: 'var(--text-tertiary)' }}>×</button>
+                }} className="text-[18px] leading-none ml-2 flex-shrink-0" style={{ color: 'var(--text-tertiary)' }}>×</button>
               </div>
-              <p className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
-                Direction → {cfg?.direction ?? '—'}
-              </p>
-              <p className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
-                Touchez un arrêt sur la carte pour voir les prochains départs
+
+              {/* Temps réel */}
+              {cfg && (
+                <div className="px-4 py-1.5 flex items-center gap-2" style={{ background: `${c}08`, borderBottom: `1px solid ${c}20` }}>
+                  <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: c }} />
+                  <p className="text-[11px]" style={{ color: c }}>
+                    {cfg.status !== 'normal' ? `+${cfg.delayMin} min` : 'Normal'} · vers {cfg.direction}
+                  </p>
+                </div>
+              )}
+
+              {/* Liste des arrêts */}
+              <div className="max-h-52 overflow-y-auto divide-y" style={{ divideColor: 'rgba(255,255,255,0.05)' }}>
+                {(lineCfg?.stops ?? []).map((stop, i) => {
+                  const isFirst = i === 0
+                  const isLast  = i === (lineCfg?.stops.length ?? 1) - 1
+                  return (
+                    <button
+                      key={stop.name}
+                      onClick={() => {
+                        window.dispatchEvent(new CustomEvent('tif:stop-select', {
+                          detail: { name: stop.name, coord: stop.coord, line: selectedLine },
+                        }))
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-left active:scale-[0.98] transition-transform"
+                      style={{ background: 'rgba(255,255,255,0.02)' }}
+                    >
+                      {/* Ligne de trajet */}
+                      <div className="flex flex-col items-center flex-shrink-0 gap-0.5" style={{ width: 12 }}>
+                        {!isFirst && <div className="w-px flex-1 min-h-[8px]" style={{ background: `${c}50` }} />}
+                        <div className="w-2.5 h-2.5 rounded-full border-2 flex-shrink-0" style={{ borderColor: c, background: (isFirst || isLast) ? c : 'transparent' }} />
+                        {!isLast  && <div className="w-px flex-1 min-h-[8px]" style={{ background: `${c}50` }} />}
+                      </div>
+                      <p className="flex-1 text-[13px] font-medium" style={{ color: (isFirst || isLast) ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
+                        {stop.name}
+                      </p>
+                      <svg width="6" height="10" viewBox="0 0 6 10" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" strokeLinecap="round" className="flex-shrink-0">
+                        <path d="M1 1l4 4-4 4"/>
+                      </svg>
+                    </button>
+                  )
+                })}
+              </div>
+              <p className="text-center text-[10px] py-2" style={{ color: 'var(--text-tertiary)' }}>
+                Tapez un arrêt pour les prochains départs
               </p>
             </div>
           )
