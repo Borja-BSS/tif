@@ -69,6 +69,11 @@ export function useHereMobilityLayer(map: mapboxgl.Map | null) {
         },
       })
 
+      // Douanes toujours au-dessus des lignes trafic
+      ;['tif-border-shadow','tif-border-dot','tif-border-icon'].forEach(id => {
+        try { if (map.getLayer(id)) map.moveLayer(id) } catch {}
+      })
+
       // Flèches de direction via image SVG — ▶ n'est pas dans la police Mapbox GL
       const ARROW_ID = 'tif-arrow'
       if (!map.hasImage(ARROW_ID)) {
@@ -90,6 +95,10 @@ export function useHereMobilityLayer(map: mapboxgl.Map | null) {
 
       function addArrowLayer() {
         if (!map || map.getLayer(LAYER_ARROW)) return
+        // Remonter les douanes au-dessus du trafic avant d'ajouter les flèches
+        ;['tif-border-shadow','tif-border-dot','tif-border-icon'].forEach(id => {
+          try { if (map.getLayer(id)) map.moveLayer(id) } catch {}
+        })
         map.addLayer({
           id:   LAYER_ARROW,
           type: 'symbol',

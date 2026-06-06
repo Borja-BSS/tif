@@ -367,28 +367,26 @@ export default function BorderCrossingsLayer({ map }: BorderCrossingsLayerProps)
       if (map.getLayer(LAYER_ICON))   map.moveLayer(LAYER_ICON)
     }
 
+    // Enregistrer ensureOnTop immédiatement — avant runWithFallback
+    map.on('styledata', ensureOnTop)
+
     const setupEvents = () => {
       const dispatchClick = (e: mapboxgl.MapLayerMouseEvent) => {
         if (!e.features?.length) return
         const props = e.features[0].properties as Record<string, unknown>
         const id = String(props.id ?? '')
         if (!id) return
-        // Empêche double-fire si les deux layers répondent
         e.originalEvent.stopPropagation()
         window.dispatchEvent(new CustomEvent('tif:crossing-select', { detail: { id } }))
       }
 
-      // Écoute sur les deux layers : shadow (cercle, toujours visible) ET icon
-      map.on('click', LAYER_SHADOW, dispatchClick)
-      map.on('click', LAYER_DOT,    dispatchClick)
-      map.on('click', LAYER_ICON,   dispatchClick)
+      // click (desktop) + touchend (mobile iOS/Android)
       for (const layer of [LAYER_SHADOW, LAYER_DOT, LAYER_ICON]) {
+        map.on('click',    layer, dispatchClick)
+        map.on('touchend', layer, dispatchClick as unknown as (e: mapboxgl.MapTouchEvent) => void)
         map.on('mouseenter', layer, () => { map.getCanvas().style.cursor = 'pointer' })
         map.on('mouseleave', layer, () => { map.getCanvas().style.cursor = '' })
       }
-
-      // Re-monter au-dessus si de nouveaux layers sont ajoutés après nous
-      map.on('styledata', ensureOnTop)
     }
 
     const runWithFallback = async () => {
