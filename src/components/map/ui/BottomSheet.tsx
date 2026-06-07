@@ -869,6 +869,7 @@ export function BottomSheet({ session: _session, activeFilter, map }: BottomShee
   const lastTouchTime  = useRef(0)
   const velocity       = useRef(0)
   const containerRef   = useRef<HTMLDivElement>(null)
+  const headerRef      = useRef<HTMLDivElement>(null)
 
   const { data } = useQuery<DashboardData>({
     queryKey:        ['dashboard'],
@@ -880,9 +881,9 @@ export function BottomSheet({ session: _session, activeFilter, map }: BottomShee
 
   const snapOrder: SnapSize[] = ['compact', 'mid', 'full']
 
-  // Attache un listener natif non-passif pour bloquer le scroll Mapbox pendant le drag
+  // Attache un listener natif non-passif sur le HEADER uniquement (pas sur le contenu scrollable)
   useEffect(() => {
-    const el = containerRef.current
+    const el = headerRef.current
     if (!el) return
     const prevent = (e: TouchEvent) => { e.preventDefault() }
     el.addEventListener('touchmove', prevent, { passive: false })
@@ -890,6 +891,7 @@ export function BottomSheet({ session: _session, activeFilter, map }: BottomShee
   }, [])
 
   const onTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length > 1) return  // ignore multi-touch (pinch-zoom)
     touchStartY.current    = e.touches[0].clientY
     touchStartSnap.current = snap
     lastTouchY.current     = e.touches[0].clientY
@@ -991,32 +993,38 @@ export function BottomSheet({ session: _session, activeFilter, map }: BottomShee
       ref={containerRef}
       className="fixed bottom-0 left-0 right-0 z-30 flex flex-col overflow-hidden"
       style={{ ...LG, height: SNAP_HEIGHT[snap], transition: isDragging ? 'none' : `height ${springs.sheet}` }}
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
     >
-      {/* Drag handle */}
-      <button
-        className="flex justify-center pt-2.5 pb-1 flex-shrink-0"
-        onClick={() => {
-          if (snap === 'compact') setSnap('mid')
-          else { setSnap('compact'); setDetailView('overview'); setSelectedCrossing(null) }
-        }}
-        aria-label="Ouvrir/fermer">
-        <div className="w-9 h-1 rounded-full" style={{ background: 'var(--border)' }} />
-      </button>
+      {/* Header drag zone — seule zone qui déclenche le drag du sheet */}
+      <div
+        ref={headerRef}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        style={{ touchAction: 'none' }}
+      >
+        {/* Drag handle */}
+        <button
+          className="flex justify-center pt-2.5 pb-1 w-full"
+          onClick={() => {
+            if (snap === 'compact') setSnap('mid')
+            else { setSnap('compact'); setDetailView('overview'); setSelectedCrossing(null) }
+          }}
+          aria-label="Ouvrir/fermer">
+          <div className="w-9 h-1 rounded-full" style={{ background: 'var(--border)' }} />
+        </button>
 
-      {/* Compact row */}
-      <div className="flex items-center justify-between px-4 py-1 flex-shrink-0">
-        <span className="text-sm font-medium truncate" style={{ color: alertCount > 0 ? '#FF9F0A' : 'var(--text-secondary)' }}>
-          {compactText}
-        </span>
-        {alertCount > 0 && snap === 'compact' && (
-          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full ml-2 flex-shrink-0"
-            style={{ background: 'rgba(255,159,10,0.15)', color: '#FF9F0A' }}>
-            {alertCount}
+        {/* Compact row */}
+        <div className="flex items-center justify-between px-4 py-1 flex-shrink-0">
+          <span className="text-sm font-medium truncate" style={{ color: alertCount > 0 ? '#FF9F0A' : 'var(--text-secondary)' }}>
+            {compactText}
           </span>
-        )}
+          {alertCount > 0 && snap === 'compact' && (
+            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full ml-2 flex-shrink-0"
+              style={{ background: 'rgba(255,159,10,0.15)', color: '#FF9F0A' }}>
+              {alertCount}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Expanded content */}

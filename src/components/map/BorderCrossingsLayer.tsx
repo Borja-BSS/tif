@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react'
 import mapboxgl from 'mapbox-gl'
 import type { FeatureCollection } from 'geojson'
-import { buildInstantGeoJSON } from '@/lib/territory/border-crossings-client'
+import { buildInstantGeoJSON, computeInstantStatus, ALL_CROSSINGS } from '@/lib/territory/border-crossings-client'
 
 interface BorderCrossingsLayerProps {
   map: mapboxgl.Map | null
@@ -233,6 +233,25 @@ function buildPopupHTML(props: Record<string, unknown>): string {
     </div>`
 }
 
+// ── Force client-side status consistency ─────────────────────────────────────
+// Ensures map dot color always matches CrossingDetail in BottomSheet.
+// HERE API may have stale/different colors; we override color+status with
+// time-based client computation while keeping HERE wait times when available.
+function mergeWithClientStatus(apiData: FeatureCollection): FeatureCollection {
+  const now = new Date()
+  return {
+    ...apiData,
+    features: apiData.features.map(f => {
+      const p = f.properties as Record<string, unknown>
+      if (p.type !== 'border') return f
+      const crossing = ALL_CROSSINGS.find(c => c.id === String(p.id ?? ''))
+      if (!crossing) return f
+      const { status, color, icon, waitMinutes } = computeInstantStatus(crossing, now)
+      return { ...f, properties: { ...p, status, color, icon, waitMinutes: p.waitTimeMinutes ?? waitMinutes } }
+    }),
+  }
+}
+
 // ── Layer management ──────────────────────────────────────────────────────────
 function featureImgProps(f: { properties: unknown }) {
   const p           = f.properties as Record<string, unknown>
@@ -399,7 +418,7 @@ export default function BorderCrossingsLayer({ map }: BorderCrossingsLayerProps)
         fetchBorderData(),
         preloadCommonImages(map),
       ])
-      if (live) await applyData(map, live)
+      if (live) await applyData(map, mergeWithClientStatus(live))
     }
 
     if (map.isStyleLoaded()) {
@@ -415,7 +434,7 @@ export default function BorderCrossingsLayer({ map }: BorderCrossingsLayerProps)
     timerRef.current = setInterval(async () => {
       const data = await fetchBorderData()
       if (!data) return
-      applyData(map, data)
+      applyData(map, mergeWithClientStatus(data))
     }, REFRESH_MS)
 
     return () => {
