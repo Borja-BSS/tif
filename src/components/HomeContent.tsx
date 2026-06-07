@@ -595,11 +595,11 @@ export function HomeContent() {
             {[...SRC_SLIDES, ...SRC_SLIDES, ...SRC_SLIDES].map((s, i) => (
               <div key={i} className="cslide">
                 <a href={s.url} target="_blank" rel="noreferrer" style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
-                  <div className="src" style={s.gold ? { border: '1px solid var(--gold-border)', cursor: 'pointer' } : { cursor: 'pointer' }}>
+                  <div className="src" style={{ cursor: 'pointer' }}>
                     <div className="src-icon">{s.icon}</div>
-                    <div className="src-name" style={s.gold ? { color: 'var(--gold)' } : {}}>{s.name}</div>
+                    <div className="src-name">{s.name}</div>
                     <div className="src-desc">{s.desc}</div>
-                    <div className="src-live" style={s.gold ? { color: 'var(--gold)' } : s.blue ? { color: 'var(--blue-d)' } : {}}>{s.live}</div>
+                    <div className="src-live" style={s.blue ? { color: 'var(--blue-d)' } : {}}>{s.live}</div>
                   </div>
                 </a>
               </div>
