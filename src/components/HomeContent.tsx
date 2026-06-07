@@ -388,7 +388,6 @@ export function HomeContent() {
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="2.5" fill="white" /><circle cx="7" cy="7" r="5.5" stroke="white" strokeWidth="1.5" /></svg>
             Ouvrir la carte live
           </a>
-          <a className="btn-s" href="https://tif.borja-swiss-solutions.ch/veille" target="_blank" rel="noreferrer">Veille G7</a>
         </div>
         <div className="scroll-cue" aria-hidden="true">
           <span>Situation en direct</span>
@@ -645,7 +644,6 @@ export function HomeContent() {
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="2.5" fill="currentColor" /><circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.5" /></svg>
             Ouvrir la carte live
           </a>
-          <a className="btn-ow" href="https://tif.borja-swiss-solutions.ch/veille" target="_blank" rel="noreferrer">Veille G7 →</a>
         </div>
         <div className="cta-stats">
           <div className="cta-stat"><div className="cta-stat-v">9</div><div className="cta-stat-l">sources officielles</div></div>

@@ -516,4 +516,13 @@ html{scroll-behavior:smooth;}
   .home-page .m-src-borja{background:rgba(48,209,88,.12);color:var(--green);border-color:rgba(48,209,88,.2);}
   .home-page .m-src-map{background:var(--off2);color:var(--ink2);border-color:var(--border);}
   .home-page .share-copy{background:var(--off2);color:var(--ink2);border-color:var(--border);}
+  /* Boutons blancs : texte noir par défaut, texte blanc au hover */
+  .home-page .lc-a{color:#1d1d1f;}
+  .home-page .lc-a:hover{color:#fff;}
+  .home-page .btn-full.dark{color:#1d1d1f;}
+  .home-page .btn-full.dark:hover{color:#fff;}
+  .home-page .cta-dark .btn-w{background:#fff;color:#1d1d1f;}
+  .home-page .cta-dark .btn-w:hover{background:#1d1d1f;color:#fff;}
+  /* cta-dark : h2 et stats deviennent noirs via var(--white) → forcer blanc */
+  .home-page .cta-dark h2,.home-page .cta-stat-v{color:#fff;}
 }
