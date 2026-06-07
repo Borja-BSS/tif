@@ -10,7 +10,7 @@ html{scroll-behavior:smooth;}
   --ink:#1d1d1f;
   --ink2:#3a3a3c;
   --ink3:#6e6e73;
-  --ink4:#aeaeb2;
+  --ink4:#86868b;
   --blue:#0071e3;
   --blue-d:#0058b0;
   --blue-bg:rgba(0,113,227,.08);
@@ -215,7 +215,7 @@ html{scroll-behavior:smooth;}
 .cta-dark{background:var(--ink);padding:80px 24px;text-align:center;position:relative;overflow:hidden;}
 .cta-dark::before{content:'';position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(0,113,227,.12) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
 .cta-dark h2{font-size:clamp(2.2rem,4.5vw,3.5rem);font-weight:700;letter-spacing:-.04em;color:var(--white);margin-bottom:14px;position:relative;}
-.cta-dark p{font-size:17px;font-weight:300;color:rgba(255,255,255,.55);max-width:44ch;margin:0 auto 28px;line-height:1.55;position:relative;}
+.cta-dark p{font-size:17px;font-weight:300;color:rgba(255,255,255,.70);max-width:44ch;margin:0 auto 28px;line-height:1.55;position:relative;}
 .cta-dark .btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;position:relative;}
 .btn-w{display:inline-flex;align-items:center;gap:7px;background:var(--white);color:var(--ink);padding:13px 24px;border-radius:980px;font-size:16px;font-weight:500;text-decoration:none;transition:background .15s,transform .12s;letter-spacing:-.02em;}
 .btn-w:hover{background:var(--off);transform:scale(1.015);}
@@ -225,7 +225,7 @@ html{scroll-behavior:smooth;}
 .cta-stat{padding:20px;text-align:center;}
 .cta-stat+.cta-stat{border-left:1px solid rgba(255,255,255,.08);}
 .cta-stat-v{font-size:1.8rem;font-weight:700;letter-spacing:-.03em;color:var(--white);margin-bottom:3px;}
-.cta-stat-l{font-size:11px;color:rgba(255,255,255,.35);letter-spacing:.01em;}
+.cta-stat-l{font-size:11px;color:rgba(255,255,255,.55);letter-spacing:.01em;}
 
 /* ─── CONTRIBUTION ─── */
 .contrib-wrap{max-width:860px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:3px;border-radius:var(--r);overflow:hidden;}
@@ -482,7 +482,7 @@ html{scroll-behavior:smooth;}
 @media(prefers-color-scheme:dark){
   .home-page{
     --white:#000;--off:#111214;--off2:#1c1c1e;
-    --ink:#f5f5f7;--ink2:#d1d1d6;--ink3:#aeaeb2;--ink4:#6e6e73;
+    --ink:#f5f5f7;--ink2:#d1d1d6;--ink3:#aeaeb2;--ink4:#8e8e93;
     --blue:#409cff;--blue-d:#5aabff;--blue-bg:rgba(64,156,255,.12);
     --green:#30d158;--green-bg:rgba(48,209,88,.12);
     --red:#ff453a;--red-bg:rgba(255,69,58,.12);
