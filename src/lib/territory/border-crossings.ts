@@ -59,7 +59,7 @@ const CROSSINGS: Crossing[] = [
 
   {
     id: 'bardonnex', name: 'Bardonnex',
-    lat: 46.14856, lng: 6.09561,
+    lat: 46.1406, lng: 6.1008,
     type: 'motorway', capacity: 'high',
     hours: '24h/24, 7j/7',
     vehicles: ['Voitures', 'Camions', 'Cars', 'Motos'],
@@ -73,7 +73,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'thonex-vallard', name: 'Thônex-Vallard',
-    lat: 46.18885, lng: 6.20215,
+    lat: 46.1942, lng: 6.2236,
     type: 'main', capacity: 'medium',
     hours: '24h/24, 7j/7',
     vehicles: ['Voitures', 'Camions', 'Cars', 'Motos'],
@@ -86,7 +86,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'moillesulaz', name: 'Moillesulaz',
-    lat: 46.19220, lng: 6.20628,
+    lat: 46.1946, lng: 6.2055,
     type: 'main', capacity: 'medium',
     hours: '24h/24, 7j/7',
     vehicles: ['Voitures', 'Motos', 'Piétons', 'Vélos', 'Tram D'],
@@ -112,7 +112,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'ferney-voltaire', name: 'Ferney-Voltaire',
-    lat: 46.25004, lng: 6.11905,
+    lat: 46.2505, lng: 6.1107,
     type: 'main', capacity: 'medium',
     hours: '24h/24, 7j/7',
     vehicles: ['Voitures', 'Motos', 'Cars'],
@@ -125,7 +125,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'perly', name: 'Perly',
-    lat: 46.15199, lng: 6.09056,
+    lat: 46.1488, lng: 6.0829,
     type: 'secondary', capacity: 'low',
     hours: '24h/24, 7j/7',
     vehicles: ['Voitures', 'Motos'],
@@ -152,7 +152,7 @@ const CROSSINGS: Crossing[] = [
 
   {
     id: 'croix-de-rozon', name: 'Croix-de-Rozon',
-    lat: 46.14382, lng: 6.13789,
+    lat: 46.1379, lng: 6.126,
     type: 'secondary', capacity: 'low',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures', 'Motos'],
@@ -172,7 +172,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'fossard', name: 'Fossard',
-    lat: 46.20654, lng: 6.25008,
+    lat: 46.195, lng: 6.213,
     type: 'secondary', capacity: 'low',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures'],
@@ -182,7 +182,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'mategnin', name: 'Mategnin',
-    lat: 46.23231, lng: 6.10601,
+    lat: 46.232, lng: 6.0688,
     type: 'secondary', capacity: 'low',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures', 'Motos'],
@@ -192,7 +192,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'mon-idee', name: 'Mon-Idée',
-    lat: 46.15008, lng: 6.08168,
+    lat: 46.2084, lng: 6.2456,
     type: 'secondary', capacity: 'low',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures'],
@@ -212,7 +212,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'chancy', name: 'Chancy',
-    lat: 46.14442, lng: 5.96568,
+    lat: 46.1501, lng: 5.9722,
     type: 'secondary', capacity: 'low',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures', 'Motos'],
@@ -232,7 +232,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'la-plaine', name: 'La Plaine',
-    lat: 46.17765, lng: 5.99194,
+    lat: 46.1776, lng: 5.9821,
     type: 'secondary', capacity: 'low',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures', 'Motos'],
@@ -252,7 +252,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'hermance', name: 'Hermance',
-    lat: 46.30283, lng: 6.24758,
+    lat: 46.3018, lng: 6.2439,
     type: 'secondary', capacity: 'low',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures', 'Piétons', 'Vélos'],
@@ -262,7 +262,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'soral', name: 'Soral',
-    lat: 46.13708, lng: 6.03615,
+    lat: 46.1509, lng: 5.9993,
     type: 'secondary', capacity: 'low',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures'],
@@ -275,7 +275,7 @@ const CROSSINGS: Crossing[] = [
 
   {
     id: 'landecy', name: 'Landecy',
-    lat: 46.14464, lng: 6.12951,
+    lat: 46.1409, lng: 6.072,
     type: 'tertiary', capacity: 'low',
     hours: 'Restreint (locaux)',
     vehicles: ['Voitures', 'Riverains'],
@@ -335,7 +335,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'veigy', name: 'Veigy',
-    lat: 46.27637, lng: 6.24670,
+    lat: 46.2492, lng: 6.2571,
     type: 'tertiary', capacity: 'low',
     hours: 'Restreint (locaux)',
     vehicles: ['Voitures'],
@@ -391,21 +391,21 @@ const CROSSINGS: Crossing[] = [
   // ── Extension Grand Genève — Vaud-France ────────────────────────────────────
   {
     id: 'la-cure', name: 'La Cure / Les Rousses',
-    lat: 46.46478, lng: 6.07300, type: 'main', capacity: 'medium',
+    lat: 46.4638, lng: 6.0726, type: 'main', capacity: 'medium',
     hours: '24h/24 (sauf neige)', vehicles: ['Voitures', 'Motos', 'Piétons', 'Vélos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert · Route D1084 ↔ Givrine · Fermé si neige abondante',
   },
   {
     id: 'saint-cergue', name: 'Saint-Cergue (Col de la Givrine)',
-    lat: 46.45460, lng: 6.08771, type: 'secondary', capacity: 'low',
+    lat: 46.441, lng: 6.109, type: 'secondary', capacity: 'low',
     hours: '24h/24 (saison)', vehicles: ['Voitures', 'Motos', 'Vélos', 'Piétons'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert · Passage Nyon ↔ Morez FR', nearestOpen: 'La Cure (15 km)',
   },
   {
     id: 'vallorbe', name: 'Vallorbe',
-    lat: 46.73154, lng: 6.38525, type: 'main', capacity: 'high',
+    lat: 46.714, lng: 6.37, type: 'main', capacity: 'high',
     hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Train', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise', 'Vignette CH recommandée'],
     g7Info: '✓ Ouvert · Douane principale Vaud · Ligne CFF Lausanne-Paris',
