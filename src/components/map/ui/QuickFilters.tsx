@@ -8,11 +8,11 @@ interface FilterDef { id: FilterId; icon: string; label: string }
 
 const FILTERS: FilterDef[] = [
   { id: 'all',     icon: '🗺️',  label: 'Tout'      },
-  { id: 'transit', icon: '🚌',  label: 'Transport'  },
   { id: 'traffic', icon: '🚦',  label: 'Trafic'     },
   { id: 'alerts',  icon: '⚠️',  label: 'Alertes'    },
+  { id: 'transit', icon: '🚌',  label: 'Transport'  },
   { id: 'borders', icon: '🛂',  label: 'Frontières' },
-  { id: 'g7',      icon: '🏛️', label: 'G7'         },
+  { id: 'g7',      icon: '🏛️', label: 'Info G7'    },
   { id: 'journey', icon: '⭐',  label: 'Mon Trajet' },
 ]
 

@@ -4,9 +4,11 @@ import { useEffect, useRef } from 'react'
 import mapboxgl from 'mapbox-gl'
 import type { FeatureCollection } from 'geojson'
 import { buildInstantGeoJSON, computeInstantStatus, ALL_CROSSINGS } from '@/lib/territory/border-crossings-client'
+import type { FilterId } from '@/components/map/ui/QuickFilters'
 
 interface BorderCrossingsLayerProps {
-  map: mapboxgl.Map | null
+  map:          mapboxgl.Map | null
+  activeFilter?: FilterId
 }
 
 const REFRESH_MS   = 120_000
@@ -353,10 +355,11 @@ function removeLayers(m: mapboxgl.Map) {
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
-export default function BorderCrossingsLayer({ map }: BorderCrossingsLayerProps) {
+export default function BorderCrossingsLayer({ map, activeFilter = 'all' }: BorderCrossingsLayerProps) {
   const timerRef     = useRef<ReturnType<typeof setInterval> | null>(null)
   const prefetchRef  = useRef<FeatureCollection | null>(null)
   const prefetchDone = useRef(false)
+  const isPinching   = useRef(false)
 
   useEffect(() => {
     let cancelled = false
@@ -367,6 +370,16 @@ export default function BorderCrossingsLayer({ map }: BorderCrossingsLayerProps)
     })
     return () => { cancelled = true }
   }, [])
+
+  // Visibility toggle — hide border layers when transit or alerts filter is active
+  useEffect(() => {
+    if (!map) return
+    const hide = activeFilter === 'transit' || activeFilter === 'alerts'
+    const vis  = hide ? 'none' : 'visible'
+    for (const id of [LAYER_SHADOW, LAYER_DOT, LAYER_ICON]) {
+      if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', vis)
+    }
+  }, [map, activeFilter])
 
   useEffect(() => {
     if (!map) return
@@ -399,10 +412,22 @@ export default function BorderCrossingsLayer({ map }: BorderCrossingsLayerProps)
         window.dispatchEvent(new CustomEvent('tif:crossing-select', { detail: { id } }))
       }
 
+      // Pinch-zoom guard — track multi-touch to suppress accidental taps during pinch
+      const onTouchStart = (e: mapboxgl.MapTouchEvent) => {
+        if (e.originalEvent.touches.length > 1) isPinching.current = true
+      }
+      const onTouchEnd = (e: mapboxgl.MapTouchEvent) => {
+        if (e.originalEvent.touches.length === 0) isPinching.current = false
+      }
+      map.on('touchstart', onTouchStart)
+      map.on('touchend',   onTouchEnd)
+
       // click (desktop) + touchend (mobile iOS/Android)
       for (const layer of [LAYER_SHADOW, LAYER_DOT, LAYER_ICON]) {
-        map.on('click',    layer, dispatchClick)
-        map.on('touchend', layer, dispatchClick as unknown as (e: mapboxgl.MapTouchEvent) => void)
+        map.on('click', layer, dispatchClick)
+        map.on('touchend', layer, (e: mapboxgl.MapTouchEvent) => {
+          if (!isPinching.current) dispatchClick(e as unknown as mapboxgl.MapLayerMouseEvent)
+        })
         map.on('mouseenter', layer, () => { map.getCanvas().style.cursor = 'pointer' })
         map.on('mouseleave', layer, () => { map.getCanvas().style.cursor = '' })
       }

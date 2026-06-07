@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from 'react'
 import mapboxgl from 'mapbox-gl'
 import type { MapGLProps } from './MapGL'
 import type { FilterState } from './FilterPanel'
+import type { FilterId } from './ui/QuickFilters'
 import { useTerritorialLayers }    from './useTerritorialLayers'
 import { useHereMobilityLayer }    from './useHereMobilityLayer'
 import { useTransitNetworkLayer }  from './useTransitNetworkLayer'
@@ -36,11 +37,12 @@ const TRANSPORT_LEGEND = [
 ]
 
 interface MapViewProps extends Omit<MapGLProps, 'onMapReady'> {
-  filters?:     FilterState
-  onMapReady?:  (map: mapboxgl.Map) => void
+  filters?:      FilterState
+  activeFilter?: FilterId
+  onMapReady?:   (map: mapboxgl.Map) => void
 }
 
-export default function MapView({ filters: externalFilters, onMapReady, ...props }: MapViewProps) {
+export default function MapView({ filters: externalFilters, activeFilter = 'all', onMapReady, ...props }: MapViewProps) {
   const [map,             setMap]             = useState<mapboxgl.Map | null>(null)
   const [internalFilters, setInternalFilters] = useState<FilterState>(DEFAULT_FILTERS)
   const filters = externalFilters ?? internalFilters
@@ -94,7 +96,7 @@ export default function MapView({ filters: externalFilters, onMapReady, ...props
     <>
       <MapGL {...props} onMapReady={m => { setMap(m); onMapReady?.(m) }} />
 
-      <BorderCrossingsLayer map={map} />
+      <BorderCrossingsLayer map={map} activeFilter={activeFilter} />
       <RoadClosuresLayer    map={map} />
       <ConstructionLayer    map={map} />
 

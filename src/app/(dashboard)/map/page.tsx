@@ -45,6 +45,7 @@ export default function MapPage() {
       {/* MapView cadre automatiquement sur le Grand Genève complet au chargement */}
       <MapView
         filters={filterState}
+        activeFilter={activeFilter}
         onMapReady={handleMapReady}
       />
 
