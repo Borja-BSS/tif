@@ -182,7 +182,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'mategnin', name: 'Mategnin',
-    lat: 46.24900, lng: 6.08000,
+    lat: 46.23231, lng: 6.10601,
     type: 'secondary', capacity: 'low',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures', 'Motos'],
@@ -252,7 +252,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'hermance', name: 'Hermance',
-    lat: 46.29605, lng: 6.23890,
+    lat: 46.30283, lng: 6.24758,
     type: 'secondary', capacity: 'low',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures', 'Piétons', 'Vélos'],
@@ -275,7 +275,7 @@ const CROSSINGS: Crossing[] = [
 
   {
     id: 'landecy', name: 'Landecy',
-    lat: 46.14550, lng: 6.11720,
+    lat: 46.14464, lng: 6.12951,
     type: 'tertiary', capacity: 'low',
     hours: 'Restreint (locaux)',
     vehicles: ['Voitures', 'Riverains'],
@@ -295,7 +295,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'troinex', name: 'Troinex',
-    lat: 46.16150, lng: 6.17520,
+    lat: 46.16165, lng: 6.14782,
     type: 'tertiary', capacity: 'low',
     hours: 'Restreint (locaux)',
     vehicles: ['Voitures'],
@@ -375,7 +375,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'divonne', name: 'Divonne-les-Bains',
-    lat: 46.35700, lng: 6.13800, type: 'main', capacity: 'medium',
+    lat: 46.34574, lng: 6.15228, type: 'main', capacity: 'medium',
     hours: '24h/24', vehicles: ['Voitures', 'Motos', 'Piétons'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert 24/7 · Accès lac et casino',
@@ -391,28 +391,28 @@ const CROSSINGS: Crossing[] = [
   // ── Extension Grand Genève — Vaud-France ────────────────────────────────────
   {
     id: 'la-cure', name: 'La Cure / Les Rousses',
-    lat: 46.45600, lng: 6.06800, type: 'main', capacity: 'medium',
+    lat: 46.46478, lng: 6.07300, type: 'main', capacity: 'medium',
     hours: '24h/24 (sauf neige)', vehicles: ['Voitures', 'Motos', 'Piétons', 'Vélos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert · Route D1084 ↔ Givrine · Fermé si neige abondante',
   },
   {
     id: 'saint-cergue', name: 'Saint-Cergue (Col de la Givrine)',
-    lat: 46.44700, lng: 6.15400, type: 'secondary', capacity: 'low',
+    lat: 46.45460, lng: 6.08771, type: 'secondary', capacity: 'low',
     hours: '24h/24 (saison)', vehicles: ['Voitures', 'Motos', 'Vélos', 'Piétons'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert · Passage Nyon ↔ Morez FR', nearestOpen: 'La Cure (15 km)',
   },
   {
     id: 'vallorbe', name: 'Vallorbe',
-    lat: 46.70600, lng: 6.37500, type: 'main', capacity: 'high',
+    lat: 46.73154, lng: 6.38525, type: 'main', capacity: 'high',
     hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Train', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise', 'Vignette CH recommandée'],
     g7Info: '✓ Ouvert · Douane principale Vaud · Ligne CFF Lausanne-Paris',
   },
   {
     id: 'bois-d-amont', name: "Bois-d'Amont (Les Rousses)",
-    lat: 46.52200, lng: 5.98700, type: 'secondary', capacity: 'low',
+    lat: 46.54842, lng: 6.15902, type: 'secondary', capacity: 'low',
     hours: '24h/24 (saison ski)', vehicles: ['Voitures', 'Motos', 'Piétons'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert · Zone ski transfrontalière Les Rousses ↔ Suisse',
@@ -426,7 +426,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'les-hopitaux-neufs', name: 'Les Hôpitaux-Neufs / Pontarlier',
-    lat: 46.80500, lng: 6.35600, type: 'main', capacity: 'medium',
+    lat: 46.90073, lng: 6.45820, type: 'main', capacity: 'medium',
     hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert · Axe RN57 Pontarlier ↔ Vallorbe (CH)',
@@ -435,21 +435,21 @@ const CROSSINGS: Crossing[] = [
   // ── Extension Grand Genève — Haute-Savoie ───────────────────────────────────
   {
     id: 'douvaine', name: 'Douvaine',
-    lat: 46.31400, lng: 6.31700, type: 'main', capacity: 'medium',
+    lat: 46.30598, lng: 6.30250, type: 'main', capacity: 'medium',
     hours: '24h/24', vehicles: ['Voitures', 'Motos', 'Camions'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert · Axe Annemasse ↔ Thonon · Surveillance renforcée G7',
   },
   {
     id: 'sciez', name: 'Sciez / Ballaison',
-    lat: 46.29000, lng: 6.29000, type: 'secondary', capacity: 'low',
+    lat: 46.33136, lng: 6.37525, type: 'secondary', capacity: 'low',
     hours: '06:00–22:00', vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '⚠️ Contrôles pendant G7', nearestOpen: 'Douvaine (8 km)',
   },
   {
     id: 'excenevex', name: 'Excenevex / Yvoire',
-    lat: 46.35200, lng: 6.32900, type: 'tertiary', capacity: 'low',
+    lat: 46.36933, lng: 6.32545, type: 'tertiary', capacity: 'low',
     hours: 'Piétons / Vélos / Riverains', vehicles: ['Piétons', 'Vélos', 'Voitures riverains'],
     vignettes: ['CNI ou passeport obligatoire'],
     g7Info: '⚠️ Contrôles renforcés G7 · Rive lac Léman', nearestOpen: 'Douvaine (9 km)',
@@ -463,7 +463,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'evian', name: 'Évian-les-Bains',
-    lat: 46.40100, lng: 6.58700, type: 'main', capacity: 'medium',
+    lat: 46.40165, lng: 6.59477, type: 'main', capacity: 'medium',
     hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise', 'Pass G7 requis 12-18 juin'],
     g7Info: '🏛️ SITE G7 · Contrôles maximaux 8-18 juin · Accès très restreint sans accréditation',
@@ -478,7 +478,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'saint-julien', name: 'Saint-Julien-en-Genevois',
-    lat: 46.14200, lng: 6.07700, type: 'main', capacity: 'high',
+    lat: 46.14448, lng: 6.08125, type: 'main', capacity: 'high',
     hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Cars', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert 24/7 · Axe A41 vers Annecy · Renforcé G7',
