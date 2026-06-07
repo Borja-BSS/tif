@@ -49,7 +49,7 @@ const SOURCE_URLS: Record<string, string> = {
   'TIF Monitoring': 'https://tif.borja-swiss-solutions.ch',
 }
 
-const SLIDE_COUNTS: Record<string, number> = { why: 4, src: 9, tc1: 4, tc2: 4 }
+const SLIDE_COUNTS: Record<string, number> = { why: 4, src: 8, tc1: 4, tc2: 4 }
 
 const STATIC_INC: IncSlide[] = [
   { id: '1', icon: '🚦', title: 'A1, km 4.2 direction Lausanne, 2 voies bloquées sur 3', severity: 'CRITICAL', timeAgo: '07:43', source: 'OFROU' },
@@ -111,7 +111,6 @@ const SRC_SLIDES = [
   { icon: '🌩️', name: 'MétéoSuisse', desc: 'Alertes météo officielles, précipitations, orages et vigilance pour le Canton de Genève.', live: 'Officiel Confédération', url: 'https://www.meteoswiss.admin.ch', blue: false },
   { icon: '🛂', name: 'Frontières CH-FR', desc: "Temps d'attente aux 8 postes frontaliers franco-suisses. Bardonnex, Moillesulaz, Ferney...", live: 'Live  5 min', url: 'https://www.bazg.admin.ch', blue: false },
   { icon: '🚗', name: 'HERE Maps / Waze', desc: 'Données trafic communautaires. Incidents terrain, congestion, signalements citoyens.', live: 'Live  corrélation', url: 'https://www.here.com', blue: false },
-  { icon: '⬡', name: 'Veille G7', desc: 'Restrictions, zones de sécurité et consignes agrégées depuis les sources publiques officielles liées au Sommet.', live: 'Actif  Durée du Sommet', url: 'https://tif.borja-swiss-solutions.ch/veille', gold: true, blue: false },
 ]
 
 const TC1_SLIDES = [
@@ -493,7 +492,6 @@ export function HomeContent() {
               <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="2.2" fill="currentColor" /><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" strokeWidth="1.4" /></svg>
               Ouvrir la carte live
             </a>
-            <a className="lc-a lc-g" href="https://tif.borja-swiss-solutions.ch/veille" target="_blank" rel="noreferrer">Veille G7 →</a>
           </div>
         </div>
       </section>
