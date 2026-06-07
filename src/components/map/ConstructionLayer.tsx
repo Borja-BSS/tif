@@ -188,7 +188,7 @@ function setupPopups(m: mapboxgl.Map) {
     const p = e.features[0].properties as Record<string, unknown>
     const isClosure = p.type === 'roadClosure'
     const desc = esc(String(p.description ?? 'Incident routier'))
-    const src  = String(p.source ?? 'HERE / OSM')
+    const src  = esc(String(p.source ?? 'HERE / OSM'))
     const timeInfo = p.startTime ? `<div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:6px">Depuis ${new Date(String(p.startTime)).toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' })}</div>` : ''
     popup.setLngLat(e.lngLat).setHTML(`
       <div style="font-family:-apple-system,sans-serif;padding:10px 12px;min-width:200px">

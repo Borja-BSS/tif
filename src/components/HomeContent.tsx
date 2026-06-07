@@ -24,28 +24,28 @@ type DetailInfo = {
 }
 
 const SOURCE_URLS: Record<string, string> = {
-  'OFROU': 'https://www.astra.admin.ch/astra/fr/home/verkehrsinfos.html',
-  'OFROU (Réseau autoroutier national)': 'https://www.astra.admin.ch/astra/fr/home/verkehrsinfos.html',
+  'OFROU': 'https://www.astra.admin.ch/astra/fr/home.html',
+  'OFROU (Réseau autoroutier national)': 'https://www.astra.admin.ch/astra/fr/home.html',
   'TPG': 'https://www.tpg.ch/fr/voyagez-avec-nous/infos-trafic',
   'TPG (Transports Publics Genevois)': 'https://www.tpg.ch/fr/voyagez-avec-nous/infos-trafic',
-  'TPG en lien avec dispositif G7': 'https://www.tpg.ch',
+  'TPG en lien avec dispositif G7': 'https://www.tpg.ch/fr/voyagez-avec-nous/infos-trafic',
   'OpenTransportData.swiss': 'https://opentransportdata.swiss/fr/',
   'CFF / SBB via OpenTransportData.swiss': 'https://opentransportdata.swiss/fr/',
   'CFF / SBB': 'https://www.sbb.ch/fr',
-  'MétéoSuisse': 'https://www.meteoswiss.admin.ch/home/weather/extreme-weather/alertswiss.html',
-  'MétéoSuisse, Office fédéral de météorologie': 'https://www.meteoswiss.admin.ch/home/weather/extreme-weather/alertswiss.html',
-  'BAZG': 'https://www.bazg.admin.ch/bazg/fr/home/services/services-fuer-privatpersonen/reiseverkehr.html',
-  'BAZG, Bureau fédéral des douanes suisses': 'https://www.bazg.admin.ch/bazg/fr/home/services/services-fuer-privatpersonen/reiseverkehr.html',
-  'BAZG (frontières), Police Cantonale GE': 'https://www.bazg.admin.ch',
-  'Police Cantonale GE': 'https://www.ge.ch/securite',
-  'Police Cantonale GE, Dispositif G7': 'https://www.ge.ch/securite',
-  'Police Cantonale GE, SITG, OFROU': 'https://ge.ch/sitg/',
-  'OFROU, SITG, Veille G7 TIF': 'https://www.astra.admin.ch',
+  'MétéoSuisse': 'https://www.meteoswiss.admin.ch/',
+  'MétéoSuisse, Office fédéral de météorologie': 'https://www.meteoswiss.admin.ch/',
+  'BAZG': 'https://www.bazg.admin.ch/bazg/fr/home.html',
+  'BAZG, Bureau fédéral des douanes suisses': 'https://www.bazg.admin.ch/bazg/fr/home.html',
+  'BAZG (frontières), Police Cantonale GE': 'https://www.bazg.admin.ch/bazg/fr/home.html',
+  'Police Cantonale GE': 'https://www.police.ge.ch/',
+  'Police Cantonale GE, Dispositif G7': 'https://www.police.ge.ch/',
+  'Police Cantonale GE, SITG, OFROU': 'https://www.police.ge.ch/',
+  'OFROU, SITG, Veille G7 TIF': 'https://www.astra.admin.ch/astra/fr/home.html',
   'OFROU, SITG': 'https://ge.ch/sitg/',
   'OFROU, Police Cantonale GE, TPG, CFF, MétéoSuisse, BAZG': 'https://tif.borja-swiss-solutions.ch',
   'Canton GE, SITG': 'https://ge.ch/sitg/',
   'CFF côté suisse et SNCF côté français': 'https://opentransportdata.swiss/fr/',
-  'BAZG, Bureau fédéral des douanes': 'https://www.bazg.admin.ch',
+  'BAZG, Bureau fédéral des douanes': 'https://www.bazg.admin.ch/bazg/fr/home.html',
   'TIF Monitoring': 'https://tif.borja-swiss-solutions.ch',
 }
 
@@ -160,10 +160,6 @@ export function HomeContent() {
   const [borders, setBorders] = useState<BorderRow[]>(STATIC_BORDERS)
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null)
   const [copied, setCopied] = useState(false)
-  const [darkMode, setDarkMode] = useState(() => {
-    if (typeof window !== 'undefined') return localStorage.getItem('tif-dark') === '1'
-    return false
-  })
   const lastFocus = useRef<HTMLElement | null>(null)
   const carRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
@@ -240,10 +236,15 @@ export function HomeContent() {
       if (transRes.status === 'fulfilled' && transRes.value) setTransport(transRes.value)
       if (terrRes.status === 'fulfilled' && terrRes.value) {
         const parsed: BorderRow[] = (terrRes.value.features ?? [])
-          .filter((f: { properties?: Record<string, unknown> }) => typeof f.properties?.waitMinutes === 'number')
+          .filter((f: { properties?: Record<string, unknown> }) => {
+            const p = f.properties ?? {}
+            return p.type === 'border' && (typeof p.waitMinutes === 'number' || typeof p.waitTimeMinutes === 'number')
+          })
           .slice(0, 5)
-          .map((f: { properties: { name: string; waitMinutes: number; status: string } }) => ({
-            name: f.properties.name, waitMinutes: f.properties.waitMinutes, status: f.properties.status,
+          .map((f: { properties: Record<string, unknown> }) => ({
+            name: String(f.properties.name ?? ''),
+            waitMinutes: Number(f.properties.waitMinutes ?? f.properties.waitTimeMinutes ?? 0),
+            status: String(f.properties.status ?? 'CLEAR'),
           }))
         if (parsed.length) setBorders(parsed)
       }
@@ -348,7 +349,7 @@ export function HomeContent() {
   }
 
   return (
-    <div className={`home-page${darkMode ? ' dark' : ''}`}>
+    <div className="home-page">
 
       {/* NAV */}
       <nav id="nav">
@@ -361,9 +362,6 @@ export function HomeContent() {
         </div>
         <div className="n-right">
           <div className="n-live"><div className="n-live-dot" /><span>{clock}</span></div>
-          <button className="n-dark-toggle" aria-label="Mode sombre" onClick={() => { setDarkMode(d => { const v = !d; localStorage.setItem('tif-dark', v ? '1' : '0'); return v }) }}>
-            {darkMode ? '☀' : '🌙'}
-          </button>
           <a className="n-cta" href="https://tif.borja-swiss-solutions.ch/map" target="_blank" rel="noreferrer">Carte live →</a>
         </div>
       </nav>
