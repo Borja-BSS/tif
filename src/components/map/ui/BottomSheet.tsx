@@ -870,6 +870,8 @@ export function BottomSheet({ session: _session, activeFilter, map }: BottomShee
   const velocity       = useRef(0)
   const containerRef   = useRef<HTMLDivElement>(null)
   const headerRef      = useRef<HTMLDivElement>(null)
+  const contentRef     = useRef<HTMLDivElement>(null)
+  const cDragY         = useRef(0)
 
   const { data } = useQuery<DashboardData>({
     queryKey:        ['dashboard'],
@@ -928,6 +930,22 @@ export function BottomSheet({ session: _session, activeFilter, map }: BottomShee
     else if (delta < -60 && idx > 0) setSnap(snapOrder[idx - 1])
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [snapOrder])
+
+  // Swipe-down-to-dismiss depuis le contenu (quand scrollTop === 0)
+  const onContentTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length > 1) return
+    cDragY.current = e.touches[0].clientY
+  }, [])
+
+  const onContentTouchEnd = useCallback((e: React.TouchEvent) => {
+    const el = contentRef.current
+    if (!el || el.scrollTop > 4) return
+    const dy = e.changedTouches[0].clientY - cDragY.current
+    if (dy > 55) {
+      const idx = snapOrder.indexOf(snap)
+      setSnap(idx > 0 ? snapOrder[idx - 1] : 'compact')
+    }
+  }, [snap, snapOrder])
 
   const openDetail = useCallback((v: DetailView) => {
     setDetailView(v)
@@ -1029,7 +1047,9 @@ export function BottomSheet({ session: _session, activeFilter, map }: BottomShee
 
       {/* Expanded content */}
       {snap !== 'compact' && (
-        <div className="flex-1 overflow-y-auto px-4 pb-6" style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
+        <div ref={contentRef} className="flex-1 overflow-y-auto px-4 pb-6" style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
+          onTouchStart={onContentTouchStart}
+          onTouchEnd={onContentTouchEnd}>
 
           {/* Bouton retour */}
           {showBack && (
