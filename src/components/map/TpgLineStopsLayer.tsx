@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import mapboxgl from 'mapbox-gl'
+import type { GeoJSONSource, MapLayerMouseEvent, MapLayerTouchEvent } from 'mapbox-gl'
 import { TPG_LINES } from '@/lib/transport/tpg-line-stops'
 
 interface Props { map: mapboxgl.Map | null }
@@ -12,69 +13,103 @@ export interface StopSelectDetail {
   line:  string
 }
 
-const PIN_SIZE = 10
+const SRC      = 'tif-tpg-stops'
+const LYR_GLOW = 'tif-tpg-glow'
+const LYR_DOT  = 'tif-tpg-dot'
 
-function makeMarkerEl(stopName: string, lineColor: string): HTMLDivElement {
-  const el = document.createElement('div')
-  el.style.cssText = `
-    width:${PIN_SIZE + 4}px;height:${PIN_SIZE + 4}px;
-    border-radius:50%;
-    background:${lineColor};
-    border:2px solid rgba(255,255,255,0.9);
-    box-shadow:0 1px 6px rgba(0,0,0,0.5);
-    cursor:pointer;
-    transition:transform 0.15s;
-  `
-  el.title = stopName
-  el.addEventListener('mouseenter', () => { el.style.transform = 'scale(1.5)' })
-  el.addEventListener('mouseleave', () => { el.style.transform = 'scale(1)' })
-  return el
+type StopFeature = {
+  type: 'Feature'
+  geometry: { type: 'Point'; coordinates: [number, number] }
+  properties: { name: string; line: string; color: string }
 }
+type StopFC = { type: 'FeatureCollection'; features: StopFeature[] }
+const EMPTY: StopFC = { type: 'FeatureCollection', features: [] }
 
 export default function TpgLineStopsLayer({ map }: Props) {
-  const markersRef  = useRef<mapboxgl.Marker[]>([])
-  const activeColor = useRef('#30D158')
+  const initDone = useRef(false)
 
   useEffect(() => {
-    const clearMarkers = () => {
-      markersRef.current.forEach(m => m.remove())
-      markersRef.current = []
+    if (!map) return
+
+    const init = () => {
+      if (initDone.current || map.getSource(SRC)) { initDone.current = true; return }
+      initDone.current = true
+
+      map.addSource(SRC, { type: 'geojson', data: EMPTY })
+
+      // Glow halo — rendered in WebGL, no DOM flicker on zoom
+      map.addLayer({
+        id: LYR_GLOW, type: 'circle', source: SRC,
+        paint: {
+          'circle-radius':  16,
+          'circle-color':   ['get', 'color'],
+          'circle-opacity': 0.18,
+          'circle-blur':    0.6,
+        },
+      })
+      // Solid dot
+      map.addLayer({
+        id: LYR_DOT, type: 'circle', source: SRC,
+        paint: {
+          'circle-radius':       6,
+          'circle-color':        ['get', 'color'],
+          'circle-stroke-width': 2,
+          'circle-stroke-color': '#ffffff',
+          'circle-opacity':      0.92,
+        },
+      })
+
+      const dispatch = (e: MapLayerMouseEvent | MapLayerTouchEvent) => {
+        if (!e.features?.length) return
+        const p = e.features[0].properties as { name: string; line: string }
+        window.dispatchEvent(new CustomEvent<StopSelectDetail>('tif:stop-select', {
+          detail: { name: p.name, coord: [e.lngLat.lng, e.lngLat.lat], line: p.line },
+        }))
+      }
+      map.on('click',    LYR_DOT, dispatch)
+      map.on('touchend', LYR_DOT, dispatch as unknown as (e: mapboxgl.MapTouchEvent) => void)
+      map.on('mouseenter', LYR_DOT, () => { map.getCanvas().style.cursor = 'pointer' })
+      map.on('mouseleave', LYR_DOT, () => { map.getCanvas().style.cursor = '' })
     }
 
-    const handleLineSelect = (e: Event) => {
-      clearMarkers()
+    const setData = (fc: StopFC) => {
+      const src = map.getSource(SRC) as GeoJSONSource | undefined
+      if (src) src.setData(fc)
+    }
+
+    if (map.isStyleLoaded()) init()
+    else map.once('idle', init)
+
+    const handleSelect = (e: Event) => {
       const { line, color } = (e as CustomEvent<{ line: string | null; color?: string }>).detail
-      if (!line || !map) return
-
+      if (!line) { setData(EMPTY); return }
       const cfg = TPG_LINES[line]
-      if (!cfg) return
-
-      activeColor.current = color ?? '#30D158'
-
-      cfg.stops.forEach(stop => {
-        const el = makeMarkerEl(stop.name, activeColor.current)
-
-        el.addEventListener('click', () => {
-          window.dispatchEvent(new CustomEvent<StopSelectDetail>('tif:stop-select', {
-            detail: { name: stop.name, coord: stop.coord, line },
-          }))
-        })
-
-        const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
-          .setLngLat(stop.coord)
-          .addTo(map)
-
-        markersRef.current.push(marker)
+      if (!cfg) { setData(EMPTY); return }
+      const c = color ?? '#30D158'
+      setData({
+        type: 'FeatureCollection',
+        features: cfg.stops.map(s => ({
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: s.coord },
+          properties: { name: s.name, line, color: c },
+        })),
       })
     }
 
-    window.addEventListener('tif:line-select', handleLineSelect)
-    window.addEventListener('tif:line-clear', clearMarkers)
+    const clearData = () => setData(EMPTY)
+
+    window.addEventListener('tif:line-select', handleSelect)
+    window.addEventListener('tif:line-clear',  clearData)
 
     return () => {
-      window.removeEventListener('tif:line-select', handleLineSelect)
-      window.removeEventListener('tif:line-clear', clearMarkers)
-      clearMarkers()
+      window.removeEventListener('tif:line-select', handleSelect)
+      window.removeEventListener('tif:line-clear',  clearData)
+      try {
+        if (map.getLayer(LYR_DOT))  map.removeLayer(LYR_DOT)
+        if (map.getLayer(LYR_GLOW)) map.removeLayer(LYR_GLOW)
+        if (map.getSource(SRC))     map.removeSource(SRC)
+      } catch { /* map destroyed */ }
+      initDone.current = false
     }
   }, [map])
 
