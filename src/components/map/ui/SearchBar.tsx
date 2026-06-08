@@ -116,6 +116,10 @@ export function SearchBar({ map }: SearchBarProps) {
     )
   }
 
+  // QuickFilters: top = 52+12+8 = 72px, height 40px → bottom à 112px
+  // Le dropdown apparaît sous les filtres pour ne pas les couvrir
+  const RESULTS_TOP = 'calc(52px + 12px + 8px + 40px + 8px)' // 120px
+
   return (
     <>
       <div
@@ -123,8 +127,10 @@ export function SearchBar({ map }: SearchBarProps) {
         style={{ background: 'rgba(0,0,0,0.30)', backdropFilter: 'blur(2px)' }}
         onClick={() => { setIsOpen(false); setQuery(''); setResults([]) }}
       />
+
+      {/* Champ de saisie — reste en haut, au niveau de la barre */}
       <div
-        className="fixed top-0 left-0 right-0 z-30 mx-4 mt-3 flex flex-col overflow-hidden"
+        className="fixed top-0 left-0 right-0 z-30 mx-4 mt-3 overflow-hidden"
         style={{ ...LG, borderRadius: 16 }}
       >
         <div className="flex items-center gap-3 px-4 py-3">
@@ -149,9 +155,15 @@ export function SearchBar({ map }: SearchBarProps) {
             <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white/70 animate-spin flex-shrink-0" />
           )}
         </div>
+      </div>
 
-        {(results.length > 0 || recentSearches.length > 0) && (
-          <div className="max-h-64 overflow-y-auto px-2 pb-2">
+      {/* Résultats — positionnés SOUS les filtres */}
+      {(results.length > 0 || recentSearches.length > 0) && (
+        <div
+          className="fixed left-0 right-0 z-30 mx-4 overflow-hidden"
+          style={{ ...LG, borderRadius: 16, top: RESULTS_TOP, maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}
+        >
+          <div className="px-2 py-2">
             {results.length > 0 ? (
               results.map(r => (
                 <button
@@ -181,8 +193,8 @@ export function SearchBar({ map }: SearchBarProps) {
               </>
             )}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </>
   )
 }
