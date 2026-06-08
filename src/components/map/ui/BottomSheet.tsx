@@ -666,6 +666,7 @@ function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
     refetchInterval: 60000,
     staleTime:       60000,
   })
+  const [showBanner, setShowBanner] = useState(false)
 
   const alerts = (geoJson?.features ?? []).map((f, i) => ({
     id:          String(f.properties.id ?? i),
@@ -690,11 +691,36 @@ function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
     map.flyTo({ center: [lng, lat], zoom: 14, duration: 900, essential: true })
   }
 
+  useEffect(() => {
+    if (!isLoading && alerts.length === 0) {
+      setShowBanner(true)
+      const t = setTimeout(() => setShowBanner(false), 4500)
+      return () => clearTimeout(t)
+    }
+  }, [isLoading, alerts.length])
+
   return (
     <div className="space-y-2">
       <p className="text-[10px] font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-tertiary)' }}>
         Incidents · Accidents · Travaux · Grand Genève
       </p>
+
+      {/* Banner éphémère "aucune alerte" — disparaît après 4.5s */}
+      {showBanner && (
+        <div className="flex items-center gap-3 rounded-2xl px-4 py-3 mb-1"
+          style={{
+            background:   'rgba(52,199,89,0.12)',
+            border:       '0.5px solid rgba(52,199,89,0.40)',
+            backdropFilter: 'blur(20px)',
+            animation:    'slideDown 0.28s ease forwards',
+          }}>
+          <span className="text-xl flex-shrink-0">✅</span>
+          <div>
+            <p className="text-sm font-semibold" style={{ color: '#34C759' }}>Aucune alerte détectée</p>
+            <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Grand Genève · Trafic normal en ce moment</p>
+          </div>
+        </div>
+      )}
 
       {isLoading && (
         <div className="flex items-center justify-center py-8 gap-2">
@@ -704,7 +730,7 @@ function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
         </div>
       )}
 
-      {!isLoading && alerts.length === 0 && (
+      {!isLoading && alerts.length === 0 && !showBanner && (
         <div className="rounded-2xl p-6 text-center" style={{ background: 'var(--bg-card)' }}>
           <p className="text-2xl mb-2">✅</p>
           <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Aucun incident actif</p>
@@ -981,17 +1007,6 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
     return () => window.removeEventListener('tif:crossing-select', handler)
   }, [openCrossing])
 
-  // Sync detailView quand le filtre externe change (barre QuickFilters)
-  useEffect(() => {
-    const filterToView: Partial<Record<FilterId, DetailView>> = {
-      'transit': 'transport',
-      'borders': 'douanes',
-      'alerts':  'alertes',
-      'g7':      'g7',
-    }
-    setDetailView(filterToView[activeFilter] ?? 'overview')
-  }, [activeFilter])
-
   const locateCrossing = useCallback((c: CrossingStatic) => {
     if (!map) return
     map.flyTo({ center: [c.lng, c.lat], zoom: 15, duration: 900, essential: true })
@@ -1005,9 +1020,8 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
     } else {
       setDetailView('overview')
       setSnap('mid')
-      onFilterChange('all')
     }
-  }, [selectedCrossing, onFilterChange])
+  }, [selectedCrossing])
 
   // Compact headline
   const alertCount  = data?.alerts.length ?? 0
