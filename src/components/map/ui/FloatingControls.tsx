@@ -74,10 +74,11 @@ export function FloatingControls({ map }: FloatingControlsProps) {
   const handleGPS = useCallback(() => {
     if (!navigator.geolocation || !map) return
 
+    const topPad = Math.round(window.innerHeight * 0.42)
+
     if (watchIdRef.current === null) {
-      // Premier clic — démarrer le suivi GPS
       flyDoneRef.current = false
-      followRef.current  = true   // avant watchPosition : garantit que le callback trouve followRef=true
+      followRef.current  = true
       setActive(true)
 
       const id = navigator.geolocation.watchPosition(
@@ -88,46 +89,45 @@ export function FloatingControls({ map }: FloatingControlsProps) {
             detail: { lat, lng, accuracy },
           }))
           if (!followRef.current) return
-          if (flyingRef.current) return  // ne pas annuler un flyTo en cours avec un easeTo
+          if (flyingRef.current) return
 
           if (!flyDoneRef.current) {
-            // Première position → flyTo immersif (zoom + pitch + bearing)
             flyDoneRef.current = true
-            flyingRef.current  = true  // bloquer rotateTo pendant l'animation
+            flyingRef.current  = true
             map.flyTo({
-              center:    [lng, lat],
-              pitch:     80,
-              zoom:      16,
-              bearing:   compassRef.current,
-              duration:  1300,
+              center:   [lng, lat],
+              pitch:    55,
+              zoom:     16,
+              bearing:  compassRef.current,
+              duration: 1300,
               essential: true,
+              padding:  { top: topPad, bottom: 0, left: 0, right: 0 },
             })
             map.once('moveend', () => { flyingRef.current = false })
-          } else {
-            map.easeTo({ center: [lng, lat], duration: 500, essential: true })
           }
+          // Pas d'easeTo — l'utilisateur navigue librement après le flyTo initial
         },
         () => {},
         { enableHighAccuracy: true, maximumAge: 2000 },
       )
       watchIdRef.current = id
     } else {
-      // Re-clic : flyTo immédiat sur la dernière position connue
       if (lastPosRef.current && map) {
         const [lng, lat] = lastPosRef.current
         flyingRef.current  = true
-        flyDoneRef.current = true  // éviter un double flyTo au prochain callback watchPosition
+        flyDoneRef.current = true
         map.flyTo({
           center:   [lng, lat],
-          pitch:    80,
+          pitch:    55,
           zoom:     16,
           bearing:  compassRef.current,
           duration: 1300,
           essential: true,
+          padding:  { top: topPad, bottom: 0, left: 0, right: 0 },
         })
         map.once('moveend', () => { flyingRef.current = false })
       } else {
-        flyDoneRef.current = false  // pas de position en cache → attendre le prochain callback
+        flyDoneRef.current = false
       }
     }
 
