@@ -59,6 +59,11 @@ export default function TpgLineStopsLayer({ map }: Props) {
         },
       })
 
+      // User location always above TPG stops
+      ;['user-location-accuracy', 'user-location-dot'].forEach(id => {
+        try { if (map.getLayer(id)) map.moveLayer(id) } catch {}
+      })
+
       const dispatch = (e: MapLayerMouseEvent | MapLayerTouchEvent) => {
         if (!e.features?.length) return
         const p = e.features[0].properties as { name: string; line: string }

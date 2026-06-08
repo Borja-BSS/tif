@@ -191,12 +191,59 @@ async function applyData(m: mapboxgl.Map, geojson: FeatureCollection) {
   setupClick(m)
 }
 
+// ── Overpass client-side (contourne le blocage IP Vercel) ────────────────────
+const OVERPASS_BBOX = '46.05,5.75,46.95,7.00'
+const OVERPASS_QUERY = `[out:json][timeout:10];(way["highway"="construction"](${OVERPASS_BBOX});way["construction"~"."](${OVERPASS_BBOX});node["highway"="construction"](${OVERPASS_BBOX});node["construction"~"."](${OVERPASS_BBOX}););out center tags 30;`
+
+async function fetchOverpass(): Promise<FeatureCollection> {
+  try {
+    const res = await fetch('https://overpass-api.de/api/interpreter', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `data=${encodeURIComponent(OVERPASS_QUERY)}`,
+      signal: AbortSignal.timeout(12000),
+    })
+    if (!res.ok) return { type: 'FeatureCollection', features: [] }
+    const data = await res.json() as { elements: Array<{ type: string; id: number; lat?: number; lon?: number; center?: { lat: number; lon: number }; tags?: Record<string, string> }> }
+    const features = data.elements
+      .filter(el => el.lat != null || el.center != null)
+      .map(el => {
+        const lat  = el.lat ?? el.center!.lat
+        const lon  = el.lon ?? el.center!.lon
+        const tags = el.tags ?? {}
+        const name = tags['name'] ?? tags['description'] ?? ''
+        return {
+          type: 'Feature' as const,
+          properties: {
+            id: `osm-${el.id}`, type: 'construction', criticality: 'minor',
+            description: name ? `🚧 Travaux — ${name}` : '🚧 Chantier en cours',
+            icon: '🚧', color: '#FF9500',
+            startTime: new Date().toISOString(), endTime: null, source: 'OSM',
+          },
+          geometry: { type: 'Point' as const, coordinates: [lon, lat] },
+        }
+      })
+    return { type: 'FeatureCollection', features }
+  } catch { return { type: 'FeatureCollection', features: [] } }
+}
+
 async function fetchAndApply(m: mapboxgl.Map) {
   try {
-    const res = await fetch('/api/v1/layers/alerts', { cache: 'no-store', signal: AbortSignal.timeout(5000) })
-    if (!res.ok) return
-    const data = await res.json() as FeatureCollection
-    applyData(m, data)
+    // Fetch server alerts + client-side Overpass en parallèle
+    const [serverRes, overpassData] = await Promise.all([
+      fetch('/api/v1/layers/alerts', { cache: 'no-store', signal: AbortSignal.timeout(8000) }),
+      fetchOverpass(),
+    ])
+    if (!serverRes.ok) {
+      if (overpassData.features.length) applyData(m, overpassData)
+      return
+    }
+    const serverData = await serverRes.json() as FeatureCollection
+    const merged: FeatureCollection = {
+      type: 'FeatureCollection',
+      features: [...serverData.features, ...overpassData.features],
+    }
+    applyData(m, merged)
   } catch { /* réseau — silencieux */ }
 }
 
@@ -210,8 +257,14 @@ export default function HereIncidentsLayer({ map }: HereIncidentsLayerProps) {
 
     const run = () => fetchAndApply(map)
 
-    if (map.loaded()) run()
-    else map.once('load', run)
+    // Fix race condition: map.loaded() peut retourner false même si style prêt
+    if (map.isStyleLoaded()) {
+      run()
+    } else {
+      map.once('style.load', run)
+      // Filet de sécurité si style.load a déjà tiré
+      map.once('idle', () => { if (!map.getSource(SOURCE_ID)) run() })
+    }
 
     timerRef.current = setInterval(run, REFRESH_MS)
 

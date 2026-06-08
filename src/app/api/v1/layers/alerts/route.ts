@@ -1,9 +1,7 @@
 import { NextResponse }              from 'next/server'
 import { getIncidents }             from '@/lib/here/incidents'
 import { getTpgDisruptions }        from '@/lib/alerts/tpg-disruptions'
-import { getOverpassRoadworks }     from '@/lib/alerts/overpass-roadworks'
 import { getWeatherAlerts }         from '@/lib/alerts/openmeteo-weather'
-import { getWazeIncidents }         from '@/lib/waze/incidents'
 import { withMetrics }              from '@/lib/route-utils'
 import { redis }                    from '@/lib/redis'
 import { logger }                   from '@/lib/logger'
@@ -57,13 +55,11 @@ async function handler(_req: NextRequest): Promise<NextResponse> {
     logger.warn({ err }, 'alerts:redis-get-failed — skipping cache')
   }
 
-  // 5 sources en parallèle — toutes avec fallback silencieux
-  const [hereResult, wazeResult, tpgResult, overpassResult, weatherResult] = await Promise.allSettled([
-    getIncidents(),           // HERE Maps accidents/congestion
-    getWazeIncidents(),       // Waze live — accidents, bouchons, dangers
-    getTpgDisruptions(),      // opendata.ch — retards TPG/CFF
-    getOverpassRoadworks(),   // OpenStreetMap — travaux (gratuit)
-    getWeatherAlerts(),       // OpenMeteo — météo 48h (gratuit)
+  // 3 sources serveur en parallèle — Overpass et Waze retirés (bloqués côté Vercel)
+  const [hereResult, tpgResult, weatherResult] = await Promise.allSettled([
+    getIncidents(),        // HERE Maps accidents/congestion
+    getTpgDisruptions(),   // opendata.ch — retards TPG/CFF
+    getWeatherAlerts(),    // OpenMeteo — météo 48h (gratuit)
   ])
 
   const allFeatures: Feature<Point>[] = []
@@ -75,25 +71,11 @@ async function handler(_req: NextRequest): Promise<NextResponse> {
     logger.warn({ err: hereResult.reason }, 'alerts:here-failed')
   }
 
-  if (wazeResult.status === 'fulfilled') {
-    allFeatures.push(...wazeResult.value.features as Feature<Point>[])
-    logger.info({ count: wazeResult.value.features.length }, 'alerts:waze-ok')
-  } else {
-    logger.warn({ err: wazeResult.reason }, 'alerts:waze-failed')
-  }
-
   if (tpgResult.status === 'fulfilled') {
     allFeatures.push(...tpgResult.value.features as Feature<Point>[])
     logger.info({ count: tpgResult.value.features.length }, 'alerts:tpg-ok')
   } else {
     logger.warn({ err: tpgResult.reason }, 'alerts:tpg-failed')
-  }
-
-  if (overpassResult.status === 'fulfilled') {
-    allFeatures.push(...overpassResult.value.features as Feature<Point>[])
-    logger.info({ count: overpassResult.value.features.length }, 'alerts:overpass-ok')
-  } else {
-    logger.warn({ err: overpassResult.reason }, 'alerts:overpass-failed')
   }
 
   if (weatherResult.status === 'fulfilled') {

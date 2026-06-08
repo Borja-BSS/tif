@@ -194,6 +194,11 @@ function initLayers(map: mapboxgl.Map) {
       },
     })
   }
+
+  // User location always on top of transit lines
+  ;['user-location-accuracy', 'user-location-dot'].forEach(id => {
+    try { if (map.getLayer(id)) map.moveLayer(id) } catch {}
+  })
 }
 
 // ── Popup setup ───────────────────────────────────────────────────────────────

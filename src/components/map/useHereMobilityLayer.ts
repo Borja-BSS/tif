@@ -69,8 +69,9 @@ export function useHereMobilityLayer(map: mapboxgl.Map | null) {
         },
       })
 
-      // Douanes toujours au-dessus des lignes trafic
-      ;['tif-border-shadow','tif-border-dot','tif-border-icon'].forEach(id => {
+      // Points toujours au-dessus des lignes trafic
+      ;['tif-border-shadow','tif-border-dot','tif-border-icon',
+        'user-location-accuracy','user-location-dot'].forEach(id => {
         try { if (map.getLayer(id)) map.moveLayer(id) } catch {}
       })
 
@@ -95,8 +96,9 @@ export function useHereMobilityLayer(map: mapboxgl.Map | null) {
 
       function addArrowLayer() {
         if (!map || map.getLayer(LAYER_ARROW)) return
-        // Remonter les douanes au-dessus du trafic avant d'ajouter les flèches
-        ;['tif-border-shadow','tif-border-dot','tif-border-icon'].forEach(id => {
+        // Points au-dessus des flèches trafic
+        ;['tif-border-shadow','tif-border-dot','tif-border-icon',
+          'user-location-accuracy','user-location-dot'].forEach(id => {
           try { if (map.getLayer(id)) map.moveLayer(id) } catch {}
         })
         map.addLayer({
