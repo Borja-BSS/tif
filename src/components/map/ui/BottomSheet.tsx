@@ -12,7 +12,7 @@ import type { JourneyStatusResult } from '@/lib/my-journey/types'
 import type mapboxgl from 'mapbox-gl'
 
 type SnapSize   = 'compact' | 'mid' | 'full'
-type DetailView = 'overview' | 'douanes' | 'transport' | 'alertes' | 'g7'
+type DetailView = 'overview' | 'douanes' | 'transport' | 'alertes' | 'g7' | 'meteo'
 
 const SNAP_HEIGHT: Record<SnapSize, string> = {
   compact: '56px',
@@ -819,6 +819,125 @@ function G7Detail() {
   )
 }
 
+// ── Météo : helpers + banner + détail ────────────────────────────────────────
+function wmoIcon(c: number) {
+  if (c === 0)   return '☀️'
+  if (c <= 2)    return '🌤️'
+  if (c === 3)   return '☁️'
+  if (c <= 48)   return '🌫️'
+  if (c <= 55)   return '🌦️'
+  if (c <= 67)   return '🌧️'
+  if (c <= 77)   return '❄️'
+  if (c <= 82)   return '🌦️'
+  if (c <= 86)   return '🌨️'
+  return '⛈️'
+}
+function wmoLabel(c: number) {
+  if (c === 0)   return 'Ciel dégagé'
+  if (c <= 2)    return 'Peu nuageux'
+  if (c === 3)   return 'Couvert'
+  if (c <= 48)   return 'Brouillard'
+  if (c <= 55)   return 'Bruine'
+  if (c <= 67)   return 'Pluie'
+  if (c <= 77)   return 'Neige'
+  if (c <= 82)   return 'Averses'
+  if (c <= 86)   return 'Averses de neige'
+  return 'Orage'
+}
+
+const METEO_URL = 'https://api.open-meteo.com/v1/forecast?latitude=46.2044&longitude=6.1432&hourly=temperature_2m,precipitation_probability,weathercode&timezone=Europe%2FZurich&forecast_days=2'
+
+interface WeatherHourly { time: string[]; temperature_2m: number[]; precipitation_probability: number[]; weathercode: number[] }
+
+function useWeather() {
+  return useQuery<{ hourly: WeatherHourly }>({
+    queryKey:        ['open-meteo'],
+    queryFn:         () => fetch(METEO_URL).then(r => r.json()),
+    staleTime:       20 * 60 * 1000,
+    refetchInterval: 20 * 60 * 1000,
+  })
+}
+
+function meteoStartIdx(times: string[]): number {
+  const now = new Date()
+  const idx = times.findIndex(t => new Date(t) >= now)
+  return idx >= 0 ? idx : 0
+}
+
+function WeatherBanner({ onPress }: { onPress: () => void }) {
+  const { data } = useWeather()
+  if (!data?.hourly) return null
+  const { hourly } = data
+  const s     = meteoStartIdx(hourly.time)
+  const temps = hourly.temperature_2m.slice(s, s + 4)
+  const probs = hourly.precipitation_probability.slice(s, s + 4)
+  const codes = hourly.weathercode.slice(s, s + 4)
+  const minT  = Math.round(Math.min(...temps))
+  const maxT  = Math.round(Math.max(...temps))
+  const maxP  = Math.max(...probs)
+  const code  = codes.reduce((a, b) => Math.max(a, b), 0)
+  const tempStr   = minT === maxT ? `${minT}°C` : `${minT}–${maxT}°C`
+  const precipStr = maxP >= 20 ? ` · 💧 ${maxP}%` : ''
+  return (
+    <button onClick={onPress}
+      className="w-full flex items-center gap-3 rounded-2xl px-4 py-3 mb-0.5 text-left active:scale-[0.98] transition-transform"
+      style={{ background: 'rgba(10,132,255,0.10)', border: '0.5px solid rgba(10,132,255,0.22)' }}>
+      <span className="text-2xl flex-shrink-0">{wmoIcon(code)}</span>
+      <div className="flex-1 min-w-0">
+        <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'rgba(10,132,255,0.75)' }}>Prochaines 4h</p>
+        <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{tempStr} · {wmoLabel(code)}{precipStr}</p>
+      </div>
+      <svg width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="2" strokeLinecap="round">
+        <path d="M1 1l5 5-5 5"/>
+      </svg>
+    </button>
+  )
+}
+
+function MeteoDetail() {
+  const { data, isLoading } = useWeather()
+  if (isLoading) return (
+    <div className="flex justify-center py-10 gap-2">
+      {[0,1,2].map(i => <span key={i} className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" style={{ animationDelay: `${i*150}ms` }}/>)}
+    </div>
+  )
+  if (!data?.hourly) return null
+  const { hourly } = data
+  const s = meteoStartIdx(hourly.time)
+  const hours = hourly.time.slice(s, s + 24)
+  return (
+    <div>
+      <p className="text-[10px] font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-tertiary)' }}>
+        Météo · Grand Genève · 24h
+      </p>
+      <div className="space-y-0.5">
+        {hours.map((t, i) => {
+          const hour = new Date(t).getHours()
+          const temp = Math.round(hourly.temperature_2m[s + i])
+          const prob = hourly.precipitation_probability[s + i]
+          const code = hourly.weathercode[s + i]
+          return (
+            <div key={t} className="flex items-center gap-3 rounded-xl px-3 py-2.5"
+              style={{ background: i === 0 ? 'rgba(10,132,255,0.12)' : i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.03)' }}>
+              <span className="w-10 text-[12px] font-semibold" style={{ color: i === 0 ? '#0A84FF' : 'var(--text-secondary)' }}>
+                {String(hour).padStart(2, '0')}h
+              </span>
+              <span className="text-lg w-7 text-center">{wmoIcon(code)}</span>
+              <span className="flex-1 text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{temp}°C</span>
+              <span className="text-[11px] w-12 text-right" style={{ color: prob >= 50 ? '#0A84FF' : 'var(--text-tertiary)' }}>
+                {prob > 0 ? `💧 ${prob}%` : ''}
+              </span>
+              <span className="text-[11px] w-20 text-right truncate" style={{ color: 'var(--text-secondary)' }}>
+                {wmoLabel(code)}
+              </span>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 // ── Vue d'ensemble "Tout" — 4 cartes ─────────────────────────────────────────
 function ToutOverview({ data, onSelect }: {
   data?: DashboardData
@@ -835,6 +954,7 @@ function ToutOverview({ data, onSelect }: {
 
   return (
     <div className="space-y-2.5 pt-1">
+      <WeatherBanner onPress={() => onSelect('meteo')} />
       <CategoryCard icon="🛂" title="Douanes"
         subtitle={heavy ? `⚠️ ${heavy.name} · trafic chargé` : `${ALL_CROSSINGS.length} postes · ${blocked > 0 ? `${blocked} fermés G7` : 'tous ouverts'}`}
         onPress={() => onSelect('douanes')} />
@@ -1111,6 +1231,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
             : detailView === 'douanes'    ? <DouanesDetail onSelect={openCrossing} map={map} />
             : detailView === 'transport'  ? <TransportDetail onExpand={expandToFull} />
             : detailView === 'alertes'    ? <AlertesDetail map={map} />
+            : detailView === 'meteo'      ? <MeteoDetail />
             : <G7Detail />
           }
         </div>
