@@ -13,7 +13,22 @@ const BTN_BASE: React.CSSProperties = {
   cursor: 'pointer',
 }
 
-type OrientationEvent = DeviceOrientationEvent & { webkitCompassHeading?: number }
+// Bearing from A→B in degrees (0=Nord, sens horaire)
+function bearingBetween(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const toRad = (d: number) => d * Math.PI / 180
+  const dLng  = toRad(lng2 - lng1)
+  const φ1    = toRad(lat1), φ2 = toRad(lat2)
+  const y = Math.sin(dLng) * Math.cos(φ2)
+  const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(dLng)
+  return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360
+}
+
+// Distance approx en mètres
+function distMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const dlat = (lat2 - lat1) * 111_000
+  const dlng = (lng2 - lng1) * 111_000 * Math.cos(lat1 * Math.PI / 180)
+  return Math.sqrt(dlat * dlat + dlng * dlng)
+}
 
 interface FloatingControlsProps {
   map: mapboxgl.Map | null
@@ -22,53 +37,12 @@ interface FloatingControlsProps {
 export function FloatingControls({ map }: FloatingControlsProps) {
   const [active,    setActive]    = useState(false)
   const [following, setFollowing] = useState(false)
-  const followRef      = useRef(false)
-  const watchIdRef     = useRef<number | null>(null)
-  const compassRef     = useRef<number>(0)
-  const compassCleanup = useRef<(() => void) | null>(null)
-  const flyDoneRef     = useRef(false)
-  const flyingRef      = useRef(false)
-  const lastPosRef     = useRef<[number, number] | null>(null)
-
-  // ── Compass setup ─────────────────────────────────────────────────────────
-  const startCompass = useCallback(async () => {
-    if (compassCleanup.current) return  // already running
-
-    // iOS 13+ requires permission
-    const DOE = DeviceOrientationEvent as typeof DeviceOrientationEvent & {
-      requestPermission?: () => Promise<'granted' | 'denied'>
-    }
-    if (typeof DOE.requestPermission === 'function') {
-      const perm = await DOE.requestPermission().catch(() => 'denied')
-      if (perm !== 'granted') return
-    }
-
-    const handler = (e: OrientationEvent) => {
-      let heading: number | null = null
-      if (e.webkitCompassHeading != null) {
-        // iOS — 0=North, clockwise, calibrated
-        heading = e.webkitCompassHeading
-      } else if (e.alpha != null) {
-        // Android absolute — convert to clockwise from North
-        heading = (360 - e.alpha) % 360
-      }
-      if (heading == null) return
-      compassRef.current = heading
-      // Ne pas appeler rotateTo pendant flyTo — ça annule l'animation
-      if (followRef.current && map && !flyingRef.current) {
-        map.rotateTo(heading, { duration: 200, essential: true })
-      }
-    }
-
-    // deviceorientationabsolute is more reliable on Android (Chrome 50+)
-    window.addEventListener('deviceorientationabsolute', handler as EventListener, true)
-    window.addEventListener('deviceorientation',         handler as EventListener, true)
-
-    compassCleanup.current = () => {
-      window.removeEventListener('deviceorientationabsolute', handler as EventListener, true)
-      window.removeEventListener('deviceorientation',         handler as EventListener, true)
-    }
-  }, [map])
+  const followRef  = useRef(false)
+  const watchIdRef = useRef<number | null>(null)
+  const flyDoneRef = useRef(false)
+  const flyingRef  = useRef(false)
+  const lastPosRef = useRef<[number, number] | null>(null)  // [lng, lat]
+  const bearingRef = useRef<number>(0)                      // bearing calculé depuis le mouvement
 
   // ── GPS button click ──────────────────────────────────────────────────────
   const handleGPS = useCallback(() => {
@@ -77,41 +51,68 @@ export function FloatingControls({ map }: FloatingControlsProps) {
     const topPad = Math.round(window.innerHeight * 0.42)
 
     if (watchIdRef.current === null) {
+      // Première activation
       flyDoneRef.current = false
       followRef.current  = true
       setActive(true)
+      setFollowing(true)
 
       const id = navigator.geolocation.watchPosition(
         pos => {
           const { latitude: lat, longitude: lng, accuracy } = pos.coords
-          lastPosRef.current = [lng, lat]
+
+          // Émettre position pour le point bleu
           window.dispatchEvent(new CustomEvent('tif:update-user-location', {
             detail: { lat, lng, accuracy },
           }))
+
+          // Calculer le bearing depuis le mouvement (seulement si déplacé > 5m)
+          if (lastPosRef.current) {
+            const [prevLng, prevLat] = lastPosRef.current
+            const dist = distMeters(prevLat, prevLng, lat, lng)
+            if (dist >= 5) {
+              bearingRef.current = bearingBetween(prevLat, prevLng, lat, lng)
+            }
+          }
+          lastPosRef.current = [lng, lat]
+
           if (!followRef.current) return
-          if (flyingRef.current) return
+          if (flyingRef.current)  return
 
           if (!flyDoneRef.current) {
+            // Premier fix : flyTo immersif
             flyDoneRef.current = true
             flyingRef.current  = true
             map.flyTo({
               center:   [lng, lat],
               pitch:    55,
               zoom:     16,
-              bearing:  compassRef.current,
+              bearing:  bearingRef.current,
               duration: 1300,
               essential: true,
               padding:  { top: topPad, bottom: 0, left: 0, right: 0 },
             })
             map.once('moveend', () => { flyingRef.current = false })
+          } else {
+            // Suivi continu — easeTo smooth, annulable par drag utilisateur
+            map.easeTo({
+              center:   [lng, lat],
+              bearing:  bearingRef.current,
+              duration: 1000,
+              padding:  { top: topPad, bottom: 0, left: 0, right: 0 },
+            })
           }
-          // Pas d'easeTo — l'utilisateur navigue librement après le flyTo initial
         },
         () => {},
         { enableHighAccuracy: true, maximumAge: 2000 },
       )
       watchIdRef.current = id
+
     } else {
+      // Re-clic : re-centrer et ré-activer le suivi
+      followRef.current = true
+      setFollowing(true)
+
       if (lastPosRef.current && map) {
         const [lng, lat] = lastPosRef.current
         flyingRef.current  = true
@@ -120,7 +121,7 @@ export function FloatingControls({ map }: FloatingControlsProps) {
           center:   [lng, lat],
           pitch:    55,
           zoom:     16,
-          bearing:  compassRef.current,
+          bearing:  bearingRef.current,
           duration: 1300,
           essential: true,
           padding:  { top: topPad, bottom: 0, left: 0, right: 0 },
@@ -130,12 +131,7 @@ export function FloatingControls({ map }: FloatingControlsProps) {
         flyDoneRef.current = false
       }
     }
-
-    void startCompass()
-
-    followRef.current = true
-    setFollowing(true)
-  }, [map, startCompass])
+  }, [map])
 
   // ── Stop following on user map interaction ────────────────────────────────
   useEffect(() => {
@@ -147,10 +143,10 @@ export function FloatingControls({ map }: FloatingControlsProps) {
       setFollowing(false)
     }
 
-    // dragstart = toujours user-initiated (pas de dragstart programmatique)
+    // dragstart = toujours user-initiated
     const onDrag = () => doStop()
 
-    // zoomstart se déclenche aussi sur flyTo — ne stopper que si originalEvent présent
+    // zoomstart se déclenche aussi sur flyTo — stopper seulement si user-initiated
     const onZoom = (e: mapboxgl.MapboxEvent & { originalEvent?: Event }) => {
       if (e.originalEvent) doStop()
     }
@@ -167,7 +163,6 @@ export function FloatingControls({ map }: FloatingControlsProps) {
   // ── Cleanup on unmount ────────────────────────────────────────────────────
   useEffect(() => {
     return () => {
-      compassCleanup.current?.()
       if (watchIdRef.current !== null) navigator.geolocation.clearWatch(watchIdRef.current)
     }
   }, [])
