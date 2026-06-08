@@ -88,6 +88,14 @@ export default function MapGL({
       onMapReady?.(map)
     })
 
+    // Garantit que user-location-dot reste toujours au-dessus de toutes les couches
+    // (trafic, TPG, incidents…) quel que soit l'ordre d'ajout des layers
+    map.on('idle', () => {
+      ;['user-location-accuracy', 'user-location-dot'].forEach(id => {
+        try { if (map.getLayer(id)) map.moveLayer(id) } catch { /* ignoré */ }
+      })
+    })
+
     // Listen for location update events from RecenterButton or other components
     const handleLocationUpdate = (e: Event) => {
       const detail = (e as CustomEvent<{ lat: number; lng: number; accuracy: number } | null>).detail

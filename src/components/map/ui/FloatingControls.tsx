@@ -13,16 +13,60 @@ const BTN_BASE: React.CSSProperties = {
   cursor: 'pointer',
 }
 
+type OrientationEvent = DeviceOrientationEvent & { webkitCompassHeading?: number }
+
 interface FloatingControlsProps {
   map: mapboxgl.Map | null
 }
 
 export function FloatingControls({ map }: FloatingControlsProps) {
-  const [active,    setActive]    = useState(false)   // watchPosition running
-  const [following, setFollowing] = useState(false)   // auto-centering on
-  const followRef  = useRef(false)
-  const watchIdRef = useRef<number | null>(null)
+  const [active,    setActive]    = useState(false)
+  const [following, setFollowing] = useState(false)
+  const followRef      = useRef(false)
+  const watchIdRef     = useRef<number | null>(null)
+  const compassRef     = useRef<number>(0)
+  const compassCleanup = useRef<(() => void) | null>(null)
 
+  // ── Compass setup ─────────────────────────────────────────────────────────
+  const startCompass = useCallback(async () => {
+    if (compassCleanup.current) return  // already running
+
+    // iOS 13+ requires permission
+    const DOE = DeviceOrientationEvent as typeof DeviceOrientationEvent & {
+      requestPermission?: () => Promise<'granted' | 'denied'>
+    }
+    if (typeof DOE.requestPermission === 'function') {
+      const perm = await DOE.requestPermission().catch(() => 'denied')
+      if (perm !== 'granted') return
+    }
+
+    const handler = (e: OrientationEvent) => {
+      let heading: number | null = null
+      if (e.webkitCompassHeading != null) {
+        // iOS — 0=North, clockwise, calibrated
+        heading = e.webkitCompassHeading
+      } else if (e.alpha != null) {
+        // Android absolute — convert to clockwise from North
+        heading = (360 - e.alpha) % 360
+      }
+      if (heading == null) return
+      compassRef.current = heading
+      if (followRef.current && map) {
+        map.rotateTo(heading, { duration: 200, essential: true })
+      }
+    }
+
+    // deviceorientationabsolute is more reliable on Android (Chrome 50+)
+    window.addEventListener('deviceorientationabsolute', handler as EventListener, true)
+    window.addEventListener('deviceorientation',         handler as EventListener, true)
+
+    compassCleanup.current = () => {
+      window.removeEventListener('deviceorientationabsolute', handler as EventListener, true)
+      window.removeEventListener('deviceorientation',         handler as EventListener, true)
+    }
+  }, [map])
+
+  // ── GPS button click ──────────────────────────────────────────────────────
   const handleGPS = useCallback(() => {
     if (!navigator.geolocation || !map) return
 
@@ -35,45 +79,43 @@ export function FloatingControls({ map }: FloatingControlsProps) {
             detail: { lat, lng, accuracy },
           }))
           if (followRef.current) {
-            map.easeTo({ center: [lng, lat], duration: 600, essential: true })
+            map.easeTo({ center: [lng, lat], duration: 500, essential: true })
           }
         },
         () => {},
-        { enableHighAccuracy: true, maximumAge: 3000 },
+        { enableHighAccuracy: true, maximumAge: 2000 },
       )
       watchIdRef.current = id
       setActive(true)
     }
 
-    // Always re-engage immersive view
+    // Start compass (async — may request iOS permission)
+    void startCompass()
+
+    // Engage immersive view
     followRef.current = true
     setFollowing(true)
 
-    // Immediate fix for flyTo (watchPosition may have slight delay)
     navigator.geolocation.getCurrentPosition(
       pos => {
         map.flyTo({
-          center:   [pos.coords.longitude, pos.coords.latitude],
-          pitch:    65,
-          zoom:     16,
-          bearing:  0,
-          duration: 1200,
+          center:    [pos.coords.longitude, pos.coords.latitude],
+          pitch:     80,
+          zoom:      16,
+          bearing:   compassRef.current,
+          duration:  1300,
           essential: true,
         })
         window.dispatchEvent(new CustomEvent('tif:update-user-location', {
-          detail: {
-            lat:      pos.coords.latitude,
-            lng:      pos.coords.longitude,
-            accuracy: pos.coords.accuracy,
-          },
+          detail: { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy },
         }))
       },
       () => {},
       { enableHighAccuracy: true, timeout: 6000 },
     )
-  }, [map])
+  }, [map, startCompass])
 
-  // Detect user map interaction → stop following, reset pitch
+  // ── Stop following on user map interaction ────────────────────────────────
   useEffect(() => {
     if (!map) return
 
@@ -85,14 +127,22 @@ export function FloatingControls({ map }: FloatingControlsProps) {
       }
     }
 
-    map.on('dragstart',  stopFollow as Parameters<typeof map.on>[1])
-    map.on('zoomstart',  stopFollow as Parameters<typeof map.on>[1])
+    map.on('dragstart', stopFollow as Parameters<typeof map.on>[1])
+    map.on('zoomstart', stopFollow as Parameters<typeof map.on>[1])
 
     return () => {
       map.off('dragstart', stopFollow as Parameters<typeof map.on>[1])
       map.off('zoomstart', stopFollow as Parameters<typeof map.on>[1])
     }
   }, [map])
+
+  // ── Cleanup on unmount ────────────────────────────────────────────────────
+  useEffect(() => {
+    return () => {
+      compassCleanup.current?.()
+      if (watchIdRef.current !== null) navigator.geolocation.clearWatch(watchIdRef.current)
+    }
+  }, [])
 
   const color  = following ? '#0A84FF' : active ? 'rgba(10,132,255,0.55)' : 'rgba(255,255,255,0.75)'
   const bg     = following ? 'rgba(10,132,255,0.18)' : 'rgba(255,255,255,0.07)'
