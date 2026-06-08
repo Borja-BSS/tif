@@ -137,7 +137,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'anieres', name: 'Anières',
-    lat: 46.26925, lng: 6.23907,
+    lat: 46.2650, lng: 6.2440,
     type: 'secondary', capacity: 'low',
     hours: '24h/24, 7j/7',
     vehicles: ['Voitures', 'Motos'],
@@ -182,7 +182,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'mategnin', name: 'Mategnin',
-    lat: 46.232, lng: 6.0688,
+    lat: 46.2315, lng: 6.0640,
     type: 'secondary', capacity: 'low',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures', 'Motos'],
@@ -222,7 +222,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'avully', name: 'Avully',
-    lat: 46.16215, lng: 5.98445,
+    lat: 46.1618, lng: 5.9778,
     type: 'secondary', capacity: 'low',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures', 'Motos'],
@@ -242,7 +242,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'communaux-ambilly', name: 'Communaux d\'Ambilly',
-    lat: 46.19560, lng: 6.22150,
+    lat: 46.1958, lng: 6.2180,
     type: 'secondary', capacity: 'low',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures', 'Riverains'],
@@ -252,7 +252,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'hermance', name: 'Hermance',
-    lat: 46.3018, lng: 6.2439,
+    lat: 46.3018, lng: 6.2480,
     type: 'secondary', capacity: 'low',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures', 'Piétons', 'Vélos'],
@@ -275,7 +275,7 @@ const CROSSINGS: Crossing[] = [
 
   {
     id: 'landecy', name: 'Landecy',
-    lat: 46.1409, lng: 6.072,
+    lat: 46.1395, lng: 6.0756,
     type: 'tertiary', capacity: 'low',
     hours: 'Restreint (locaux)',
     vehicles: ['Voitures', 'Riverains'],
@@ -295,7 +295,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'troinex', name: 'Troinex',
-    lat: 46.16165, lng: 6.14782,
+    lat: 46.1616, lng: 6.1530,
     type: 'tertiary', capacity: 'low',
     hours: 'Restreint (locaux)',
     vehicles: ['Voitures'],
@@ -335,7 +335,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'veigy', name: 'Veigy',
-    lat: 46.2492, lng: 6.2571,
+    lat: 46.2500, lng: 6.2524,
     type: 'tertiary', capacity: 'low',
     hours: 'Restreint (locaux)',
     vehicles: ['Voitures'],
@@ -347,7 +347,7 @@ const CROSSINGS: Crossing[] = [
   // ── Extension Grand Genève — Pays de Gex ────────────────────────────────────
   {
     id: 'prevessin-moens', name: 'Prévessin-Moëns',
-    lat: 46.25600, lng: 6.06700, type: 'main', capacity: 'medium',
+    lat: 46.2470, lng: 6.0642, type: 'main', capacity: 'medium',
     hours: '24h/24', vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert · Zone CERN · Contrôles fréquents',
@@ -375,7 +375,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'divonne', name: 'Divonne-les-Bains',
-    lat: 46.34574, lng: 6.15228, type: 'main', capacity: 'medium',
+    lat: 46.3521, lng: 6.1488, type: 'main', capacity: 'medium',
     hours: '24h/24', vehicles: ['Voitures', 'Motos', 'Piétons'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert 24/7 · Accès lac et casino',
@@ -398,35 +398,35 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'saint-cergue', name: 'Saint-Cergue (Col de la Givrine)',
-    lat: 46.441, lng: 6.109, type: 'secondary', capacity: 'low',
+    lat: 46.4182, lng: 6.0780, type: 'secondary', capacity: 'low',
     hours: '24h/24 (saison)', vehicles: ['Voitures', 'Motos', 'Vélos', 'Piétons'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert · Passage Nyon ↔ Morez FR', nearestOpen: 'La Cure (15 km)',
   },
   {
     id: 'vallorbe', name: 'Vallorbe',
-    lat: 46.714, lng: 6.37, type: 'main', capacity: 'high',
+    lat: 46.7138, lng: 6.3800, type: 'main', capacity: 'high',
     hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Train', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise', 'Vignette CH recommandée'],
     g7Info: '✓ Ouvert · Douane principale Vaud · Ligne CFF Lausanne-Paris',
   },
   {
     id: 'bois-d-amont', name: "Bois-d'Amont (Les Rousses)",
-    lat: 46.54842, lng: 6.15902, type: 'secondary', capacity: 'low',
+    lat: 46.5476, lng: 6.1870, type: 'secondary', capacity: 'low',
     hours: '24h/24 (saison ski)', vehicles: ['Voitures', 'Motos', 'Piétons'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert · Zone ski transfrontalière Les Rousses ↔ Suisse',
   },
   {
     id: 'saint-Laurent', name: 'Saint-Laurent-en-Grandvaux',
-    lat: 46.57600, lng: 5.96000, type: 'secondary', capacity: 'low',
+    lat: 46.5766, lng: 6.0840, type: 'secondary', capacity: 'low',
     hours: '06:00–22:00', vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert · Jura ↔ Vaud · Vers Champagnole', nearestOpen: 'La Cure (20 km)',
   },
   {
     id: 'les-hopitaux-neufs', name: 'Les Hôpitaux-Neufs / Pontarlier',
-    lat: 46.90073, lng: 6.45820, type: 'main', capacity: 'medium',
+    lat: 46.7740, lng: 6.3682, type: 'main', capacity: 'medium',
     hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert · Axe RN57 Pontarlier ↔ Vallorbe (CH)',
@@ -435,7 +435,7 @@ const CROSSINGS: Crossing[] = [
   // ── Extension Grand Genève — Haute-Savoie ───────────────────────────────────
   {
     id: 'douvaine', name: 'Douvaine',
-    lat: 46.30598, lng: 6.30250, type: 'main', capacity: 'medium',
+    lat: 46.3005, lng: 6.2552, type: 'main', capacity: 'medium',
     hours: '24h/24', vehicles: ['Voitures', 'Motos', 'Camions'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert · Axe Annemasse ↔ Thonon · Surveillance renforcée G7',
@@ -456,14 +456,14 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'thonon', name: 'Thonon-les-Bains',
-    lat: 46.37100, lng: 6.47700, type: 'main', capacity: 'medium',
+    lat: 46.3693, lng: 6.4788, type: 'main', capacity: 'medium',
     hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert · Axe vers Évian et Valais · Renforcé G7',
   },
   {
     id: 'evian', name: 'Évian-les-Bains',
-    lat: 46.40165, lng: 6.59477, type: 'main', capacity: 'medium',
+    lat: 46.4018, lng: 6.5878, type: 'main', capacity: 'medium',
     hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise', 'Pass G7 requis 12-18 juin'],
     g7Info: '🏛️ SITE G7 · Contrôles maximaux 8-18 juin · Accès très restreint sans accréditation',
@@ -471,14 +471,14 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'annemasse-gaillard', name: 'Annemasse / Gaillard',
-    lat: 46.19400, lng: 6.23400, type: 'main', capacity: 'high',
+    lat: 46.1944, lng: 6.2278, type: 'main', capacity: 'high',
     hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Motos', 'Piétons', 'Tram'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise', "Crit'Air / Stick'AIR (ZFE Annemasse)"],
     g7Info: '✓ Ouvert · Axe principal Genève ↔ Annecy · Contrôles renforcés G7',
   },
   {
     id: 'saint-julien', name: 'Saint-Julien-en-Genevois',
-    lat: 46.14448, lng: 6.08125, type: 'main', capacity: 'high',
+    lat: 46.1516, lng: 6.0978, type: 'main', capacity: 'high',
     hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Cars', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert 24/7 · Axe A41 vers Annecy · Renforcé G7',
