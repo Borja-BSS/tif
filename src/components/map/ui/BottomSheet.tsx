@@ -17,7 +17,7 @@ type DetailView = 'overview' | 'douanes' | 'transport' | 'alertes' | 'g7'
 const SNAP_HEIGHT: Record<SnapSize, string> = {
   compact: '56px',
   mid:     '50vh',
-  full:    '92vh',
+  full:    'calc(100dvh - 120px)',  // s'arrête sous la SearchBar + QuickFilters (120px)
 }
 
 const LG: React.CSSProperties = {
@@ -38,9 +38,10 @@ interface DashboardData {
 }
 
 interface BottomSheetProps {
-  session:      Session | null
-  activeFilter: FilterId
-  map:          mapboxgl.Map | null
+  session:        Session | null
+  activeFilter:   FilterId
+  map:            mapboxgl.Map | null
+  onFilterChange: (id: FilterId) => void
 }
 
 // ── Carte catégorie cliquable ─────────────────────────────────────────────────
@@ -855,7 +856,7 @@ function ToutOverview({ data, onSelect }: {
 }
 
 // ── Composant principal ───────────────────────────────────────────────────────
-export function BottomSheet({ session: _session, activeFilter, map }: BottomSheetProps) {
+export function BottomSheet({ session: _session, activeFilter, map, onFilterChange }: BottomSheetProps) {
   const [snap,             setSnap]             = useState<SnapSize>('compact')
   const [detailView,       setDetailView]       = useState<DetailView>('overview')
   const [selectedCrossing, setSelectedCrossing] = useState<CrossingStatic | null>(null)
@@ -912,7 +913,8 @@ export function BottomSheet({ session: _session, activeFilter, map }: BottomShee
     lastTouchTime.current = now
 
     const delta   = e.touches[0].clientY - touchStartY.current
-    const clamped = Math.max(-60, Math.min(120, delta))
+    const maxUp   = touchStartSnap.current === 'full' ? 0 : -60
+    const clamped = Math.max(maxUp, Math.min(120, delta))
     if (containerRef.current) {
       containerRef.current.style.transform = `translateY(${clamped}px)`
     }
@@ -951,7 +953,16 @@ export function BottomSheet({ session: _session, activeFilter, map }: BottomShee
     setDetailView(v)
     setSelectedCrossing(null)
     setSnap('mid')
-  }, [])
+    const viewToFilter: Partial<Record<DetailView, FilterId>> = {
+      'douanes':   'borders',
+      'transport': 'transit',
+      'alertes':   'alerts',
+      'g7':        'g7',
+      'overview':  'all',
+    }
+    const filterId = viewToFilter[v]
+    if (filterId) onFilterChange(filterId)
+  }, [onFilterChange])
 
   const openCrossing = useCallback((c: CrossingStatic) => {
     setSelectedCrossing(c)
@@ -970,6 +981,17 @@ export function BottomSheet({ session: _session, activeFilter, map }: BottomShee
     return () => window.removeEventListener('tif:crossing-select', handler)
   }, [openCrossing])
 
+  // Sync detailView quand le filtre externe change (barre QuickFilters)
+  useEffect(() => {
+    const filterToView: Partial<Record<FilterId, DetailView>> = {
+      'transit': 'transport',
+      'borders': 'douanes',
+      'alerts':  'alertes',
+      'g7':      'g7',
+    }
+    setDetailView(filterToView[activeFilter] ?? 'overview')
+  }, [activeFilter])
+
   const locateCrossing = useCallback((c: CrossingStatic) => {
     if (!map) return
     map.flyTo({ center: [c.lng, c.lat], zoom: 15, duration: 900, essential: true })
@@ -983,8 +1005,9 @@ export function BottomSheet({ session: _session, activeFilter, map }: BottomShee
     } else {
       setDetailView('overview')
       setSnap('mid')
+      onFilterChange('all')
     }
-  }, [selectedCrossing])
+  }, [selectedCrossing, onFilterChange])
 
   // Compact headline
   const alertCount  = data?.alerts.length ?? 0
@@ -1070,29 +1093,12 @@ export function BottomSheet({ session: _session, activeFilter, map }: BottomShee
               onBack={goBack}
               onLocate={locateCrossing}
             />
-          ) : activeFilter === 'all' ? (
-            detailView === 'overview'   ? <ToutOverview data={data} onSelect={openDetail} />
-            : detailView === 'douanes'  ? <DouanesDetail onSelect={openCrossing} map={map} />
-            : detailView === 'transport'? <TransportDetail onExpand={expandToFull} />
-            : detailView === 'alertes'  ? <AlertesDetail map={map} />
+          ) : detailView === 'overview'   ? <ToutOverview data={data} onSelect={openDetail} />
+            : detailView === 'douanes'    ? <DouanesDetail onSelect={openCrossing} map={map} />
+            : detailView === 'transport'  ? <TransportDetail onExpand={expandToFull} />
+            : detailView === 'alertes'    ? <AlertesDetail map={map} />
             : <G7Detail />
-          ) : (
-            <div className="space-y-3">
-              {activeFilter === 'transit'  && <TransportDetail onExpand={expandToFull} />}
-              {activeFilter === 'borders'  && <DouanesDetail onSelect={openCrossing} map={map} />}
-              {activeFilter === 'alerts'   && <AlertesDetail map={map} />}
-              {activeFilter === 'g7'       && <G7Detail />}
-              {activeFilter === 'traffic'  && (
-                <div className="rounded-2xl p-6 text-center" style={{ background: 'var(--bg-card)' }}>
-                  <p className="text-2xl mb-2">🚦</p>
-                  <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Trafic routier</p>
-                  <p className="text-[12px] mt-1" style={{ color: 'var(--text-secondary)' }}>
-                    Mapbox Traffic · HERE Maps · Temps réel
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
+          }
         </div>
       )}
 

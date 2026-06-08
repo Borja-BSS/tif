@@ -69,7 +69,7 @@ export default function MapPage() {
       {isG7Active && <G7Mode map={mapRef} />}
 
       {/* Layer 7: BottomSheet */}
-      <BottomSheet session={session ?? null} activeFilter={activeFilter} map={mapRef} />
+      <BottomSheet session={session ?? null} activeFilter={activeFilter} map={mapRef} onFilterChange={setActiveFilter} />
 
       {/* Layer 8: SearchHandle — itinéraire (activé par tif:route-to) */}
       <SearchHandle map={mapRef} />
