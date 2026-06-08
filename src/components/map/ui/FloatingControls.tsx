@@ -27,6 +27,7 @@ export function FloatingControls({ map }: FloatingControlsProps) {
   const compassRef     = useRef<number>(0)
   const compassCleanup = useRef<(() => void) | null>(null)
   const flyDoneRef     = useRef(false)
+  const flyingRef      = useRef(false)
 
   // ── Compass setup ─────────────────────────────────────────────────────────
   const startCompass = useCallback(async () => {
@@ -52,7 +53,8 @@ export function FloatingControls({ map }: FloatingControlsProps) {
       }
       if (heading == null) return
       compassRef.current = heading
-      if (followRef.current && map) {
+      // Ne pas appeler rotateTo pendant flyTo — ça annule l'animation
+      if (followRef.current && map && !flyingRef.current) {
         map.rotateTo(heading, { duration: 200, essential: true })
       }
     }
@@ -86,6 +88,7 @@ export function FloatingControls({ map }: FloatingControlsProps) {
           if (!flyDoneRef.current) {
             // Première position → flyTo immersif (zoom + pitch + bearing)
             flyDoneRef.current = true
+            flyingRef.current  = true  // bloquer rotateTo pendant l'animation
             map.flyTo({
               center:    [lng, lat],
               pitch:     80,
@@ -94,6 +97,7 @@ export function FloatingControls({ map }: FloatingControlsProps) {
               duration:  1300,
               essential: true,
             })
+            map.once('moveend', () => { flyingRef.current = false })
           } else {
             map.easeTo({ center: [lng, lat], duration: 500, essential: true })
           }
