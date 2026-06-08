@@ -7,6 +7,7 @@ interface FilterState {
   alerts:    boolean
   transport: boolean
   territory: boolean
+  parking:   boolean
 }
 
 interface FilterPanelProps {

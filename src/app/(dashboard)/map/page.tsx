@@ -25,6 +25,7 @@ function toFilterState(active: FilterId): FilterState {
     alerts:    active === 'all' || active === 'alerts',
     transport: active === 'transit',
     territory: active === 'all' || active === 'borders' || active === 'g7',
+    parking:   active === 'parking',
   }
 }
 

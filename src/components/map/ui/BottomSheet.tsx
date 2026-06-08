@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { springs } from '@/lib/animations/springs'
+import { PARKINGS_PR, TOTAL_PR_CAPACITY } from '@/lib/parking/pr-data'
 import { TPG_LINES } from '@/lib/transport/tpg-line-stops'
 import { ALL_CROSSINGS, computeInstantStatus } from '@/lib/territory/border-crossings-client'
 import type { CrossingStatic } from '@/lib/territory/border-crossings-client'
@@ -12,7 +13,7 @@ import type { JourneyStatusResult } from '@/lib/my-journey/types'
 import type mapboxgl from 'mapbox-gl'
 
 type SnapSize   = 'compact' | 'mid' | 'full'
-type DetailView = 'overview' | 'douanes' | 'transport' | 'alertes' | 'g7' | 'meteo'
+type DetailView = 'overview' | 'douanes' | 'transport' | 'alertes' | 'g7' | 'meteo' | 'parking'
 
 const SNAP_HEIGHT: Record<SnapSize, string> = {
   compact: '56px',
@@ -785,6 +786,86 @@ function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
   )
 }
 
+// ── Parkings P+R ─────────────────────────────────────────────────────────────
+function ParkingDetail({ map }: { map: mapboxgl.Map | null }) {
+  const sorted = [...PARKINGS_PR].sort((a, b) => b.capacity - a.capacity)
+  const rtCount = PARKINGS_PR.filter(p => p.hasRT).length
+
+  const flyTo = (lng: number, lat: number) => {
+    if (!map) return
+    map.flyTo({ center: [lng, lat], zoom: 15, duration: 900, essential: true })
+  }
+
+  return (
+    <div className="space-y-2">
+      <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text-tertiary)' }}>
+        {PARKINGS_PR.length} parcs relais · {TOTAL_PR_CAPACITY.toLocaleString('fr-CH')} places · Grand Genève
+      </p>
+
+      {/* Avertissement temps réel */}
+      <div className="flex items-start gap-3 rounded-2xl px-4 py-3 mb-1"
+        style={{ background: 'rgba(10,132,255,0.08)', border: '0.5px solid rgba(10,132,255,0.22)' }}>
+        <span className="text-base flex-shrink-0">ℹ️</span>
+        <div>
+          <p className="text-[12px] font-semibold" style={{ color: 'rgba(10,132,255,0.9)' }}>Capacité totale affichée</p>
+          <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>
+            {rtCount} P+R disposent d'une page temps réel sur geneve-parking.ch
+          </p>
+        </div>
+      </div>
+
+      {sorted.map(p => (
+        <button key={p.id}
+          onClick={() => flyTo(p.lng, p.lat)}
+          className="w-full flex items-center gap-3 rounded-2xl px-4 py-3 text-left active:scale-[0.98] transition-transform"
+          style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+          <span className="text-xl flex-shrink-0">🅿️</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{p.name}</p>
+            {p.tpg && (
+              <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>🚌 {p.tpg}</p>
+            )}
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {p.hasRT && (
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
+                style={{ background: 'rgba(48,209,88,0.15)', color: '#30D158' }}>RT</span>
+            )}
+            <span className="text-[12px] font-bold tabular-nums"
+              style={{ color: p.capacity >= 500 ? '#30D158' : p.capacity >= 200 ? '#0A84FF' : 'var(--text-secondary)' }}>
+              {p.capacity > 0 ? `${p.capacity}` : '?'}
+            </span>
+            <span className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>pl.</span>
+            <svg width="6" height="10" viewBox="0 0 6 10" fill="none" stroke="var(--text-tertiary)" strokeWidth="1.5" strokeLinecap="round">
+              <path d="M1 1l4 4-4 4"/>
+            </svg>
+          </div>
+        </button>
+      ))}
+
+      <div className="mt-3 space-y-2">
+        <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>Source</p>
+        <a href="https://ge.ch/sitg" target="_blank" rel="noopener noreferrer"
+          className="flex items-center justify-between rounded-xl px-3 py-2.5 active:scale-[0.98] transition-transform"
+          style={{ background: 'var(--bg)', border: '1px solid var(--border)' }}>
+          <span className="text-[13px] font-medium" style={{ color: 'var(--brand)' }}>SITG · OTC Canton de Genève</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2.5" strokeLinecap="round" className="flex-shrink-0 ml-2">
+            <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+        </a>
+        <a href="https://www.geneve-parking.ch" target="_blank" rel="noopener noreferrer"
+          className="flex items-center justify-between rounded-xl px-3 py-2.5 active:scale-[0.98] transition-transform"
+          style={{ background: 'var(--bg)', border: '1px solid var(--border)' }}>
+          <span className="text-[13px] font-medium" style={{ color: 'var(--brand)' }}>Fondation des Parkings — temps réel</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2.5" strokeLinecap="round" className="flex-shrink-0 ml-2">
+            <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  )
+}
+
 // ── G7 ────────────────────────────────────────────────────────────────────────
 function G7Detail() {
   const now     = new Date()
@@ -962,6 +1043,9 @@ function ToutOverview({ data, onSelect }: {
         subtitle="TPG · CFF · Léman Express · CEVA"
         badge={hasIssue ? 'Perturbation' : undefined} badgeColor="#FF9F0A"
         onPress={() => onSelect('transport')} />
+      <CategoryCard icon="🅿️" title="Parkings P+R"
+        subtitle={`${PARKINGS_PR.length} parcs relais · ${TOTAL_PR_CAPACITY.toLocaleString('fr-CH')} places`}
+        onPress={() => onSelect('parking')} />
       <CategoryCard icon="⚠️" title="Alertes & Incidents"
         subtitle={alertCount > 0 ? `${alertCount} incident${alertCount > 1 ? 's' : ''} actif${alertCount > 1 ? 's' : ''}` : 'Aucun incident · Trafic normal'}
         badge={alertCount > 0 ? String(alertCount) : undefined} badgeColor="#FF453A"
@@ -1104,6 +1188,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
       'transport': 'transit',
       'alertes':   'alerts',
       'g7':        'g7',
+      'parking':   'parking',
       'overview':  'all',
     }
     const filterId = viewToFilter[v]
@@ -1232,6 +1317,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
             : detailView === 'transport'  ? <TransportDetail onExpand={expandToFull} />
             : detailView === 'alertes'    ? <AlertesDetail map={map} />
             : detailView === 'meteo'      ? <MeteoDetail />
+            : detailView === 'parking'    ? <ParkingDetail map={map} />
             : <G7Detail />
           }
         </div>

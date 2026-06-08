@@ -2,7 +2,7 @@
 
 import { springs } from '@/lib/animations/springs'
 
-export type FilterId = 'all' | 'transit' | 'traffic' | 'alerts' | 'borders' | 'g7' | 'journey'
+export type FilterId = 'all' | 'transit' | 'traffic' | 'alerts' | 'borders' | 'g7' | 'journey' | 'parking'
 
 interface FilterDef { id: FilterId; icon: string; label: string }
 
@@ -11,6 +11,7 @@ const FILTERS: FilterDef[] = [
   { id: 'traffic', icon: '🚦',  label: 'Trafic'     },
   { id: 'alerts',  icon: '⚠️',  label: 'Alertes'    },
   { id: 'transit', icon: '🚌',  label: 'Transport'  },
+  { id: 'parking', icon: '🅿️', label: 'Parking'    },
   { id: 'borders', icon: '🛂',  label: 'Frontières' },
   { id: 'g7',      icon: '🏛️', label: 'Info G7'    },
   { id: 'journey', icon: '⭐',  label: 'Mon Trajet' },

@@ -20,12 +20,14 @@ const BorderCrossingsLayer = dynamic(() => import('./BorderCrossingsLayer'), { s
 const RoadClosuresLayer    = dynamic(() => import('./RoadClosuresLayer'),    { ssr: false })
 const ConstructionLayer    = dynamic(() => import('./ConstructionLayer'),    { ssr: false })
 const HereIncidentsLayer   = dynamic(() => import('./HereIncidentsLayer'),   { ssr: false })
+const ParkingLayer         = dynamic(() => import('./ParkingLayer'),         { ssr: false })
 
 const DEFAULT_FILTERS: FilterState = {
   heatmap:   true,
   alerts:    true,
   transport: false,
   territory: true,
+  parking:   false,
 }
 
 const TRANSPORT_LEGEND = [
@@ -106,6 +108,7 @@ export default function MapView({ filters: externalFilters, activeFilter = 'all'
           <RealtimeLayer  map={map} visible={filters.heatmap} showTransport={filters.transport} />
           <AlertLayer     map={map} visible={filters.alerts} />
           <HereIncidentsLayer map={filters.alerts && !filters.transport ? map : null} />
+          <ParkingLayer       map={filters.parking ? map : null} />
 
           {/* Transport legend — compact Liquid Glass badge, bottom-right */}
           {filters.transport && (
