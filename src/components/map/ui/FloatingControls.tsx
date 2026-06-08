@@ -119,20 +119,27 @@ export function FloatingControls({ map }: FloatingControlsProps) {
   useEffect(() => {
     if (!map) return
 
-    const stopFollow = (e: { originalEvent?: Event }) => {
-      if (followRef.current && e.originalEvent) {
-        followRef.current = false
-        setFollowing(false)
-        map.easeTo({ pitch: 0, duration: 400 })
-      }
+    const doStop = () => {
+      if (!followRef.current) return
+      followRef.current = false
+      setFollowing(false)
+      map.easeTo({ pitch: 0, duration: 400 })
     }
 
-    map.on('dragstart', stopFollow as Parameters<typeof map.on>[1])
-    map.on('zoomstart', stopFollow as Parameters<typeof map.on>[1])
+    // dragstart = toujours user-initiated (pas de dragstart programmatique)
+    const onDrag = () => doStop()
+
+    // zoomstart se déclenche aussi sur flyTo — ne stopper que si originalEvent présent
+    const onZoom = (e: mapboxgl.MapboxEvent & { originalEvent?: Event }) => {
+      if (e.originalEvent) doStop()
+    }
+
+    map.on('dragstart', onDrag)
+    map.on('zoomstart', onZoom)
 
     return () => {
-      map.off('dragstart', stopFollow as Parameters<typeof map.on>[1])
-      map.off('zoomstart', stopFollow as Parameters<typeof map.on>[1])
+      map.off('dragstart', onDrag)
+      map.off('zoomstart', onZoom)
     }
   }, [map])
 
