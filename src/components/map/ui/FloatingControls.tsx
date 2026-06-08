@@ -77,6 +77,8 @@ export function FloatingControls({ map }: FloatingControlsProps) {
     if (watchIdRef.current === null) {
       // Premier clic — démarrer le suivi GPS
       flyDoneRef.current = false
+      followRef.current  = true   // avant watchPosition : garantit que le callback trouve followRef=true
+      setActive(true)
 
       const id = navigator.geolocation.watchPosition(
         pos => {
@@ -86,6 +88,7 @@ export function FloatingControls({ map }: FloatingControlsProps) {
             detail: { lat, lng, accuracy },
           }))
           if (!followRef.current) return
+          if (flyingRef.current) return  // ne pas annuler un flyTo en cours avec un easeTo
 
           if (!flyDoneRef.current) {
             // Première position → flyTo immersif (zoom + pitch + bearing)
@@ -108,7 +111,6 @@ export function FloatingControls({ map }: FloatingControlsProps) {
         { enableHighAccuracy: true, maximumAge: 2000 },
       )
       watchIdRef.current = id
-      setActive(true)
     } else {
       // Re-clic : flyTo immédiat sur la dernière position connue
       if (lastPosRef.current && map) {
@@ -143,7 +145,8 @@ export function FloatingControls({ map }: FloatingControlsProps) {
       if (!followRef.current) return
       followRef.current = false
       setFollowing(false)
-      map.easeTo({ pitch: 0, duration: 400 })
+      // jumpTo instant — pas d'animation qui entrerait en conflit avec le geste tactile
+      map.jumpTo({ pitch: 0 })
     }
 
     // dragstart = toujours user-initiated (pas de dragstart programmatique)
