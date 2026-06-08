@@ -26,6 +26,7 @@ export function FloatingControls({ map }: FloatingControlsProps) {
   const watchIdRef     = useRef<number | null>(null)
   const compassRef     = useRef<number>(0)
   const compassCleanup = useRef<(() => void) | null>(null)
+  const flyDoneRef     = useRef(false)
 
   // ── Compass setup ─────────────────────────────────────────────────────────
   const startCompass = useCallback(async () => {
@@ -70,15 +71,30 @@ export function FloatingControls({ map }: FloatingControlsProps) {
   const handleGPS = useCallback(() => {
     if (!navigator.geolocation || !map) return
 
-    // Start watchPosition if not already running
     if (watchIdRef.current === null) {
+      // Premier clic — démarrer le suivi GPS
+      flyDoneRef.current = false
+
       const id = navigator.geolocation.watchPosition(
         pos => {
           const { latitude: lat, longitude: lng, accuracy } = pos.coords
           window.dispatchEvent(new CustomEvent('tif:update-user-location', {
             detail: { lat, lng, accuracy },
           }))
-          if (followRef.current) {
+          if (!followRef.current) return
+
+          if (!flyDoneRef.current) {
+            // Première position → flyTo immersif (zoom + pitch + bearing)
+            flyDoneRef.current = true
+            map.flyTo({
+              center:    [lng, lat],
+              pitch:     80,
+              zoom:      16,
+              bearing:   compassRef.current,
+              duration:  1300,
+              essential: true,
+            })
+          } else {
             map.easeTo({ center: [lng, lat], duration: 500, essential: true })
           }
         },
@@ -87,32 +103,15 @@ export function FloatingControls({ map }: FloatingControlsProps) {
       )
       watchIdRef.current = id
       setActive(true)
+    } else {
+      // Re-clic après arrêt manuel → prochain callback watchPosition refait le flyTo
+      flyDoneRef.current = false
     }
 
-    // Start compass (async — may request iOS permission)
     void startCompass()
 
-    // Engage immersive view
     followRef.current = true
     setFollowing(true)
-
-    navigator.geolocation.getCurrentPosition(
-      pos => {
-        map.flyTo({
-          center:    [pos.coords.longitude, pos.coords.latitude],
-          pitch:     80,
-          zoom:      16,
-          bearing:   compassRef.current,
-          duration:  1300,
-          essential: true,
-        })
-        window.dispatchEvent(new CustomEvent('tif:update-user-location', {
-          detail: { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy },
-        }))
-      },
-      () => {},
-      { enableHighAccuracy: true, timeout: 6000 },
-    )
   }, [map, startCompass])
 
   // ── Stop following on user map interaction ────────────────────────────────
