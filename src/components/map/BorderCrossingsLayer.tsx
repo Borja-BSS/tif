@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react'
 import mapboxgl from 'mapbox-gl'
 import type { FeatureCollection } from 'geojson'
 import { buildInstantGeoJSON, computeInstantStatus, ALL_CROSSINGS } from '@/lib/territory/border-crossings-client'
+import { isPinching } from '@/lib/multiTouchGuard'
 import type { FilterId } from '@/components/map/ui/QuickFilters'
 
 interface BorderCrossingsLayerProps {
@@ -359,7 +360,6 @@ export default function BorderCrossingsLayer({ map, activeFilter = 'all' }: Bord
   const timerRef     = useRef<ReturnType<typeof setInterval> | null>(null)
   const prefetchRef  = useRef<FeatureCollection | null>(null)
   const prefetchDone = useRef(false)
-  const isPinching   = useRef(false)
 
   useEffect(() => {
     let cancelled = false
@@ -412,21 +412,13 @@ export default function BorderCrossingsLayer({ map, activeFilter = 'all' }: Bord
         window.dispatchEvent(new CustomEvent('tif:crossing-select', { detail: { id } }))
       }
 
-      // Pinch-zoom guard — track multi-touch to suppress accidental taps during pinch
-      const onTouchStart = (e: mapboxgl.MapTouchEvent) => {
-        if (e.originalEvent.touches.length > 1) isPinching.current = true
-      }
-      const onTouchEnd = (e: mapboxgl.MapTouchEvent) => {
-        if (e.originalEvent.touches.length === 0) isPinching.current = false
-      }
-      map.on('touchstart', onTouchStart)
-      map.on('touchend',   onTouchEnd)
-
-      // click (desktop) + touchend (mobile iOS/Android)
+      // click (desktop) + touchend (mobile) — guarded via shared isPinching()
       for (const layer of [LAYER_SHADOW, LAYER_DOT, LAYER_ICON]) {
-        map.on('click', layer, dispatchClick)
+        map.on('click',    layer, (e: mapboxgl.MapLayerMouseEvent) => {
+          if (!isPinching()) dispatchClick(e)
+        })
         map.on('touchend', layer, (e: mapboxgl.MapTouchEvent) => {
-          if (!isPinching.current) dispatchClick(e as unknown as mapboxgl.MapLayerMouseEvent)
+          if (!isPinching()) dispatchClick(e as unknown as mapboxgl.MapLayerMouseEvent)
         })
         map.on('mouseenter', layer, () => { map.getCanvas().style.cursor = 'pointer' })
         map.on('mouseleave', layer, () => { map.getCanvas().style.cursor = '' })

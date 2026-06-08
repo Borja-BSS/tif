@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react'
 import mapboxgl from 'mapbox-gl'
 import type { GeoJSONSource, MapLayerMouseEvent, MapLayerTouchEvent } from 'mapbox-gl'
 import { TPG_LINES } from '@/lib/transport/tpg-line-stops'
+import { isPinching } from '@/lib/multiTouchGuard'
 
 interface Props { map: mapboxgl.Map | null }
 
@@ -65,6 +66,7 @@ export default function TpgLineStopsLayer({ map }: Props) {
       })
 
       const dispatch = (e: MapLayerMouseEvent | MapLayerTouchEvent) => {
+        if (isPinching()) return
         if (!e.features?.length) return
         const p = e.features[0].properties as { name: string; line: string }
         window.dispatchEvent(new CustomEvent<StopSelectDetail>('tif:stop-select', {

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
+import { markPinchStart, markPinchEnd } from '@/lib/multiTouchGuard'
 
 // ── Grand Genève — bbox complète ───────────────────────────────────────────────
 // Lausanne (NE) · Sallanches (SE) · Annecy (S) · Champagnole (W) · Pontarlier (NW)
@@ -96,6 +97,13 @@ export default function MapGL({
       })
     })
 
+    // Pinch-zoom guard: track multi-touch at DOM level so all layer handlers share it
+    const canvas = map.getCanvasContainer()
+    const onTouchStart = (e: TouchEvent) => { if (e.touches.length >= 2) markPinchStart() }
+    const onTouchEnd   = (e: TouchEvent) => { if (e.touches.length  <  2) markPinchEnd()  }
+    canvas.addEventListener('touchstart', onTouchStart, { passive: true })
+    canvas.addEventListener('touchend',   onTouchEnd,   { passive: true })
+
     // Listen for location update events from RecenterButton or other components
     const handleLocationUpdate = (e: Event) => {
       const detail = (e as CustomEvent<{ lat: number; lng: number; accuracy: number } | null>).detail
@@ -120,6 +128,8 @@ export default function MapGL({
     mapRef.current = map
 
     return () => {
+      canvas.removeEventListener('touchstart', onTouchStart)
+      canvas.removeEventListener('touchend',   onTouchEnd)
       window.removeEventListener('tif:update-user-location', handleLocationUpdate)
       map.remove()
       mapRef.current = null

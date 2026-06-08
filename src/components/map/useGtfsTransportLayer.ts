@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react'
 import mapboxgl from 'mapbox-gl'
 import type { FeatureCollection } from 'geojson'
 import type { TransportLayerResponse, TpgDisruption, CffDisruption } from '@/lib/transport/types'
+import { isPinching } from '@/lib/multiTouchGuard'
 
 // Source IDs
 const SRC_TPG    = 'tif-tpg-vehicles'
@@ -174,6 +175,7 @@ function setupPopups(map: mapboxgl.Map, popup: mapboxgl.Popup) {
 
   for (const layerId of circleLayers) {
     map.on('click', layerId, (e) => {
+      if (isPinching()) return
       if (!e.features?.[0]) return
       const p = e.features[0].properties ?? {}
       const vehicleType = String(p.vehicleType ?? '')
@@ -194,6 +196,7 @@ function setupPopups(map: mapboxgl.Map, popup: mapboxgl.Popup) {
 
   for (const layerId of alertLayers) {
     map.on('click', layerId, (e) => {
+      if (isPinching()) return
       if (!e.features?.[0]) return
       const p = e.features[0].properties ?? {}
       const delay = Number(p.delayMinutes ?? 0)

@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react'
 import mapboxgl from 'mapbox-gl'
 import type { FeatureCollection, Feature, MultiLineString } from 'geojson'
 import type { TransitRouteProperties } from '@/lib/transit/network'
+import { isPinching } from '@/lib/multiTouchGuard'
 import type { TransportLayerResponse, TpgDisruption, CffDisruption } from '@/lib/transport/types'
 
 // ── Source / layer IDs ────────────────────────────────────────────────────────
@@ -204,6 +205,7 @@ function initLayers(map: mapboxgl.Map) {
 // ── Popup setup ───────────────────────────────────────────────────────────────
 function setupPopups(map: mapboxgl.Map, popup: mapboxgl.Popup) {
   map.on('click', LAYER_ALERTS, (e) => {
+    if (isPinching()) return
     if (!e.features?.[0]) return
     const p = e.features[0].properties ?? {}
     const delay = Number(p.delayMinutes ?? 0)

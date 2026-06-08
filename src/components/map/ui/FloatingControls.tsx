@@ -28,6 +28,7 @@ export function FloatingControls({ map }: FloatingControlsProps) {
   const compassCleanup = useRef<(() => void) | null>(null)
   const flyDoneRef     = useRef(false)
   const flyingRef      = useRef(false)
+  const lastPosRef     = useRef<[number, number] | null>(null)
 
   // ── Compass setup ─────────────────────────────────────────────────────────
   const startCompass = useCallback(async () => {
@@ -80,6 +81,7 @@ export function FloatingControls({ map }: FloatingControlsProps) {
       const id = navigator.geolocation.watchPosition(
         pos => {
           const { latitude: lat, longitude: lng, accuracy } = pos.coords
+          lastPosRef.current = [lng, lat]
           window.dispatchEvent(new CustomEvent('tif:update-user-location', {
             detail: { lat, lng, accuracy },
           }))
@@ -108,8 +110,23 @@ export function FloatingControls({ map }: FloatingControlsProps) {
       watchIdRef.current = id
       setActive(true)
     } else {
-      // Re-clic après arrêt manuel → prochain callback watchPosition refait le flyTo
-      flyDoneRef.current = false
+      // Re-clic : flyTo immédiat sur la dernière position connue
+      if (lastPosRef.current && map) {
+        const [lng, lat] = lastPosRef.current
+        flyingRef.current  = true
+        flyDoneRef.current = true  // éviter un double flyTo au prochain callback watchPosition
+        map.flyTo({
+          center:   [lng, lat],
+          pitch:    80,
+          zoom:     16,
+          bearing:  compassRef.current,
+          duration: 1300,
+          essential: true,
+        })
+        map.once('moveend', () => { flyingRef.current = false })
+      } else {
+        flyDoneRef.current = false  // pas de position en cache → attendre le prochain callback
+      }
     }
 
     void startCompass()
