@@ -241,7 +241,10 @@ async function fetchAndApply(m: mapboxgl.Map) {
     const serverData = await serverRes.json() as FeatureCollection
     const merged: FeatureCollection = {
       type: 'FeatureCollection',
-      features: [...serverData.features, ...overpassData.features],
+      features: [
+        ...serverData.features.filter(f => (f.properties as Record<string, unknown>)?.type !== 'weather'),
+        ...overpassData.features,
+      ],
     }
     applyData(m, merged)
   } catch { /* réseau — silencieux */ }

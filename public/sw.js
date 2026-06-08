@@ -1,5 +1,5 @@
 // Service Worker TIF — Web Push
-const CACHE_NAME = 'tif-v1'
+const CACHE_NAME = 'tif-v2'
 
 self.addEventListener('install', () => self.skipWaiting())
 self.addEventListener('activate', e => e.waitUntil(self.clients.claim()))
