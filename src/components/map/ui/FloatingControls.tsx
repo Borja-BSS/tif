@@ -145,8 +145,6 @@ export function FloatingControls({ map }: FloatingControlsProps) {
       if (!followRef.current) return
       followRef.current = false
       setFollowing(false)
-      // jumpTo instant — pas d'animation qui entrerait en conflit avec le geste tactile
-      map.jumpTo({ pitch: 0 })
     }
 
     // dragstart = toujours user-initiated (pas de dragstart programmatique)
