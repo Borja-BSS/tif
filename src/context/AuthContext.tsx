@@ -3,8 +3,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import {
   onAuthStateChanged,
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithPopup,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
@@ -55,12 +54,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [error,   setError]   = useState<string | null>(null)
 
   useEffect(() => {
-    // Capture redirect result (Google/Apple redirect flow)
-    getRedirectResult(firebaseAuth).catch(e => {
-      const err = e as { code?: string; message?: string }
-      setError(err.code || err.message || 'Erreur de connexion')
-    })
-
     const unsub = onAuthStateChanged(firebaseAuth, fbUser => {
       setUser(fbUser ? toAuthUser(fbUser) : null)
       setLoading(false)
@@ -70,16 +63,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInGoogle = async () => {
     setError(null)
-    const provider = new GoogleAuthProvider()
-    await signInWithRedirect(firebaseAuth, provider)
+    try {
+      const provider = new GoogleAuthProvider()
+      await signInWithPopup(firebaseAuth, provider)
+    } catch (e) {
+      const err = e as { code?: string; message?: string }
+      // Show full message so we can see the real underlying error
+      setError(err.message || err.code || 'Erreur de connexion Google')
+    }
   }
 
   const signInApple = async () => {
     setError(null)
-    const provider = new OAuthProvider('apple.com')
-    provider.addScope('email')
-    provider.addScope('name')
-    await signInWithRedirect(firebaseAuth, provider)
+    try {
+      const provider = new OAuthProvider('apple.com')
+      provider.addScope('email')
+      provider.addScope('name')
+      await signInWithPopup(firebaseAuth, provider)
+    } catch (e) {
+      const err = e as { code?: string; message?: string }
+      setError(err.message || err.code || 'Erreur de connexion Apple')
+    }
   }
 
   const signInEmail = async (email: string, password: string) => {
