@@ -40,11 +40,15 @@ export default function MapPage() {
   const session                         = sessionResult?.data ?? null
   const isG7Active                      = useG7Active()
   const router                          = useRouter()
-  const { isGuest } = useGuest()
+  const { isGuest, endGuest } = useGuest()
 
   useEffect(() => {
     if (sessionResult.status !== 'loading' && !session && !isGuest) router.replace('/login')
   }, [sessionResult.status, session, isGuest, router])
+
+  useEffect(() => {
+    if (session && isGuest) endGuest()
+  }, [session, isGuest, endGuest])
 
   const handleMapReady = useCallback((m: mapboxgl.Map) => {
     setMapRef(m)

@@ -78,6 +78,7 @@ function LoginPageInner() {
       if (!res.ok) throw new Error('Erreur serveur')
       const { expiresAt } = await res.json() as { expiresAt: number }
       startGuest(expiresAt)
+      setBusy(false)
       router.push('/map')
     } catch {
       setLocalError("Impossible d'accéder en mode invité")
