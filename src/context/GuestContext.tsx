@@ -67,6 +67,7 @@ export function GuestProvider({ children }: { children: ReactNode }) {
   }, [])
 
   function startGuest(expiresAt: number) {
+    if (expiresAt - Date.now() <= 0) return
     sessionStorage.setItem(STORAGE_KEY, String(expiresAt))
     startCountdown(expiresAt)
   }

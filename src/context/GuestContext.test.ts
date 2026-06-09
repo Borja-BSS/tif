@@ -65,6 +65,7 @@ describe('GuestContext — startGuest', () => {
     const { result } = renderHook(() => useGuest(), { wrapper })
     act(() => result.current.startGuest(inPast(5_000)))
     expect(result.current.isGuest).toBe(false)
+    expect(sessionStorageMock.setItem).not.toHaveBeenCalled()
   })
 })
 
