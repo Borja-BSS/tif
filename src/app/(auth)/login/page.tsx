@@ -6,10 +6,10 @@ import Link                    from 'next/link'
 import { useAuth }             from '@/context/AuthContext'
 
 export default function LoginPage() {
-  const { signInGoogle, signInEmail, user, loading, error, clearError } = useAuth()
+  const { signInGoogle, signInApple, signInEmail, user, loading, error, clearError } = useAuth()
   const router = useRouter()
 
-  const [tab,      setTab]      = useState<'google' | 'email'>('google')
+  const [tab,      setTab]      = useState<'google' | 'apple' | 'email'>('google')
   const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')
   const [busy,     setBusy]     = useState(false)
@@ -23,6 +23,13 @@ export default function LoginPage() {
     clearError()
     setBusy(true)
     await signInGoogle()
+    setBusy(false)
+  }
+
+  async function handleApple() {
+    clearError()
+    setBusy(true)
+    await signInApple()
     setBusy(false)
   }
 
@@ -65,7 +72,7 @@ export default function LoginPage() {
           className="flex rounded-xl p-1 mb-5"
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
         >
-          {(['google', 'email'] as const).map(t => (
+          {(['google', 'apple', 'email'] as const).map(t => (
             <button
               key={t}
               onClick={() => { setTab(t); clearError() }}
@@ -76,7 +83,7 @@ export default function LoginPage() {
                 boxShadow:  tab === t ? 'var(--shadow-sm)' : 'none',
               }}
             >
-              {t === 'google' ? 'Google' : 'Email'}
+              {t === 'google' ? 'Google' : t === 'apple' ? 'Apple' : 'Email'}
             </button>
           ))}
         </div>
@@ -102,6 +109,30 @@ export default function LoginPage() {
           >
             <GoogleIcon />
             {busy ? 'Connexion…' : 'Continuer avec Google'}
+          </button>
+        )}
+
+        {/* Apple */}
+        {tab === 'apple' && (
+          <button
+            onClick={handleApple}
+            disabled={busy}
+            className="w-full flex items-center justify-center gap-3 transition-all duration-200"
+            style={{
+              background:   '#000000',
+              color:        '#FFFFFF',
+              border:       '1px solid var(--border)',
+              borderRadius: '12px',
+              padding:      '14px 20px',
+              fontSize:     '15px',
+              fontWeight:   500,
+              cursor:       busy ? 'not-allowed' : 'pointer',
+              opacity:      busy ? 0.7 : 1,
+              boxShadow:    'var(--shadow-sm)',
+            }}
+          >
+            <AppleIcon />
+            {busy ? 'Connexion…' : 'Continuer avec Apple'}
           </button>
         )}
 
@@ -190,6 +221,14 @@ export default function LoginPage() {
 
       </div>
     </div>
+  )
+}
+
+function AppleIcon() {
+  return (
+    <svg width="17" height="20" viewBox="0 0 17 20" fill="currentColor">
+      <path d="M13.769 10.326c-.022-2.498 2.046-3.706 2.14-3.765-1.169-1.708-2.985-1.942-3.626-1.963-1.537-.157-3.017.91-3.797.91-.782 0-1.974-.891-3.253-.866-1.663.024-3.207.974-4.062 2.463-1.743 3.016-.444 7.477 1.245 9.923.83 1.197 1.81 2.536 3.094 2.488 1.247-.05 1.714-.8 3.22-.8 1.506 0 1.933.8 3.243.773 1.341-.022 2.187-1.21 3.006-2.416a12.27 12.27 0 0 0 1.37-2.784c-.029-.013-2.622-1.002-2.648-3.963ZM11.358 3.157C12.038 2.33 12.51 1.19 12.38 0c-.984.04-2.172.655-2.876 1.481-.632.73-1.184 1.9-1.036 3.018 1.098.084 2.217-.558 2.89-1.342Z"/>
+    </svg>
   )
 }
 
