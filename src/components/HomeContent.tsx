@@ -293,7 +293,7 @@ export function HomeContent() {
     const info = [
       { cls: 'tb-b', label: 'TIF', text: '9 sources officielles connectées, mise à jour toutes les 30 secondes' },
       { cls: 'tb-gold', label: 'G7', text: 'Sommet du Grand Genève du 11 au 18 juin 2026, restrictions en vigueur' },
-      { cls: 'tb-g', label: 'Frontières', text: '5 postes surveillés : Bardonnex, Moillesulaz, Ferney, Thônex, Vallard' },
+      { cls: 'tb-g', label: 'Frontières', text: '46 postes frontaliers sur la carte · Bardonnex, Ferney-Voltaire, Thônex-Vallard, Moillesulaz, Perly, Meyrin et 40 autres' },
       { cls: 'tb-b', label: 'CEVA', text: 'Léman Express 4 lignes surveillées : L1, L2, L3, L4' },
       { cls: 'tb-g', label: 'Info', text: '47 000 frontaliers par jour dans le Grand Genève concernés par les restrictions G7' },
       { cls: 'tb-b', label: 'Sources', text: 'OFROU, Police Cantonale GE, TPG, CFF, MétéoSuisse, SITG, BAZG' },

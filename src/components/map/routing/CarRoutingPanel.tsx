@@ -210,7 +210,7 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
         const enriched = enrichRoutes(data.routes as CarRoute[])
         setRoutes(enriched)
         setSelected(0)
-        setSheetState('half')
+        setSheetState('full')
         if (map && enriched[0].geometry.length > 0) {
           const coords = enriched[0].geometry as [number, number][]
           map.fitBounds(
@@ -475,8 +475,8 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
         {/* Content — hidden in peek state */}
         {!isPeek && (
           <div
-            className={sheetState === 'full' ? 'overflow-y-auto' : ''}
-            style={{ maxHeight: sheetState === 'full' ? 'calc(92vh - 90px)' : undefined }}
+            className="overflow-y-auto"
+            style={{ maxHeight: 'calc(88vh - 90px)' }}
           >
             {/* Origin + Destination fields */}
             <div className="px-3 pt-3 pb-2 space-y-2">

@@ -172,7 +172,7 @@ export function RouteDisplay({
       if (route.geometry.length < 2) return
       const sourceId = `route-alt-${slotIdx + 1}` as 'route-alt-1' | 'route-alt-2'
       const layerId  = sourceId
-      const style    = ROUTE_STYLE[routeType(route)]
+      const style    = ROUTE_STYLE['alternative']  // non-selected routes always dimmed
 
       map.addSource(sourceId, {
         type: 'geojson',
@@ -205,10 +205,11 @@ export function RouteDisplay({
       },
     })
 
-    // Determine main route type for coloring
-    const mainStyle = ROUTE_STYLE[routeType(mainRoute)]
-    const isBlue    = routeType(mainRoute) === 'fastest'
-    const glowColor = routeType(mainRoute) === 'safe' ? '#34C759' : '#0A84FF'
+    // Selected route always draws solid — blue unless it's the G7-safe (green) variant
+    const selectedType = routeType(mainRoute) === 'safe' ? 'safe' : 'fastest'
+    const mainStyle    = ROUTE_STYLE[selectedType]
+    const isBlue       = selectedType === 'fastest'
+    const glowColor    = selectedType === 'safe' ? '#34C759' : '#0A84FF'
 
     // Glow layer — blurred, wide
     map.addLayer({

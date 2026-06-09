@@ -80,7 +80,7 @@ export function TransportRoutingPanel({ map, onClose }: TransportRoutingPanelPro
       if (data.routes?.length > 0) {
         setRoutes(data.routes)
         setSelected(0)
-        setSheetState('half')
+        setSheetState('full')
       }
       else setError('Aucune connexion disponible.')
     } catch { setError('Calcul indisponible.') }
@@ -213,7 +213,7 @@ export function TransportRoutingPanel({ map, onClose }: TransportRoutingPanelPro
         style={{ borderColor: 'rgba(255,255,255,0.08)' }}
       >
         <div className="flex items-center gap-2">
-          <span className="text-base">🧭</span>
+          <span className="text-base">🚌</span>
           <span className="text-sm font-semibold text-white/85">Itinéraire transports</span>
         </div>
         {onClose && (
