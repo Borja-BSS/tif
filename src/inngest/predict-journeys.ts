@@ -1,9 +1,10 @@
 import ngeohash from 'ngeohash'
 import Ably     from 'ably'
 
-import { inngest } from '@/lib/inngest'
-import { db }      from '@/lib/db'
-import { redis }   from '@/lib/redis'
+import { inngest }          from '@/lib/inngest'
+import { db }               from '@/lib/db'
+import { redis }            from '@/lib/redis'
+import { sendJourneyAlert } from '@/lib/email'
 import {
   calculateImpactScore,
   minutesUntilDeparture,
@@ -113,11 +114,32 @@ export const predictJourneysJob = inngest.createFunction(
           ? (typeof prevRaw === 'string' ? JSON.parse(prevRaw) : prevRaw) as JourneyStatusResult
           : null
 
-        if (!prev || prev.status !== status) {
+        const statusChanged = !prev || prev.status !== status
+
+        if (statusChanged) {
           try {
             await getAbly().channels.get(`tif:journey:${journey.userId}`).publish('status', result)
           } catch {
             // circuit breaker: continuer si Ably indisponible
+          }
+
+          // Envoi email si adresse configurée et statut dégradé
+          const email = journey.emailNotify
+          if (email && (status === 'delayed' || status === 'disrupted')) {
+            try {
+              await sendJourneyAlert({
+                to:            email,
+                journeyName:   journey.name,
+                status,
+                headline:      result.headline,
+                detail:        result.detail ?? undefined,
+                delayMinutes,
+                departureHour: journey.departureHour,
+                departureMin:  journey.departureMinute,
+              })
+            } catch {
+              // Ne pas bloquer le job si l'email échoue
+            }
           }
         }
 

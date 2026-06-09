@@ -126,44 +126,50 @@ function buildPopup(p: Record<string, unknown>): string {
 }
 
 // ── Layers ────────────────────────────────────────────────────────────────────
+// Chaque couche est ajoutée individuellement pour éviter qu'une erreur partielle
+// n'empêche les couches suivantes d'être créées (pattern idempotent).
 function addLayers(m: mapboxgl.Map) {
-  // Ombre portée
-  m.addLayer({
-    id: LYR_SHADOW, type: 'circle', source: SRC,
-    paint: {
-      'circle-radius':    18,
-      'circle-color':     'rgba(0,0,0,0.35)',
-      'circle-blur':       0.6,
-      'circle-translate': [0, 3],
-    },
-  })
+  if (!m.getLayer(LYR_SHADOW)) {
+    m.addLayer({
+      id: LYR_SHADOW, type: 'circle', source: SRC,
+      paint: {
+        'circle-radius':    18,
+        'circle-color':     'rgba(0,0,0,0.35)',
+        'circle-blur':       0.6,
+        'circle-translate': [0, 3],
+      },
+    })
+  }
 
-  // Cercle bleu — toujours visible, aucune image requise
-  m.addLayer({
-    id: LYR_DOT, type: 'circle', source: SRC,
-    paint: {
-      'circle-radius':       16,
-      'circle-color':        '#0A84FF',
-      'circle-stroke-width': 3,
-      'circle-stroke-color': '#FFFFFF',
-      'circle-opacity':       0.92,
-    },
-  })
+  if (!m.getLayer(LYR_DOT)) {
+    m.addLayer({
+      id: LYR_DOT, type: 'circle', source: SRC,
+      paint: {
+        'circle-radius':       16,
+        'circle-color':        '#0A84FF',
+        'circle-stroke-width': 3,
+        'circle-stroke-color': '#FFFFFF',
+        'circle-opacity':       0.92,
+      },
+    })
+  }
 
-  // Icône "P" via canvas — s'affiche quand l'image est prête
-  m.addLayer({
-    id: LYR_ICON, type: 'symbol', source: SRC,
-    layout: {
-      'icon-image':            IMG_ID,
-      'icon-size':             1,
-      'icon-allow-overlap':    true,
-      'icon-ignore-placement': true,
-    },
-  })
+  if (!m.getLayer(LYR_ICON)) {
+    m.addLayer({
+      id: LYR_ICON, type: 'symbol', source: SRC,
+      layout: {
+        'icon-image':            IMG_ID,
+        'icon-size':             1,
+        'icon-allow-overlap':    true,
+        'icon-ignore-placement': true,
+      },
+    })
+  }
 
-  m.moveLayer(LYR_SHADOW)
-  m.moveLayer(LYR_DOT)
-  m.moveLayer(LYR_ICON)
+  // Assure l'ordre z correct : shadow en bas, dot au milieu, icon au-dessus
+  try { m.moveLayer(LYR_SHADOW) } catch { /* ignore */ }
+  try { m.moveLayer(LYR_DOT) }   catch { /* ignore */ }
+  try { m.moveLayer(LYR_ICON) }  catch { /* ignore */ }
 }
 
 function removeLayers(m: mapboxgl.Map) {
@@ -191,46 +197,52 @@ function setupEvents(m: mapboxgl.Map) {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function ParkingLayer({ map }: ParkingLayerProps) {
-  const addedRef = useRef(false)
+  const eventsRef = useRef(false)
 
   useEffect(() => {
     if (!map) {
-      addedRef.current = false
+      eventsRef.current = false
       return
     }
 
-    // cancelled est local à cette invocation de l'effet — empêche les "ghost runs"
-    // déclenchés par map.once('idle') après le cleanup (désactivation du filtre)
-    let cancelled = false
+    let mounted = true
+    let rafId: ReturnType<typeof requestAnimationFrame> | null = null
 
     const run = async () => {
-      if (addedRef.current || cancelled) return
-      addedRef.current = true
-
+      if (!mounted) return
       try {
         if (!map.getSource(SRC)) {
           map.addSource(SRC, { type: 'geojson', data: buildGeojson() })
         }
-        if (!map.getLayer(LYR_SHADOW)) {
-          addLayers(map)
+        // addLayers est idempotente — elle vérifie chaque couche individuellement
+        addLayers(map)
+        if (!eventsRef.current && map.getLayer(LYR_DOT)) {
           setupEvents(map)
+          eventsRef.current = true
         }
         await loadParkingImage(map)
       } catch {
-        addedRef.current = false
+        /* silent — la couche réessaie au prochain idle */
       }
     }
 
+    const onIdle = () => { void run() }
+
     if (map.isStyleLoaded()) {
-      void run()
+      // Diffère d'un frame pour laisser les autres changements de couches se stabiliser
+      rafId = requestAnimationFrame(() => { void run() })
     } else {
-      map.once('style.load', () => { if (!cancelled) void run() })
+      map.once('style.load', () => { if (mounted) void run() })
     }
-    map.once('idle', () => { if (!cancelled && !addedRef.current) void run() })
+
+    // Fallback persistant sur idle (auto-retry si la première tentative a échoué)
+    map.on('idle', onIdle)
 
     return () => {
-      cancelled = true
-      addedRef.current = false
+      mounted = false
+      if (rafId !== null) cancelAnimationFrame(rafId)
+      map.off('idle', onIdle)
+      eventsRef.current = false
       try { removeLayers(map) } catch { /* map détruite */ }
     }
   }, [map])

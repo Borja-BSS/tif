@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback, useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { PARKINGS_PR, TOTAL_PR_CAPACITY } from '@/lib/parking/pr-data'
 import { TPG_LINES } from '@/lib/transport/tpg-line-stops'
 import { ALL_CROSSINGS, computeInstantStatus } from '@/lib/territory/border-crossings-client'
@@ -10,8 +10,9 @@ import type { AuthUser } from '@/context/AuthContext'
 import type { FilterId } from './QuickFilters'
 import type { JourneyStatusResult } from '@/lib/my-journey/types'
 import type mapboxgl from 'mapbox-gl'
+import { JourneySetup } from '@/components/my-journey/JourneySetup'
 
-type DetailView = 'overview' | 'douanes' | 'transport' | 'alertes' | 'g7' | 'meteo' | 'parking'
+type DetailView = 'overview' | 'douanes' | 'transport' | 'alertes' | 'g7' | 'meteo' | 'parking' | 'journey'
 
 const COMPACT_H = 56
 const getFullH  = () => (typeof window !== 'undefined' ? window.innerHeight - 120 : 600)
@@ -865,6 +866,126 @@ function ParkingDetail({ map }: { map: mapboxgl.Map | null }) {
   )
 }
 
+// ── Mon Trajet ────────────────────────────────────────────────────────────────
+type SavedJourney = {
+  id: string; name: string
+  fromLabel: string; toLabel: string
+  dayOfWeek: number[]; departureHour: number; departureMinute: number
+  preferredMode: string; notifyMinutesBefore: number
+}
+
+const DAY_SHORT = ['D','L','M','M','J','V','S']
+
+function MonTrajetDetail() {
+  const qc = useQueryClient()
+  const [showSetup, setShowSetup] = useState(false)
+
+  const { data, isLoading } = useQuery<{ journeys: SavedJourney[] }>({
+    queryKey:        ['my-journeys'],
+    queryFn:         () => fetch('/api/v1/my-journey').then(r => r.json()),
+    staleTime:       15000,
+  })
+
+  const deleteMut = useMutation({
+    mutationFn: (id: string) => fetch(`/api/v1/my-journey/${id}`, { method: 'DELETE' }),
+    onSuccess:  () => qc.invalidateQueries({ queryKey: ['my-journeys'] }),
+  })
+
+  const journeys = data?.journeys ?? []
+
+  if (showSetup) {
+    return (
+      <JourneySetup
+        onComplete={() => { setShowSetup(false); qc.invalidateQueries({ queryKey: ['my-journeys'] }) }}
+        onClose={() => setShowSetup(false)}
+      />
+    )
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between mb-1">
+        <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>
+          Trajets favoris · alertes email
+        </p>
+        <button
+          onClick={() => setShowSetup(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-bold"
+          style={{ background: 'var(--brand)', color: '#fff' }}>
+          + Ajouter
+        </button>
+      </div>
+
+      {isLoading && (
+        <div className="flex items-center justify-center py-8">
+          <div className="w-5 h-5 rounded-full border-2 border-white/20 border-t-white/70 animate-spin" />
+        </div>
+      )}
+
+      {!isLoading && journeys.length === 0 && (
+        <div className="rounded-2xl px-4 py-8 text-center"
+          style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+          <p className="text-3xl mb-3">🛤️</p>
+          <p className="text-sm font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>
+            Aucun trajet favori
+          </p>
+          <p className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
+            Créez un trajet pour recevoir des alertes par email avant votre départ
+          </p>
+        </div>
+      )}
+
+      {journeys.map(j => {
+        const dep = `${String(j.departureHour).padStart(2,'0')}h${String(j.departureMinute).padStart(2,'0')}`
+        const days = j.dayOfWeek.sort((a,b)=>a-b).map(d => DAY_SHORT[d]).join(' · ')
+        const modeIcon = j.preferredMode === 'CAR' ? '🚗' : j.preferredMode === 'TRANSIT' ? '🚌' : '🔄'
+        return (
+          <div key={j.id} className="rounded-2xl overflow-hidden"
+            style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+            <div className="flex items-start gap-3 px-4 py-3">
+              <span className="text-xl flex-shrink-0 mt-0.5">{modeIcon}</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold truncate" style={{ color: 'var(--text-primary)' }}>{j.name}</p>
+                <p className="text-[11px] mt-0.5 truncate" style={{ color: 'var(--text-secondary)' }}>
+                  {j.fromLabel.split(',')[0]} → {j.toLabel.split(',')[0]}
+                </p>
+                <div className="flex items-center gap-2 mt-1.5">
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-md font-bold"
+                    style={{ background: 'rgba(10,132,255,0.12)', color: 'var(--brand)' }}>
+                    {dep}
+                  </span>
+                  <span className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>{days}</span>
+                  <span className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>
+                    · alerte {j.notifyMinutesBefore} min avant
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => { if (!deleteMut.isPending) deleteMut.mutate(j.id) }}
+                disabled={deleteMut.isPending}
+                className="flex-shrink-0 p-1.5 rounded-xl"
+                style={{ color: 'var(--text-tertiary)', opacity: deleteMut.isPending ? 0.5 : 1 }}
+                aria-label="Supprimer">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+                  <path d="M10 11v6M14 11v6M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        )
+      })}
+
+      <div className="flex items-start gap-2 rounded-xl px-3 py-2.5"
+        style={{ background: 'rgba(10,132,255,0.06)', border: '0.5px solid rgba(10,132,255,0.18)' }}>
+        <span className="text-[11px] leading-relaxed" style={{ color: 'rgba(10,132,255,0.8)' }}>
+          ℹ️ Vous recevrez un email automatique si votre trajet est perturbé avant votre départ habituel.
+        </span>
+      </div>
+    </div>
+  )
+}
+
 // ── G7 ────────────────────────────────────────────────────────────────────────
 function G7Detail() {
   const now     = new Date()
@@ -1049,6 +1170,9 @@ function ToutOverview({ data, onSelect }: {
         subtitle={alertCount > 0 ? `${alertCount} incident${alertCount > 1 ? 's' : ''} actif${alertCount > 1 ? 's' : ''}` : 'Aucun incident · Trafic normal'}
         badge={alertCount > 0 ? String(alertCount) : undefined} badgeColor="#FF453A"
         onPress={() => onSelect('alertes')} />
+      <CategoryCard icon="🛤️" title="Mon Trajet"
+        subtitle="Itinéraires favoris · Alertes email avant départ"
+        onPress={() => onSelect('journey')} />
       <CategoryCard icon="🏛️" title="G7 — 8 au 18 juin 2026"
         subtitle="Directives officielles · Restrictions d'accès"
         onPress={() => onSelect('g7')} />
@@ -1182,6 +1306,14 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
     }
   }, [animateTo])
 
+  // Sync activeFilter 'journey' → ouvre directement la vue Mon Trajet
+  useEffect(() => {
+    if (activeFilter === 'journey') {
+      setDetailView('journey')
+      animateTo(getFullH(), true)
+    }
+  }, [activeFilter, animateTo])
+
   // ── Ouverture programmatique ───────────────────────────────────────────────
   const expandToFull = useCallback(() => animateTo(getFullH(), true), [animateTo])
 
@@ -1195,6 +1327,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
       'alertes':   'alerts',
       'g7':        'g7',
       'parking':   'parking',
+      'journey':   'journey',
       'overview':  'all',
     }
     const filterId = viewToFilter[v]
@@ -1242,6 +1375,8 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
     : activeFilter === 'alerts'   ? 'Alertes & Incidents routes'
     : activeFilter === 'borders'  ? 'Douanes · 47 passages frontière'
     : activeFilter === 'g7'       ? 'G7 · 8–18 juin 2026 · Évian'
+    : activeFilter === 'journey'  ? 'Mon Trajet · Favoris · Alertes email'
+    : activeFilter === 'parking'  ? 'Parkings P+R · Grand Genève'
     : 'Grand Genève'
 
   const showBack = detailView !== 'overview' || selectedCrossing !== null
@@ -1315,6 +1450,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
             : detailView === 'alertes'    ? <AlertesDetail map={map} />
             : detailView === 'meteo'      ? <MeteoDetail />
             : detailView === 'parking'    ? <ParkingDetail map={map} />
+            : detailView === 'journey'    ? <MonTrajetDetail />
             : <G7Detail />
           }
         </div>

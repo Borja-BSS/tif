@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useAuth } from '@/context/AuthContext'
 import { springs } from '@/lib/animations/springs'
 import type { CreateJourneyInput } from '@/lib/my-journey/types'
 
@@ -20,6 +21,7 @@ interface JourneySetupProps {
 }
 
 export function JourneySetup({ onComplete, onClose }: JourneySetupProps) {
+  const { user }              = useAuth()
   const [step,    setStep]    = useState<Step>(1)
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState<string | null>(null)
@@ -31,6 +33,7 @@ export function JourneySetup({ onComplete, onClose }: JourneySetupProps) {
   const [minute,  setMinute]  = useState(45)
   const [mode,    setMode]    = useState<'car' | 'transit' | 'both'>('both')
   const [notify,  setNotify]  = useState(15)
+  const [email,   setEmail]   = useState(user?.email ?? '')
 
   const [query,   setQuery]   = useState('')
   const [results, setResults] = useState<SearchResult[]>([])
@@ -75,12 +78,13 @@ export function JourneySetup({ onComplete, onClose }: JourneySetupProps) {
     setLoading(true)
     setError(null)
     try {
-      const body: CreateJourneyInput = {
+      const body: CreateJourneyInput & { emailNotify?: string } = {
         name:                `${from.title.split(',')[0]} → ${to.title.split(',')[0]}`,
         fromLat: from.lat, fromLng: from.lng, fromLabel: from.title,
         toLat: to.lat,     toLng: to.lng,     toLabel: to.title,
         dayOfWeek: days, departureHour: hour, departureMinute: minute,
         preferredMode: mode, notifyMinutesBefore: notify,
+        ...(email.trim() ? { emailNotify: email.trim() } : {}),
       }
       const res = await fetch('/api/v1/my-journey', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -220,8 +224,8 @@ export function JourneySetup({ onComplete, onClose }: JourneySetupProps) {
           {step === 5 && (
             <div style={{ animation: `scaleIn ${springs.search} forwards` }}>
               <h2 className="text-xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>Alertez-moi avant mon départ</h2>
-              <p className="text-sm mb-5" style={{ color: 'var(--text-secondary)' }}>Si votre trajet est perturbé, TIF vous alerte à l'avance</p>
-              <div className="flex gap-2 mb-6">
+              <p className="text-sm mb-5" style={{ color: 'var(--text-secondary)' }}>Si votre trajet est perturbé, TIF vous alerte à l'avance par email</p>
+              <div className="flex gap-2 mb-5">
                 {[5, 10, 15, 20, 30].map(n => (
                   <button key={n} onClick={() => setNotify(n)}
                     className="flex-1 h-10 rounded-xl text-sm font-bold"
@@ -234,6 +238,17 @@ export function JourneySetup({ onComplete, onClose }: JourneySetupProps) {
                   </button>
                 ))}
               </div>
+              <p className="text-[11px] font-semibold mb-1.5" style={{ color: 'var(--text-tertiary)' }}>
+                Email pour les alertes (optionnel)
+              </p>
+              <input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="votre@email.com"
+                className="w-full px-4 py-3 rounded-2xl text-sm outline-none mb-5"
+                style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
+              />
               {error && <p className="text-sm mb-4" style={{ color: 'var(--red)' }}>{error}</p>}
               <button onClick={submit} disabled={loading}
                 className="w-full py-3.5 rounded-xl text-sm font-bold"

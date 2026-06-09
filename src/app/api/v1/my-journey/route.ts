@@ -21,6 +21,7 @@ const CreateSchema = z.object({
   flexMinutes:         z.number().int().min(0).max(60).optional().default(15),
   preferredMode:       z.enum(['car', 'transit', 'both']).optional().default('both'),
   notifyMinutesBefore: z.number().int().min(5).max(60).optional().default(15),
+  emailNotify:         z.string().email().max(200).optional(),
 })
 
 const MODE_DB: Record<string, 'CAR' | 'TRANSIT' | 'BOTH'> = {
@@ -35,7 +36,7 @@ export async function GET(_req: NextRequest) {
 
   const journeys = await db.userJourney.findMany({
     where: { userId: session.user.id, active: true },
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: 'asc' },
   })
 
   return Response.json({ journeys })
@@ -55,11 +56,8 @@ export async function POST(req: NextRequest) {
 
   const d = parsed.data
 
-  // Désactiver les anciens trajets (1 trajet actif max par user)
-  await db.userJourney.updateMany({
-    where: { userId: session.user.id, active: true },
-    data:  { active: false },
-  })
+  // Email pour notifications : priorité au champ fourni, puis email de session
+  const emailNotify = d.emailNotify ?? (session.user.email ?? undefined)
 
   const journey = await db.userJourney.create({
     data: {
@@ -77,12 +75,14 @@ export async function POST(req: NextRequest) {
       flexMinutes:         d.flexMinutes,
       preferredMode:       MODE_DB[d.preferredMode],
       notifyMinutesBefore: d.notifyMinutesBefore,
+      emailNotify,
     },
   })
 
   return Response.json({ journey }, { status: 201 })
 }
 
+// DELETE all journeys for the user (legacy — kept for compatibility)
 export async function DELETE(_req: NextRequest) {
   const session = await auth()
   if (!session?.user?.id) return Response.json({ error: 'Unauthorized' }, { status: 401 })
