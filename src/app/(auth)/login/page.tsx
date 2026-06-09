@@ -195,23 +195,9 @@ export default function LoginPage() {
         {error && (
           <p
             className="text-center text-[12px] mt-3"
-            style={{ color: '#FF453A' }}
+            style={{ color: '#FF453A', fontFamily: 'monospace', wordBreak: 'break-all' }}
           >
-            {error.includes('wrong-password') || error.includes('user-not-found')
-              ? 'Email ou mot de passe incorrect'
-              : error.includes('too-many-requests')
-              ? 'Trop de tentatives, réessayez plus tard'
-              : error.includes('popup-closed') || error.includes('popup-blocked-by-browser')
-              ? 'Fenêtre fermée, veuillez réessayer'
-              : error.includes('unauthorized-domain')
-              ? 'Domaine non autorisé — vérifiez Firebase Console → Authorized domains'
-              : error.includes('operation-not-allowed')
-              ? 'Fournisseur non activé dans Firebase Console'
-              : error.includes('popup-blocked')
-              ? 'Popup bloqué — autorisez les popups pour ce site'
-              : error.includes('network-request-failed')
-              ? 'Erreur réseau, réessayez'
-              : 'Erreur de connexion'}
+            {error}
           </p>
         )}
 

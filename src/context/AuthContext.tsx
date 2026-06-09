@@ -8,6 +8,7 @@ import {
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
   GoogleAuthProvider,
+  OAuthProvider,
   type User,
 } from 'firebase/auth'
 import { firebaseAuth } from '@/lib/firebase'
@@ -25,6 +26,7 @@ interface AuthContextValue {
   user:           AuthUser | null
   loading:        boolean
   signInGoogle:   () => Promise<void>
+  signInApple:    () => Promise<void>
   signInEmail:    (email: string, password: string) => Promise<void>
   registerEmail:  (email: string, password: string) => Promise<void>
   signOut:        () => Promise<void>
@@ -65,7 +67,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const provider = new GoogleAuthProvider()
       await signInWithPopup(firebaseAuth, provider)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erreur de connexion Google')
+      const code = (e as { code?: string }).code ?? ''
+      const msg  = e instanceof Error ? e.message : ''
+      setError(code || msg || 'Erreur de connexion Google')
+    }
+  }
+
+  const signInApple = async () => {
+    setError(null)
+    try {
+      const provider = new OAuthProvider('apple.com')
+      provider.addScope('email')
+      provider.addScope('name')
+      await signInWithPopup(firebaseAuth, provider)
+    } catch (e) {
+      const code = (e as { code?: string }).code ?? ''
+      const msg  = e instanceof Error ? e.message : ''
+      setError(code || msg || 'Erreur de connexion Apple')
     }
   }
 
@@ -94,7 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider value={{
       user, loading,
-      signInGoogle, signInEmail, registerEmail,
+      signInGoogle, signInApple, signInEmail, registerEmail,
       signOut,
       error, clearError: () => setError(null),
     }}>
