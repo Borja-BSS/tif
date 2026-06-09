@@ -21,7 +21,7 @@ const MapView = dynamicImport(() => import('@/components/map/MapView'), { ssr: f
 
 function toFilterState(active: FilterId): FilterState {
   return {
-    heatmap:   active === 'all' || active === 'traffic',
+    heatmap:   active === 'all' || active === 'traffic' || active === 'parking',
     alerts:    active === 'all' || active === 'alerts',
     transport: active === 'transit',
     territory: active === 'all' || active === 'borders' || active === 'g7',

@@ -291,17 +291,32 @@ export function useTransitNetworkLayer(map: mapboxgl.Map | null) {
       intervalRef.current = setInterval(refreshDisruptions, 120_000)
     }
 
-    if (map.isStyleLoaded()) {
-      void init()
-    } else {
-      map.once('style.load', () => void init())
+    let cancelled = false
+
+    const wrappedInit = async () => {
+      if (cancelled || map.getLayer(LAYER_NETWORK_BUS)) return
+      await init()
     }
 
+    const onStyleLoad = () => void wrappedInit()
+    const onIdle      = () => { if (!map.getLayer(LAYER_NETWORK_BUS)) void wrappedInit() }
+
+    if (map.isStyleLoaded()) {
+      void wrappedInit()
+    } else {
+      map.once('style.load', onStyleLoad)
+    }
+    // Fallback idle — style.load peut avoir déjà tiré si isStyleLoaded() était faux
+    map.once('idle', onIdle)
+
     return () => {
+      cancelled = true
+      map.off('style.load', onStyleLoad)
+      map.off('idle',       onIdle)
       if (intervalRef.current) clearInterval(intervalRef.current)
       popupRef.current?.remove()
-      for (const id of ALL_LAYERS)   { if (map.getLayer(id))   map.removeLayer(id) }
-      for (const src of ALL_SOURCES) { if (map.getSource(src)) map.removeSource(src) }
+      for (const id of ALL_LAYERS)   { try { if (map.getLayer(id))   map.removeLayer(id) } catch {} }
+      for (const src of ALL_SOURCES) { try { if (map.getSource(src)) map.removeSource(src) } catch {} }
     }
   }, [map])
 }
