@@ -31,6 +31,14 @@ export const metadata: Metadata = {
     siteName:    'TIF',
     locale:      'fr_CH',
     type:        'website',
+    images: [
+      {
+        url:    '/borja-og.png',
+        width:  900,
+        height: 639,
+        alt:    'Börja Swiss Solutions — TIF',
+      },
+    ],
   },
   robots: { index: true, follow: true },
 }
