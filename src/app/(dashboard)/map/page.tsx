@@ -17,6 +17,9 @@ import { SmartAlertManager }      from '@/components/map/ui/SmartAlert'
 import { G7Mode, useG7Active }    from '@/components/map/modes/G7Mode'
 import type { FilterId }          from '@/components/map/ui/QuickFilters'
 import type { FilterState }       from '@/components/map/FilterPanel'
+import { useGuest }           from '@/context/GuestContext'
+import { GuestBanner }        from '@/components/guest/GuestBanner'
+import { GuestExpiredModal }  from '@/components/guest/GuestExpiredModal'
 
 const MapView = dynamicImport(() => import('@/components/map/MapView'), { ssr: false })
 
@@ -37,10 +40,11 @@ export default function MapPage() {
   const session                         = sessionResult?.data ?? null
   const isG7Active                      = useG7Active()
   const router                          = useRouter()
+  const { isGuest } = useGuest()
 
   useEffect(() => {
-    if (sessionResult.status !== 'loading' && !session) router.replace('/login')
-  }, [sessionResult.status, session, router])
+    if (sessionResult.status !== 'loading' && !session && !isGuest) router.replace('/login')
+  }, [sessionResult.status, session, isGuest, router])
 
   const handleMapReady = useCallback((m: mapboxgl.Map) => {
     setMapRef(m)
@@ -105,6 +109,10 @@ export default function MapPage() {
 
       {/* Layer 9: TPG line stop pins (activé par tif:line-select) */}
       <TpgLineStopsLayer map={mapRef} />
+
+      {/* Guest mode — countdown banner + expiry modal */}
+      <GuestBanner />
+      <GuestExpiredModal />
 
     </div>
   )
