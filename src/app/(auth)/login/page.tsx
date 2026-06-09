@@ -1,15 +1,37 @@
 'use client'
 
-import { signIn } from 'next-auth/react'
-import { useState } from 'react'
-import Link from 'next/link'
+import { useState, useEffect } from 'react'
+import { useRouter }           from 'next/navigation'
+import Link                    from 'next/link'
+import { useAuth }             from '@/context/AuthContext'
 
 export default function LoginPage() {
-  const [loading, setLoading] = useState(false)
+  const { signInGoogle, signInEmail, user, loading, error, clearError } = useAuth()
+  const router = useRouter()
+
+  const [tab,      setTab]      = useState<'google' | 'email'>('google')
+  const [email,    setEmail]    = useState('')
+  const [password, setPassword] = useState('')
+  const [busy,     setBusy]     = useState(false)
+
+  // Redirige vers la carte dès que l'utilisateur est connecté
+  useEffect(() => {
+    if (!loading && user) router.replace('/map')
+  }, [user, loading, router])
 
   async function handleGoogle() {
-    setLoading(true)
-    await signIn('google', { callbackUrl: '/map' })
+    clearError()
+    setBusy(true)
+    await signInGoogle()
+    setBusy(false)
+  }
+
+  async function handleEmail(e: React.FormEvent) {
+    e.preventDefault()
+    clearError()
+    setBusy(true)
+    await signInEmail(email, password)
+    setBusy(false)
   }
 
   return (
@@ -19,7 +41,7 @@ export default function LoginPage() {
     >
       <div className="w-full max-w-sm">
 
-        {/* Logo */}
+        {/* Logo — identique à l'original */}
         <div className="text-center mb-8">
           <Link
             href="/"
@@ -28,10 +50,7 @@ export default function LoginPage() {
           >
             Börja
           </Link>
-          <div
-            className="w-8 h-px mx-auto my-4"
-            style={{ background: 'var(--border)' }}
-          />
+          <div className="w-8 h-px mx-auto my-4" style={{ background: 'var(--border)' }} />
           <h1 className="text-[28px] font-bold tracking-[-0.015em]" style={{ color: 'var(--text-primary)' }}>
             Accès Grand{' '}
             <em style={{ fontStyle: 'italic', color: 'var(--italic)', fontWeight: 700 }}>Genève.</em>
@@ -41,40 +60,130 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Google OAuth */}
-        <button
-          onClick={handleGoogle}
-          disabled={loading}
-          className="w-full flex items-center justify-center gap-3 transition-all duration-200"
-          style={{
-            background: '#FFFFFF',
-            color: '#1F2937',
-            border: '1px solid var(--border)',
-            borderRadius: '12px',
-            padding: '14px 20px',
-            fontSize: '15px',
-            fontWeight: 500,
-            cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.7 : 1,
-            boxShadow: 'var(--shadow-sm)',
-          }}
+        {/* Tabs */}
+        <div
+          className="flex rounded-xl p-1 mb-5"
+          style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
         >
-          <GoogleIcon />
-          {loading ? 'Connexion…' : 'Continuer avec Google'}
-        </button>
+          {(['google', 'email'] as const).map(t => (
+            <button
+              key={t}
+              onClick={() => { setTab(t); clearError() }}
+              className="flex-1 py-2 text-[13px] font-medium rounded-lg transition-all"
+              style={{
+                background: tab === t ? 'var(--bg)' : 'transparent',
+                color:      tab === t ? 'var(--text-primary)' : 'var(--text-secondary)',
+                boxShadow:  tab === t ? 'var(--shadow-sm)' : 'none',
+              }}
+            >
+              {t === 'google' ? 'Google' : 'Email'}
+            </button>
+          ))}
+        </div>
 
-        {/* Disclaimer */}
+        {/* Google */}
+        {tab === 'google' && (
+          <button
+            onClick={handleGoogle}
+            disabled={busy}
+            className="w-full flex items-center justify-center gap-3 transition-all duration-200"
+            style={{
+              background:   '#FFFFFF',
+              color:        '#1F2937',
+              border:       '1px solid var(--border)',
+              borderRadius: '12px',
+              padding:      '14px 20px',
+              fontSize:     '15px',
+              fontWeight:   500,
+              cursor:       busy ? 'not-allowed' : 'pointer',
+              opacity:      busy ? 0.7 : 1,
+              boxShadow:    'var(--shadow-sm)',
+            }}
+          >
+            <GoogleIcon />
+            {busy ? 'Connexion…' : 'Continuer avec Google'}
+          </button>
+        )}
+
+        {/* Email / Password */}
+        {tab === 'email' && (
+          <form onSubmit={handleEmail} className="flex flex-col gap-3">
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+              style={{
+                background:   'var(--bg-card)',
+                color:        'var(--text-primary)',
+                border:       '1px solid var(--border)',
+                borderRadius: '12px',
+                padding:      '14px 16px',
+                fontSize:     '15px',
+                outline:      'none',
+              }}
+            />
+            <input
+              type="password"
+              placeholder="Mot de passe"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+              style={{
+                background:   'var(--bg-card)',
+                color:        'var(--text-primary)',
+                border:       '1px solid var(--border)',
+                borderRadius: '12px',
+                padding:      '14px 16px',
+                fontSize:     '15px',
+                outline:      'none',
+              }}
+            />
+            <button
+              type="submit"
+              disabled={busy}
+              style={{
+                background:   'var(--brand)',
+                color:        '#fff',
+                border:       'none',
+                borderRadius: '12px',
+                padding:      '14px 20px',
+                fontSize:     '15px',
+                fontWeight:   600,
+                cursor:       busy ? 'not-allowed' : 'pointer',
+                opacity:      busy ? 0.7 : 1,
+              }}
+            >
+              {busy ? 'Connexion…' : 'Se connecter'}
+            </button>
+          </form>
+        )}
+
+        {/* Erreur Firebase */}
+        {error && (
+          <p
+            className="text-center text-[12px] mt-3"
+            style={{ color: '#FF453A' }}
+          >
+            {error.includes('wrong-password') || error.includes('user-not-found')
+              ? 'Email ou mot de passe incorrect'
+              : error.includes('too-many-requests')
+              ? 'Trop de tentatives, réessayez plus tard'
+              : error.includes('popup-closed')
+              ? 'Fenêtre fermée, veuillez réessayer'
+              : 'Erreur de connexion'}
+          </p>
+        )}
+
+        {/* Disclaimer — identique à l'original */}
         <p className="text-center text-[12px] mt-6" style={{ color: 'var(--text-tertiary)' }}>
           Accès restreint — personnel autorisé uniquement
         </p>
 
-        {/* Back */}
+        {/* Back — identique à l'original */}
         <div className="text-center mt-8">
-          <Link
-            href="/"
-            className="text-[13px] transition-colors duration-150"
-            style={{ color: 'var(--text-tertiary)' }}
-          >
+          <Link href="/" className="text-[13px] transition-colors duration-150" style={{ color: 'var(--text-tertiary)' }}>
             ← Retour à l'accueil
           </Link>
         </div>

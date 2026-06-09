@@ -3,7 +3,7 @@
 export const dynamic = 'force-dynamic'
 
 import { useState, useCallback, useMemo } from 'react'
-import { useSession }             from 'next-auth/react'
+import { useSession }             from '@/context/AuthContext'
 import dynamicImport              from 'next/dynamic'
 import mapboxgl                   from 'mapbox-gl'
 import { SearchBar }              from '@/components/map/ui/SearchBar'

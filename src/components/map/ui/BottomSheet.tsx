@@ -6,7 +6,7 @@ import { PARKINGS_PR, TOTAL_PR_CAPACITY } from '@/lib/parking/pr-data'
 import { TPG_LINES } from '@/lib/transport/tpg-line-stops'
 import { ALL_CROSSINGS, computeInstantStatus } from '@/lib/territory/border-crossings-client'
 import type { CrossingStatic } from '@/lib/territory/border-crossings-client'
-import type { Session } from 'next-auth'
+import type { AuthUser } from '@/context/AuthContext'
 import type { FilterId } from './QuickFilters'
 import type { JourneyStatusResult } from '@/lib/my-journey/types'
 import type mapboxgl from 'mapbox-gl'
@@ -38,7 +38,7 @@ interface DashboardData {
 }
 
 interface BottomSheetProps {
-  session:        Session | null
+  session:        { user: AuthUser } | null
   activeFilter:   FilterId
   map:            mapboxgl.Map | null
   onFilterChange: (id: FilterId) => void
