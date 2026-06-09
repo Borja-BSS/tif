@@ -5,7 +5,12 @@ import mapboxgl from 'mapbox-gl'
 import { PARKINGS_PR } from '@/lib/parking/pr-data'
 import type { FeatureCollection, Point } from 'geojson'
 
-interface ParkingLayerProps { map: mapboxgl.Map | null }
+import type { FilterId } from '@/components/map/ui/QuickFilters'
+
+interface ParkingLayerProps {
+  map:          mapboxgl.Map | null
+  activeFilter?: FilterId
+}
 
 const SRC        = 'tif-parking-pr'
 const LYR_SHADOW = 'tif-pr-shadow'
@@ -190,14 +195,21 @@ function setupEvents(m: mapboxgl.Map) {
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
-export default function ParkingLayer({ map }: ParkingLayerProps) {
+export default function ParkingLayer({ map, activeFilter = 'all' }: ParkingLayerProps) {
   const addedRef = useRef(false)
 
+  // Visibility toggle — show only when parking filter is active
   useEffect(() => {
-    if (!map) {
-      addedRef.current = false
-      return
+    if (!map) return
+    const vis = activeFilter === 'parking' ? 'visible' : 'none'
+    for (const id of [LYR_SHADOW, LYR_DOT, LYR_ICON]) {
+      if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', vis)
     }
+  }, [map, activeFilter])
+
+  // Initial layer setup — run once when map is ready
+  useEffect(() => {
+    if (!map) return
 
     const run = async () => {
       if (addedRef.current) return
@@ -208,6 +220,11 @@ export default function ParkingLayer({ map }: ParkingLayerProps) {
       addLayers(map)
       setupEvents(map)
 
+      // Cacher par défaut — la visibilité est gérée par le 2ème useEffect
+      for (const id of [LYR_SHADOW, LYR_DOT, LYR_ICON]) {
+        if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none')
+      }
+
       // 2. Image canvas en arrière-plan — les cercles sont déjà visibles
       await loadParkingImage(map)
     }
@@ -216,8 +233,9 @@ export default function ParkingLayer({ map }: ParkingLayerProps) {
       void run()
     } else {
       map.once('style.load', () => void run())
-      map.once('idle', () => { if (!addedRef.current) void run() })
     }
+    // Fallback : si style.load a déjà tiré et isStyleLoaded() est false
+    map.once('idle', () => { if (!addedRef.current) void run() })
 
     return () => {
       addedRef.current = false

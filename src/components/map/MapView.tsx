@@ -108,7 +108,7 @@ export default function MapView({ filters: externalFilters, activeFilter = 'all'
           <RealtimeLayer  map={map} visible={filters.heatmap} showTransport={filters.transport} />
           <AlertLayer     map={map} visible={filters.alerts} />
           <HereIncidentsLayer map={filters.alerts && !filters.transport ? map : null} />
-          <ParkingLayer       map={filters.parking ? map : null} />
+          <ParkingLayer       map={map} activeFilter={activeFilter} />
 
           {/* Transport legend — compact Liquid Glass badge, bottom-right */}
           {filters.transport && (
