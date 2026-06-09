@@ -2,7 +2,6 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { springs } from '@/lib/animations/springs'
 import { PARKINGS_PR, TOTAL_PR_CAPACITY } from '@/lib/parking/pr-data'
 import { TPG_LINES } from '@/lib/transport/tpg-line-stops'
 import { ALL_CROSSINGS, computeInstantStatus } from '@/lib/territory/border-crossings-client'
@@ -12,14 +11,14 @@ import type { FilterId } from './QuickFilters'
 import type { JourneyStatusResult } from '@/lib/my-journey/types'
 import type mapboxgl from 'mapbox-gl'
 
-type SnapSize   = 'compact' | 'mid' | 'full'
 type DetailView = 'overview' | 'douanes' | 'transport' | 'alertes' | 'g7' | 'meteo' | 'parking'
 
-const SNAP_HEIGHT: Record<SnapSize, string> = {
-  compact: '56px',
-  mid:     '50vh',
-  full:    'calc(100dvh - 120px)',  // s'arrête sous la SearchBar + QuickFilters (120px)
-}
+const COMPACT_H = 56
+const getFullH  = () => (typeof window !== 'undefined' ? window.innerHeight - 120 : 600)
+// Spring iOS-like pour les snaps automatiques
+const SPRING    = 'height 0.42s cubic-bezier(0.34, 1.56, 0.64, 1)'
+// Transition douce pour les repositionnements libres
+const EASE      = 'height 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
 
 const LG: React.CSSProperties = {
   background:           'rgba(255,255,255,0.04)',
@@ -1087,18 +1086,17 @@ function ToutOverview({ data, onSelect }: {
 
 // ── Composant principal ───────────────────────────────────────────────────────
 export function BottomSheet({ session: _session, activeFilter, map, onFilterChange }: BottomSheetProps) {
-  const [snap,             setSnap]             = useState<SnapSize>('compact')
+  const [isOpen,           setIsOpen]           = useState(false)
   const [detailView,       setDetailView]       = useState<DetailView>('overview')
   const [selectedCrossing, setSelectedCrossing] = useState<CrossingStatic | null>(null)
-  const [isDragging,       setIsDragging]       = useState(false)
 
-  const expandToFull = useCallback(() => setSnap('full'), [])
-
+  // ── Refs drag ──────────────────────────────────────────────────────────────
+  const heightRef      = useRef(COMPACT_H)   // hauteur courante en px
+  const startHeightRef = useRef(COMPACT_H)   // hauteur au moment du touchstart
   const touchStartY    = useRef(0)
-  const touchStartSnap = useRef<SnapSize>('compact')
   const lastTouchY     = useRef(0)
   const lastTouchTime  = useRef(0)
-  const velocity       = useRef(0)
+  const velocity       = useRef(0)           // px/ms, + = vers le haut
   const containerRef   = useRef<HTMLDivElement>(null)
   const headerRef      = useRef<HTMLDivElement>(null)
   const contentRef     = useRef<HTMLDivElement>(null)
@@ -1112,9 +1110,26 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
     placeholderData: { alerts: [], network: { tpg: 'normal', cff: 'normal', ceva: 'normal' }, globalStatus: 'calm', activeZones: 0 },
   })
 
-  const snapOrder: SnapSize[] = ['compact', 'mid', 'full']
+  // ── animateTo : anime le sheet vers une hauteur cible ─────────────────────
+  const animateTo = useCallback((targetH: number, useSpring = true) => {
+    heightRef.current = targetH
+    const open = targetH > COMPACT_H + 20
+    setIsOpen(open)
+    if (containerRef.current) {
+      containerRef.current.style.transition = useSpring ? SPRING : EASE
+      containerRef.current.style.height = `${targetH}px`
+    }
+  }, [])
 
-  // Attache un listener natif non-passif sur le HEADER uniquement (pas sur le contenu scrollable)
+  // Init hauteur DOM au montage
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.style.transition = 'none'
+      containerRef.current.style.height = `${COMPACT_H}px`
+    }
+  }, [])
+
+  // Listener non-passif sur le header pour bloquer le scroll natif pendant le drag
   useEffect(() => {
     const el = headerRef.current
     if (!el) return
@@ -1123,47 +1138,62 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
     return () => el.removeEventListener('touchmove', prevent)
   }, [])
 
+  // ── Handlers drag header ───────────────────────────────────────────────────
   const onTouchStart = useCallback((e: React.TouchEvent) => {
-    if (e.touches.length > 1) return  // ignore multi-touch (pinch-zoom)
+    if (e.touches.length > 1) return
     touchStartY.current    = e.touches[0].clientY
-    touchStartSnap.current = snap
+    startHeightRef.current = heightRef.current
     lastTouchY.current     = e.touches[0].clientY
     lastTouchTime.current  = Date.now()
     velocity.current       = 0
-    setIsDragging(true)
-    if (containerRef.current) containerRef.current.style.transform = ''
-  }, [snap])
+    if (containerRef.current) containerRef.current.style.transition = 'none'
+  }, [])
 
   const onTouchMove = useCallback((e: React.TouchEvent) => {
-    const now   = Date.now()
-    const dy    = lastTouchY.current - e.touches[0].clientY
-    const dt    = now - lastTouchTime.current
+    const now = Date.now()
+    const dy  = lastTouchY.current - e.touches[0].clientY  // + = doigt monte
+    const dt  = now - lastTouchTime.current
     velocity.current      = dt > 0 ? dy / dt : 0
     lastTouchY.current    = e.touches[0].clientY
     lastTouchTime.current = now
 
-    const delta   = e.touches[0].clientY - touchStartY.current
-    const maxUp   = touchStartSnap.current === 'full' ? 0 : -60
-    const clamped = Math.max(maxUp, Math.min(120, delta))
-    if (containerRef.current) {
-      containerRef.current.style.transform = `translateY(${clamped}px)`
-    }
+    // Le sheet suit le doigt pixel par pixel
+    const delta = touchStartY.current - e.touches[0].clientY  // + = doigt monte
+    const newH  = Math.max(COMPACT_H, Math.min(getFullH(), startHeightRef.current + delta))
+    heightRef.current = newH
+    if (containerRef.current) containerRef.current.style.height = `${newH}px`
   }, [])
 
-  const onTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (containerRef.current) containerRef.current.style.transform = ''
-    setIsDragging(false)
-    const delta = touchStartY.current - e.changedTouches[0].clientY
+  const onTouchEnd = useCallback(() => {
     const v     = velocity.current
-    if (v > 1.5)  { setSnap('full');    return }
-    if (v < -1.5) { setSnap('compact'); return }
-    const idx = snapOrder.indexOf(touchStartSnap.current)
-    if (delta > 60 && idx < 2)  setSnap(snapOrder[idx + 1])
-    else if (delta < -60 && idx > 0) setSnap(snapOrder[idx - 1])
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [snapOrder])
+    const fullH = getFullH()
+    const VSNAP = 0.4  // px/ms — seuil pour considérer un swipe intentionnel
 
-  // Swipe-down-to-dismiss depuis le contenu (quand scrollTop === 0)
+    if (v > VSNAP) {
+      // Swipe rapide vers le haut → plein écran
+      animateTo(fullH, true)
+    } else if (v < -VSNAP) {
+      // Swipe rapide vers le bas → compact
+      animateTo(COMPACT_H, true)
+    } else {
+      // Release lent : l'utilisateur décide de la taille
+      const h = heightRef.current
+      if (h < COMPACT_H + 30) {
+        animateTo(COMPACT_H, false)
+      } else if (h > fullH - 30) {
+        animateTo(fullH, false)
+      } else {
+        // Position libre : on laisse là où l'utilisateur a lâché
+        setIsOpen(h > COMPACT_H + 20)
+        if (containerRef.current) {
+          containerRef.current.style.transition = EASE
+          containerRef.current.style.height = `${h}px`
+        }
+      }
+    }
+  }, [animateTo])
+
+  // ── Swipe-down depuis le contenu scrollé à 0 ─────────────────────────────
   const onContentTouchStart = useCallback((e: React.TouchEvent) => {
     if (e.touches.length > 1) return
     cDragY.current = e.touches[0].clientY
@@ -1173,16 +1203,16 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
     const el = contentRef.current
     if (!el || el.scrollTop > 4) return
     const dy = e.changedTouches[0].clientY - cDragY.current
-    if (dy > 55) {
-      const idx = snapOrder.indexOf(snap)
-      setSnap(idx > 0 ? snapOrder[idx - 1] : 'compact')
-    }
-  }, [snap, snapOrder])
+    if (dy > 55) animateTo(COMPACT_H, true)
+  }, [animateTo])
+
+  // ── Ouverture programmatique ───────────────────────────────────────────────
+  const expandToFull = useCallback(() => animateTo(getFullH(), true), [animateTo])
 
   const openDetail = useCallback((v: DetailView) => {
     setDetailView(v)
     setSelectedCrossing(null)
-    setSnap('mid')
+    animateTo(getFullH(), true)
     const viewToFilter: Partial<Record<DetailView, FilterId>> = {
       'douanes':   'borders',
       'transport': 'transit',
@@ -1193,13 +1223,13 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
     }
     const filterId = viewToFilter[v]
     if (filterId) onFilterChange(filterId)
-  }, [onFilterChange])
+  }, [animateTo, onFilterChange])
 
   const openCrossing = useCallback((c: CrossingStatic) => {
     setSelectedCrossing(c)
     setDetailView('overview')
-    setSnap('full')
-  }, [])
+    animateTo(getFullH(), true)
+  }, [animateTo])
 
   // Écoute les clics sur les pastilles de douane depuis la carte
   useEffect(() => {
@@ -1215,18 +1245,18 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
   const locateCrossing = useCallback((c: CrossingStatic) => {
     if (!map) return
     map.flyTo({ center: [c.lng, c.lat], zoom: 15, duration: 900, essential: true })
-    setSnap('compact')  // réduit le sheet pour voir la carte
-  }, [map])
+    animateTo(COMPACT_H, true)
+  }, [map, animateTo])
 
   const goBack = useCallback(() => {
     if (selectedCrossing) {
       setSelectedCrossing(null)
-      setSnap('full')
+      animateTo(getFullH(), true)
     } else {
       setDetailView('overview')
-      setSnap('mid')
+      animateTo(getFullH(), true)
     }
-  }, [selectedCrossing])
+  }, [selectedCrossing, animateTo])
 
   // Compact headline
   const alertCount  = data?.alerts.length ?? 0
@@ -1242,19 +1272,19 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
 
   return (
     <>
-    {snap !== 'compact' && (
+    {isOpen && (
       <div
         className="fixed inset-0 z-20"
         style={{ background: 'transparent' }}
-        onClick={() => setSnap('compact')}
+        onClick={() => { animateTo(COMPACT_H, true); setDetailView('overview'); setSelectedCrossing(null) }}
       />
     )}
     <div
       ref={containerRef}
       className="fixed bottom-0 left-0 right-0 z-30 flex flex-col overflow-hidden"
-      style={{ ...LG, height: SNAP_HEIGHT[snap], transition: isDragging ? 'none' : `height ${springs.sheet}` }}
+      style={{ ...LG, height: COMPACT_H }}
     >
-      {/* Header drag zone — seule zone qui déclenche le drag du sheet */}
+      {/* Header drag zone */}
       <div
         ref={headerRef}
         onTouchStart={onTouchStart}
@@ -1266,8 +1296,8 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
         <button
           className="flex justify-center pt-2.5 pb-1 w-full"
           onClick={() => {
-            if (snap === 'compact') setSnap('mid')
-            else { setSnap('compact'); setDetailView('overview'); setSelectedCrossing(null) }
+            if (!isOpen) animateTo(getFullH(), true)
+            else { animateTo(COMPACT_H, true); setDetailView('overview'); setSelectedCrossing(null) }
           }}
           aria-label="Ouvrir/fermer">
           <div className="w-9 h-1 rounded-full" style={{ background: 'var(--border)' }} />
@@ -1278,7 +1308,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
           <span className="text-sm font-medium truncate" style={{ color: alertCount > 0 ? '#FF9F0A' : 'var(--text-secondary)' }}>
             {compactText}
           </span>
-          {alertCount > 0 && snap === 'compact' && (
+          {alertCount > 0 && !isOpen && (
             <span className="text-[11px] font-bold px-2 py-0.5 rounded-full ml-2 flex-shrink-0"
               style={{ background: 'rgba(255,159,10,0.15)', color: '#FF9F0A' }}>
               {alertCount}
@@ -1288,7 +1318,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
       </div>
 
       {/* Expanded content */}
-      {snap !== 'compact' && (
+      {isOpen && (
         <div ref={contentRef} className="flex-1 overflow-y-auto px-4 pb-6" style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
           onTouchStart={onContentTouchStart}
           onTouchEnd={onContentTouchEnd}>
