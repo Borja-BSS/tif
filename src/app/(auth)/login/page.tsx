@@ -1,18 +1,23 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter }           from 'next/navigation'
-import Link                    from 'next/link'
-import { useAuth }             from '@/context/AuthContext'
+import { useState, useEffect, Suspense } from 'react'
+import { useRouter }                     from 'next/navigation'
+import Link                              from 'next/link'
+import { useAuth }                       from '@/context/AuthContext'
+import { useGuest }                      from '@/context/GuestContext'
+import { useSearchParams }               from 'next/navigation'
 
-export default function LoginPage() {
+function LoginPageInner() {
   const {
     signInGoogle, signInEmail, registerEmail,
     user, loading, error, clearError,
   } = useAuth()
   const router = useRouter()
+  const { startGuest } = useGuest()
+  const searchParams   = useSearchParams()
+  const initialTab     = searchParams.get('tab') === 'register' ? 'register' : 'google'
 
-  const [tab,             setTab]             = useState<'google' | 'email' | 'register'>('google')
+  const [tab,             setTab]             = useState<'google' | 'email' | 'register'>(initialTab as 'google' | 'email' | 'register')
   const [email,           setEmail]           = useState('')
   const [password,        setPassword]        = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -63,6 +68,22 @@ export default function LoginPage() {
     setBusy(true)
     await registerEmail(email, password)
     setBusy(false)
+  }
+
+  async function handleGuest() {
+    setLocalError(null)
+    setBusy(true)
+    try {
+      const res = await fetch('/api/auth/guest', { method: 'POST' })
+      if (!res.ok) throw new Error('Erreur serveur')
+      const { expiresAt } = await res.json() as { expiresAt: number }
+      startGuest(expiresAt)
+      setBusy(false)
+      router.push('/map')
+    } catch {
+      setLocalError("Impossible d'accéder en mode invité")
+      setBusy(false)
+    }
   }
 
   const displayError = localError || error
@@ -190,9 +211,36 @@ export default function LoginPage() {
           </p>
         )}
 
+        {/* Séparateur mode invité */}
+        <div className="flex items-center gap-3 my-5">
+          <div className="flex-1 h-px" style={{ background: 'var(--border)' }} />
+          <span className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>ou</span>
+          <div className="flex-1 h-px" style={{ background: 'var(--border)' }} />
+        </div>
+
+        {/* Bouton mode invité */}
+        <button
+          onClick={handleGuest}
+          disabled={busy}
+          className="w-full transition-all duration-200"
+          style={{
+            background:   'transparent',
+            color:        'var(--text-secondary)',
+            border:       '1px solid var(--border)',
+            borderRadius: '12px',
+            padding:      '13px 20px',
+            fontSize:     '14px',
+            fontWeight:   500,
+            cursor:       busy ? 'not-allowed' : 'pointer',
+            opacity:      busy ? 0.6 : 1,
+          }}
+        >
+          {busy ? 'Chargement…' : '👁 Explorer en mode invité · 1 min'}
+        </button>
+
         {/* Disclaimer */}
         <p className="text-center text-[12px] mt-6" style={{ color: 'var(--text-tertiary)' }}>
-          Accès restreint — personnel autorisé uniquement
+          Accès invité limité à 60 secondes · Données Grand Genève
         </p>
 
         {/* Back */}
@@ -204,6 +252,14 @@ export default function LoginPage() {
 
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPageInner />
+    </Suspense>
   )
 }
 
