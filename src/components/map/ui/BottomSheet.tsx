@@ -1117,9 +1117,9 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
 
   // ── Init + drag natif (non-passif, iOS-safe) ─────────────────────────────
   useEffect(() => {
-    const container = containerRef.current
-    const header    = headerRef.current
-    if (!container || !header) return
+    if (!containerRef.current || !headerRef.current) return
+    const container: HTMLDivElement = containerRef.current
+    const header: HTMLDivElement    = headerRef.current
 
     // Init hauteur
     container.style.transition = 'none'
