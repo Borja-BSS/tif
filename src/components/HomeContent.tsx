@@ -723,7 +723,7 @@ export function HomeContent() {
       {/* TRANSPARENCE */}
       <section className="s" id="confiance">
         <div className="s-label reveal">Confiance et Transparence</div>
-        <h2 className="s-h reveal">Honnêteté<br />plutôt que façade.</h2>
+        <h2 className="s-h reveal">L'honnêteté<br />Comme façade.</h2>
         <p className="s-sub reveal">Nous ne prétendons pas être certifiés. Nous préférons la transparence active et vous inviter à auditer la plateforme vous-même.</p>
         <div className="car-outer reveal" style={{ maxWidth: '960px', margin: '0 auto 3px' }}>
           <div className="car-head"><span className="car-head-t">Données et légal</span>

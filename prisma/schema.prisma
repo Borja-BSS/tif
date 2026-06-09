@@ -358,6 +358,21 @@ enum PreferredMode {
   BOTH
 }
 
+// ── Analytics TIF (anonymous, RGPD-compliant) ────────────────────────────────
+
+model TifAnalytic {
+  id        String   @id @default(cuid())
+  sessionId String   @db.VarChar(36)
+  event     String   @db.VarChar(50)
+  data      Json?
+  country   String?  @db.VarChar(5)
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  @@index([sessionId])
+  @@index([event, createdAt])
+  @@index([createdAt])
+}
+
 enum G7DirectiveCategory {
   ARMY_DEPLOYMENT
   BORDER_CONTROL

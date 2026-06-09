@@ -42,7 +42,28 @@ export default function MapPage() {
     if (sessionResult.status !== 'loading' && !session) router.replace('/login')
   }, [sessionResult.status, session, router])
 
-  const handleMapReady = useCallback((m: mapboxgl.Map) => setMapRef(m), [])
+  const handleMapReady = useCallback((m: mapboxgl.Map) => {
+    setMapRef(m)
+    // Auto-fly to user location if geo consent was given
+    try {
+      const raw = localStorage.getItem('tif-consent-v1')
+      if (raw) {
+        const consent = JSON.parse(raw) as { geo?: boolean }
+        if (consent?.geo && navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              m.flyTo({ center: [pos.coords.longitude, pos.coords.latitude], zoom: 13, duration: 2200 })
+              import('@/lib/analytics/track').then(({ track }) => track('geo_granted'))
+            },
+            () => {
+              import('@/lib/analytics/track').then(({ track }) => track('geo_denied'))
+            },
+            { timeout: 8000 }
+          )
+        }
+      }
+    } catch { /* silent */ }
+  }, [])
 
   const filterState = useMemo(() => toFilterState(activeFilter), [activeFilter])
 
