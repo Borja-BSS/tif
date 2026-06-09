@@ -3,7 +3,8 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import {
   onAuthStateChanged,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
@@ -54,6 +55,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [error,   setError]   = useState<string | null>(null)
 
   useEffect(() => {
+    // Capture redirect result (Google/Apple redirect flow)
+    getRedirectResult(firebaseAuth).catch(e => {
+      const err = e as { code?: string; message?: string }
+      setError(err.code || err.message || 'Erreur de connexion')
+    })
+
     const unsub = onAuthStateChanged(firebaseAuth, fbUser => {
       setUser(fbUser ? toAuthUser(fbUser) : null)
       setLoading(false)
@@ -63,28 +70,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInGoogle = async () => {
     setError(null)
-    try {
-      const provider = new GoogleAuthProvider()
-      await signInWithPopup(firebaseAuth, provider)
-    } catch (e) {
-      const err = e as { code?: string; message?: string; customData?: { serverResponse?: string } }
-      const inner = err.customData?.serverResponse ?? ''
-      setError(err.code || inner || err.message || 'Erreur de connexion Google')
-    }
+    const provider = new GoogleAuthProvider()
+    await signInWithRedirect(firebaseAuth, provider)
   }
 
   const signInApple = async () => {
     setError(null)
-    try {
-      const provider = new OAuthProvider('apple.com')
-      provider.addScope('email')
-      provider.addScope('name')
-      await signInWithPopup(firebaseAuth, provider)
-    } catch (e) {
-      const err = e as { code?: string; message?: string; customData?: { serverResponse?: string } }
-      const inner = err.customData?.serverResponse ?? ''
-      setError(err.code || inner || err.message || 'Erreur de connexion Apple')
-    }
+    const provider = new OAuthProvider('apple.com')
+    provider.addScope('email')
+    provider.addScope('name')
+    await signInWithRedirect(firebaseAuth, provider)
   }
 
   const signInEmail = async (email: string, password: string) => {

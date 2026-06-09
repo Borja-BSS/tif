@@ -23,14 +23,14 @@ export default function LoginPage() {
     clearError()
     setBusy(true)
     await signInGoogle()
-    setBusy(false)
+    // page redirects — setBusy never called after this
   }
 
   async function handleApple() {
     clearError()
     setBusy(true)
     await signInApple()
-    setBusy(false)
+    // page redirects — setBusy never called after this
   }
 
   async function handleEmail(e: React.FormEvent) {
