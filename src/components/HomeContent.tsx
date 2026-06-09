@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/context/AuthContext'
 
 interface DashData {
   alerts: Array<{ id: string; icon: string; title: string; severity: string; timeAgo: string }>
@@ -160,6 +162,8 @@ export function HomeContent() {
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null)
   const [copied, setCopied] = useState(false)
   const lastFocus = useRef<HTMLElement | null>(null)
+  const { user } = useAuth()
+  const router = useRouter()
   const carRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   // Clock
@@ -347,6 +351,11 @@ export function HomeContent() {
     navigator.clipboard.writeText(shareUrl).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000) })
   }
 
+  function handleOpenMap(e: React.MouseEvent) {
+    e.preventDefault()
+    router.push(user ? '/map' : '/login')
+  }
+
   return (
     <div className="home-page">
 
@@ -361,7 +370,15 @@ export function HomeContent() {
         </div>
         <div className="n-right">
           <div className="n-live"><div className="n-live-dot" /><span>{clock}</span></div>
-          <a className="n-cta" href="https://tif.borja-swiss-solutions.ch/map" target="_blank" rel="noreferrer">Carte live →</a>
+          <a
+            href={user ? '/map' : '/login'}
+            onClick={e => { e.preventDefault(); router.push(user ? '/map' : '/login') }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: 'transparent', border: '1px solid var(--border)', borderRadius: '980px', padding: '5px 11px', fontSize: '13px', fontWeight: 500, color: 'var(--ink)', textDecoration: 'none', letterSpacing: '-.01em', whiteSpace: 'nowrap' }}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" /></svg>
+            <span>{user ? (user.name?.split(' ')[0] ?? user.email?.split('@')[0] ?? 'Compte') : 'Se connecter'}</span>
+          </a>
+          <a className="n-cta" href={user ? '/map' : '/login'} onClick={handleOpenMap}>Carte live →</a>
         </div>
       </nav>
 
@@ -383,7 +400,7 @@ export function HomeContent() {
           TIF les centralise. Avant qu&apos;il soit trop tard.
         </p>
         <div className="hero-btns">
-          <a className="btn-p" href="https://tif.borja-swiss-solutions.ch/map" target="_blank" rel="noreferrer">
+          <a className="btn-p" href={user ? '/map' : '/login'} onClick={handleOpenMap}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="2.5" fill="white" /><circle cx="7" cy="7" r="5.5" stroke="white" strokeWidth="1.5" /></svg>
             Ouvrir la carte live
           </a>
@@ -488,7 +505,7 @@ export function HomeContent() {
         <div className="live-cta reveal">
           <div className="lct"><strong>Vous venez de voir la situation en direct.</strong><br />La carte live regroupe tout ça en une seule vue : routes, TPG, G7, météo, frontières.</div>
           <div className="lcb">
-            <a className="lc-a" href="https://tif.borja-swiss-solutions.ch/map" target="_blank" rel="noreferrer">
+            <a className="lc-a" href={user ? '/map' : '/login'} onClick={handleOpenMap}>
               <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="2.2" fill="currentColor" /><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" strokeWidth="1.4" /></svg>
               Ouvrir la carte live
             </a>
@@ -638,7 +655,7 @@ export function HomeContent() {
         <h2>Voir avant<br />tout le monde.</h2>
         <p>La carte live est gratuite, sans inscription, sans publicité. Ouvrez-la maintenant, avant de prendre la route.</p>
         <div className="btns">
-          <a className="btn-w" href="https://tif.borja-swiss-solutions.ch/map" target="_blank" rel="noreferrer">
+          <a className="btn-w" href={user ? '/map' : '/login'} onClick={handleOpenMap}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="2.5" fill="currentColor" /><circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.5" /></svg>
             Ouvrir la carte live
           </a>
@@ -740,7 +757,7 @@ export function HomeContent() {
         <h2>Voir. Comprendre. <span className="accent">Anticiper.</span></h2>
         <p>Gratuit. Sans inscription. RGPD conforme. Hébergé en Suisse.</p>
         <div className="btns">
-          <a className="btn-p" href="https://tif.borja-swiss-solutions.ch/map" target="_blank" rel="noreferrer">
+          <a className="btn-p" href={user ? '/map' : '/login'} onClick={handleOpenMap}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="2.5" fill="white" /><circle cx="7" cy="7" r="5.5" stroke="white" strokeWidth="1.5" /></svg>
             Ouvrir la carte live
           </a>

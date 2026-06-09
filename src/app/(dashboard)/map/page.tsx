@@ -2,8 +2,9 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import { useSession }             from '@/context/AuthContext'
+import { useRouter }              from 'next/navigation'
 import dynamicImport              from 'next/dynamic'
 import mapboxgl                   from 'mapbox-gl'
 import { SearchBar }              from '@/components/map/ui/SearchBar'
@@ -32,8 +33,14 @@ function toFilterState(active: FilterId): FilterState {
 export default function MapPage() {
   const [activeFilter, setActiveFilter] = useState<FilterId>('all')
   const [mapRef,       setMapRef]       = useState<mapboxgl.Map | null>(null)
-  const session                         = useSession()?.data ?? null
+  const sessionResult                   = useSession()
+  const session                         = sessionResult?.data ?? null
   const isG7Active                      = useG7Active()
+  const router                          = useRouter()
+
+  useEffect(() => {
+    if (sessionResult.status !== 'loading' && !session) router.replace('/login')
+  }, [sessionResult.status, session, router])
 
   const handleMapReady = useCallback((m: mapboxgl.Map) => setMapRef(m), [])
 
