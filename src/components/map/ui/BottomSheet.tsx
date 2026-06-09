@@ -1091,16 +1091,10 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
   const [selectedCrossing, setSelectedCrossing] = useState<CrossingStatic | null>(null)
 
   // ── Refs drag ──────────────────────────────────────────────────────────────
-  const heightRef      = useRef(COMPACT_H)   // hauteur courante en px
-  const startHeightRef = useRef(COMPACT_H)   // hauteur au moment du touchstart
-  const touchStartY    = useRef(0)
-  const lastTouchY     = useRef(0)
-  const lastTouchTime  = useRef(0)
-  const velocity       = useRef(0)           // px/ms, + = vers le haut
-  const containerRef   = useRef<HTMLDivElement>(null)
-  const headerRef      = useRef<HTMLDivElement>(null)
-  const contentRef     = useRef<HTMLDivElement>(null)
-  const cDragY         = useRef(0)
+  const heightRef    = useRef(COMPACT_H)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const headerRef    = useRef<HTMLDivElement>(null)
+  const contentRef   = useRef<HTMLDivElement>(null)
 
   const { data } = useQuery<DashboardData>({
     queryKey:        ['dashboard'],
@@ -1121,89 +1115,71 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
     }
   }, [])
 
-  // Init hauteur DOM au montage
+  // ── Init + drag natif (non-passif, iOS-safe) ─────────────────────────────
   useEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.style.transition = 'none'
-      containerRef.current.style.height = `${COMPACT_H}px`
+    const container = containerRef.current
+    const header    = headerRef.current
+    if (!container || !header) return
+
+    // Init hauteur
+    container.style.transition = 'none'
+    container.style.height     = `${COMPACT_H}px`
+
+    let startY = 0
+    let startH = COMPACT_H
+    let lastY  = 0
+    let lastT  = 0
+    let velo   = 0
+
+    function onMove(e: TouchEvent) {
+      e.preventDefault()
+      const now = Date.now()
+      const dy  = lastY - e.touches[0].clientY   // + = doigt monte
+      const dt  = now - lastT
+      velo  = dt > 0 ? dy / dt : velo
+      lastY = e.touches[0].clientY
+      lastT = now
+      const delta = startY - e.touches[0].clientY
+      const newH  = Math.max(COMPACT_H, Math.min(getFullH(), startH + delta))
+      heightRef.current       = newH
+      container.style.height  = `${newH}px`
     }
-  }, [])
 
-  // Listener non-passif sur le header pour bloquer le scroll natif pendant le drag
-  useEffect(() => {
-    const el = headerRef.current
-    if (!el) return
-    const prevent = (e: TouchEvent) => { e.preventDefault() }
-    el.addEventListener('touchmove', prevent, { passive: false })
-    return () => el.removeEventListener('touchmove', prevent)
-  }, [])
-
-  // ── Handlers drag header ───────────────────────────────────────────────────
-  const onTouchStart = useCallback((e: React.TouchEvent) => {
-    if (e.touches.length > 1) return
-    touchStartY.current    = e.touches[0].clientY
-    startHeightRef.current = heightRef.current
-    lastTouchY.current     = e.touches[0].clientY
-    lastTouchTime.current  = Date.now()
-    velocity.current       = 0
-    if (containerRef.current) containerRef.current.style.transition = 'none'
-  }, [])
-
-  const onTouchMove = useCallback((e: React.TouchEvent) => {
-    const now = Date.now()
-    const dy  = lastTouchY.current - e.touches[0].clientY  // + = doigt monte
-    const dt  = now - lastTouchTime.current
-    velocity.current      = dt > 0 ? dy / dt : 0
-    lastTouchY.current    = e.touches[0].clientY
-    lastTouchTime.current = now
-
-    // Le sheet suit le doigt pixel par pixel
-    const delta = touchStartY.current - e.touches[0].clientY  // + = doigt monte
-    const newH  = Math.max(COMPACT_H, Math.min(getFullH(), startHeightRef.current + delta))
-    heightRef.current = newH
-    if (containerRef.current) containerRef.current.style.height = `${newH}px`
-  }, [])
-
-  const onTouchEnd = useCallback(() => {
-    const v     = velocity.current
-    const fullH = getFullH()
-    const VSNAP = 0.4  // px/ms — seuil pour considérer un swipe intentionnel
-
-    if (v > VSNAP) {
-      // Swipe rapide vers le haut → plein écran
-      animateTo(fullH, true)
-    } else if (v < -VSNAP) {
-      // Swipe rapide vers le bas → compact
-      animateTo(COMPACT_H, true)
-    } else {
-      // Release lent : l'utilisateur décide de la taille
-      const h = heightRef.current
-      if (h < COMPACT_H + 30) {
-        animateTo(COMPACT_H, false)
-      } else if (h > fullH - 30) {
-        animateTo(fullH, false)
-      } else {
-        // Position libre : on laisse là où l'utilisateur a lâché
+    function onEnd() {
+      window.removeEventListener('touchmove', onMove)
+      window.removeEventListener('touchend',  onEnd)
+      const h     = container.offsetHeight
+      const fullH = getFullH()
+      if      (velo >  1.2)        animateTo(fullH,    true)
+      else if (velo < -1.2)        animateTo(COMPACT_H, true)
+      else if (h < COMPACT_H + 40) animateTo(COMPACT_H, false)
+      else if (h > fullH - 40)     animateTo(fullH,     false)
+      else {
+        heightRef.current          = h
         setIsOpen(h > COMPACT_H + 20)
-        if (containerRef.current) {
-          containerRef.current.style.transition = EASE
-          containerRef.current.style.height = `${h}px`
-        }
+        container.style.transition = EASE
       }
     }
-  }, [animateTo])
 
-  // ── Swipe-down depuis le contenu scrollé à 0 ─────────────────────────────
-  const onContentTouchStart = useCallback((e: React.TouchEvent) => {
-    if (e.touches.length > 1) return
-    cDragY.current = e.touches[0].clientY
-  }, [])
+    function onStart(e: TouchEvent) {
+      if (e.touches.length > 1) return
+      e.preventDefault()
+      startY = e.touches[0].clientY
+      startH = container.offsetHeight   // hauteur réelle DOM
+      lastY  = startY
+      lastT  = Date.now()
+      velo   = 0
+      container.style.transition = 'none'
+      window.addEventListener('touchmove', onMove, { passive: false })
+      window.addEventListener('touchend',  onEnd)
+    }
 
-  const onContentTouchEnd = useCallback((e: React.TouchEvent) => {
-    const el = contentRef.current
-    if (!el || el.scrollTop > 4) return
-    const dy = e.changedTouches[0].clientY - cDragY.current
-    if (dy > 55) animateTo(COMPACT_H, true)
+    header.addEventListener('touchstart', onStart, { passive: false })
+    return () => {
+      header.removeEventListener('touchstart', onStart)
+      window.removeEventListener('touchmove', onMove)
+      window.removeEventListener('touchend',  onEnd)
+    }
   }, [animateTo])
 
   // ── Ouverture programmatique ───────────────────────────────────────────────
@@ -1284,14 +1260,8 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
       className="fixed bottom-0 left-0 right-0 z-30 flex flex-col overflow-hidden"
       style={LG}
     >
-      {/* Header drag zone */}
-      <div
-        ref={headerRef}
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-        style={{ touchAction: 'none' }}
-      >
+      {/* Header drag zone — touch géré par listeners natifs (useEffect) */}
+      <div ref={headerRef}>
         {/* Drag handle */}
         <button
           className="flex justify-center pt-2.5 pb-1 w-full"
@@ -1318,9 +1288,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
       </div>
 
       {/* Expanded content — always rendered, height+overflow-hidden masque quand compact */}
-      <div ref={contentRef} className="flex-1 overflow-y-auto px-4 pb-6" style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
-          onTouchStart={onContentTouchStart}
-          onTouchEnd={onContentTouchEnd}>
+      <div ref={contentRef} className="flex-1 overflow-y-auto px-4 pb-6" style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
 
           {/* Bouton retour */}
           {showBack && (
