@@ -201,8 +201,16 @@ export default function LoginPage() {
               ? 'Email ou mot de passe incorrect'
               : error.includes('too-many-requests')
               ? 'Trop de tentatives, réessayez plus tard'
-              : error.includes('popup-closed')
+              : error.includes('popup-closed') || error.includes('popup-blocked-by-browser')
               ? 'Fenêtre fermée, veuillez réessayer'
+              : error.includes('unauthorized-domain')
+              ? 'Domaine non autorisé — vérifiez Firebase Console → Authorized domains'
+              : error.includes('operation-not-allowed')
+              ? 'Fournisseur non activé dans Firebase Console'
+              : error.includes('popup-blocked')
+              ? 'Popup bloqué — autorisez les popups pour ce site'
+              : error.includes('network-request-failed')
+              ? 'Erreur réseau, réessayez'
               : 'Erreur de connexion'}
           </p>
         )}
