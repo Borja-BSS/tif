@@ -166,10 +166,6 @@ function addLayers(m: mapboxgl.Map) {
     })
   }
 
-  // Assure l'ordre z correct : shadow en bas, dot au milieu, icon au-dessus
-  try { m.moveLayer(LYR_SHADOW) } catch { /* ignore */ }
-  try { m.moveLayer(LYR_DOT) }   catch { /* ignore */ }
-  try { m.moveLayer(LYR_ICON) }  catch { /* ignore */ }
 }
 
 function removeLayers(m: mapboxgl.Map) {
@@ -200,50 +196,42 @@ export default function ParkingLayer({ map }: ParkingLayerProps) {
   const eventsRef = useRef(false)
 
   useEffect(() => {
-    if (!map) {
-      eventsRef.current = false
-      return
+    if (!map) { eventsRef.current = false; return }
+
+    // Repositionne parking au sommet — les effets parent (traffic HERE, etc.)
+    // s'exécutent APRÈS les effets enfants en React, donc parking se retrouve
+    // en dessous du trafic. moveToTop corrige l'ordre z à chaque idle.
+    const moveToTop = () => {
+      if (!map.getLayer(LYR_DOT)) return
+      try { map.moveLayer(LYR_SHADOW) } catch {}
+      try { map.moveLayer(LYR_DOT)   } catch {}
+      try { map.moveLayer(LYR_ICON)  } catch {}
     }
 
-    let mounted = true
-    let rafId: ReturnType<typeof requestAnimationFrame> | null = null
-
-    const run = async () => {
-      if (!mounted) return
+    const init = () => {
+      if (!map.isStyleLoaded()) return
       try {
-        if (!map.getSource(SRC)) {
-          map.addSource(SRC, { type: 'geojson', data: buildGeojson() })
-        }
-        // addLayers est idempotente — elle vérifie chaque couche individuellement
+        if (!map.getSource(SRC)) map.addSource(SRC, { type: 'geojson', data: buildGeojson() })
         addLayers(map)
-        if (!eventsRef.current && map.getLayer(LYR_DOT)) {
-          setupEvents(map)
-          eventsRef.current = true
-        }
-        await loadParkingImage(map)
+        if (!eventsRef.current) { setupEvents(map); eventsRef.current = true }
+        void loadParkingImage(map)
+        // setTimeout(0) : s'exécute après tous les effets React (trafic, territoire…)
+        // pour monter au sommet une fois que les autres couches sont stabilisées
+        setTimeout(moveToTop, 0)
       } catch {
-        /* silent — la couche réessaie au prochain idle */
+        map.once('idle', init)
       }
     }
 
-    const onIdle = () => { void run() }
+    if (map.isStyleLoaded()) init()
+    else map.once('load', init)
 
-    if (map.isStyleLoaded()) {
-      // Diffère d'un frame pour laisser les autres changements de couches se stabiliser
-      rafId = requestAnimationFrame(() => { void run() })
-    } else {
-      map.once('style.load', () => { if (mounted) void run() })
-    }
-
-    // Fallback persistant sur idle (auto-retry si la première tentative a échoué)
-    map.on('idle', onIdle)
+    map.on('idle', moveToTop)
 
     return () => {
-      mounted = false
-      if (rafId !== null) cancelAnimationFrame(rafId)
-      map.off('idle', onIdle)
+      map.off('idle', moveToTop)
       eventsRef.current = false
-      try { removeLayers(map) } catch { /* map détruite */ }
+      try { removeLayers(map) } catch {}
     }
   }, [map])
 

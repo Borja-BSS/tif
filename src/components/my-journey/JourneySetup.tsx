@@ -37,7 +37,6 @@ export function JourneySetup({ onComplete, onClose }: JourneySetupProps) {
   const [query,   setQuery]   = useState('')
   const [results, setResults] = useState<SearchResult[]>([])
   const [searching, setSearching] = useState(false)
-  const [searchFor, setSearchFor] = useState<'from' | 'to'>('from')
 
   const searchAddress = async (q: string) => {
     if (q.length < 2) { setResults([]); return }
@@ -45,13 +44,14 @@ export function JourneySetup({ onComplete, onClose }: JourneySetupProps) {
     try {
       const res  = await fetch(`/api/v1/routing/geocode?q=${encodeURIComponent(q)}&bbox=5.9,46.1,6.5,46.5`)
       const data = await res.json()
-      setResults((data.results ?? []).slice(0, 5))
+      // API returns a direct array (SearchResult[]), not {results:[...]}
+      setResults((Array.isArray(data) ? data : []).slice(0, 5))
     } catch { setResults([]) }
     finally { setSearching(false) }
   }
 
-  const selectResult = (r: SearchResult) => {
-    if (searchFor === 'from') { setFrom(r); setStep(2) }
+  const selectResult = (r: SearchResult, which: 'from' | 'to') => {
+    if (which === 'from') { setFrom(r); setStep(2) }
     else { setTo(r); setStep(3) }
     setQuery('')
     setResults([])
@@ -95,7 +95,8 @@ export function JourneySetup({ onComplete, onClose }: JourneySetupProps) {
     } finally { setLoading(false) }
   }
 
-  const SearchStep = ({ which }: { which: 'from' | 'to' }) => (
+  // Render function (not a component) — évite les remontages sur chaque frappe
+  const renderSearch = (which: 'from' | 'to') => (
     <div style={{ animation: `scaleIn ${springs.search} forwards` }}>
       <h2 className="text-xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
         {which === 'from' ? 'Où commencez-vous ?' : 'Où allez-vous ?'}
@@ -107,7 +108,7 @@ export function JourneySetup({ onComplete, onClose }: JourneySetupProps) {
         <input
           autoFocus
           value={query}
-          onChange={e => { setQuery(e.target.value); searchAddress(e.target.value) }}
+          onChange={e => { setQuery(e.target.value); void searchAddress(e.target.value) }}
           placeholder={which === 'from' ? 'Domicile ou adresse de départ…' : 'Bureau, école, destination…'}
           className="w-full px-4 py-3 rounded-2xl text-sm outline-none"
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
@@ -121,7 +122,7 @@ export function JourneySetup({ onComplete, onClose }: JourneySetupProps) {
         </button>
       )}
       {results.map(r => (
-        <button key={r.id} onClick={() => selectResult(r)}
+        <button key={r.id} onClick={() => selectResult(r, which)}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left mb-1"
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
           <span style={{ color: 'var(--text-tertiary)' }}>📍</span>
@@ -153,8 +154,8 @@ export function JourneySetup({ onComplete, onClose }: JourneySetupProps) {
         </div>
 
         <div className="flex-1 overflow-y-auto px-6 pb-8">
-          {step === 1 && <SearchStep which="from" />}
-          {step === 2 && <SearchStep which="to" />}
+          {step === 1 && renderSearch('from')}
+          {step === 2 && renderSearch('to')}
 
           {step === 3 && (
             <div style={{ animation: `scaleIn ${springs.search} forwards` }}>
