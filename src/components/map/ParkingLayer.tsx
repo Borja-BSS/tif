@@ -196,18 +196,26 @@ function setupEvents(m: mapboxgl.Map) {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function ParkingLayer({ map, activeFilter = 'all' }: ParkingLayerProps) {
-  const addedRef = useRef(false)
+  const addedRef         = useRef(false)
+  const activeFilterRef  = useRef(activeFilter)
 
-  // Visibility toggle — show only when parking filter is active
+  // Toujours garder la ref à jour
+  activeFilterRef.current = activeFilter
+
+  // Visibility toggle — appelé depuis l'effect ET depuis run() après ajout des layers
+  const applyVisibility = (m: mapboxgl.Map) => {
+    const vis = activeFilterRef.current === 'parking' ? 'visible' : 'none'
+    for (const id of [LYR_SHADOW, LYR_DOT, LYR_ICON]) {
+      if (m.getLayer(id)) m.setLayoutProperty(id, 'visibility', vis)
+    }
+  }
+
   useEffect(() => {
     if (!map) return
-    const vis = activeFilter === 'parking' ? 'visible' : 'none'
-    for (const id of [LYR_SHADOW, LYR_DOT, LYR_ICON]) {
-      if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', vis)
-    }
+    applyVisibility(map)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, activeFilter])
 
-  // Initial layer setup — run once when map is ready
   useEffect(() => {
     if (!map) return
 
@@ -215,17 +223,14 @@ export default function ParkingLayer({ map, activeFilter = 'all' }: ParkingLayer
       if (addedRef.current) return
       addedRef.current = true
 
-      // 1. Source + cercles IMMÉDIATEMENT (aucune image nécessaire)
       map.addSource(SRC, { type: 'geojson', data: buildGeojson() })
       addLayers(map)
       setupEvents(map)
 
-      // Cacher par défaut — la visibilité est gérée par le 2ème useEffect
-      for (const id of [LYR_SHADOW, LYR_DOT, LYR_ICON]) {
-        if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none')
-      }
+      // Appliquer la visibilité immédiatement — activeFilterRef est déjà à jour
+      applyVisibility(map)
 
-      // 2. Image canvas en arrière-plan — les cercles sont déjà visibles
+      // Image canvas en arrière-plan
       await loadParkingImage(map)
     }
 
@@ -234,13 +239,13 @@ export default function ParkingLayer({ map, activeFilter = 'all' }: ParkingLayer
     } else {
       map.once('style.load', () => void run())
     }
-    // Fallback : si style.load a déjà tiré et isStyleLoaded() est false
     map.once('idle', () => { if (!addedRef.current) void run() })
 
     return () => {
       addedRef.current = false
       try { removeLayers(map) } catch { /* map détruite */ }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map])
 
   return null
