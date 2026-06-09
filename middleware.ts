@@ -23,16 +23,27 @@ export async function middleware(req: NextRequest) {
   // Routes publiques — pas de vérification JWT
   if (PUBLIC_PATHS.some(p => pathname.startsWith(p))) return res
 
-  // Vérification JWT (Edge-compatible, jose uniquement)
+  // Extraction du token de session utilisateur
   const token = req.cookies.get('next-auth.session-token')?.value
     ?? req.cookies.get('__Secure-next-auth.session-token')?.value
 
+  const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET)
+
   if (!token) {
+    // Guest token check — ajout additionnel, rien d'existant modifié
+    const guestToken = req.cookies.get('tif-guest-token')?.value
+    if (guestToken) {
+      try {
+        await jwtVerify(guestToken, secret)
+        return res
+      } catch {
+        return NextResponse.redirect(new URL('/login', req.url))
+      }
+    }
     return NextResponse.redirect(new URL('/login', req.url))
   }
 
   try {
-    const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET)
     await jwtVerify(token, secret)
     return res
   } catch {
