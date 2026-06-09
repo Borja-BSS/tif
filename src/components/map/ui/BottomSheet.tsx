@@ -1282,7 +1282,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
     <div
       ref={containerRef}
       className="fixed bottom-0 left-0 right-0 z-30 flex flex-col overflow-hidden"
-      style={{ ...LG, height: COMPACT_H }}
+      style={LG}
     >
       {/* Header drag zone */}
       <div
@@ -1317,9 +1317,8 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
         </div>
       </div>
 
-      {/* Expanded content */}
-      {isOpen && (
-        <div ref={contentRef} className="flex-1 overflow-y-auto px-4 pb-6" style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
+      {/* Expanded content — always rendered, height+overflow-hidden masque quand compact */}
+      <div ref={contentRef} className="flex-1 overflow-y-auto px-4 pb-6" style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
           onTouchStart={onContentTouchStart}
           onTouchEnd={onContentTouchEnd}>
 
@@ -1351,7 +1350,6 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
             : <G7Detail />
           }
         </div>
-      )}
 
       <div className="flex-shrink-0" style={{ height: 'env(safe-area-inset-bottom, 0px)' }} />
     </div>
