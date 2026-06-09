@@ -6,40 +6,88 @@ import Link                    from 'next/link'
 import { useAuth }             from '@/context/AuthContext'
 
 export default function LoginPage() {
-  const { signInGoogle, signInApple, signInEmail, user, loading, error, clearError } = useAuth()
+  const {
+    signInGoogle, signInEmail, registerEmail,
+    user, loading, error, clearError,
+  } = useAuth()
   const router = useRouter()
 
-  const [tab,      setTab]      = useState<'google' | 'apple' | 'email'>('google')
-  const [email,    setEmail]    = useState('')
-  const [password, setPassword] = useState('')
-  const [busy,     setBusy]     = useState(false)
+  const [tab,             setTab]             = useState<'google' | 'email' | 'register'>('google')
+  const [email,           setEmail]           = useState('')
+  const [password,        setPassword]        = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [busy,            setBusy]            = useState(false)
+  const [localError,      setLocalError]      = useState<string | null>(null)
 
-  // Redirige vers la carte dès que l'utilisateur est connecté
   useEffect(() => {
     if (!loading && user) router.replace('/map')
   }, [user, loading, router])
 
+  function resetForm() {
+    setEmail('')
+    setPassword('')
+    setConfirmPassword('')
+    setLocalError(null)
+    clearError()
+  }
+
   async function handleGoogle() {
+    setLocalError(null)
     clearError()
     setBusy(true)
     await signInGoogle()
-    // page redirects — setBusy never called after this
-  }
-
-  async function handleApple() {
-    clearError()
-    setBusy(true)
-    await signInApple()
-    // page redirects — setBusy never called after this
+    setBusy(false)
   }
 
   async function handleEmail(e: React.FormEvent) {
     e.preventDefault()
+    setLocalError(null)
     clearError()
     setBusy(true)
     await signInEmail(email, password)
     setBusy(false)
   }
+
+  async function handleRegister(e: React.FormEvent) {
+    e.preventDefault()
+    setLocalError(null)
+    clearError()
+    if (password !== confirmPassword) {
+      setLocalError('Les mots de passe ne correspondent pas')
+      return
+    }
+    if (password.length < 6) {
+      setLocalError('Le mot de passe doit faire au moins 6 caractères')
+      return
+    }
+    setBusy(true)
+    await registerEmail(email, password)
+    setBusy(false)
+  }
+
+  const displayError = localError || error
+
+  const inputStyle = {
+    background:   'var(--bg-card)',
+    color:        'var(--text-primary)',
+    border:       '1px solid var(--border)',
+    borderRadius: '12px',
+    padding:      '14px 16px',
+    fontSize:     '15px',
+    outline:      'none',
+  }
+
+  const btnPrimary = (isBusy: boolean) => ({
+    background:   'var(--brand)',
+    color:        '#fff',
+    border:       'none',
+    borderRadius: '12px',
+    padding:      '14px 20px',
+    fontSize:     '15px',
+    fontWeight:   600,
+    cursor:       isBusy ? 'not-allowed' : 'pointer',
+    opacity:      isBusy ? 0.7 : 1,
+  })
 
   return (
     <div
@@ -48,7 +96,7 @@ export default function LoginPage() {
     >
       <div className="w-full max-w-sm">
 
-        {/* Logo — identique à l'original */}
+        {/* Logo */}
         <div className="text-center mb-8">
           <Link
             href="/"
@@ -72,10 +120,10 @@ export default function LoginPage() {
           className="flex rounded-xl p-1 mb-5"
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
         >
-          {(['google', 'apple', 'email'] as const).map(t => (
+          {(['google', 'email', 'register'] as const).map(t => (
             <button
               key={t}
-              onClick={() => { setTab(t); clearError() }}
+              onClick={() => { setTab(t); resetForm() }}
               className="flex-1 py-2 text-[13px] font-medium rounded-lg transition-all"
               style={{
                 background: tab === t ? 'var(--bg)' : 'transparent',
@@ -83,7 +131,7 @@ export default function LoginPage() {
                 boxShadow:  tab === t ? 'var(--shadow-sm)' : 'none',
               }}
             >
-              {t === 'google' ? 'Google' : t === 'apple' ? 'Apple' : 'Email'}
+              {t === 'google' ? 'Google' : t === 'email' ? 'Connexion' : 'Créer'}
             </button>
           ))}
         </div>
@@ -112,101 +160,42 @@ export default function LoginPage() {
           </button>
         )}
 
-        {/* Apple */}
-        {tab === 'apple' && (
-          <button
-            onClick={handleApple}
-            disabled={busy}
-            className="w-full flex items-center justify-center gap-3 transition-all duration-200"
-            style={{
-              background:   '#000000',
-              color:        '#FFFFFF',
-              border:       '1px solid var(--border)',
-              borderRadius: '12px',
-              padding:      '14px 20px',
-              fontSize:     '15px',
-              fontWeight:   500,
-              cursor:       busy ? 'not-allowed' : 'pointer',
-              opacity:      busy ? 0.7 : 1,
-              boxShadow:    'var(--shadow-sm)',
-            }}
-          >
-            <AppleIcon />
-            {busy ? 'Connexion…' : 'Continuer avec Apple'}
-          </button>
-        )}
-
-        {/* Email / Password */}
+        {/* Email — connexion */}
         {tab === 'email' && (
           <form onSubmit={handleEmail} className="flex flex-col gap-3">
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              style={{
-                background:   'var(--bg-card)',
-                color:        'var(--text-primary)',
-                border:       '1px solid var(--border)',
-                borderRadius: '12px',
-                padding:      '14px 16px',
-                fontSize:     '15px',
-                outline:      'none',
-              }}
-            />
-            <input
-              type="password"
-              placeholder="Mot de passe"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              style={{
-                background:   'var(--bg-card)',
-                color:        'var(--text-primary)',
-                border:       '1px solid var(--border)',
-                borderRadius: '12px',
-                padding:      '14px 16px',
-                fontSize:     '15px',
-                outline:      'none',
-              }}
-            />
-            <button
-              type="submit"
-              disabled={busy}
-              style={{
-                background:   'var(--brand)',
-                color:        '#fff',
-                border:       'none',
-                borderRadius: '12px',
-                padding:      '14px 20px',
-                fontSize:     '15px',
-                fontWeight:   600,
-                cursor:       busy ? 'not-allowed' : 'pointer',
-                opacity:      busy ? 0.7 : 1,
-              }}
-            >
+            <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required style={inputStyle} />
+            <input type="password" placeholder="Mot de passe" value={password} onChange={e => setPassword(e.target.value)} required style={inputStyle} />
+            <button type="submit" disabled={busy} style={btnPrimary(busy)}>
               {busy ? 'Connexion…' : 'Se connecter'}
             </button>
           </form>
         )}
 
-        {/* Erreur Firebase */}
-        {error && (
-          <p
-            className="text-center text-[12px] mt-3"
-            style={{ color: '#FF453A', fontFamily: 'monospace', wordBreak: 'break-all' }}
-          >
-            {error}
+        {/* Créer un compte */}
+        {tab === 'register' && (
+          <form onSubmit={handleRegister} className="flex flex-col gap-3">
+            <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required style={inputStyle} />
+            <input type="password" placeholder="Mot de passe" value={password} onChange={e => setPassword(e.target.value)} required style={inputStyle} />
+            <input type="password" placeholder="Confirmer le mot de passe" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required style={inputStyle} />
+            <button type="submit" disabled={busy} style={btnPrimary(busy)}>
+              {busy ? 'Création…' : 'Créer mon compte'}
+            </button>
+          </form>
+        )}
+
+        {/* Erreur */}
+        {displayError && (
+          <p className="text-center text-[12px] mt-3" style={{ color: '#FF453A' }}>
+            {displayError}
           </p>
         )}
 
-        {/* Disclaimer — identique à l'original */}
+        {/* Disclaimer */}
         <p className="text-center text-[12px] mt-6" style={{ color: 'var(--text-tertiary)' }}>
           Accès restreint — personnel autorisé uniquement
         </p>
 
-        {/* Back — identique à l'original */}
+        {/* Back */}
         <div className="text-center mt-8">
           <Link href="/" className="text-[13px] transition-colors duration-150" style={{ color: 'var(--text-tertiary)' }}>
             ← Retour à l'accueil
@@ -215,14 +204,6 @@ export default function LoginPage() {
 
       </div>
     </div>
-  )
-}
-
-function AppleIcon() {
-  return (
-    <svg width="17" height="20" viewBox="0 0 17 20" fill="currentColor">
-      <path d="M13.769 10.326c-.022-2.498 2.046-3.706 2.14-3.765-1.169-1.708-2.985-1.942-3.626-1.963-1.537-.157-3.017.91-3.797.91-.782 0-1.974-.891-3.253-.866-1.663.024-3.207.974-4.062 2.463-1.743 3.016-.444 7.477 1.245 9.923.83 1.197 1.81 2.536 3.094 2.488 1.247-.05 1.714-.8 3.22-.8 1.506 0 1.933.8 3.243.773 1.341-.022 2.187-1.21 3.006-2.416a12.27 12.27 0 0 0 1.37-2.784c-.029-.013-2.622-1.002-2.648-3.963ZM11.358 3.157C12.038 2.33 12.51 1.19 12.38 0c-.984.04-2.172.655-2.876 1.481-.632.73-1.184 1.9-1.036 3.018 1.098.084 2.217-.558 2.89-1.342Z"/>
-    </svg>
   )
 }
 

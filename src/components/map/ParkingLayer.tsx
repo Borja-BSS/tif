@@ -199,8 +199,12 @@ export default function ParkingLayer({ map }: ParkingLayerProps) {
       return
     }
 
+    // cancelled est local à cette invocation de l'effet — empêche les "ghost runs"
+    // déclenchés par map.once('idle') après le cleanup (désactivation du filtre)
+    let cancelled = false
+
     const run = async () => {
-      if (addedRef.current) return
+      if (addedRef.current || cancelled) return
       addedRef.current = true
 
       try {
@@ -213,19 +217,19 @@ export default function ParkingLayer({ map }: ParkingLayerProps) {
         }
         await loadParkingImage(map)
       } catch {
-        addedRef.current = false  // permettre un retry si erreur
+        addedRef.current = false
       }
     }
 
     if (map.isStyleLoaded()) {
       void run()
     } else {
-      map.once('style.load', () => void run())
+      map.once('style.load', () => { if (!cancelled) void run() })
     }
-    // Fallback double sécurité — idle garantit l'exécution même si style.load a déjà tiré
-    map.once('idle', () => { if (!addedRef.current) void run() })
+    map.once('idle', () => { if (!cancelled && !addedRef.current) void run() })
 
     return () => {
+      cancelled = true
       addedRef.current = false
       try { removeLayers(map) } catch { /* map détruite */ }
     }

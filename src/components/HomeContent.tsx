@@ -51,7 +51,18 @@ const SOURCE_URLS: Record<string, string> = {
   'TIF Monitoring': 'https://tif.borja-swiss-solutions.ch',
 }
 
-const SLIDE_COUNTS: Record<string, number> = { why: 4, src: 8, tc1: 4, tc2: 4 }
+const SLIDE_COUNTS: Record<string, number> = { why: 4, src: 8, tc1: 4, tc2: 4, prk: 8 }
+
+const PRK_SLIDES = [
+  { id: 'balexert',    name: 'Balexert',      capacity: 1879, tpg: 'Tram 14',         hasRT: false },
+  { id: 'sous-moulin', name: 'Sous-Moulin',    capacity:  876, tpg: 'Tram 12',         hasRT: true  },
+  { id: 'ge-plage',    name: 'Genève-Plage',   capacity:  865, tpg: 'Bus 2 · 27',      hasRT: true  },
+  { id: 'etoile',      name: 'Étoile',         capacity:  541, tpg: 'Tram 15 · 17',    hasRT: true  },
+  { id: 'p26',         name: 'P26 Aéroport',   capacity:  527, tpg: 'Train · Tram 14', hasRT: true  },
+  { id: 'secheron',    name: 'Sécheron',       capacity:  395, tpg: 'Tram 14 · 15',    hasRT: false },
+  { id: 'moillesulaz', name: 'Moillesulaz',    capacity:  379, tpg: 'Tram 12',         hasRT: true  },
+  { id: 'bernex',      name: 'Bernex',         capacity:  254, tpg: 'Tram 15',         hasRT: false },
+]
 
 const STATIC_INC: IncSlide[] = [
   { id: '1', icon: '🚦', title: 'A1, km 4.2 direction Lausanne, 2 voies bloquées sur 3', severity: 'CRITICAL', timeAgo: '07:43', source: 'OFROU' },
@@ -271,11 +282,6 @@ export function HomeContent() {
   const tpgBar = Math.min(95, uniqueTpgLines.length * 14)
   const cffBar = Math.min(90, maxCffDelay * 2)
   const meteoBar = meteoAlert ? 72 : 25
-
-  const incidentSlides: IncSlide[] = dashData?.alerts.length
-    ? (dashData.alerts as IncSlide[])
-    : STATIC_INC
-  const incLogical = incidentSlides.length
 
   // Ticker items from real API data or accurate generic fallback
   const tickerItems = useMemo(() => {
@@ -513,6 +519,30 @@ export function HomeContent() {
         </div>
       </section>
 
+      {/* SOCIAL SHARING */}
+      <section className="s reveal">
+        <div className="s-label">Partagez TIF</div>
+        <h2 className="s-h">Informez votre<br />entourage</h2>
+        <p className="s-sub">Plus les gens connaissent TIF avant le G7, moins il y a de blocages inutiles. Chaque partage peut éviter une heure perdue à quelqu&apos;un.</p>
+        <div className="share-btns">
+          <a className="share-btn share-tw" href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`} target="_blank" rel="noreferrer">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
+            Partager sur X
+          </a>
+          <a className="share-btn share-li" href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`} target="_blank" rel="noreferrer">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" /></svg>
+            Partager sur LinkedIn
+          </a>
+          <a className="share-btn share-wa" href={`https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`} target="_blank" rel="noreferrer">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z" /></svg>
+            WhatsApp
+          </a>
+          <button className="share-btn share-copy" onClick={copyLink}>
+            {copied ? '✓ Lien copié' : '🔗 Copier le lien'}
+          </button>
+        </div>
+      </section>
+
       {/* POURQUOI G7 */}
       <section className="s reveal">
         <div className="s-label">Sommet G7</div>
@@ -557,40 +587,49 @@ export function HomeContent() {
         </div>
       </section>
 
-      {/* INCIDENTS */}
-      <section className="s reveal" id="incidents">
-        <div className="s-label">Incidents actifs</div>
-        <h2 className="s-h">Grand Genève en ce moment</h2>
+      {/* PARKINGS */}
+      <section className="s reveal" id="parkings">
+        <div className="s-label">Stationnement · P+R</div>
+        <h2 className="s-h">Parkings et<br />solutions actives</h2>
+        <p className="s-sub">Pendant le G7, garez votre voiture dans un P+R et prenez les transports publics directement au centre-ville. Moins d&apos;embouteillages, zéro stress.</p>
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
           <div className="car-outer">
             <div className="car-head">
-              <span className="car-head-t">{incidentSlides.length} incident{incidentSlides.length > 1 ? 's' : ''} actif{incidentSlides.length > 1 ? 's' : ''}, cliquez pour le détail</span>
+              <span className="car-head-t">8 P+R principaux · accès TPG direct</span>
               <div className="car-arrows">
-                <button className="c-arr" onClick={() => carMove('inc', -1, incLogical)} aria-label="Précédent"><svg viewBox="0 0 11 11"><polyline points="7.5,1.5 3,5.5 7.5,9.5" /></svg></button>
-                <button className="c-arr" onClick={() => carMove('inc', 1, incLogical)} aria-label="Suivant"><svg viewBox="0 0 11 11"><polyline points="3.5,1.5 8,5.5 3.5,9.5" /></svg></button>
+                <button className="c-arr" onClick={() => carMove('prk', -1)} aria-label="Précédent"><svg viewBox="0 0 11 11"><polyline points="7.5,1.5 3,5.5 7.5,9.5" /></svg></button>
+                <button className="c-arr" onClick={() => carMove('prk', 1)} aria-label="Suivant"><svg viewBox="0 0 11 11"><polyline points="3.5,1.5 8,5.5 3.5,9.5" /></svg></button>
               </div>
             </div>
-            <div className="ctrack" id="ctr-inc" ref={el => { carRefs.current['inc'] = el }} onScroll={() => csync('inc', incLogical)}>
-              {[...incidentSlides, ...incidentSlides, ...incidentSlides].map((inc, i) => {
-                const isCrit = inc.severity === 'CRITICAL'; const isHigh = inc.severity === 'HIGH'
-                return (
-                  <div key={i} className="cslide" onClick={() => setIncModal(inc)}>
-                    <div className="inc-slide">
-                      <div className={`inc-dot ${isCrit ? 'd-crit' : isHigh ? 'd-high' : 'd-med'}`} />
-                      <div className="inc-body">
-                        <div className="inc-title">{inc.title}</div>
-                        <div className="inc-meta">
-                          <span className="itag" style={{ background: isCrit ? 'var(--red-bg)' : isHigh ? 'var(--orange-bg)' : 'var(--yellow-bg)', color: isCrit ? 'var(--red)' : isHigh ? 'var(--orange)' : 'var(--yellow-text)' }}>{inc.severity}</span>
-                          <span>{inc.timeAgo}</span>
-                          <span style={{ color: 'var(--blue)', fontSize: '10px' }}>Voir détail →</span>
-                        </div>
+            <div className="ctrack" id="ctr-prk" ref={el => { carRefs.current['prk'] = el }} onScroll={() => csync('prk')}>
+              {[...PRK_SLIDES, ...PRK_SLIDES, ...PRK_SLIDES].map((p, i) => (
+                <div key={i} className="cslide">
+                  <div className="why-card" style={{ textAlign: 'left' }}>
+                    <div style={{ fontSize: '26px', marginBottom: '8px' }}>🅿️</div>
+                    <div className="why-title">{p.name}</div>
+                    <div className="why-body" style={{ marginTop: '8px' }}>
+                      <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.02em', marginBottom: '4px' }}>
+                        {p.capacity.toLocaleString('fr-CH')}
+                        <span style={{ fontSize: '12px', fontWeight: 400, color: 'var(--text-secondary)', marginLeft: '4px' }}>places</span>
                       </div>
+                      <div style={{ fontSize: '13px', color: 'var(--brand)', fontWeight: 600, marginBottom: '4px' }}>🚌 {p.tpg}</div>
+                      {p.hasRT && <div style={{ fontSize: '11px', color: 'var(--green)' }}>⚡ Disponibilité temps réel</div>}
                     </div>
+                    <div style={{ fontSize: '11px', color: 'var(--blue)', marginTop: '10px' }}>Voir sur la carte →</div>
                   </div>
-                )
-              })}
+                </div>
+              ))}
             </div>
-            <Dots id="inc" logical={incLogical} />
+            <Dots id="prk" logical={PRK_SLIDES.length} />
+          </div>
+        </div>
+        <div className="live-cta reveal" style={{ marginTop: '20px' }}>
+          <div className="lct"><strong>Stratégie P+R pendant le G7.</strong><br />Posez votre voiture en périphérie et rejoignez le centre en TPG. La plupart des P+R sont gratuits ou à très faible coût.</div>
+          <div className="lcb">
+            <a className="lc-a" href={user ? '/map' : '/login'} onClick={handleOpenMap}>
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="2.2" fill="currentColor" /><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" strokeWidth="1.4" /></svg>
+              Voir les parkings sur la carte
+            </a>
           </div>
         </div>
       </section>
@@ -623,30 +662,6 @@ export function HomeContent() {
             ))}
           </div>
           <Dots id="src" logical={SRC_SLIDES.length} />
-        </div>
-      </section>
-
-      {/* SOCIAL SHARING */}
-      <section className="s reveal">
-        <div className="s-label">Partagez TIF</div>
-        <h2 className="s-h">Informez votre<br />entourage</h2>
-        <p className="s-sub">Plus les gens connaissent TIF avant le G7, moins il y a de blocages inutiles. Chaque partage peut éviter une heure perdue à quelqu&apos;un.</p>
-        <div className="share-btns">
-          <a className="share-btn share-tw" href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`} target="_blank" rel="noreferrer">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
-            Partager sur X
-          </a>
-          <a className="share-btn share-li" href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`} target="_blank" rel="noreferrer">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" /></svg>
-            Partager sur LinkedIn
-          </a>
-          <a className="share-btn share-wa" href={`https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`} target="_blank" rel="noreferrer">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z" /></svg>
-            WhatsApp
-          </a>
-          <button className="share-btn share-copy" onClick={copyLink}>
-            {copied ? '✓ Lien copié' : '🔗 Copier le lien'}
-          </button>
         </div>
       </section>
 
