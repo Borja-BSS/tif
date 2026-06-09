@@ -5,12 +5,7 @@ import mapboxgl from 'mapbox-gl'
 import { PARKINGS_PR } from '@/lib/parking/pr-data'
 import type { FeatureCollection, Point } from 'geojson'
 
-import type { FilterId } from '@/components/map/ui/QuickFilters'
-
-interface ParkingLayerProps {
-  map:          mapboxgl.Map | null
-  activeFilter?: FilterId
-}
+interface ParkingLayerProps { map: mapboxgl.Map | null }
 
 const SRC        = 'tif-parking-pr'
 const LYR_SHADOW = 'tif-pr-shadow'
@@ -195,43 +190,31 @@ function setupEvents(m: mapboxgl.Map) {
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
-export default function ParkingLayer({ map, activeFilter = 'all' }: ParkingLayerProps) {
-  const addedRef         = useRef(false)
-  const activeFilterRef  = useRef(activeFilter)
+export default function ParkingLayer({ map }: ParkingLayerProps) {
+  const addedRef = useRef(false)
 
-  // Toujours garder la ref à jour
-  activeFilterRef.current = activeFilter
-
-  // Visibility toggle — appelé depuis l'effect ET depuis run() après ajout des layers
-  const applyVisibility = (m: mapboxgl.Map) => {
-    const vis = activeFilterRef.current === 'parking' ? 'visible' : 'none'
-    for (const id of [LYR_SHADOW, LYR_DOT, LYR_ICON]) {
-      if (m.getLayer(id)) m.setLayoutProperty(id, 'visibility', vis)
+  useEffect(() => {
+    if (!map) {
+      addedRef.current = false
+      return
     }
-  }
-
-  useEffect(() => {
-    if (!map) return
-    applyVisibility(map)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map, activeFilter])
-
-  useEffect(() => {
-    if (!map) return
 
     const run = async () => {
       if (addedRef.current) return
       addedRef.current = true
 
-      map.addSource(SRC, { type: 'geojson', data: buildGeojson() })
-      addLayers(map)
-      setupEvents(map)
-
-      // Appliquer la visibilité immédiatement — activeFilterRef est déjà à jour
-      applyVisibility(map)
-
-      // Image canvas en arrière-plan
-      await loadParkingImage(map)
+      try {
+        if (!map.getSource(SRC)) {
+          map.addSource(SRC, { type: 'geojson', data: buildGeojson() })
+        }
+        if (!map.getLayer(LYR_SHADOW)) {
+          addLayers(map)
+          setupEvents(map)
+        }
+        await loadParkingImage(map)
+      } catch {
+        addedRef.current = false  // permettre un retry si erreur
+      }
     }
 
     if (map.isStyleLoaded()) {
@@ -239,13 +222,13 @@ export default function ParkingLayer({ map, activeFilter = 'all' }: ParkingLayer
     } else {
       map.once('style.load', () => void run())
     }
+    // Fallback double sécurité — idle garantit l'exécution même si style.load a déjà tiré
     map.once('idle', () => { if (!addedRef.current) void run() })
 
     return () => {
       addedRef.current = false
       try { removeLayers(map) } catch { /* map détruite */ }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map])
 
   return null
