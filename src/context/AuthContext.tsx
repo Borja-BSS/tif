@@ -67,9 +67,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const provider = new GoogleAuthProvider()
       await signInWithPopup(firebaseAuth, provider)
     } catch (e) {
-      const code = (e as { code?: string }).code ?? ''
-      const msg  = e instanceof Error ? e.message : ''
-      setError(code || msg || 'Erreur de connexion Google')
+      const err = e as { code?: string; message?: string; customData?: { serverResponse?: string } }
+      const inner = err.customData?.serverResponse ?? ''
+      setError(err.code || inner || err.message || 'Erreur de connexion Google')
     }
   }
 
@@ -81,9 +81,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       provider.addScope('name')
       await signInWithPopup(firebaseAuth, provider)
     } catch (e) {
-      const code = (e as { code?: string }).code ?? ''
-      const msg  = e instanceof Error ? e.message : ''
-      setError(code || msg || 'Erreur de connexion Apple')
+      const err = e as { code?: string; message?: string; customData?: { serverResponse?: string } }
+      const inner = err.customData?.serverResponse ?? ''
+      setError(err.code || inner || err.message || 'Erreur de connexion Apple')
     }
   }
 
