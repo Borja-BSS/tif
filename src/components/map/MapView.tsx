@@ -62,8 +62,8 @@ export default function MapView({ filters: externalFilters, activeFilter = 'all'
     }
   }, [filters.territory])
 
-  useHereMobilityLayer(filters.heatmap && !filters.transport ? map : null)
-  useTransitNetworkLayer(filters.transport ? map : null)
+  useHereMobilityLayer(map, filters.heatmap && !filters.transport)
+  useTransitNetworkLayer(map, filters.transport)
   useTerritorialLayers(filters.alerts ? map : null)
 
   // Listen for tif:search-pin events and place a red marker on the map

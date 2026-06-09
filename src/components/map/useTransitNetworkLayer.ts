@@ -253,70 +253,99 @@ function applyDisruptions(
   }))
 }
 
+function applyTransitVis(map: mapboxgl.Map, visible: boolean) {
+  const v = visible ? 'visible' : 'none'
+  for (const id of ALL_LAYERS) {
+    if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', v)
+  }
+}
+
 // ── Main hook ─────────────────────────────────────────────────────────────────
-export function useTransitNetworkLayer(map: mapboxgl.Map | null) {
+// Nouveau contrat : reçoit toujours la map + un booléen visible.
+// Les layers ne sont JAMAIS supprimés — seule la visibilité change.
+export function useTransitNetworkLayer(map: mapboxgl.Map | null, visible: boolean) {
   const networkRef  = useRef<FeatureCollection<MultiLineString, TransitRouteProperties> | null>(null)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const popupRef    = useRef<mapboxgl.Popup | null>(null)
+  const visRef      = useRef(visible)
+  visRef.current    = visible
 
+  // ── Setup unique : chargement des layers + données réseau ─────────────────
   useEffect(() => {
     if (!map) return
 
-    const popup = new mapboxgl.Popup({
-      maxWidth: '300px', closeButton: true, closeOnClick: false,
-    })
+    let active = true
+
+    const popup = new mapboxgl.Popup({ maxWidth: '300px', closeButton: true, closeOnClick: false })
     popupRef.current = popup
 
     const init = async () => {
+      if (!active || map.getLayer(LAYER_NETWORK_BUS)) {
+        applyTransitVis(map, visRef.current)
+        return
+      }
+
       initLayers(map)
       setupPopups(map, popup)
 
-      // Load static network (cached 24h — may be slow on first call)
       const network = await fetchNetwork()
+      if (!active) return
       if (network) {
         networkRef.current = network
         ;(map.getSource(SRC_NETWORK) as mapboxgl.GeoJSONSource | undefined)
           ?.setData(network as unknown as FeatureCollection)
       }
 
-      // Load disruptions immediately, then every 2 min
       const refreshDisruptions = async () => {
+        if (!active) return
         const data = await fetchDisruptions()
+        if (!active) return
         if (data && networkRef.current && map.getSource(SRC_DISRUPTED)) {
           applyDisruptions(map, networkRef.current, data)
         }
       }
 
       await refreshDisruptions()
-      intervalRef.current = setInterval(refreshDisruptions, 120_000)
+      if (active) intervalRef.current = setInterval(refreshDisruptions, 120_000)
+
+      applyTransitVis(map, visRef.current)
     }
 
-    let cancelled = false
-
-    const wrappedInit = async () => {
-      if (cancelled || map.getLayer(LAYER_NETWORK_BUS)) return
-      await init()
-    }
-
-    const onStyleLoad = () => void wrappedInit()
-    const onIdle      = () => { if (!map.getLayer(LAYER_NETWORK_BUS)) void wrappedInit() }
+    // map.on (pas once) pour que map.off fonctionne vraiment au cleanup
+    const onStyleLoad = () => { map.off('style.load', onStyleLoad); void init() }
+    const onIdle      = () => { map.off('idle', onIdle); if (!map.getLayer(LAYER_NETWORK_BUS)) void init() }
 
     if (map.isStyleLoaded()) {
-      void wrappedInit()
+      void init()
     } else {
-      map.once('style.load', onStyleLoad)
+      map.on('style.load', onStyleLoad)
     }
-    // Fallback idle — style.load peut avoir déjà tiré si isStyleLoaded() était faux
-    map.once('idle', onIdle)
+    map.on('idle', onIdle)
 
     return () => {
-      cancelled = true
+      active = false
       map.off('style.load', onStyleLoad)
       map.off('idle',       onIdle)
       if (intervalRef.current) clearInterval(intervalRef.current)
       popupRef.current?.remove()
-      for (const id of ALL_LAYERS)   { try { if (map.getLayer(id))   map.removeLayer(id) } catch {} }
-      for (const src of ALL_SOURCES) { try { if (map.getSource(src)) map.removeSource(src) } catch {} }
+      applyTransitVis(map, false)
     }
   }, [map])
+
+  // ── Visibilité + refresh interval selon filtre actif ─────────────────────
+  useEffect(() => {
+    if (!map) return
+    applyTransitVis(map, visible)
+
+    if (visible) {
+      // Relance un refresh immédiat quand on revient sur le filtre
+      if (networkRef.current && map.getSource(SRC_DISRUPTED)) {
+        fetchDisruptions().then(data => {
+          if (data && networkRef.current && map.getSource(SRC_DISRUPTED)) {
+            applyDisruptions(map, networkRef.current, data)
+          }
+        })
+      }
+    }
+  }, [map, visible])
 }
