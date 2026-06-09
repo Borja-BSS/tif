@@ -21,7 +21,6 @@ const CreateSchema = z.object({
   flexMinutes:         z.number().int().min(0).max(60).optional().default(15),
   preferredMode:       z.enum(['car', 'transit', 'both']).optional().default('both'),
   notifyMinutesBefore: z.number().int().min(5).max(60).optional().default(15),
-  emailNotify:         z.string().email().max(200).optional(),
 })
 
 const MODE_DB: Record<string, 'CAR' | 'TRANSIT' | 'BOTH'> = {
@@ -56,8 +55,8 @@ export async function POST(req: NextRequest) {
 
   const d = parsed.data
 
-  // Email pour notifications : priorité au champ fourni, puis email de session
-  const emailNotify = d.emailNotify ?? (session.user.email ?? undefined)
+  // Email pour notifications : toujours depuis la session (pas de relay arbitraire)
+  const emailNotify = session.user.email ?? undefined
 
   const journey = await db.userJourney.create({
     data: {

@@ -1,5 +1,14 @@
 import nodemailer from 'nodemailer'
 
+function esc(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 let _transport: nodemailer.Transporter | null = null
 
 function getTransport(): nodemailer.Transporter {
@@ -61,19 +70,19 @@ export async function sendJourneyAlert(payload: JourneyAlertPayload): Promise<vo
 
       <!-- Journey name -->
       <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:6px;">Trajet favori</div>
-      <div style="font-size:17px;font-weight:700;color:#fff;margin-bottom:20px;">${journeyName}</div>
+      <div style="font-size:17px;font-weight:700;color:#fff;margin-bottom:20px;">${esc(journeyName)}</div>
 
       <!-- Status badge -->
       <div style="display:inline-block;padding:8px 16px;border-radius:12px;font-size:14px;font-weight:700;margin-bottom:20px;
         background:${status === 'disrupted' ? 'rgba(255,69,58,0.15)' : status === 'delayed' ? 'rgba(255,159,10,0.15)' : 'rgba(48,209,88,0.15)'};
         color:${status === 'disrupted' ? '#FF453A' : status === 'delayed' ? '#FF9F0A' : '#30D158'};
         border:1px solid ${status === 'disrupted' ? 'rgba(255,69,58,0.3)' : status === 'delayed' ? 'rgba(255,159,10,0.3)' : 'rgba(48,209,88,0.3)'};">
-        ${STATUS_FR[status] ?? '⚠️ Alerte'}
+        ${esc(STATUS_FR[status] ?? '⚠️ Alerte')}
       </div>
 
       <!-- Headline -->
-      <div style="font-size:16px;font-weight:600;color:#fff;margin-bottom:10px;line-height:1.4;">${headline}</div>
-      ${detail ? `<div style="font-size:14px;color:rgba(255,255,255,0.6);margin-bottom:16px;line-height:1.5;">${detail}</div>` : ''}
+      <div style="font-size:16px;font-weight:600;color:#fff;margin-bottom:10px;line-height:1.4;">${esc(headline)}</div>
+      ${detail ? `<div style="font-size:14px;color:rgba(255,255,255,0.6);margin-bottom:16px;line-height:1.5;">${esc(detail)}</div>` : ''}
       ${delayMinutes > 0 ? `<div style="background:rgba(255,159,10,0.08);border:1px solid rgba(255,159,10,0.2);border-radius:12px;padding:12px 16px;font-size:13px;color:#FF9F0A;font-weight:600;margin-bottom:16px;">⏱ Retard estimé : +${delayMinutes} min · Départ prévu ${dep}</div>` : ''}
 
       <!-- CTA -->
