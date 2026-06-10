@@ -421,7 +421,7 @@ export function HomeContent() {
       const res = await fetch('/api/v1/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'partner', institution: partnerForm.institution, email: partnerForm.email, expertise: partnerForm.expertise }),
+        body: JSON.stringify({ type: 'partner', name: partnerForm.institution, institution: partnerForm.institution, email: partnerForm.email, expertise: partnerForm.expertise }),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data?.error ?? 'Erreur lors de l\'envoi')

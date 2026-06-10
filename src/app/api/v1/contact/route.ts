@@ -22,8 +22,10 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(req: NextRequest) {
   const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
-  const { success } = await rl.limit(`contact:${ip}`)
-  if (!success) return Response.json({ error: 'Too many requests' }, { status: 429 })
+  try {
+    const { success } = await rl.limit(`contact:${ip}`)
+    if (!success) return Response.json({ error: 'Too many requests' }, { status: 429 })
+  } catch { /* Redis indisponible — fail open */ }
 
   let body: unknown
   try {

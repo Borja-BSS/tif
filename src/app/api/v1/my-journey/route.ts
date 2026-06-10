@@ -44,8 +44,10 @@ export async function GET(_req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
-  const { success } = await rl.limit(ip)
-  if (!success) return Response.json({ error: 'Too many requests' }, { status: 429 })
+  try {
+    const { success } = await rl.limit(ip)
+    if (!success) return Response.json({ error: 'Too many requests' }, { status: 429 })
+  } catch { /* Redis indisponible — fail open */ }
 
   const session = await auth()
   if (!session?.user?.id) return Response.json({ error: 'Unauthorized' }, { status: 401 })
