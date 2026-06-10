@@ -983,25 +983,30 @@ export function HomeContent() {
           {contactForm.success && <p style={{ color: 'var(--green)', fontSize: '13px', marginTop: '8px' }}>✓ Message envoyé. Nous vous répondrons sous 48h ouvrées.</p>}</>
         )},
         { id: 'm-hosting', tag: { bg: 'var(--green-bg)', c: 'var(--green)', label: 'Public' }, title: 'Hébergement', content: (
-          <><div className="m-note">🇨🇭 TIF est intégralement hébergé en Suisse, chez Infomaniak Network SA.</div>
-          <div className="m-row"><label>Hébergeur</label><span>Infomaniak Network SA</span></div>
-          <div className="m-row"><label>Localisation</label><span>Genève, Suisse</span></div>
-          <div className="m-row"><label>Juridiction</label><span>Droit suisse (LPD / nLPD)</span></div>
-          <div className="m-row"><label>Données hors UE</label><span>Jamais</span></div>
-          <div className="m-row"><label>Certifications</label><span>ISO 27001, ISO 50001</span></div></>
+          <><div className="m-note">🇪🇺 Toutes les données sont hébergées et traitées exclusivement en Europe (nLPD art. 16–17).</div>
+          <div className="m-row"><label>Base de données</label><span>Neon PostgreSQL — eu-central-1 (Francfort, Allemagne)</span></div>
+          <div className="m-row"><label>Cache &amp; sessions</label><span>Upstash Redis — eu-west-1 (Irlande)</span></div>
+          <div className="m-row"><label>Fichiers statiques</label><span>Cloudflare R2 — Union Européenne exclusivement</span></div>
+          <div className="m-row"><label>Application</label><span>Vercel — edge nodes UE, TLS 1.3 en transit</span></div>
+          <div className="m-row"><label>Juridiction</label><span>Droit suisse (nLPD) + RGPD européen</span></div>
+          <div className="m-row"><label>Chiffrement</label><span>AES-256 au repos sur tous les supports</span></div>
+          <div className="m-row"><label>Données hors UE</label><span>Jamais</span></div></>
         )},
         { id: 'm-rgpd', tag: { bg: 'var(--green-bg)', c: 'var(--green)', label: 'Public' }, title: 'Protection des données', content: (
-          <><p>TIF applique les principes du RGPD européen et de la nLPD suisse.</p>
-          <h4>Ce que nous collectons</h4><ul><li>Adresse email si création de compte</li><li>Données de navigation anonymisées</li><li>Signalements terrain soumis volontairement</li></ul>
-          <h4>Ce que nous ne collectons jamais</h4><ul><li>Données de paiement</li><li>Localisation précise sans consentement</li><li>Données vendues à des tiers</li></ul>
-          <div className="m-row"><label>Conservation</label><span>12 mois maximum</span></div>
+          <><p>TIF applique le principe Privacy by Design (nLPD art. 7) : seules les données strictement nécessaires sont collectées. Anonymisation irréversible avant toute transmission ou stockage.</p>
+          <h4>Ce que nous collectons</h4><ul><li>Adresse e-mail (authentification) — chiffrée AES-256</li><li>Identifiant unique interne — non communicable à des tiers</li><li>Fournisseur OAuth (Google/Apple) — pas les jetons</li><li>Données de mobilité anonymisées — uniquement avec consentement explicite</li><li>Logs de sécurité — IP hashée (jamais l&apos;IP brute)</li></ul>
+          <h4>Ce que nous ne collectons jamais</h4><ul><li>Coordonnées GPS exactes — transformation irréversible en zone ±600m</li><li>Nom et prénom — non requis</li><li>Numéro de téléphone</li><li>Données de santé ou biométriques (nLPD art. 5 lit. c)</li><li>Contenu des communications</li><li>Historique de navigation web</li><li>Profilage publicitaire</li><li>Données vendues ou cédées à des tiers</li></ul>
+          <div className="m-row"><label>Conservation compte</label><span>Durée de vie du compte + 30 jours</span></div>
+          <div className="m-row"><label>Conservation mobilité</label><span>90 jours maximum — purge automatique</span></div>
+          <div className="m-row"><label>Conservation logs</label><span>30 jours glissants</span></div>
           <div className="m-row"><label>Contact</label><span>contact@borja-swiss-solutions.ch</span></div></>
         )},
         { id: 'm-privacy', tag: { bg: 'var(--green-bg)', c: 'var(--green)', label: 'Public' }, title: 'Politique de confidentialité', content: (
-          <><p>Version 1.0, en vigueur depuis juin 2025.</p>
-          <h4>Responsable du traitement</h4><p>Börja Swiss Solutions RI, Genève, contact@borja-swiss-solutions.ch</p>
+          <><p>Établie conformément à la nLPD suisse (RS 235.1, en vigueur depuis le 1er septembre 2023) et au RGPD (UE 2016/679).</p>
+          <h4>Responsable du traitement</h4><p>Borja Swiss Solutions, Genève — contact@borja-swiss-solutions.ch</p>
           <h4>Cookies</h4><ul><li>Cookies techniques strictement nécessaires</li><li>Aucun cookie publicitaire ou tracking tiers</li></ul>
-          <h4>Vos droits</h4><ul><li>Droit d&apos;accès à vos données (art. 25 nLPD)</li><li>Droit de rectification et d&apos;effacement</li><li>Droit à la portabilité des données</li></ul></>
+          <h4>Vos droits (nLPD art. 25–32)</h4><ul><li>Droit d&apos;accès (art. 25) — liste complète des données traitées, finalité et destinataires</li><li>Droit de rectification (art. 32) — correction de toute donnée inexacte</li><li>Droit à l&apos;effacement (art. 32) — suppression complète en base, y compris mobilité</li><li>Droit à la portabilité (art. 28) — export format structuré, lisible par machine</li><li>Droit d&apos;opposition (art. 30) — applicable en particulier à la collecte de mobilité</li><li>Droit de retrait du consentement — révocable à tout moment, collecte cesse immédiatement</li></ul>
+          <div className="m-row"><label>Délai de réponse</label><span>30 jours calendaires (nLPD art. 25 al. 6)</span></div></>
         )},
         { id: 'm-secu', tag: { bg: 'var(--green-bg)', c: 'var(--green)', label: 'Sécurité' }, title: 'Contact sécurité', content: (
           <><div className="m-note">🛡️ Pour tout signalement de vulnérabilité, contactez-nous directement et en toute confidentialité.</div>
