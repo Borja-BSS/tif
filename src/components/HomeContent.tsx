@@ -172,6 +172,10 @@ export function HomeContent() {
   const [borders, setBorders] = useState<BorderRow[]>(STATIC_BORDERS)
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null)
   const [copied, setCopied] = useState(false)
+  const [proForm, setProForm] = useState({ name: '', organisation: '', email: '', fonction: '', message: '', loading: false, success: false, error: '' })
+  const [contactForm, setContactForm] = useState({ name: '', email: '', subject: '', message: '', loading: false, success: false, error: '' })
+  const [auditForm, setAuditForm] = useState({ name: '', email: '', expertise: '', loading: false, success: false, error: '' })
+  const [partnerForm, setPartnerForm] = useState({ institution: '', email: '', expertise: '', loading: false, success: false, error: '' })
   const lastFocus = useRef<HTMLElement | null>(null)
   const { user } = useAuth()
   const router = useRouter()
@@ -360,6 +364,71 @@ export function HomeContent() {
   function handleOpenMap(e: React.MouseEvent) {
     e.preventDefault()
     router.push(user ? '/map' : '/login')
+  }
+
+  // Form submits
+  const submitPro = async () => {
+    setProForm(f => ({ ...f, loading: true, error: '' }))
+    try {
+      const res = await fetch('/api/v1/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'pro', name: proForm.name, organisation: proForm.organisation, email: proForm.email, fonction: proForm.fonction, message: proForm.message }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.error ?? 'Erreur lors de l\'envoi')
+      setProForm(f => ({ ...f, loading: false, success: true }))
+    } catch (e) {
+      setProForm(f => ({ ...f, loading: false, error: e instanceof Error ? e.message : 'Erreur inconnue' }))
+    }
+  }
+
+  const submitContact = async () => {
+    setContactForm(f => ({ ...f, loading: true, error: '' }))
+    try {
+      const res = await fetch('/api/v1/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'contact', name: contactForm.name, email: contactForm.email, subject: contactForm.subject, message: contactForm.message }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.error ?? 'Erreur lors de l\'envoi')
+      setContactForm(f => ({ ...f, loading: false, success: true }))
+    } catch (e) {
+      setContactForm(f => ({ ...f, loading: false, error: e instanceof Error ? e.message : 'Erreur inconnue' }))
+    }
+  }
+
+  const submitAudit = async () => {
+    setAuditForm(f => ({ ...f, loading: true, error: '' }))
+    try {
+      const res = await fetch('/api/v1/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'audit', name: auditForm.name, email: auditForm.email, expertise: auditForm.expertise }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.error ?? 'Erreur lors de l\'envoi')
+      setAuditForm(f => ({ ...f, loading: false, success: true }))
+    } catch (e) {
+      setAuditForm(f => ({ ...f, loading: false, error: e instanceof Error ? e.message : 'Erreur inconnue' }))
+    }
+  }
+
+  const submitPartner = async () => {
+    setPartnerForm(f => ({ ...f, loading: true, error: '' }))
+    try {
+      const res = await fetch('/api/v1/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'partner', institution: partnerForm.institution, email: partnerForm.email, expertise: partnerForm.expertise }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.error ?? 'Erreur lors de l\'envoi')
+      setPartnerForm(f => ({ ...f, loading: false, success: true }))
+    } catch (e) {
+      setPartnerForm(f => ({ ...f, loading: false, error: e instanceof Error ? e.message : 'Erreur inconnue' }))
+    }
   }
 
   return (
@@ -896,18 +965,22 @@ export function HomeContent() {
           <h4>Ce qui est inclus</h4>
           <ul><li>API REST temps réel, flux bruts (trafic, TPG, CFF, météo, frontières)</li><li>Dashboard dédié avec alertes personnalisées par zone</li><li>Export JSON/CSV et intégration webhooks</li><li>Support prioritaire, réponse sous 4h ouvrées</li><li>SLA contractuel, confidentialité des données</li></ul>
           <h4>Votre demande</h4>
-          <input className="m-input" type="text" placeholder="Nom Prénom" /><input className="m-input" type="text" placeholder="Organisation" /><input className="m-input" type="email" placeholder="Email professionnel" /><input className="m-input" type="text" placeholder="Fonction" />
-          <textarea className="m-input m-ta" placeholder="Décrivez votre cas d'usage..." />
-          <button className="m-submit">Envoyer la demande →</button></>
+          <input className="m-input" type="text" placeholder="Nom Prénom" value={proForm.name} onChange={e => setProForm(f => ({ ...f, name: e.target.value }))} /><input className="m-input" type="text" placeholder="Organisation" value={proForm.organisation} onChange={e => setProForm(f => ({ ...f, organisation: e.target.value }))} /><input className="m-input" type="email" placeholder="Email professionnel" value={proForm.email} onChange={e => setProForm(f => ({ ...f, email: e.target.value }))} /><input className="m-input" type="text" placeholder="Fonction" value={proForm.fonction} onChange={e => setProForm(f => ({ ...f, fonction: e.target.value }))} />
+          <textarea className="m-input m-ta" placeholder="Décrivez votre cas d'usage..." value={proForm.message} onChange={e => setProForm(f => ({ ...f, message: e.target.value }))} />
+          <button className="m-submit" onClick={submitPro} disabled={proForm.loading} style={{ opacity: proForm.loading ? 0.7 : 1 }}>{proForm.loading ? 'Envoi...' : 'Envoyer la demande →'}</button>
+          {proForm.error && <p style={{ color: 'var(--red)', fontSize: '13px', marginTop: '8px' }}>{proForm.error}</p>}
+          {proForm.success && <p style={{ color: 'var(--green)', fontSize: '13px', marginTop: '8px' }}>✓ Message envoyé. Nous vous répondrons sous 48h ouvrées.</p>}</>
         )},
         { id: 'm-contact', tag: { bg: 'var(--off2)', c: 'var(--ink3)', label: 'Public' }, title: 'Nous contacter', content: (
           <><div className="m-row"><label>Email</label><span>contact@borja-swiss-solutions.ch</span></div>
           <div className="m-row"><label>Délai</label><span>48h ouvrées</span></div>
           <h4>Envoyer un message</h4>
-          <input className="m-input" type="text" placeholder="Nom" /><input className="m-input" type="email" placeholder="Email" />
-          <select className="m-input m-select"><option>Sujet...</option><option>Question générale</option><option>Signalement</option><option>Accès professionnel</option><option>Partenariat</option><option>Presse / Média</option></select>
-          <textarea className="m-input m-ta" placeholder="Votre message..." />
-          <button className="m-submit">✉ Envoyer</button></>
+          <input className="m-input" type="text" placeholder="Nom" value={contactForm.name} onChange={e => setContactForm(f => ({ ...f, name: e.target.value }))} /><input className="m-input" type="email" placeholder="Email" value={contactForm.email} onChange={e => setContactForm(f => ({ ...f, email: e.target.value }))} />
+          <select className="m-input m-select" value={contactForm.subject} onChange={e => setContactForm(f => ({ ...f, subject: e.target.value }))}><option>Sujet...</option><option>Question générale</option><option>Signalement</option><option>Accès professionnel</option><option>Partenariat</option><option>Presse / Média</option></select>
+          <textarea className="m-input m-ta" placeholder="Votre message..." value={contactForm.message} onChange={e => setContactForm(f => ({ ...f, message: e.target.value }))} />
+          <button className="m-submit" onClick={submitContact} disabled={contactForm.loading} style={{ opacity: contactForm.loading ? 0.7 : 1 }}>{contactForm.loading ? 'Envoi...' : '✉ Envoyer'}</button>
+          {contactForm.error && <p style={{ color: 'var(--red)', fontSize: '13px', marginTop: '8px' }}>{contactForm.error}</p>}
+          {contactForm.success && <p style={{ color: 'var(--green)', fontSize: '13px', marginTop: '8px' }}>✓ Message envoyé. Nous vous répondrons sous 48h ouvrées.</p>}</>
         )},
         { id: 'm-hosting', tag: { bg: 'var(--green-bg)', c: 'var(--green)', label: 'Public' }, title: 'Hébergement', content: (
           <><div className="m-note">🇨🇭 TIF est intégralement hébergé en Suisse, chez Infomaniak Network SA.</div>
@@ -960,15 +1033,19 @@ export function HomeContent() {
         { id: 'm-audit', tag: { bg: 'var(--blue-bg)', c: 'var(--blue-d)', label: 'Sur demande' }, title: 'Accès audit complet', content: (
           <><p>Documentation technique approfondie et environnement sandbox inclus.</p>
           <ul><li>Documentation technique complète</li><li>Schémas de flux de données</li><li>Environnement sandbox</li><li>Session avec l&apos;équipe technique Börja</li></ul>
-          <input className="m-input" type="text" placeholder="Nom Prénom" /><input className="m-input" type="email" placeholder="Email professionnel" />
-          <textarea className="m-input m-ta" placeholder="Expertise et objectif de l'audit..." />
-          <button className="m-submit">Soumettre →</button></>
+          <input className="m-input" type="text" placeholder="Nom Prénom" value={auditForm.name} onChange={e => setAuditForm(f => ({ ...f, name: e.target.value }))} /><input className="m-input" type="email" placeholder="Email professionnel" value={auditForm.email} onChange={e => setAuditForm(f => ({ ...f, email: e.target.value }))} />
+          <textarea className="m-input m-ta" placeholder="Expertise et objectif de l'audit..." value={auditForm.expertise} onChange={e => setAuditForm(f => ({ ...f, expertise: e.target.value }))} />
+          <button className="m-submit" onClick={submitAudit} disabled={auditForm.loading} style={{ opacity: auditForm.loading ? 0.7 : 1 }}>{auditForm.loading ? 'Envoi...' : 'Soumettre →'}</button>
+          {auditForm.error && <p style={{ color: 'var(--red)', fontSize: '13px', marginTop: '8px' }}>{auditForm.error}</p>}
+          {auditForm.success && <p style={{ color: 'var(--green)', fontSize: '13px', marginTop: '8px' }}>✓ Message envoyé. Nous vous répondrons sous 48h ouvrées.</p>}</>
         )},
         { id: 'm-partner', tag: { bg: 'var(--blue-bg)', c: 'var(--blue-d)', label: 'Institutionnel' }, title: 'Partenariat institutionnel', content: (
           <><ul><li>Ville de Genève, Canton : intégration de données officielles</li><li>Services d&apos;urgence : diffusion prioritaire d&apos;alertes</li><li>TPG, CFF : flux de données directs</li><li>Collectivités françaises : extension Grand Genève</li></ul>
-          <input className="m-input" type="text" placeholder="Institution" /><input className="m-input" type="email" placeholder="Email institutionnel" />
-          <textarea className="m-input m-ta" placeholder="Nature du partenariat..." />
-          <button className="m-submit">Initier →</button></>
+          <input className="m-input" type="text" placeholder="Institution" value={partnerForm.institution} onChange={e => setPartnerForm(f => ({ ...f, institution: e.target.value }))} /><input className="m-input" type="email" placeholder="Email institutionnel" value={partnerForm.email} onChange={e => setPartnerForm(f => ({ ...f, email: e.target.value }))} />
+          <textarea className="m-input m-ta" placeholder="Nature du partenariat..." value={partnerForm.expertise} onChange={e => setPartnerForm(f => ({ ...f, expertise: e.target.value }))} />
+          <button className="m-submit" onClick={submitPartner} disabled={partnerForm.loading} style={{ opacity: partnerForm.loading ? 0.7 : 1 }}>{partnerForm.loading ? 'Envoi...' : 'Initier →'}</button>
+          {partnerForm.error && <p style={{ color: 'var(--red)', fontSize: '13px', marginTop: '8px' }}>{partnerForm.error}</p>}
+          {partnerForm.success && <p style={{ color: 'var(--green)', fontSize: '13px', marginTop: '8px' }}>✓ Message envoyé. Nous vous répondrons sous 48h ouvrées.</p>}</>
         )},
       ].map(m => (
         <div key={m.id} className={`overlay${openModal === m.id ? ' on' : ''}`} role="dialog" aria-modal="true" onClick={e => { if (e.target === e.currentTarget) closeM() }}>

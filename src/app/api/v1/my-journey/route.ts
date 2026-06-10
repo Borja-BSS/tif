@@ -1,9 +1,10 @@
-import { auth }        from '@/lib/auth'
-import { NextRequest } from 'next/server'
-import { db }          from '@/lib/db'
-import { redis }       from '@/lib/redis'
-import { Ratelimit }   from '@upstash/ratelimit'
-import { z }           from 'zod'
+import { auth }                    from '@/lib/auth'
+import { NextRequest }             from 'next/server'
+import { db }                      from '@/lib/db'
+import { redis }                   from '@/lib/redis'
+import { Ratelimit }               from '@upstash/ratelimit'
+import { z }                       from 'zod'
+import { sendJourneyConfirmation } from '@/lib/email'
 
 const rl = new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, '1m') })
 
@@ -82,6 +83,21 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error('[my-journey POST] db.create failed:', err)
     return Response.json({ error: 'Erreur base de données' }, { status: 500 })
+  }
+
+  // Confirmation email — fire and forget
+  if (emailNotify) {
+    sendJourneyConfirmation({
+      to:                  emailNotify,
+      journeyName:         journey.name,
+      fromLabel:           d.fromLabel,
+      toLabel:             d.toLabel,
+      departureHour:       d.departureHour,
+      departureMin:        d.departureMinute,
+      dayOfWeek:           d.dayOfWeek,
+      notifyMinutesBefore: d.notifyMinutesBefore,
+      preferredMode:       d.preferredMode,
+    }).catch(() => {})
   }
 
   return Response.json({ journey }, { status: 201 })

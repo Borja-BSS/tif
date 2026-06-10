@@ -11,6 +11,7 @@ import { resolveEvents }            from '@/inngest/resolve-events'
 import { shipLogs }                 from '@/inngest/ship-logs'
 import { watchG7Sources }          from '@/inngest/watch-g7-sources'
 import { predictJourneysJob }      from '@/inngest/predict-journeys'
+import { morningBriefingJob }      from '@/inngest/morning-briefing'
 
 export const { GET, POST, PUT } = serve({
   client:    inngest,
@@ -26,5 +27,6 @@ export const { GET, POST, PUT } = serve({
     shipLogs,
     watchG7Sources,
     predictJourneysJob,
+    morningBriefingJob,
   ],
 })
