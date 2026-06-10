@@ -88,7 +88,10 @@ export function JourneySetup({ onComplete, onClose }: JourneySetupProps) {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
-      if (!res.ok) throw new Error('Erreur lors de la sauvegarde')
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data?.error ?? 'Erreur lors de la sauvegarde')
+      }
       onComplete()
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erreur inconnue')

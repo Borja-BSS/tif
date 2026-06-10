@@ -58,25 +58,31 @@ export async function POST(req: NextRequest) {
   // Email pour notifications : toujours depuis la session (pas de relay arbitraire)
   const emailNotify = session.user.email ?? undefined
 
-  const journey = await db.userJourney.create({
-    data: {
-      userId:              session.user.id,
-      name:                d.name,
-      fromLat:             d.fromLat,
-      fromLng:             d.fromLng,
-      fromLabel:           d.fromLabel,
-      toLat:               d.toLat,
-      toLng:               d.toLng,
-      toLabel:             d.toLabel,
-      dayOfWeek:           d.dayOfWeek,
-      departureHour:       d.departureHour,
-      departureMinute:     d.departureMinute,
-      flexMinutes:         d.flexMinutes,
-      preferredMode:       MODE_DB[d.preferredMode],
-      notifyMinutesBefore: d.notifyMinutesBefore,
-      emailNotify,
-    },
-  })
+  let journey
+  try {
+    journey = await db.userJourney.create({
+      data: {
+        userId:              session.user.id,
+        name:                d.name,
+        fromLat:             d.fromLat,
+        fromLng:             d.fromLng,
+        fromLabel:           d.fromLabel,
+        toLat:               d.toLat,
+        toLng:               d.toLng,
+        toLabel:             d.toLabel,
+        dayOfWeek:           d.dayOfWeek,
+        departureHour:       d.departureHour,
+        departureMinute:     d.departureMinute,
+        flexMinutes:         d.flexMinutes,
+        preferredMode:       MODE_DB[d.preferredMode],
+        notifyMinutesBefore: d.notifyMinutesBefore,
+        emailNotify,
+      },
+    })
+  } catch (err) {
+    console.error('[my-journey POST] db.create failed:', err)
+    return Response.json({ error: 'Erreur base de données' }, { status: 500 })
+  }
 
   return Response.json({ journey }, { status: 201 })
 }
