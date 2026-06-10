@@ -31,23 +31,29 @@ function timeAgo(date: Date): string {
   return `Il y a ${Math.floor(m / 60)}h`
 }
 
+async function redisGet(key: string): Promise<unknown> {
+  try { return await redis.get(key) } catch { return null }
+}
+
 export async function GET(req: NextRequest) {
-  // Rate limiting
+  // Rate limiting — fail open if Redis is down
   const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
-  const { success } = await rl.limit(ip)
-  if (!success) return Response.json({ error: 'Too many requests' }, { status: 429 })
+  try {
+    const { success } = await rl.limit(ip)
+    if (!success) return Response.json({ error: 'Too many requests' }, { status: 429 })
+  } catch { /* Redis indisponible — fail open */ }
 
   // Journey status — spécifique à l'utilisateur si connecté
   const session = await auth()
   let myJourney: JourneyStatusResult | undefined
   if (session?.user?.id) {
-    const raw = await redis.get(`tif:journey:${session.user.id}:status`)
+    const raw = await redisGet(`tif:journey:${session.user.id}:status`)
     if (raw) myJourney = (typeof raw === 'string' ? JSON.parse(raw) : raw) as JourneyStatusResult
   }
 
   // Données globales depuis cache ou DB
   const cacheKey = 'tif:dashboard:global'
-  const cached   = await redis.get(cacheKey)
+  const cached   = await redisGet(cacheKey)
   let globalData: Record<string, unknown>
 
   if (cached) {
@@ -62,10 +68,10 @@ export async function GET(req: NextRequest) {
     })
 
     const [tpgStatus, cffStatus, cevaStatus, activeZonesRaw] = await Promise.all([
-      redis.get('tif:network:tpg:status'),
-      redis.get('tif:network:cff:status'),
-      redis.get('tif:network:ceva:status'),
-      redis.get('tif:active-zones-count'),
+      redisGet('tif:network:tpg:status'),
+      redisGet('tif:network:cff:status'),
+      redisGet('tif:network:ceva:status'),
+      redisGet('tif:active-zones-count'),
     ])
 
     globalData = {
@@ -88,7 +94,7 @@ export async function GET(req: NextRequest) {
       lastUpdated: now.toISOString(),
     }
 
-    await redis.set(cacheKey, JSON.stringify(globalData), { ex: 30 })
+    try { await redis.set(cacheKey, JSON.stringify(globalData), { ex: 30 }) } catch { /* skip cache write */ }
   }
 
   const response = Response.json({ ...globalData, myJourney })
