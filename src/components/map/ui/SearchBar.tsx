@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import type mapboxgl from 'mapbox-gl'
 import { springs } from '@/lib/animations/springs'
+import { useMapT } from '@/i18n/map'
 
 const LG: React.CSSProperties = {
   background:           'rgba(255,255,255,0.05)',
@@ -11,13 +12,6 @@ const LG: React.CSSProperties = {
   border:               '0.5px solid rgba(255,255,255,0.22)',
   boxShadow:            'inset 0 0.5px 0 rgba(255,255,255,0.30), 0 4px 24px rgba(0,0,0,0.10)',
 }
-
-const PLACEHOLDERS = [
-  'Où allez-vous ?',
-  'Bardonnex, Cornavin, Rive...',
-  'Un arrêt, une adresse, un lieu',
-  'Rechercher dans le Grand Genève',
-]
 
 interface SearchResult {
   id: string
@@ -32,6 +26,9 @@ interface SearchBarProps {
 }
 
 export function SearchBar({ map }: SearchBarProps) {
+  const t = useMapT()
+  const PLACEHOLDERS = [t.search.ph1, t.search.ph2, t.search.ph3, t.search.ph4]
+
   const [isOpen,         setIsOpen]         = useState(false)
   const [placeholderIdx, setPlaceholderIdx] = useState(0)
   const [query,          setQuery]          = useState('')
@@ -54,7 +51,7 @@ export function SearchBar({ map }: SearchBarProps) {
 
   useEffect(() => {
     if (!query || query.length < 2) { setResults([]); return }
-    const t = setTimeout(async () => {
+    const timer = setTimeout(async () => {
       setLoading(true)
       try {
         const res  = await fetch(`/api/v1/routing/geocode?q=${encodeURIComponent(query)}&bbox=5.9,46.1,6.5,46.5`)
@@ -63,7 +60,7 @@ export function SearchBar({ map }: SearchBarProps) {
       } catch { setResults([]) }
       finally { setLoading(false) }
     }, 300)
-    return () => clearTimeout(t)
+    return () => clearTimeout(timer)
   }, [query])
 
   const handleSelect = useCallback((result: SearchResult) => {
@@ -179,7 +176,7 @@ export function SearchBar({ map }: SearchBarProps) {
               ))
             ) : (
               <>
-                <p className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.25)' }}>Récents</p>
+                <p className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.25)' }}>{t.search.recent}</p>
                 {recentSearches.map(r => (
                   <button
                     key={r.id}

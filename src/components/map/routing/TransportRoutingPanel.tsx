@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import { SearchBox }   from './SearchBox'
 import type { SearchResult }   from '@/lib/routing/shared/search-engine'
 import type { TransportRoute } from '@/lib/routing/transport/transport-router'
+import { useMapT } from '@/i18n/map'
 
 import mapboxgl from 'mapbox-gl'
 
@@ -29,6 +30,10 @@ const SHEET_HEIGHTS: Record<SheetState, string> = {
 }
 
 export function TransportRoutingPanel({ map, onClose }: TransportRoutingPanelProps) {
+  const t = useMapT()
+  const tRef = useRef(t)
+  tRef.current = t
+
   const [origin,      setOrigin]      = useState<SearchResult | null>(null)
   const [destination, setDestination] = useState<SearchResult | null>(null)
   const [routes,      setRoutes]      = useState<TransportRoute[]>([])
@@ -82,8 +87,8 @@ export function TransportRoutingPanel({ map, onClose }: TransportRoutingPanelPro
         setSelected(0)
         setSheetState('full')
       }
-      else setError('Aucune connexion disponible.')
-    } catch { setError('Calcul indisponible.') }
+      else setError(tRef.current.transit.noConnection)
+    } catch { setError(tRef.current.transit.calcError) }
     finally  { setLoading(false) }
   }, [])
 
@@ -93,10 +98,10 @@ export function TransportRoutingPanel({ map, onClose }: TransportRoutingPanelPro
 
   useEffect(() => {
     if (routes.length === 0) return
-    const t = setInterval(() => {
+    const interval = setInterval(() => {
       if (origin && destination) calculate(origin, destination)
     }, 180_000)
-    return () => clearInterval(t)
+    return () => clearInterval(interval)
   }, [routes.length, origin, destination, calculate])
 
   // ── Place/update stop markers when routes or selected route changes ───────────
@@ -214,7 +219,7 @@ export function TransportRoutingPanel({ map, onClose }: TransportRoutingPanelPro
       >
         <div className="flex items-center gap-2">
           <span className="text-base">🚌</span>
-          <span className="text-sm font-semibold text-white/85">Itinéraire transports</span>
+          <span className="text-sm font-semibold text-white/85">{t.transit.title}</span>
         </div>
         {onClose && (
           <button
@@ -236,7 +241,7 @@ export function TransportRoutingPanel({ map, onClose }: TransportRoutingPanelPro
         {/* Inputs */}
         <div className="p-3 space-y-2">
           <SearchBox
-            placeholder="Point de départ…"
+            placeholder={t.transit.origin}
             icon="🔵"
             value={origin?.title}
             gpsHint
@@ -244,7 +249,7 @@ export function TransportRoutingPanel({ map, onClose }: TransportRoutingPanelPro
               if (!navigator.geolocation) return
               navigator.geolocation.getCurrentPosition(pos => {
                 const r: SearchResult = {
-                  id: 'gps', title: 'Ma position',
+                  id: 'gps', title: tRef.current.searchBox.gpsTitle,
                   lat: pos.coords.latitude, lng: pos.coords.longitude,
                   type: 'address',
                 }
@@ -258,7 +263,7 @@ export function TransportRoutingPanel({ map, onClose }: TransportRoutingPanelPro
             }}
           />
           <SearchBox
-            placeholder="Destination…"
+            placeholder={t.transit.destination}
             icon="🔴"
             value={destination?.title}
             onSelect={r => {
@@ -274,7 +279,7 @@ export function TransportRoutingPanel({ map, onClose }: TransportRoutingPanelPro
               className="w-3.5 h-3.5 border-2 rounded-full animate-spin"
               style={{ borderColor: '#0A84FF', borderTopColor: 'transparent' }}
             />
-            <span className="text-xs">Recherche des connexions…</span>
+            <span className="text-xs">{t.transit.searching}</span>
           </div>
         )}
         {error && <div className="px-4 pb-3 text-xs text-red-400">{error}</div>}
@@ -318,7 +323,7 @@ export function TransportRoutingPanel({ map, onClose }: TransportRoutingPanelPro
                   <div className="flex items-center gap-1.5 flex-wrap">
                     {route.summary.transfers > 0 && (
                       <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/5 text-white/35">
-                        {route.summary.transfers} corresp.
+                        {route.summary.transfers} {t.transit.transfers}
                       </span>
                     )}
                     {route.summary.walkDistance > 100 && (
@@ -331,7 +336,7 @@ export function TransportRoutingPanel({ map, onClose }: TransportRoutingPanelPro
                         className="text-[10px] px-1.5 py-0.5 rounded-full"
                         style={{ background: 'rgba(255,69,58,0.15)', color: '#FF453A' }}
                       >
-                        ⚠ Perturbation
+                        {t.transit.disruption}
                       </span>
                     )}
                   </div>
@@ -345,7 +350,7 @@ export function TransportRoutingPanel({ map, onClose }: TransportRoutingPanelPro
                           <div className="flex-1 min-w-0">
                             {leg.type === 'walk' ? (
                               <span className="text-[10px] text-white/30">
-                                Marche {leg.walkDistance ? `${Math.round(leg.walkDistance)}m` : ''}
+                                {t.transit.walk} {leg.walkDistance ? `${Math.round(leg.walkDistance)}m` : ''}
                               </span>
                             ) : (
                               <div className="space-y-0.5">
@@ -379,7 +384,7 @@ export function TransportRoutingPanel({ map, onClose }: TransportRoutingPanelPro
                             )}
                             {leg.delayMinutes > 0 && (
                               <span className="text-[10px] text-red-400 font-medium">
-                                +{leg.delayMinutes} min retard
+                                +{leg.delayMinutes} {t.transit.delay}
                               </span>
                             )}
                           </div>
@@ -391,7 +396,7 @@ export function TransportRoutingPanel({ map, onClose }: TransportRoutingPanelPro
               </div>
             ))}
             <div className="px-4 pt-1">
-              <p className="text-[10px] text-white/20">TPG · CFF · Léman Express · Données temps réel</p>
+              <p className="text-[10px] text-white/20">{t.transit.footer}</p>
             </div>
           </div>
         )}

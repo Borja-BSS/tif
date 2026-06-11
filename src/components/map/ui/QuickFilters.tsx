@@ -1,21 +1,11 @@
 'use client'
 
 import { springs } from '@/lib/animations/springs'
+import { useMapT } from '@/i18n/map'
 
-export type FilterId = 'all' | 'transit' | 'traffic' | 'alerts' | 'borders' | 'g7' | 'journey' | 'parking'
+export type FilterId = 'all' | 'transit' | 'traffic' | 'alerts' | 'borders' | 'g7' | 'journey' | 'parking' | 'events'
 
 interface FilterDef { id: FilterId; icon: string; label: string }
-
-const FILTERS: FilterDef[] = [
-  { id: 'all',     icon: '🗺️',  label: 'Tout'      },
-  { id: 'traffic', icon: '🚦',  label: 'Trafic'     },
-  { id: 'alerts',  icon: '⚠️',  label: 'Alertes'    },
-  { id: 'transit', icon: '🚌',  label: 'Transport'  },
-  { id: 'parking', icon: '🅿️', label: 'Parking'    },
-  { id: 'borders', icon: '🛂',  label: 'Frontières' },
-  { id: 'g7',      icon: '🏛️', label: 'Info G7'    },
-  { id: 'journey', icon: '⭐',  label: 'Mon Trajet' },
-]
 
 interface QuickFiltersProps {
   active:       FilterId
@@ -32,11 +22,25 @@ const PILL_BASE: React.CSSProperties = {
 }
 
 export function QuickFilters({ active, onChange, showJourney = false }: QuickFiltersProps) {
+  const t = useMapT()
+
+  const FILTERS: FilterDef[] = [
+    { id: 'all',     icon: '🗺️',  label: t.filters.all     },
+    { id: 'traffic', icon: '🚦',  label: t.filters.traffic  },
+    { id: 'alerts',  icon: '⚠️',  label: t.filters.alerts   },
+    { id: 'transit', icon: '🚌',  label: t.filters.transit  },
+    { id: 'parking', icon: '🅿️', label: t.filters.parking  },
+    { id: 'borders', icon: '🛂',  label: t.filters.borders  },
+    { id: 'g7',      icon: '🏛️', label: t.filters.g7       },
+    { id: 'journey', icon: '⭐',  label: t.filters.journey  },
+    { id: 'events',  icon: '🗓️', label: t.eventsSection.filterLabel },
+  ]
+
   const visible = FILTERS.filter(f => f.id !== 'journey' || showJourney)
 
   return (
     <div
-      className="fixed left-0 right-0 z-20 flex gap-2 px-4 overflow-x-auto"
+      className="fixed left-0 right-0 z-40 flex gap-2 px-4 overflow-x-auto"
       style={{ top: 'calc(52px + 12px + 8px)', height: 40, scrollbarWidth: 'none', msOverflowStyle: 'none' } as React.CSSProperties}
     >
       {visible.map(f => {

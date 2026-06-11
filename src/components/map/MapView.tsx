@@ -9,6 +9,7 @@ import type { FilterId } from './ui/QuickFilters'
 import { useTerritorialLayers }    from './useTerritorialLayers'
 import { useHereMobilityLayer }    from './useHereMobilityLayer'
 import { useTransitNetworkLayer }  from './useTransitNetworkLayer'
+import { useMapT } from '@/i18n/map'
 
 const MapGL                = dynamic(() => import('./MapGL'),                { ssr: false })
 const RealtimeLayer        = dynamic(() => import('./RealtimeLayer'),        { ssr: false })
@@ -21,6 +22,7 @@ const RoadClosuresLayer    = dynamic(() => import('./RoadClosuresLayer'),    { s
 const ConstructionLayer    = dynamic(() => import('./ConstructionLayer'),    { ssr: false })
 const HereIncidentsLayer   = dynamic(() => import('./HereIncidentsLayer'),   { ssr: false })
 const ParkingLayer         = dynamic(() => import('./ParkingLayer'),         { ssr: false })
+const EventsLayer          = dynamic(() => import('./EventsLayer'),          { ssr: false })
 
 const DEFAULT_FILTERS: FilterState = {
   heatmap:   true,
@@ -30,13 +32,6 @@ const DEFAULT_FILTERS: FilterState = {
   parking:   false,
 }
 
-const TRANSPORT_LEGEND = [
-  { color: '#FF9500', label: 'Tram TPG' },
-  { color: '#34C759', label: 'Bus TPG'  },
-  { color: '#0040FF', label: 'Train CFF' },
-  { color: '#AF52DE', label: 'Léman Express' },
-  { color: '#FF3B30', label: 'Ligne perturbée', dashed: true },
-]
 
 interface MapViewProps extends Omit<MapGLProps, 'onMapReady'> {
   filters?:      FilterState
@@ -48,19 +43,7 @@ export default function MapView({ filters: externalFilters, activeFilter = 'all'
   const [map,             setMap]             = useState<mapboxgl.Map | null>(null)
   const [internalFilters, setInternalFilters] = useState<FilterState>(DEFAULT_FILTERS)
   const filters = externalFilters ?? internalFilters
-  const [territoryToast,  setTerritoryToast]  = useState(false)
-  const territoryShownRef = useRef(false)
-  const searchPinRef      = useRef<mapboxgl.Marker | null>(null)
-
-  // ── Territory toast — shown once per session on first activation ──────────────
-  useEffect(() => {
-    if (filters.territory && !territoryShownRef.current) {
-      territoryShownRef.current = true
-      setTerritoryToast(true)
-      const t = setTimeout(() => setTerritoryToast(false), 3000)
-      return () => clearTimeout(t)
-    }
-  }, [filters.territory])
+  const searchPinRef = useRef<mapboxgl.Marker | null>(null)
 
   useHereMobilityLayer(map, filters.heatmap && !filters.transport)
   useTransitNetworkLayer(map, filters.transport)
@@ -109,6 +92,7 @@ export default function MapView({ filters: externalFilters, activeFilter = 'all'
           <AlertLayer     map={map} visible={filters.alerts} />
           <HereIncidentsLayer map={filters.alerts && !filters.transport ? map : null} />
           <ParkingLayer       map={filters.parking ? map : null} />
+          <EventsLayer        map={activeFilter === 'events' ? map : null} />
 
           {/* Transport legend — compact Liquid Glass badge, bottom-right */}
           {filters.transport && (
@@ -125,34 +109,21 @@ export default function MapView({ filters: externalFilters, activeFilter = 'all'
         </>
       )}
 
-      {/* Territory toast — first activation of the session */}
-      {territoryToast && (
-        <div
-          className="absolute top-4 left-1/2 -translate-x-1/2 z-40 px-4 py-3 rounded-2xl
-                     text-sm font-medium text-white/90 text-center max-w-xs
-                     animate-in fade-in slide-in-from-top-2 duration-300"
-          style={{
-            background:           'rgba(18,18,22,0.88)',
-            backdropFilter:       'blur(20px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-            border:               '1px solid rgba(255,196,0,0.35)',
-            boxShadow:            'inset 0 0.5px 0 rgba(255,255,255,0.12), 0 8px 32px rgba(0,0,0,0.5)',
-          }}
-        >
-          <span className="mr-1">🗺️</span>
-          <span style={{ color: 'rgba(255,196,0,0.9)' }}>Zones G7</span>
-          <span className="text-white/60"> — </span>
-          <span className="text-[12px] text-white/75">
-            Périmètres de sécurité, restrictions d&apos;accès et conditions d&apos;entrée pour le Grand Genève du 8 au 18 juin 2026.
-          </span>
-        </div>
-      )}
+
     </>
   )
 }
 
 // ── Transport legend — compact Liquid Glass badge ─────────────────────────────
 function TransportLegend() {
+  const t = useMapT()
+  const TRANSPORT_LEGEND = [
+    { color: '#FF9500', label: t.mapView.tramTpg },
+    { color: '#34C759', label: t.mapView.busTpg  },
+    { color: '#0040FF', label: t.mapView.trainCff },
+    { color: '#AF52DE', label: t.mapView.leman },
+    { color: '#FF3B30', label: t.mapView.disrupted, dashed: true },
+  ]
   return (
     <div
       className="absolute bottom-24 left-4 z-10 rounded-2xl px-3 py-2.5"
@@ -183,7 +154,7 @@ function TransportLegend() {
         <div className="flex items-center gap-2 border-t pt-1 mt-0.5" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
           <span className="text-[10px]">🚧</span>
           <span className="text-[10px] font-medium" style={{ color: 'rgba(255,255,255,0.55)' }}>
-            Perturbation arrêt
+            {t.mapView.stopDisruption}
           </span>
         </div>
       </div>

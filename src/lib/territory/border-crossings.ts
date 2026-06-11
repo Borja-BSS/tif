@@ -69,7 +69,7 @@ const CROSSINGS: Crossing[] = [
       'Vignette autoroutière CH · CHF 40/an (obligatoire A1)',
       'Assurance RC véhicule',
     ],
-    g7Info: '⭐ Poste macaron prioritaire · Voie rapide réservée au personnel indispensable (soins, urgences, services essentiels GE résidant en France) · Délai de dépôt expiré le 27 mai 2026 · Contrôles systématiques CNI/passeport 12-18 juin',
+    g7Info: '⭐ Poste macaron prioritaire · Accès prioritaire réservé au personnel essentiel des services critiques · Douanes secondaires ouvertes sur plages horaires dédiées · Pièce d\'identité obligatoire · Contrôles systématiques 12–18 juin · Des temps d\'attente sont à prévoir',
   },
   {
     id: 'thonex-vallard', name: 'Thônex-Vallard',
@@ -82,7 +82,7 @@ const CROSSINGS: Crossing[] = [
       'Permis de conduire + carte grise',
       'Assurance RC véhicule',
     ],
-    g7Info: '⭐ Poste macaron prioritaire · Voie rapide réservée au personnel indispensable · Délai de dépôt expiré le 27 mai 2026 · Contrôles systématiques CNI/passeport 12-18 juin',
+    g7Info: '⭐ Poste macaron prioritaire · Accès prioritaire réservé au personnel essentiel des services critiques · Douanes secondaires ouvertes sur plages horaires dédiées · Pièce d\'identité obligatoire · Contrôles systématiques 12–18 juin · Des temps d\'attente sont à prévoir',
   },
   {
     id: 'moillesulaz', name: 'Moillesulaz',
@@ -95,7 +95,7 @@ const CROSSINGS: Crossing[] = [
       'Permis de conduire + carte grise',
       'Crit\'Air ou Stick\'AIR (ZFE Annemasse, depuis janv. 2025)',
     ],
-    g7Info: '✓ Ouvert 24/7 pendant le G7 · Contrôles renforcés · Délais accrus (+15-30 min attendus)',
+    g7Info: '✓ Ouvert 24/7 pendant le G7 · Pièce d\'identité obligatoire · Contrôles renforcés · Des temps d\'attente sont à prévoir',
   },
   {
     id: 'meyrin', name: 'Meyrin',
@@ -108,7 +108,7 @@ const CROSSINGS: Crossing[] = [
       'Permis de conduire + carte grise',
       'Assurance RC véhicule',
     ],
-    g7Info: '✓ Ouvert 24/7 pendant le G7 · Contrôles systématiques · Corridor CERN maintenu',
+    g7Info: '✓ Ouvert 24/7 pendant le G7 · Pièce d\'identité obligatoire · Contrôles systématiques · Corridor CERN maintenu',
   },
   {
     id: 'ferney-voltaire', name: 'Ferney-Voltaire',
@@ -121,7 +121,7 @@ const CROSSINGS: Crossing[] = [
       'Permis de conduire + carte grise',
       'Assurance RC véhicule',
     ],
-    g7Info: '✓ Ouvert 24/7 pendant le G7 · Contrôles renforcés · Proximité aéroport GVA',
+    g7Info: '✓ Ouvert 24/7 pendant le G7 · Pièce d\'identité obligatoire · Contrôles renforcés · Proximité aéroport GVA',
   },
   {
     id: 'perly', name: 'Perly',
@@ -133,7 +133,7 @@ const CROSSINGS: Crossing[] = [
       'CNI ou passeport obligatoire',
       'Permis de conduire + carte grise',
     ],
-    g7Info: '✓ Ouvert 24/7 pendant le G7 · Route de Saint-Julien-en-Genevois · Délais modérés',
+    g7Info: '✓ Ouvert 24/7 pendant le G7 · Pièce d\'identité obligatoire · Route de Saint-Julien-en-Genevois · Des temps d\'attente sont à prévoir',
   },
   {
     id: 'anieres', name: 'Anières',
@@ -145,7 +145,7 @@ const CROSSINGS: Crossing[] = [
       'CNI ou passeport obligatoire',
       'Permis de conduire + carte grise',
     ],
-    g7Info: '✓ Ouvert 24/7 pendant le G7 · Passage est du canton · Faible trafic attendu',
+    g7Info: '✓ Ouvert 24/7 pendant le G7 · Pièce d\'identité obligatoire · Passage est du canton · Des temps d\'attente sont à prévoir',
   },
 
   // ── TIER 2 — Heures restreintes (06:00–20:00), FERMÉS pendant G7 ──────────

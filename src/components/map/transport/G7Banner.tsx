@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import type { G7Impact } from '@/lib/transport/types'
+import { useMapT } from '@/i18n/map'
 
 export function G7Banner() {
+  const t = useMapT()
   const [g7, setG7]           = useState<G7Impact | null>(null)
   const [dismissed, setDismissed] = useState(false)
 
@@ -31,18 +33,16 @@ export function G7Banner() {
             <div className="flex items-center gap-2 mb-1">
               <span className="text-base">🏛️</span>
               <span className="font-semibold text-white text-sm">
-                {g7.isActive ? 'G7 en cours — Perturbations TPG' : 'G7 Évian — À venir'}
+                {g7.isActive ? t.banner.activeTitle : t.banner.upcomingTitle}
               </span>
             </div>
             <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>
-              {g7.isActive
-                ? 'Horaire vacances en vigueur sur la plupart des lignes TPG.'
-                : 'Perturbations TPG prévues du 8 au 17 juin. Anticipez vos déplacements.'}
+              {g7.isActive ? t.banner.activeBody : t.banner.upcomingBody}
               {g7.suspendedLines.length > 0 &&
-                ` Ligne${g7.suspendedLines.length > 1 ? 's' : ''} ${g7.suspendedLines.join(', ')} supprimée${g7.suspendedLines.length > 1 ? 's' : ''}.`}
+                ` ${g7.suspendedLines.length > 1 ? t.banner.lineSuppPrefixP : t.banner.lineSuppPrefixS} ${g7.suspendedLines.join(', ')} ${g7.suspendedLines.length > 1 ? t.banner.lineSuppSuffixP : t.banner.lineSuppSuffixS}`}
             </p>
             <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
-              Info TPG : <span style={{ color: 'rgba(255,255,255,0.65)' }}>{g7.hotline}</span>
+              {t.banner.infoPrefix}<span style={{ color: 'rgba(255,255,255,0.65)' }}>{g7.hotline}</span>
             </p>
           </div>
           <button

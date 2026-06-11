@@ -13,7 +13,7 @@ export function GuestBanner() {
   const secs    = secondsLeft % 60
   const timeStr = `${mins}:${secs.toString().padStart(2, '0')}`
 
-  const urgency     = secondsLeft <= 5 ? 'red' : secondsLeft <= 15 ? 'orange' : 'neutral'
+  const urgency     = secondsLeft <= 30 ? 'red' : secondsLeft <= 120 ? 'orange' : 'neutral'
   const bgColor     = urgency === 'red'    ? 'rgba(255,69,58,0.18)'
                     : urgency === 'orange' ? 'rgba(255,159,10,0.14)'
                     :                        'rgba(255,255,255,0.06)'

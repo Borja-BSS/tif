@@ -5,24 +5,28 @@ import {
   type ReactNode,
 } from 'react'
 
-const STORAGE_KEY = 'tif-guest-expiry'
+const STORAGE_KEY         = 'tif-guest-expiry'
+const WELCOME_SEEN_KEY    = 'tif-guest-welcome-seen'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface GuestContextValue {
-  isGuest:     boolean
-  hasExpired:  boolean
-  secondsLeft: number
-  startGuest:  (expiresAt: number) => void
-  endGuest:    () => void
+  isGuest:        boolean
+  hasExpired:     boolean
+  secondsLeft:    number
+  showWelcome:    boolean
+  startGuest:     (expiresAt: number) => void
+  endGuest:       () => void
+  dismissWelcome: () => void
 }
 
 const GuestContext = createContext<GuestContextValue | null>(null)
 
 // ── Provider ──────────────────────────────────────────────────────────────────
 export function GuestProvider({ children }: { children: ReactNode }) {
-  const [isGuest,     setIsGuest]     = useState(false)
-  const [hasExpired,  setHasExpired]  = useState(false)
-  const [secondsLeft, setSecondsLeft] = useState(0)
+  const [isGuest,      setIsGuest]      = useState(false)
+  const [hasExpired,   setHasExpired]   = useState(false)
+  const [secondsLeft,  setSecondsLeft]  = useState(0)
+  const [showWelcome,  setShowWelcome]  = useState(false)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   function clearTick() {
@@ -69,20 +73,29 @@ export function GuestProvider({ children }: { children: ReactNode }) {
   function startGuest(expiresAt: number) {
     if (expiresAt - Date.now() <= 0) return
     sessionStorage.setItem(STORAGE_KEY, String(expiresAt))
+    const alreadySeen = sessionStorage.getItem(WELCOME_SEEN_KEY) === '1'
+    if (!alreadySeen) setShowWelcome(true)
     startCountdown(expiresAt)
+  }
+
+  function dismissWelcome() {
+    sessionStorage.setItem(WELCOME_SEEN_KEY, '1')
+    setShowWelcome(false)
   }
 
   function endGuest() {
     clearTick()
     sessionStorage.removeItem(STORAGE_KEY)
+    sessionStorage.removeItem(WELCOME_SEEN_KEY)
     document.cookie = 'tif-guest-token=; Max-Age=0; path=/'
     setIsGuest(false)
     setHasExpired(false)
     setSecondsLeft(0)
+    setShowWelcome(false)
   }
 
   return (
-    <GuestContext.Provider value={{ isGuest, hasExpired, secondsLeft, startGuest, endGuest }}>
+    <GuestContext.Provider value={{ isGuest, hasExpired, secondsLeft, showWelcome, startGuest, endGuest, dismissWelcome }}>
       {children}
     </GuestContext.Provider>
   )

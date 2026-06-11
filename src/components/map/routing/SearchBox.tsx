@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react'
 import type { SearchResult } from '@/lib/routing/shared/search-engine'
+import { useMapT } from '@/i18n/map'
 
 interface SearchBoxProps {
   placeholder:   string
@@ -34,6 +35,7 @@ const LG_DROPDOWN: React.CSSProperties = {
 export function SearchBox({
   placeholder, onSelect, value, icon, gpsHint, onGPSSelect, loading,
 }: SearchBoxProps) {
+  const t = useMapT()
   const [query,    setQuery]    = useState(value ?? '')
   const [results,  setResults]  = useState<SearchResult[]>([])
   const [isOpen,   setIsOpen]   = useState(false)
@@ -183,10 +185,10 @@ export function SearchBox({
               </span>
               <div>
                 <div className="text-sm font-semibold" style={{ color: '#0A84FF' }}>
-                  Ma position
+                  {t.searchBox.gpsTitle}
                 </div>
                 <div className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                  Utiliser la localisation GPS
+                  {t.searchBox.gpsSub}
                 </div>
               </div>
             </button>
@@ -235,7 +237,7 @@ export function SearchBox({
                     className="flex-shrink-0 text-[9px] font-semibold px-1.5 py-0.5 rounded-full uppercase tracking-wide"
                     style={{ background: 'rgba(50,215,75,0.15)', color: 'rgba(50,215,75,0.9)' }}
                   >
-                    Arrêt
+                    {t.searchBox.stopBadge}
                   </span>
                 )}
               </button>

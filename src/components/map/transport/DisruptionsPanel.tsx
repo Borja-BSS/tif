@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import type { TpgDisruption, CffDisruption } from '@/lib/transport/types'
+import { useMapT } from '@/i18n/map'
 
 interface DisruptionDetail {
   tpg:   TpgDisruption[]
@@ -18,6 +19,7 @@ const TYPE_ICON: Record<string, string> = {
 }
 
 export function DisruptionsPanel() {
+  const t = useMapT()
   const [data, setData]           = useState<DisruptionDetail | null>(null)
   const [collapsed, setCollapsed] = useState(false)
 
@@ -51,7 +53,7 @@ export function DisruptionsPanel() {
           <div className="flex items-center gap-2">
             <span className="text-sm">⚠️</span>
             <span className="text-sm font-semibold text-white">
-              Perturbations réseau
+              {t.disruptions.title}
             </span>
             <span
               className="text-xs px-1.5 py-0.5 rounded-full font-bold"

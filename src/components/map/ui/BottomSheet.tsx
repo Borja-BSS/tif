@@ -11,8 +11,15 @@ import type { FilterId } from './QuickFilters'
 import type { JourneyStatusResult } from '@/lib/my-journey/types'
 import type mapboxgl from 'mapbox-gl'
 import { JourneySetup } from '@/components/my-journey/JourneySetup'
+import { firebaseAuth } from '@/lib/firebase'
+import { G7BulletinsPanel } from './G7Bulletins'
+import { useMapT } from '@/i18n/map'
+import type { MapT } from '@/i18n/map'
+import { events, CATEGORY_LABELS, CATEGORY_ICONS } from '@/data/events'
+import type { EventItem } from '@/data/types'
+import { getAlertsForDay } from '@/data/g7-alerts'
 
-type DetailView = 'overview' | 'douanes' | 'transport' | 'alertes' | 'g7' | 'meteo' | 'parking' | 'journey'
+type DetailView = 'overview' | 'douanes' | 'transport' | 'alertes' | 'g7' | 'meteo' | 'parking' | 'journey' | 'events'
 
 const COMPACT_H = 56
 const getFullH  = () => (typeof window !== 'undefined' ? window.innerHeight - 120 : 600)
@@ -121,6 +128,7 @@ function CrossingDetail({ crossing, onBack: _onBack, onLocate }: {
   onBack:   () => void
   onLocate: (c: CrossingStatic) => void
 }) {
+  const t   = useMapT()
   const now = new Date()
   const s   = computeInstantStatus(crossing, now)
 
@@ -130,16 +138,16 @@ function CrossingDetail({ crossing, onBack: _onBack, onLocate }: {
 
   const sources = getCrossingSources(crossing.id, isG7Period)
 
-  const statusLabel = s.status === 'BLOCKED'  ? 'Fermé'
-    : s.status === 'HEAVY'    ? `Chargé · ~${s.waitMinutes} min d'attente`
-    : s.status === 'MODERATE' ? `Ralenti · ~${s.waitMinutes} min d'attente`
-    : s.status === 'LIGHT'    ? `Fluide · ~${s.waitMinutes} min`
-    : 'Libre · Sans attente'
+  const statusLabel = s.status === 'BLOCKED'  ? t.crossing.closed
+    : s.status === 'HEAVY'    ? t.crossing.heavy.replace('{n}', String(s.waitMinutes))
+    : s.status === 'MODERATE' ? t.crossing.moderate.replace('{n}', String(s.waitMinutes))
+    : s.status === 'LIGHT'    ? t.crossing.light.replace('{n}', String(s.waitMinutes))
+    : t.crossing.clear
 
-  const typeLabel = crossing.type === 'motorway' ? 'Autoroute'
-    : crossing.type === 'main'      ? 'Route principale'
-    : crossing.type === 'secondary' ? 'Route secondaire'
-    : 'Voie locale / piétonne'
+  const typeLabel = crossing.type === 'motorway' ? t.crossing.motorway
+    : crossing.type === 'main'      ? t.crossing.main
+    : crossing.type === 'secondary' ? t.crossing.secondary
+    : t.crossing.local
 
   return (
     <div>
@@ -170,26 +178,26 @@ function CrossingDetail({ crossing, onBack: _onBack, onLocate }: {
           <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/>
           <circle cx="12" cy="10" r="3"/>
         </svg>
-        Voir sur la carte
+        {t.crossing.viewOnMap}
       </button>
 
       {/* Infos pratiques */}
       <div className="rounded-2xl p-4 mb-3 space-y-2.5"
         style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
         <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>
-          Infos pratiques
+          {t.crossing.practicalInfo}
         </p>
         <div className="flex items-start gap-2.5">
           <span className="text-base flex-shrink-0">🕐</span>
           <div>
-            <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Horaires</p>
+            <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{t.crossing.schedule}</p>
             <p className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>{crossing.hours}</p>
           </div>
         </div>
         <div className="flex items-start gap-2.5">
           <span className="text-base flex-shrink-0">🚗</span>
           <div>
-            <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Véhicules autorisés</p>
+            <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{t.crossing.vehicles}</p>
             <p className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
               {crossing.vehicles.join(' · ')}
             </p>
@@ -198,7 +206,7 @@ function CrossingDetail({ crossing, onBack: _onBack, onLocate }: {
         {crossing.pedestrian && (
           <div className="flex items-center gap-2.5">
             <span className="text-base">🚶</span>
-            <p className="text-sm" style={{ color: 'var(--text-primary)' }}>Passage piétons / vélos autorisé</p>
+            <p className="text-sm" style={{ color: 'var(--text-primary)' }}>{t.crossing.pedestrian}</p>
           </div>
         )}
       </div>
@@ -220,7 +228,7 @@ function CrossingDetail({ crossing, onBack: _onBack, onLocate }: {
           {crossing.nearestOpen && s.status === 'BLOCKED' && (
             <div className="mt-2 pt-2" style={{ borderTop: '1px solid rgba(255,69,58,0.15)' }}>
               <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>
-                <span style={{ color: '#30D158' }}>✓ Alternative : </span>
+                <span style={{ color: '#30D158' }}>{t.crossing.alternative}</span>
                 {crossing.nearestOpen}
               </p>
             </div>
@@ -231,7 +239,7 @@ function CrossingDetail({ crossing, onBack: _onBack, onLocate }: {
       {/* Sources officielles — liens cliquables */}
       <div className="rounded-2xl p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
         <p className="text-[10px] font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-tertiary)' }}>
-          Sources officielles
+          {t.crossing.officialSources}
         </p>
         <div className="space-y-2">
           {sources.map(src => (
@@ -264,10 +272,11 @@ function DouanesDetail({ onSelect, map }: {
   onSelect: (c: CrossingStatic) => void
   map:      mapboxgl.Map | null
 }) {
+  const t        = useMapT()
   const now      = new Date()
   const crossings = ALL_CROSSINGS.map(c => ({ c, s: computeInstantStatus(c, now) }))
     .sort((a, b) => {
-      const order = { BLOCKED: 0, HEAVY: 1, MODERATE: 2, LIGHT: 3, CLEAR: 4 }
+      const order = { CLEAR: 0, LIGHT: 1, MODERATE: 2, HEAVY: 3, BLOCKED: 4 }
       return order[a.s.status] - order[b.s.status]
     })
 
@@ -285,8 +294,8 @@ function DouanesDetail({ onSelect, map }: {
   return (
     <div className="space-y-2">
       <p className="text-[10px] font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-tertiary)' }}>
-        {crossings.length} passages · {open24} ouverts 24h/24
-        {blocked > 0 ? ` · ${blocked} fermés G7` : ''}
+        {crossings.length} {t.crossing.crossings} · {open24} {t.crossing.open24}
+        {blocked > 0 ? ` · ${blocked} ${t.crossing.closedG7}` : ''}
       </p>
       {crossings.map(({ c, s }) => (
         <button
@@ -305,11 +314,11 @@ function DouanesDetail({ onSelect, map }: {
           <div className="flex items-center gap-2 flex-shrink-0">
             <span className="text-[11px] font-bold px-2 py-0.5 rounded-full"
               style={{ background: `${s.color}18`, color: s.color }}>
-              {s.status === 'BLOCKED' ? 'Fermé'
+              {s.status === 'BLOCKED' ? t.crossing.closedShort
                 : s.status === 'HEAVY' ? `${s.waitMinutes} min`
                 : s.status === 'MODERATE' ? `${s.waitMinutes} min`
                 : s.status === 'LIGHT' ? `${s.waitMinutes} min`
-                : 'Libre'}
+                : t.crossing.freeShort}
             </span>
             <svg width="6" height="10" viewBox="0 0 6 10" fill="none" stroke="var(--text-tertiary)" strokeWidth="1.5" strokeLinecap="round">
               <path d="M1 1l4 4-4 4"/>
@@ -337,6 +346,7 @@ interface StopDeparture { time: string | null; direction: string; delay: number 
 interface StopDeparturesData { stopName: string; departures: StopDeparture[] }
 
 function StopDeparturesPanel({ name, line, onClose }: { name: string; line: string; onClose: () => void }) {
+  const t = useMapT()
   const { data, isLoading } = useQuery<StopDeparturesData>({
     queryKey:  ['tpg-stop-departures', name, line],
     queryFn:   () => fetch(`/api/v1/tpg-stop-departures?stopName=${encodeURIComponent(name)}&line=${line}`, { signal: AbortSignal.timeout(10000) }).then(r => r.json()),
@@ -351,7 +361,7 @@ function StopDeparturesPanel({ name, line, onClose }: { name: string; line: stri
     <div className="rounded-2xl p-4 space-y-3" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>Arrêt · Ligne {line}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>{t.transport.stopLine} {line}</p>
           <p className="text-sm font-bold mt-0.5" style={{ color: 'var(--text-primary)' }}>{name}</p>
         </div>
         <button onClick={onClose} className="text-[18px] leading-none" style={{ color: 'var(--text-tertiary)' }}>×</button>
@@ -362,7 +372,7 @@ function StopDeparturesPanel({ name, line, onClose }: { name: string; line: stri
         </div>
       )}
       {!isLoading && (data?.departures ?? []).length === 0 && (
-        <p className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>Aucun départ trouvé</p>
+        <p className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>{t.transport.noDeparts}</p>
       )}
       {!isLoading && (data?.departures ?? []).map((d, i) => {
         const delay = d.delay ?? 0
@@ -380,6 +390,7 @@ function StopDeparturesPanel({ name, line, onClose }: { name: string; line: stri
 }
 
 function TransportDetail({ onExpand }: { onExpand?: () => void }) {
+  const t = useMapT()
   const [selectedLine, setSelectedLine] = useState<string | null>(null)
   const [selectedStop, setSelectedStop] = useState<{ name: string; coord: [number, number]; line: string } | null>(null)
 
@@ -432,7 +443,7 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
   const cevaStatus = cevaDisruptions.length === 0 ? 'normal' : 'delayed'
 
   const statusColor = (s: string) => s === 'normal' ? '#30D158' : '#FF9F0A'
-  const statusLabel = (s: string) => s === 'normal' ? 'Normal' : 'Retards'
+  const statusLabel = (s: string) => s === 'normal' ? t.transport.statusNormal : t.transport.statusDelays
 
   const TYPE_ICON: Record<string, string> = {
     travaux: '🚧', deviation: '🔀', suppression: '🚫', retard: '⏱️', perturbation: '⚠️',
@@ -441,7 +452,7 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
   return (
     <div className="space-y-3">
       <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>
-        Statut réseau temps réel
+        {t.transport.networkStatus}
       </p>
 
       {isLoading && (
@@ -475,7 +486,7 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
       {/* Section lignes TPG par ligne */}
       <div className="pt-1">
         <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-tertiary)' }}>
-          Lignes TPG · opendata.ch
+          {t.transport.tpgLines}
         </p>
         {linesLoading && (
           <div className="flex items-center gap-2 py-2">
@@ -576,7 +587,7 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
                 })}
               </div>
               <p className="text-center text-[10px] py-2" style={{ color: 'var(--text-tertiary)' }}>
-                Tapez un arrêt pour les prochains départs
+                {t.transport.tapStop}
               </p>
             </div>
           )
@@ -591,7 +602,7 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
           />
         )}
         {!linesLoading && (tpgLines?.lines ?? []).length === 0 && (
-          <p className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>Aucune ligne détectée</p>
+          <p className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>{t.transport.noLines}</p>
         )}
       </div>
 
@@ -599,7 +610,7 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
       {tpgDisruptions.length > 0 && (
         <div className="space-y-1.5">
           <p className="text-[10px] font-semibold uppercase tracking-wider pt-1" style={{ color: 'var(--text-tertiary)' }}>
-            Retards TPG détectés
+            {t.transport.tpgDelays}
           </p>
           {tpgDisruptions.map((d, i) => (
             <div key={i} className="flex gap-3 rounded-xl px-3 py-2.5"
@@ -613,7 +624,7 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
                   </span>
                   {d.detectedAt && (
                     <span className="text-[10px] flex-shrink-0" style={{ color: 'var(--text-tertiary)' }}>
-                      dép. {new Date(d.detectedAt).toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Zurich' })}
+                      {t.transport.depPrefix}{new Date(d.detectedAt).toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Zurich' })}
                     </span>
                   )}
                 </div>
@@ -627,7 +638,7 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
       {[...cffDisruptions, ...cevaDisruptions].length > 0 && (
         <div className="space-y-1.5">
           <p className="text-[10px] font-semibold uppercase tracking-wider pt-1" style={{ color: 'var(--text-tertiary)' }}>
-            Retards CFF / CEVA
+            {t.transport.cffDelays}
           </p>
           {[...cffDisruptions, ...cevaDisruptions].map((d, i) => (
             <div key={i} className="flex gap-3 rounded-xl px-3 py-2.5"
@@ -641,7 +652,7 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
                   </span>
                   {d.detectedAt && (
                     <span className="text-[10px] flex-shrink-0" style={{ color: 'var(--text-tertiary)' }}>
-                      dép. {new Date(d.detectedAt).toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Zurich' })}
+                      {t.transport.depPrefix}{new Date(d.detectedAt).toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Zurich' })}
                     </span>
                   )}
                 </div>
@@ -653,7 +664,7 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
       )}
 
       <p className="text-[11px] text-center pt-1" style={{ color: 'var(--text-tertiary)' }}>
-        Retards temps réel · opendata.ch
+        {t.transport.rtFooter}
       </p>
     </div>
   )
@@ -661,6 +672,7 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
 
 // ── Alertes — fetch direct depuis layers/alerts (HERE + OFROU + TPG + météo) ───
 function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
+  const t = useMapT()
   const { data: geoJson, isLoading } = useQuery<{ type: string; features: { properties: Record<string, unknown>; geometry: { coordinates: number[] } }[] }>({
     queryKey:        ['layers-alerts'],
     queryFn:         () => fetch('/api/v1/layers/alerts', { signal: AbortSignal.timeout(6000) }).then(r => r.json()),
@@ -678,14 +690,14 @@ function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
     lat:         f.geometry?.coordinates?.[1],
   }))
 
-  const typeLabel = (t: string) =>
-    t === 'ACCIDENT'     ? '🚗 Accident'
-    : t === 'CONSTRUCTION' ? '🚧 Travaux'
-    : t === 'CONGESTION'   ? '🚦 Bouchon'
-    : t === 'ROAD_CLOSURE' ? '🚫 Route fermée'
-    : t === 'tpg'          ? '🚌 Perturbation TPG'
-    : t === 'weather'      ? '⛈️ Météo'
-    : '⚠️ Incident'
+  const typeLabel = (type: string) =>
+    type === 'ACCIDENT'     ? t.alertsSection.accident
+    : type === 'CONSTRUCTION' ? t.alertsSection.construction
+    : type === 'CONGESTION'   ? t.alertsSection.congestion
+    : type === 'ROAD_CLOSURE' ? t.alertsSection.roadClosure
+    : type === 'tpg'          ? t.alertsSection.tpgDisruption
+    : type === 'weather'      ? t.alertsSection.weather
+    : t.alertsSection.incident
 
   const flyTo = (lng: number, lat: number) => {
     if (!map || !lng || !lat) return
@@ -695,15 +707,18 @@ function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
   useEffect(() => {
     if (!isLoading && alerts.length === 0) {
       setShowBanner(true)
-      const t = setTimeout(() => setShowBanner(false), 4500)
-      return () => clearTimeout(t)
+      const timer = setTimeout(() => setShowBanner(false), 4500)
+      return () => clearTimeout(timer)
     }
   }, [isLoading, alerts.length])
 
   return (
     <div className="space-y-2">
-      <p className="text-[10px] font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-tertiary)' }}>
-        Incidents · Accidents · Travaux · Grand Genève
+      {/* Bulletins G7 planifiés — route + TPG */}
+      <G7BulletinsPanel categories={['route', 'tpg']} title={t.alertsSection.g7RouteTpg} />
+
+      <p className="text-[10px] font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-tertiary)', marginTop: 16 }}>
+        {t.alertsSection.incidents}
       </p>
 
       {/* Banner éphémère "aucune alerte" — disparaît après 4.5s */}
@@ -717,8 +732,8 @@ function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
           }}>
           <span className="text-xl flex-shrink-0">✅</span>
           <div>
-            <p className="text-sm font-semibold" style={{ color: '#34C759' }}>Aucune alerte détectée</p>
-            <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Grand Genève · Trafic normal en ce moment</p>
+            <p className="text-sm font-semibold" style={{ color: '#34C759' }}>{t.alertsSection.noAlertTitle}</p>
+            <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{t.alertsSection.noAlertSub}</p>
           </div>
         </div>
       )}
@@ -734,8 +749,8 @@ function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
       {!isLoading && alerts.length === 0 && !showBanner && (
         <div className="rounded-2xl p-6 text-center" style={{ background: 'var(--bg-card)' }}>
           <p className="text-2xl mb-2">✅</p>
-          <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Aucun incident actif</p>
-          <p className="text-[12px] mt-1" style={{ color: 'var(--text-secondary)' }}>Grand Genève · Trafic normal</p>
+          <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{t.alertsSection.noIncidentTitle}</p>
+          <p className="text-[12px] mt-1" style={{ color: 'var(--text-secondary)' }}>{t.alertsSection.noIncidentSub}</p>
         </div>
       )}
 
@@ -763,7 +778,7 @@ function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
       {/* Sources */}
       <div className="mt-3 space-y-2">
         <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>
-          Sources
+          {t.alertsSection.sources}
         </p>
         {[
           { label: 'RTS — Info Trafic', url: 'https://www.rts.ch/info/trafic/' },
@@ -788,6 +803,7 @@ function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
 
 // ── Parkings P+R ─────────────────────────────────────────────────────────────
 function ParkingDetail({ map }: { map: mapboxgl.Map | null }) {
+  const t      = useMapT()
   const sorted = [...PARKINGS_PR].sort((a, b) => b.capacity - a.capacity)
   const rtCount = PARKINGS_PR.filter(p => p.hasRT).length
 
@@ -799,7 +815,7 @@ function ParkingDetail({ map }: { map: mapboxgl.Map | null }) {
   return (
     <div className="space-y-2">
       <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text-tertiary)' }}>
-        {PARKINGS_PR.length} parcs relais · {TOTAL_PR_CAPACITY.toLocaleString('fr-CH')} places · Grand Genève
+        {PARKINGS_PR.length} {t.parkingSection.parcRelais} · {TOTAL_PR_CAPACITY.toLocaleString('fr-CH')} {t.parkingSection.places} · Grand Genève
       </p>
 
       {/* Avertissement temps réel */}
@@ -807,9 +823,9 @@ function ParkingDetail({ map }: { map: mapboxgl.Map | null }) {
         style={{ background: 'rgba(10,132,255,0.08)', border: '0.5px solid rgba(10,132,255,0.22)' }}>
         <span className="text-base flex-shrink-0">ℹ️</span>
         <div>
-          <p className="text-[12px] font-semibold" style={{ color: 'rgba(10,132,255,0.9)' }}>Capacité totale affichée</p>
+          <p className="text-[12px] font-semibold" style={{ color: 'rgba(10,132,255,0.9)' }}>{t.parkingSection.rtTitle}</p>
           <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>
-            {rtCount} P+R disposent d'une page temps réel sur geneve-parking.ch
+            {rtCount} {t.parkingSection.rtSubPart}
           </p>
         </div>
       </div>
@@ -835,7 +851,7 @@ function ParkingDetail({ map }: { map: mapboxgl.Map | null }) {
               style={{ color: p.capacity >= 500 ? '#30D158' : p.capacity >= 200 ? '#0A84FF' : 'var(--text-secondary)' }}>
               {p.capacity > 0 ? `${p.capacity}` : '?'}
             </span>
-            <span className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>pl.</span>
+            <span className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>{t.parkingSection.plAbbr}</span>
             <svg width="6" height="10" viewBox="0 0 6 10" fill="none" stroke="var(--text-tertiary)" strokeWidth="1.5" strokeLinecap="round">
               <path d="M1 1l4 4-4 4"/>
             </svg>
@@ -844,7 +860,7 @@ function ParkingDetail({ map }: { map: mapboxgl.Map | null }) {
       ))}
 
       <div className="mt-3 space-y-2">
-        <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>Source</p>
+        <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>{t.parkingSection.source}</p>
         <a href="https://ge.ch/sitg" target="_blank" rel="noopener noreferrer"
           className="flex items-center justify-between rounded-xl px-3 py-2.5 active:scale-[0.98] transition-transform"
           style={{ background: 'var(--bg)', border: '1px solid var(--border)' }}>
@@ -876,18 +892,27 @@ type SavedJourney = {
 
 const DAY_SHORT = ['D','L','M','M','J','V','S']
 
+const STRIPE_LINK = 'https://buy.stripe.com/fZu5kCar71V38erfdR97G00'
+
 function MonTrajetDetail() {
+  const t  = useMapT()
   const qc = useQueryClient()
-  const [showSetup, setShowSetup] = useState(false)
+  const [showSetup,    setShowSetup]    = useState(false)
+  const [showThankYou, setShowThankYou] = useState(false)
+
+  async function authFetch(url: string, opts?: RequestInit) {
+    const token = await firebaseAuth.currentUser?.getIdToken() ?? ''
+    return fetch(url, { ...opts, headers: { ...(opts?.headers ?? {}), 'Authorization': `Bearer ${token}` } })
+  }
 
   const { data, isLoading } = useQuery<{ journeys: SavedJourney[] }>({
-    queryKey:        ['my-journeys'],
-    queryFn:         () => fetch('/api/v1/my-journey').then(r => r.json()),
-    staleTime:       15000,
+    queryKey: ['my-journeys'],
+    queryFn:  () => authFetch('/api/v1/my-journey').then(r => r.json()),
+    staleTime: 15000,
   })
 
   const deleteMut = useMutation({
-    mutationFn: (id: string) => fetch(`/api/v1/my-journey/${id}`, { method: 'DELETE' }),
+    mutationFn: (id: string) => authFetch(`/api/v1/my-journey/${id}`, { method: 'DELETE' }),
     onSuccess:  () => qc.invalidateQueries({ queryKey: ['my-journeys'] }),
   })
 
@@ -896,9 +921,69 @@ function MonTrajetDetail() {
   if (showSetup) {
     return (
       <JourneySetup
-        onComplete={() => { setShowSetup(false); qc.invalidateQueries({ queryKey: ['my-journeys'] }) }}
+        onComplete={() => {
+          setShowSetup(false)
+          setShowThankYou(true)
+          qc.invalidateQueries({ queryKey: ['my-journeys'] })
+        }}
         onClose={() => setShowSetup(false)}
       />
+    )
+  }
+
+  if (showThankYou) {
+    return (
+      <div style={{ padding: '8px 0' }}>
+        <div style={{
+          borderRadius: '20px',
+          padding:      '28px 24px',
+          background:   'var(--bg-card)',
+          border:       '1px solid var(--border)',
+          textAlign:    'center',
+        }}>
+          <div style={{ fontSize: '40px', marginBottom: '14px', lineHeight: 1 }}>🎉</div>
+          <h3 style={{ fontSize: '17px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '8px', letterSpacing: '-0.01em' }}>
+            {t.journey.thankyouTitle}
+          </h3>
+          <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.55, marginBottom: '20px' }}>
+            {t.journey.thankyouBody}
+          </p>
+          <a
+            href={STRIPE_LINK}
+            target="_blank"
+            rel="noreferrer"
+            style={{
+              display:       'block',
+              background:    'var(--green)',
+              color:         '#fff',
+              borderRadius:  '13px',
+              padding:       '13px',
+              fontSize:      '14px',
+              fontWeight:    600,
+              textDecoration:'none',
+              marginBottom:  '9px',
+              letterSpacing: '-0.01em',
+            }}
+          >
+            {t.journey.supportBtn}
+          </a>
+          <button
+            onClick={() => setShowThankYou(false)}
+            style={{
+              width:        '100%',
+              background:   'transparent',
+              color:        'var(--text-tertiary)',
+              border:       '1px solid var(--border)',
+              borderRadius: '13px',
+              padding:      '12px',
+              fontSize:     '13px',
+              cursor:       'pointer',
+            }}
+          >
+            {t.journey.viewJourney}
+          </button>
+        </div>
+      </div>
     )
   }
 
@@ -906,13 +991,13 @@ function MonTrajetDetail() {
     <div className="space-y-3">
       <div className="flex items-center justify-between mb-1">
         <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>
-          Trajets favoris · alertes email
+          {t.journey.header}
         </p>
         <button
           onClick={() => setShowSetup(true)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-bold"
           style={{ background: 'var(--brand)', color: '#fff' }}>
-          + Ajouter
+          {t.journey.addBtn}
         </button>
       </div>
 
@@ -927,10 +1012,10 @@ function MonTrajetDetail() {
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
           <p className="text-3xl mb-3">🛤️</p>
           <p className="text-sm font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>
-            Aucun trajet favori
+            {t.journey.emptyTitle}
           </p>
           <p className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
-            Créez un trajet pour recevoir des alertes par email avant votre départ
+            {t.journey.emptySub}
           </p>
         </div>
       )}
@@ -956,7 +1041,7 @@ function MonTrajetDetail() {
                   </span>
                   <span className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>{days}</span>
                   <span className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>
-                    · alerte {j.notifyMinutesBefore} min avant
+                    · {t.journey.alertPrefix} {j.notifyMinutesBefore} {t.journey.alertSuffix}
                   </span>
                 </div>
               </div>
@@ -979,7 +1064,7 @@ function MonTrajetDetail() {
       <div className="flex items-start gap-2 rounded-xl px-3 py-2.5"
         style={{ background: 'rgba(10,132,255,0.06)', border: '0.5px solid rgba(10,132,255,0.18)' }}>
         <span className="text-[11px] leading-relaxed" style={{ color: 'rgba(10,132,255,0.8)' }}>
-          ℹ️ Vous recevrez un email automatique si votre trajet est perturbé avant votre départ habituel.
+          {t.journey.infoAlert}
         </span>
       </div>
     </div>
@@ -988,34 +1073,37 @@ function MonTrajetDetail() {
 
 // ── G7 ────────────────────────────────────────────────────────────────────────
 function G7Detail() {
-  const now     = new Date()
+  const t        = useMapT()
+  const now      = new Date()
   const isActive = now >= new Date('2026-06-08') && now <= new Date('2026-06-18')
-  return isActive ? (
-    <div className="space-y-3">
-      <div className="rounded-2xl p-4" style={{ background: 'rgba(255,69,58,0.08)', border: '1px solid rgba(255,69,58,0.25)' }}>
-        <p className="text-sm font-bold mb-1" style={{ color: '#FF453A' }}>🏛️ G7 EN COURS · 8–18 juin 2026</p>
-        <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-          Restrictions de circulation en vigueur dans le Grand Genève.
+
+  return (
+    <div className="space-y-4">
+      {/* Statut sommet */}
+      <div
+        className="rounded-2xl p-4"
+        style={isActive
+          ? { background: 'rgba(255,69,58,0.08)', border: '1px solid rgba(255,69,58,0.25)' }
+          : { background: 'var(--bg-card)', border: '1px solid var(--border)' }
+        }
+      >
+        <p className="text-sm font-bold mb-1" style={{ color: isActive ? '#FF453A' : 'var(--text-primary)' }}>
+          {isActive ? t.g7Section.activeBadge : t.g7Section.upcomingBadge}
         </p>
+        <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+          {isActive ? t.g7Section.activeDesc : t.g7Section.upcomingDesc}
+        </p>
+        {isActive && (
+          <div className="mt-2 rounded-xl p-2.5" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border)' }}>
+            <p className="text-[11px] font-semibold mb-0.5" style={{ color: 'var(--text-tertiary)' }}>{t.g7Section.macaronPosts}</p>
+            <p className="text-[12px]" style={{ color: 'var(--text-primary)' }}>Bardonnex · Thônex-Vallard</p>
+            <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>{t.g7Section.macaronSub}</p>
+          </div>
+        )}
       </div>
-      <div className="rounded-2xl p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-        <p className="text-[11px] font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-tertiary)' }}>Postes macaron</p>
-        <p className="text-sm" style={{ color: 'var(--text-primary)' }}>Bardonnex · Thônex-Vallard</p>
-        <p className="text-[12px] mt-1" style={{ color: 'var(--text-secondary)' }}>Voie rapide · Personnel indispensable uniquement</p>
-      </div>
-    </div>
-  ) : (
-    <div className="rounded-2xl p-6" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-      <p className="text-xl mb-3">🏛️</p>
-      <p className="text-sm font-bold mb-2" style={{ color: 'var(--text-primary)' }}>G7 — Grand Genève · 8–18 juin 2026</p>
-      <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-        Cette bannière sera disponible pour mieux vous aider à anticiper vos déplacements durant le G7.
-        Directives officielles, postes de contrôle et restrictions d'accès en temps réel.
-      </p>
-      <div className="mt-4 flex items-center gap-2">
-        <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#FF9F0A' }} />
-        <p className="text-[11px]" style={{ color: '#FF9F0A' }}>Activation le 8 juin 2026</p>
-      </div>
+
+      {/* Tous les bulletins G7 — route, TPG, accès */}
+      <G7BulletinsPanel title={t.g7Section.bulletinsTitle} />
     </div>
   )
 }
@@ -1033,17 +1121,17 @@ function wmoIcon(c: number) {
   if (c <= 86)   return '🌨️'
   return '⛈️'
 }
-function wmoLabel(c: number) {
-  if (c === 0)   return 'Ciel dégagé'
-  if (c <= 2)    return 'Peu nuageux'
-  if (c === 3)   return 'Couvert'
-  if (c <= 48)   return 'Brouillard'
-  if (c <= 55)   return 'Bruine'
-  if (c <= 67)   return 'Pluie'
-  if (c <= 77)   return 'Neige'
-  if (c <= 82)   return 'Averses'
-  if (c <= 86)   return 'Averses de neige'
-  return 'Orage'
+function wmoLabel(c: number, t: MapT) {
+  if (c === 0)   return t.weather.clear
+  if (c <= 2)    return t.weather.fewClouds
+  if (c === 3)   return t.weather.cloudy
+  if (c <= 48)   return t.weather.fog
+  if (c <= 55)   return t.weather.drizzle
+  if (c <= 67)   return t.weather.rain
+  if (c <= 77)   return t.weather.snow
+  if (c <= 82)   return t.weather.showers
+  if (c <= 86)   return t.weather.snowShowers
+  return t.weather.storm
 }
 
 const METEO_URL = 'https://api.open-meteo.com/v1/forecast?latitude=46.2044&longitude=6.1432&hourly=temperature_2m,precipitation_probability,weathercode&timezone=Europe%2FZurich&forecast_days=2'
@@ -1066,6 +1154,7 @@ function meteoStartIdx(times: string[]): number {
 }
 
 function WeatherBanner({ onPress }: { onPress: () => void }) {
+  const t = useMapT()
   const { data } = useWeather()
   if (!data?.hourly) return null
   const { hourly } = data
@@ -1085,8 +1174,8 @@ function WeatherBanner({ onPress }: { onPress: () => void }) {
       style={{ background: 'rgba(10,132,255,0.10)', border: '0.5px solid rgba(10,132,255,0.22)' }}>
       <span className="text-2xl flex-shrink-0">{wmoIcon(code)}</span>
       <div className="flex-1 min-w-0">
-        <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'rgba(10,132,255,0.75)' }}>Prochaines 4h</p>
-        <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{tempStr} · {wmoLabel(code)}{precipStr}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'rgba(10,132,255,0.75)' }}>{t.weather.next4h}</p>
+        <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{tempStr} · {wmoLabel(code, t)}{precipStr}</p>
       </div>
       <svg width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="2" strokeLinecap="round">
         <path d="M1 1l5 5-5 5"/>
@@ -1096,6 +1185,7 @@ function WeatherBanner({ onPress }: { onPress: () => void }) {
 }
 
 function MeteoDetail() {
+  const t = useMapT()
   const { data, isLoading } = useWeather()
   if (isLoading) return (
     <div className="flex justify-center py-10 gap-2">
@@ -1109,16 +1199,16 @@ function MeteoDetail() {
   return (
     <div>
       <p className="text-[10px] font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-tertiary)' }}>
-        Météo · Grand Genève · 24h
+        {t.weather.header}
       </p>
       <div className="space-y-0.5">
-        {hours.map((t, i) => {
-          const hour = new Date(t).getHours()
+        {hours.map((ts, i) => {
+          const hour = new Date(ts).getHours()
           const temp = Math.round(hourly.temperature_2m[s + i])
           const prob = hourly.precipitation_probability[s + i]
           const code = hourly.weathercode[s + i]
           return (
-            <div key={t} className="flex items-center gap-3 rounded-xl px-3 py-2.5"
+            <div key={ts} className="flex items-center gap-3 rounded-xl px-3 py-2.5"
               style={{ background: i === 0 ? 'rgba(10,132,255,0.12)' : i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.03)' }}>
               <span className="w-10 text-[12px] font-semibold" style={{ color: i === 0 ? '#0A84FF' : 'var(--text-secondary)' }}>
                 {String(hour).padStart(2, '0')}h
@@ -1129,7 +1219,7 @@ function MeteoDetail() {
                 {prob > 0 ? `💧 ${prob}%` : ''}
               </span>
               <span className="text-[11px] w-20 text-right truncate" style={{ color: 'var(--text-secondary)' }}>
-                {wmoLabel(code)}
+                {wmoLabel(code, t)}
               </span>
             </div>
           )
@@ -1139,11 +1229,65 @@ function MeteoDetail() {
   )
 }
 
+// ── Carte don ─────────────────────────────────────────────────────────────────
+function DonationCard() {
+  const t = useMapT()
+  const [selected, setSelected] = useState<number | null>(null)
+
+  function handleDonate() {
+    if (!selected) return
+    window.open(`${STRIPE_LINK}?prefilled_amount=${selected * 100}`, '_blank')
+  }
+
+  return (
+    <div className="rounded-2xl p-4" style={{ background: 'linear-gradient(135deg, rgba(52,199,89,0.10) 0%, rgba(52,199,89,0.04) 100%)', border: '1px solid rgba(52,199,89,0.28)' }}>
+      <div className="flex items-center gap-3 mb-3">
+        <span className="text-xl flex-shrink-0">💚</span>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-bold" style={{ color: 'rgba(255,255,255,0.92)' }}>{t.donation.title}</p>
+          <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.58)' }}>{t.donation.subtitle}</p>
+        </div>
+      </div>
+      <div className="grid grid-cols-4 gap-1.5 mb-3">
+        {[5, 10, 20, 50].map(v => (
+          <button
+            key={v}
+            onClick={() => setSelected(selected === v ? null : v)}
+            className="rounded-xl py-1.5 text-[12px] font-semibold"
+            style={{
+              background: selected === v ? 'rgba(52,199,89,0.22)' : 'rgba(255,255,255,0.06)',
+              border: `1px solid ${selected === v ? 'rgba(52,199,89,0.55)' : 'rgba(255,255,255,0.10)'}`,
+              color: selected === v ? '#34C759' : 'rgba(255,255,255,0.60)',
+              cursor: 'pointer',
+            }}
+          >
+            CHF {v}
+          </button>
+        ))}
+      </div>
+      <button
+        onClick={handleDonate}
+        style={{
+          width: '100%', borderRadius: '12px', padding: '10px',
+          fontSize: '13px', fontWeight: 600,
+          background: selected ? '#34C759' : 'rgba(52,199,89,0.18)',
+          color: selected ? '#fff' : 'rgba(52,199,89,0.55)',
+          border: 'none', cursor: selected ? 'pointer' : 'default',
+          transition: 'background .15s, color .15s',
+        }}
+      >
+        💚 {selected ? `${t.donation.donateCTA} ${selected}` : t.donation.chooseCTA}
+      </button>
+    </div>
+  )
+}
+
 // ── Vue d'ensemble "Tout" — 4 cartes ─────────────────────────────────────────
 function ToutOverview({ data, onSelect }: {
   data?: DashboardData
   onSelect: (v: DetailView) => void
 }) {
+  const t         = useMapT()
   const now       = new Date()
   const alertCount = data?.alerts.length ?? 0
   const hasIssue   = data?.network && Object.values(data.network).some(v => v !== 'normal')
@@ -1156,25 +1300,29 @@ function ToutOverview({ data, onSelect }: {
   return (
     <div className="space-y-2.5 pt-1">
       <WeatherBanner onPress={() => onSelect('meteo')} />
-      <CategoryCard icon="🛂" title="Douanes"
-        subtitle={heavy ? `⚠️ ${heavy.name} · trafic chargé` : `${ALL_CROSSINGS.length} postes · ${blocked > 0 ? `${blocked} fermés G7` : 'tous ouverts'}`}
+      <CategoryCard icon="🛂" title={t.overview.douanes}
+        subtitle={heavy ? `⚠️ ${heavy.name} · ${t.overview.trafficHeavy}` : `${ALL_CROSSINGS.length} postes · ${blocked > 0 ? `${blocked} ${t.overview.closedG7}` : t.overview.allOpen}`}
         onPress={() => onSelect('douanes')} />
-      <CategoryCard icon="🚌" title="Transport public"
-        subtitle="TPG · CFF · Léman Express · CEVA"
-        badge={hasIssue ? 'Perturbation' : undefined} badgeColor="#FF9F0A"
+      <CategoryCard icon="🚌" title={t.overview.transport}
+        subtitle={t.overview.transportSub}
+        badge={hasIssue ? t.overview.disruption : undefined} badgeColor="#FF9F0A"
         onPress={() => onSelect('transport')} />
-      <CategoryCard icon="🅿️" title="Parkings P+R"
-        subtitle={`${PARKINGS_PR.length} parcs relais · ${TOTAL_PR_CAPACITY.toLocaleString('fr-CH')} places`}
+      <CategoryCard icon="🗓️" title={t.eventsSection.filterLabel}
+        subtitle={t.welcome.feat7D}
+        badge={t.welcome.newBadge} badgeColor="#AF52DE"
+        onPress={() => onSelect('events')} />
+      <CategoryCard icon="🅿️" title={t.overview.parking}
+        subtitle={`${PARKINGS_PR.length} ${t.overview.parcRelais} · ${TOTAL_PR_CAPACITY.toLocaleString('fr-CH')} ${t.overview.placesUnit}`}
         onPress={() => onSelect('parking')} />
-      <CategoryCard icon="⚠️" title="Alertes & Incidents"
-        subtitle={alertCount > 0 ? `${alertCount} incident${alertCount > 1 ? 's' : ''} actif${alertCount > 1 ? 's' : ''}` : 'Aucun incident · Trafic normal'}
+      <CategoryCard icon="⚠️" title={t.overview.alertsTitle}
+        subtitle={alertCount > 0 ? `${alertCount} ${alertCount > 1 ? t.overview.incidentPlural : t.overview.incidentSingular}` : t.overview.noIncident}
         badge={alertCount > 0 ? String(alertCount) : undefined} badgeColor="#FF453A"
         onPress={() => onSelect('alertes')} />
-      <CategoryCard icon="🛤️" title="Mon Trajet"
-        subtitle="Itinéraires favoris · Alertes email avant départ"
+      <CategoryCard icon="🛤️" title={t.overview.journey}
+        subtitle={t.overview.journeySub}
         onPress={() => onSelect('journey')} />
-      <CategoryCard icon="🏛️" title="G7 — 8 au 18 juin 2026"
-        subtitle="Directives officielles · Restrictions d'accès"
+      <CategoryCard icon="🏛️" title={t.overview.g7Title}
+        subtitle={t.overview.g7Sub}
         onPress={() => onSelect('g7')} />
 
       {/* Carte Borja Swiss Solutions */}
@@ -1189,30 +1337,333 @@ function ToutOverview({ data, onSelect }: {
           <span className="text-2xl flex-shrink-0">🇨🇭</span>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>Börja Swiss Solutions</p>
-            <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Ingénieurs informatiques · Genève</p>
+            <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{t.overview.borjaSub}</p>
           </div>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2.5" strokeLinecap="round" className="flex-shrink-0">
             <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
           </svg>
         </div>
         <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-          Cette application a été conçue par notre équipe d'ingénieurs pour aider les habitant·e·s
-          du Grand Genève à se déplacer sereinement durant le G7 d'Évian 2026 — douanes, trafic,
-          transports publics et alertes en temps réel, tout en un seul endroit.
+          {t.overview.borjaDesc}
         </p>
         <span className="text-[11px] font-medium" style={{ color: 'var(--brand)' }}>
-          En savoir plus → borja-swiss-solutions.ch
+          {t.overview.borjaLink}
         </span>
       </a>
+
+      <DonationCard />
+    </div>
+  )
+}
+
+// ── Événements — helpers ──────────────────────────────────────────────────────
+function formatDate(iso: string): string {
+  const d = new Date(iso + 'T12:00:00')
+  return d.toLocaleDateString('fr-CH', { weekday: 'short', day: 'numeric', month: 'short' })
+}
+
+function G7AccessPanel({ item }: { item: EventItem }) {
+  const t = useMapT()
+  const G7_START = '2026-06-11'
+  const G7_END   = '2026-06-18'
+
+  const g7Dates = item.occurrences.filter(o => o.date >= G7_START && o.date <= G7_END)
+  if (g7Dates.length === 0) return null
+
+  const allAlerts = g7Dates.flatMap(o => getAlertsForDay(o.date))
+  const seen      = new Set<string>()
+  const unique    = allAlerts.filter(a => { if (seen.has(a.id)) return false; seen.add(a.id); return true })
+  const mobilityAlerts = unique.filter(a =>
+    ['frontiere', 'route', 'transport', 'aerien', 'manifestation'].includes(a.category)
+  )
+
+  const sevColor = (s: string) =>
+    s === 'critical' ? '#FF453A' : s === 'warning' ? '#FF9F0A' : 'rgba(255,255,255,0.45)'
+
+  const areaNote = () => {
+    if (item.venue.area === 'Grand-Saconnex')
+      return "⚠️ Lieu proche de l'aéroport et du périmètre G7 : prévoir du temps supplémentaire. Restriction espace aérien active."
+    if (item.occurrences.some(o => o.date === '2026-06-14'))
+      return "⚠️ 14 juin : manifestation No-G7 rive droite, Pont du Mont-Blanc interdit. Prévoir un itinéraire alternatif."
+    return null
+  }
+
+  const note = areaNote()
+
+  return (
+    <div className="rounded-2xl p-3 mb-4" style={{ background: 'rgba(255,149,0,0.08)', border: '1px solid rgba(255,149,0,0.25)' }}>
+      <p className="text-[12px] font-bold mb-2" style={{ color: '#FF9F0A' }}>{t.eventsSection.g7AccessTitle}</p>
+      {note && (
+        <p className="text-[11px] mb-2" style={{ color: 'rgba(255,255,255,0.75)' }}>{note}</p>
+      )}
+      {mobilityAlerts.map(a => (
+        <div key={a.id} className="flex items-start gap-2 mb-1.5">
+          <span className="text-[10px] font-bold mt-0.5 flex-shrink-0" style={{ color: sevColor(a.severity) }}>
+            {a.severity === 'critical' ? '🔴' : a.severity === 'warning' ? '🟠' : 'ℹ️'}
+          </span>
+          <div>
+            <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.85)' }}>{a.title}</p>
+            <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.55)' }}>{a.detail}</p>
+          </div>
+        </div>
+      ))}
+      {mobilityAlerts.length === 0 && (
+        <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.55)' }}>{t.eventsSection.g7Lifted}</p>
+      )}
+    </div>
+  )
+}
+
+function EventDetail({ slug, onBack }: { slug: string; onBack: () => void }) {
+  const t   = useMapT()
+  const item = events.find(e => e.slug === slug)
+  if (!item) return null
+
+  const verifLabel = item.verif === 'confirmed' ? t.eventsSection.verifConfirmed
+    : item.verif === 'plausible' ? t.eventsSection.verifPlausible
+    : t.eventsSection.verifUnverified
+  const verifColor = item.verif === 'confirmed' ? '#30D158' : item.verif === 'plausible' ? '#FF9F0A' : '#FF453A'
+
+  const linkStatusLabel = (s: string) =>
+    s === 'verified' ? t.eventsSection.linkVerified
+    : s === 'to_confirm' ? t.eventsSection.linkToConfirm
+    : t.eventsSection.linkFallback
+
+  return (
+    <div>
+      {/* Titre + badge */}
+      <div className="flex items-start gap-2 mb-3">
+        <span className="text-2xl flex-shrink-0">{CATEGORY_ICONS[item.category] ?? '🎟️'}</span>
+        <div className="flex-1 min-w-0">
+          <h2 className="text-base font-bold leading-tight mb-1" style={{ color: 'rgba(255,255,255,0.92)' }}>{item.title}</h2>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'var(--bg-card)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
+              {CATEGORY_LABELS[item.category] ?? item.category}
+            </span>
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'var(--bg-card)', color: verifColor, border: `1px solid ${verifColor}33` }}>
+              {verifLabel}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Description */}
+      <p className="text-[13px] mb-4 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{item.description}</p>
+
+      {/* Encart G7 */}
+      <G7AccessPanel item={item} />
+
+      {/* Lieu */}
+      <div className="rounded-2xl p-3 mb-3" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+        <p className="text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text-tertiary)' }}>{t.eventsSection.venue}</p>
+        <p className="text-[13px] font-medium" style={{ color: 'var(--text-primary)' }}>{item.venue.name}</p>
+        {item.venue.address && (
+          <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>{item.venue.address}</p>
+        )}
+        {item.venue.phone && (
+          <a href={`tel:${item.venue.phone}`} className="text-[11px] mt-0.5 block active:opacity-70" style={{ color: 'var(--brand)' }}>
+            📞 {item.venue.phone}
+          </a>
+        )}
+      </div>
+
+      {/* Prix */}
+      {item.priceInfo && (
+        <div className="rounded-2xl p-3 mb-3" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+          <p className="text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text-tertiary)' }}>{t.eventsSection.price}</p>
+          <p className="text-[13px] font-medium" style={{ color: 'var(--text-primary)' }}>{item.priceInfo}</p>
+        </div>
+      )}
+
+      {/* Dates */}
+      <div className="rounded-2xl p-3 mb-3" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+        <p className="text-[11px] font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-tertiary)' }}>{t.eventsSection.dates}</p>
+        <div className="space-y-1">
+          {item.occurrences.map((o, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <span className="text-[12px] font-medium" style={{ color: 'var(--text-primary)' }}>{formatDate(o.date)}</span>
+              {(o.start || o.note) && (
+                <span className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>
+                  {o.start ? `${o.start}${o.end ? `–${o.end}` : ''}` : ''}{o.note ? ` · ${o.note}` : ''}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Liens */}
+      <div className="rounded-2xl p-3 mb-3" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+        <p className="text-[11px] font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-tertiary)' }}>{t.eventsSection.links}</p>
+        {item.links.length === 0 ? (
+          <p className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>{t.eventsSection.noLink}</p>
+        ) : (
+          <div className="space-y-2">
+            {item.links.map((lk, i) => (
+              <a key={i} href={lk.url} target="_blank" rel="noopener noreferrer"
+                className="flex items-center justify-between gap-2 w-full text-left active:opacity-70 transition-opacity">
+                <span className="text-[13px] font-medium" style={{ color: 'var(--brand)' }}>{lk.label}</span>
+                <span className="text-[10px] flex-shrink-0" style={{ color: 'var(--text-tertiary)' }}>{linkStatusLabel(lk.status)}</span>
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function EventsPanel({ onSelect }: { onSelect: (slug: string) => void }) {
+  const t = useMapT()
+  const [priceFilter, setPriceFilter] = useState<'all' | 'free' | 'paid'>('all')
+  const [todayOnly,   setTodayOnly]   = useState(false)
+  const [venueFilter, setVenueFilter] = useState('')
+
+  const today = new Date().toISOString().slice(0, 10)
+
+  const venueNames = [...new Set(events.map(e => e.venue.name))].sort((a, b) => a.localeCompare(b, 'fr'))
+
+  const isFree = (ev: EventItem): boolean => {
+    if (!ev.priceInfo) return false
+    const p = ev.priceInfo.toLowerCase()
+    return p.includes('gratuit') || p.startsWith('entrée libre')
+  }
+
+  let filteredEvents = events
+  if (todayOnly)   filteredEvents = filteredEvents.filter(ev => ev.occurrences.some(o => o.date === today))
+  if (venueFilter) filteredEvents = filteredEvents.filter(ev => ev.venue.name === venueFilter)
+  filteredEvents = priceFilter === 'free' ? filteredEvents.filter(isFree)
+    : priceFilter === 'paid' ? filteredEvents.filter(ev => !isFree(ev))
+    : filteredEvents
+
+  const byCategory = filteredEvents.reduce<Record<string, EventItem[]>>((acc, ev) => {
+    const cat = ev.category
+    if (!acc[cat]) acc[cat] = []
+    acc[cat].push(ev)
+    return acc
+  }, {})
+
+  const categoryOrder = ['festival', 'concert', 'classique', 'theatre', 'comedie', 'nightlife', 'danse', 'sport', 'art']
+  const orderedKeys   = categoryOrder.filter(k => byCategory[k]).concat(
+    Object.keys(byCategory).filter(k => !categoryOrder.includes(k))
+  )
+
+  const PRICE_TABS: { id: 'all' | 'free' | 'paid'; label: string }[] = [
+    { id: 'all',  label: 'Tous'    },
+    { id: 'free', label: 'Gratuit' },
+    { id: 'paid', label: 'Payant'  },
+  ]
+
+  return (
+    <div className="space-y-4">
+      {/* Filtre Aujourd'hui + Lieu */}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => setTodayOnly(v => !v)}
+          className="flex-shrink-0 rounded-xl py-2 px-3 text-[12px] font-semibold transition-all"
+          style={{
+            background: todayOnly ? 'var(--brand)' : 'var(--bg-card)',
+            color:      todayOnly ? '#fff'         : 'var(--text-secondary)',
+            border:     `1px solid ${todayOnly ? 'transparent' : 'var(--border)'}`,
+          }}
+        >
+          📅 Aujourd&apos;hui
+        </button>
+        <div className="flex-1 relative">
+          <select
+            value={venueFilter}
+            onChange={e => setVenueFilter(e.target.value)}
+            className="w-full rounded-xl py-2 pl-3 pr-7 text-[12px] font-semibold appearance-none"
+            style={{
+              background: venueFilter ? 'var(--brand)' : 'var(--bg-card)',
+              color:      venueFilter ? '#fff'         : 'var(--text-secondary)',
+              border:     `1px solid ${venueFilter ? 'transparent' : 'var(--border)'}`,
+              outline:    'none',
+            }}
+          >
+            <option value="">🏛️ Lieu</option>
+            {venueNames.map(v => (
+              <option key={v} value={v}>{v}</option>
+            ))}
+          </select>
+          <svg className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2" width="8" height="5" viewBox="0 0 8 5" fill="none">
+            <path d="M1 1l3 3 3-3" stroke={venueFilter ? '#fff' : 'var(--text-tertiary)'} strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+        </div>
+      </div>
+
+      {/* Filtre prix */}
+      <div className="flex gap-2">
+        {PRICE_TABS.map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setPriceFilter(tab.id)}
+            className="flex-1 rounded-xl py-2 text-[12px] font-semibold transition-all"
+            style={{
+              background: priceFilter === tab.id ? 'var(--brand)' : 'var(--bg-card)',
+              color:      priceFilter === tab.id ? '#fff'         : 'var(--text-secondary)',
+              border:     `1px solid ${priceFilter === tab.id ? 'transparent' : 'var(--border)'}`,
+            }}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {filteredEvents.length === 0 ? (
+        <p className="text-sm text-center py-8" style={{ color: 'var(--text-tertiary)' }}>
+          {t.eventsSection.noEvents}
+        </p>
+      ) : (
+        orderedKeys.map(cat => (
+          <div key={cat}>
+            <p className="text-[11px] font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-tertiary)' }}>
+              {CATEGORY_ICONS[cat] ?? '🎟️'} {CATEGORY_LABELS[cat] ?? cat}
+            </p>
+            <div className="space-y-1.5">
+              {byCategory[cat].map(ev => {
+                const firstDate = ev.occurrences[0]
+                return (
+                  <button key={ev.slug} onClick={() => onSelect(ev.slug)}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left active:scale-[0.98] transition-transform"
+                    style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-medium truncate" style={{ color: 'var(--text-primary)' }}>{ev.title}</p>
+                      <p className="text-[11px] truncate" style={{ color: 'var(--text-secondary)' }}>
+                        {ev.venue.name}
+                        {firstDate ? ` · ${formatDate(firstDate.date)}${ev.occurrences.length > 1 ? ` +${ev.occurrences.length - 1}` : ''}` : ''}
+                      </p>
+                    </div>
+                    {ev.priceInfo && (
+                      <span className="text-[10px] font-semibold flex-shrink-0 px-1.5 py-0.5 rounded-lg"
+                        style={{
+                          background: isFree(ev) ? 'rgba(52,199,89,0.12)' : 'rgba(255,255,255,0.06)',
+                          color:      isFree(ev) ? '#30D158'               : 'var(--text-tertiary)',
+                        }}>
+                        {isFree(ev) ? 'Gratuit' : ev.priceInfo}
+                      </span>
+                    )}
+                    <svg width="6" height="10" viewBox="0 0 6 10" fill="none" stroke="var(--text-tertiary)" strokeWidth="1.5" strokeLinecap="round">
+                      <path d="M1 1l4 4-4 4"/>
+                    </svg>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        ))
+      )}
     </div>
   )
 }
 
 // ── Composant principal ───────────────────────────────────────────────────────
 export function BottomSheet({ session: _session, activeFilter, map, onFilterChange }: BottomSheetProps) {
+  const t = useMapT()
   const [isOpen,           setIsOpen]           = useState(false)
   const [detailView,       setDetailView]       = useState<DetailView>('overview')
   const [selectedCrossing, setSelectedCrossing] = useState<CrossingStatic | null>(null)
+  const [selectedEvent,    setSelectedEvent]    = useState<string | null>(null)
 
   // ── Refs drag ──────────────────────────────────────────────────────────────
   const heightRef    = useRef(COMPACT_H)
@@ -1306,11 +1757,87 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
     }
   }, [animateTo])
 
-  // Sync activeFilter 'journey' → ouvre directement la vue Mon Trajet
+  // ── Overscroll-to-close : swipe-down depuis le haut du contenu ferme le sheet ──
+  useEffect(() => {
+    if (!contentRef.current || !containerRef.current) return
+    const content:   HTMLDivElement = contentRef.current
+    const container: HTMLDivElement = containerRef.current
+
+    let startY       = 0
+    let startST      = 0
+    let startH       = 0
+    let isResizing   = false
+    let lastY        = 0
+    let lastT        = 0
+    let velo         = 0
+
+    function onStart(e: TouchEvent) {
+      if (e.touches.length > 1) return
+      startY     = e.touches[0].clientY
+      startST    = content.scrollTop
+      startH     = container.offsetHeight
+      lastY      = startY
+      lastT      = Date.now()
+      velo       = 0
+      isResizing = false
+    }
+
+    function onMove(e: TouchEvent) {
+      if (e.touches.length > 1) return
+      const cy  = e.touches[0].clientY
+      const dy  = startY - cy       // >0 = swipe up, <0 = swipe down
+      const now = Date.now()
+      const dv  = lastY - cy
+      const dt  = now - lastT
+      velo  = dt > 0 ? dv / dt : velo
+      lastY = cy
+      lastT = now
+
+      // Engage resize only when at top of scroll AND pulling down
+      if (!isResizing && startST === 0 && dy < -3) {
+        isResizing              = true
+        container.style.transition = 'none'
+      }
+
+      if (isResizing) {
+        e.preventDefault()
+        const newH = Math.max(COMPACT_H, Math.min(getFullH(), startH + dy))
+        heightRef.current      = newH
+        container.style.height = `${newH}px`
+      }
+    }
+
+    function onEnd() {
+      if (!isResizing) return
+      isResizing = false
+      const h     = container.offsetHeight
+      const fullH = getFullH()
+      if      (velo >  1.2)        animateTo(fullH,    true)
+      else if (velo < -1.2)        animateTo(COMPACT_H, true)
+      else if (h < COMPACT_H + 60) animateTo(COMPACT_H, true)
+      else                          animateTo(h > fullH - 40 ? fullH : h, false)
+    }
+
+    content.addEventListener('touchstart', onStart, { passive: true })
+    content.addEventListener('touchmove',  onMove,  { passive: false })
+    content.addEventListener('touchend',   onEnd)
+    return () => {
+      content.removeEventListener('touchstart', onStart)
+      content.removeEventListener('touchmove',  onMove)
+      content.removeEventListener('touchend',   onEnd)
+    }
+  }, [animateTo])
+
+  // Sync activeFilter 'journey' / 'events' → ouvre directement la vue correspondante
   useEffect(() => {
     if (activeFilter === 'journey') {
       setDetailView('journey')
       animateTo(getFullH(), true)
+    }
+    if (activeFilter === 'events') {
+      setDetailView('events')
+      setSelectedEvent(null)
+      animateTo(Math.round(window.innerHeight * 0.50), true)
     }
   }, [activeFilter, animateTo])
 
@@ -1328,6 +1855,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
       'g7':        'g7',
       'parking':   'parking',
       'journey':   'journey',
+      'events':    'events',
       'overview':  'all',
     }
     const filterId = viewToFilter[v]
@@ -1351,6 +1879,20 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
     return () => window.removeEventListener('tif:crossing-select', handler)
   }, [openCrossing])
 
+  // Écoute les clics sur les pastilles d'événements depuis la carte
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const { slug } = (e as CustomEvent<{ slug: string }>).detail
+      if (!slug) return
+      setDetailView('events')
+      setSelectedEvent(slug)
+      setSelectedCrossing(null)
+      animateTo(getFullH(), true)
+    }
+    window.addEventListener('tif:event-click', handler)
+    return () => window.removeEventListener('tif:event-click', handler)
+  }, [animateTo])
+
   const locateCrossing = useCallback((c: CrossingStatic) => {
     if (!map) return
     map.flyTo({ center: [c.lng, c.lat], zoom: 15, duration: 900, essential: true })
@@ -1361,25 +1903,29 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
     if (selectedCrossing) {
       setSelectedCrossing(null)
       animateTo(getFullH(), true)
+    } else if (selectedEvent) {
+      setSelectedEvent(null)
+      animateTo(getFullH(), true)
     } else {
       setDetailView('overview')
       animateTo(getFullH(), true)
     }
-  }, [selectedCrossing, animateTo])
+  }, [selectedCrossing, selectedEvent, animateTo])
 
   // Compact headline
   const alertCount  = data?.alerts.length ?? 0
-  const compactText = activeFilter === 'all'     ? (alertCount > 0 ? `Grand Genève · ${alertCount} alerte${alertCount > 1 ? 's' : ''} ⚠️` : 'Tout · Trafic · Douanes · Alertes')
-    : activeFilter === 'transit'  ? 'Transport public · TPG · CFF · CEVA'
-    : activeFilter === 'traffic'  ? 'Trafic routier · Grand Genève'
-    : activeFilter === 'alerts'   ? 'Alertes & Incidents routes'
-    : activeFilter === 'borders'  ? 'Douanes · 47 passages frontière'
-    : activeFilter === 'g7'       ? 'G7 · 8–18 juin 2026 · Évian'
-    : activeFilter === 'journey'  ? 'Mon Trajet · Favoris · Alertes email'
-    : activeFilter === 'parking'  ? 'Parkings P+R · Grand Genève'
-    : 'Grand Genève'
+  const compactText = activeFilter === 'all'     ? (alertCount > 0 ? `${t.compact.alertPrefix}${alertCount} ${alertCount > 1 ? t.compact.alertSuffixP : t.compact.alertSuffixS}` : t.compact.all)
+    : activeFilter === 'transit'  ? t.compact.transit
+    : activeFilter === 'traffic'  ? t.compact.traffic
+    : activeFilter === 'alerts'   ? t.compact.alertsFilter
+    : activeFilter === 'borders'  ? t.compact.borders
+    : activeFilter === 'g7'       ? t.compact.g7
+    : activeFilter === 'journey'  ? t.compact.journey
+    : activeFilter === 'parking'  ? t.compact.parkingFilter
+    : activeFilter === 'events'   ? t.eventsSection.filterLabel
+    : t.compact.default
 
-  const showBack = detailView !== 'overview' || selectedCrossing !== null
+  const showBack = detailView !== 'overview' || selectedCrossing !== null || selectedEvent !== null
 
   return (
     <>
@@ -1387,7 +1933,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
       <div
         className="fixed inset-0 z-20"
         style={{ background: 'transparent' }}
-        onClick={() => { animateTo(COMPACT_H, true); setDetailView('overview'); setSelectedCrossing(null) }}
+        onClick={() => { animateTo(COMPACT_H, true); setDetailView('overview'); setSelectedCrossing(null); setSelectedEvent(null) }}
       />
     )}
     <div
@@ -1402,7 +1948,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
           className="flex justify-center pt-2.5 pb-1 w-full"
           onClick={() => {
             if (!isOpen) animateTo(getFullH(), true)
-            else { animateTo(COMPACT_H, true); setDetailView('overview'); setSelectedCrossing(null) }
+            else { animateTo(COMPACT_H, true); setDetailView('overview'); setSelectedCrossing(null); setSelectedEvent(null) }
           }}
           aria-label="Ouvrir/fermer">
           <div className="w-9 h-1 rounded-full" style={{ background: 'var(--border)' }} />
@@ -1433,7 +1979,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
               <svg width="8" height="13" viewBox="0 0 8 13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <path d="M7 1L1 6.5 7 12"/>
               </svg>
-              {selectedCrossing ? 'Toutes les douanes' : 'Retour'}
+              {selectedCrossing ? t.back.allBorders : selectedEvent ? t.eventsSection.backToList : t.back.back}
             </button>
           )}
 
@@ -1444,6 +1990,8 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
               onBack={goBack}
               onLocate={locateCrossing}
             />
+          ) : selectedEvent ? (
+            <EventDetail slug={selectedEvent} onBack={() => setSelectedEvent(null)} />
           ) : detailView === 'overview'   ? <ToutOverview data={data} onSelect={openDetail} />
             : detailView === 'douanes'    ? <DouanesDetail onSelect={openCrossing} map={map} />
             : detailView === 'transport'  ? <TransportDetail onExpand={expandToFull} />
@@ -1451,6 +1999,14 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
             : detailView === 'meteo'      ? <MeteoDetail />
             : detailView === 'parking'    ? <ParkingDetail map={map} />
             : detailView === 'journey'    ? <MonTrajetDetail />
+            : detailView === 'events'     ? <EventsPanel onSelect={slug => {
+                setSelectedEvent(slug)
+                animateTo(getFullH(), true)
+                const ev = events.find(e => e.slug === slug)
+                if (ev?.venue.lat != null && ev?.venue.lng != null && map) {
+                  map.flyTo({ center: [ev.venue.lng, ev.venue.lat], zoom: 15, duration: 800, essential: true })
+                }
+              }} />
             : <G7Detail />
           }
         </div>

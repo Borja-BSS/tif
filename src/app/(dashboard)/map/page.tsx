@@ -20,6 +20,8 @@ import type { FilterState }       from '@/components/map/FilterPanel'
 import { useGuest }           from '@/context/GuestContext'
 import { GuestBanner }        from '@/components/guest/GuestBanner'
 import { GuestExpiredModal }  from '@/components/guest/GuestExpiredModal'
+import { GuestWelcomeModal }  from '@/components/guest/GuestWelcomeModal'
+import { WelcomeModals }      from '@/components/map/WelcomeModals'
 
 const MapView = dynamicImport(() => import('@/components/map/MapView'), { ssr: false })
 
@@ -114,7 +116,11 @@ export default function MapPage() {
       {/* Layer 9: TPG line stop pins (activé par tif:line-select) */}
       <TpgLineStopsLayer map={mapRef} />
 
-      {/* Guest mode — countdown banner + expiry modal */}
+      {/* Welcome modals — G7 zone info + features list (once per localStorage) */}
+      <WelcomeModals />
+
+      {/* Guest mode — welcome popup + countdown banner + expiry modal */}
+      <GuestWelcomeModal />
       <GuestBanner />
       <GuestExpiredModal />
 

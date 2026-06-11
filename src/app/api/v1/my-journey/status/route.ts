@@ -1,15 +1,15 @@
-import { auth }        from '@/lib/auth'
-import { NextRequest } from 'next/server'
-import { redis }       from '@/lib/redis'
-import type { JourneyStatusResult } from '@/lib/my-journey/types'
+import { NextRequest }                from 'next/server'
+import { redis }                       from '@/lib/redis'
+import { getFirebaseUserFromRequest }  from '@/lib/auth-firebase'
+import type { JourneyStatusResult }    from '@/lib/my-journey/types'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(_req: NextRequest) {
-  const session = await auth()
-  if (!session?.user?.id) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+export async function GET(req: NextRequest) {
+  const fbUser = await getFirebaseUserFromRequest(req)
+  if (!fbUser) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const raw = await redis.get(`tif:journey:${session.user.id}:status`)
+  const raw = await redis.get(`tif:journey:${fbUser.uid}:status`)
   if (!raw) return Response.json({ status: null })
 
   const result = (typeof raw === 'string' ? JSON.parse(raw) : raw) as JourneyStatusResult

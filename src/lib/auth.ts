@@ -29,6 +29,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.role = (user as typeof user & { role: Role }).role ?? 'USER'
         token.id   = user.id
       }
+      // token.sub is the user id set by NextAuth — use as fallback if token.id missing
+      if (!token.id && token.sub) {
+        token.id = token.sub
+      }
       return token
     },
     async session({ session, token }) {

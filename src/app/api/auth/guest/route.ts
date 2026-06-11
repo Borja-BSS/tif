@@ -7,7 +7,7 @@ import { ratelimit }   from '@/lib/redis'
 
 export const dynamic = 'force-dynamic'
 
-const GUEST_TTL = 60  // secondes
+const GUEST_TTL = 600  // secondes (10 minutes)
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   const ip = req.headers.get('x-forwarded-for') ?? 'anonymous'

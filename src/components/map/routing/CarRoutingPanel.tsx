@@ -6,6 +6,8 @@ import { RouteDisplay } from './RouteDisplay'
 import type { SearchResult } from '@/lib/routing/shared/search-engine'
 import type { CarRoute }     from '@/lib/routing/car/here-router'
 import type mapboxgl         from 'mapbox-gl'
+import { useMapT } from '@/i18n/map'
+import type { MapT } from '@/i18n/map'
 
 interface CarRoutingPanelProps {
   map:      mapboxgl.Map | null
@@ -85,22 +87,22 @@ function enrichRoutes(routes: CarRoute[]): CarRoute[] {
 }
 
 // ── Route reason explanation ───────────────────────────────────────────────────
-function getRouteReason(route: CarRoute, index: number, allRoutes: CarRoute[]): string[] {
+function getRouteReason(route: CarRoute, index: number, allRoutes: CarRoute[], t: MapT): string[] {
   const reasons: string[] = []
 
   if (index === 0) {
-    reasons.push('Itinéraire le plus rapide')
-    if (route.trafficDelay === 0) reasons.push('Trafic fluide')
-    if (!route.warnings.length) reasons.push('Aucune restriction active')
+    reasons.push(t.car.fastest)
+    if (route.trafficDelay === 0) reasons.push(t.car.fluidTraffic)
+    if (!route.warnings.length) reasons.push(t.car.noRestriction)
   } else if (route.warnings.includes('Via centre-ville')) {
-    reasons.push('Trajet via centre-ville')
-    reasons.push('Distance légèrement réduite')
+    reasons.push(t.car.viaCentre)
+    reasons.push(t.car.distReduced)
     const slower = route.summary.duration - allRoutes[0].summary.duration
-    if (slower > 0) reasons.push(`+${Math.ceil(slower / 60)} min vs le plus rapide`)
+    if (slower > 0) reasons.push(`+${Math.ceil(slower / 60)} ${t.car.slowerVs}`)
   } else if (route.warnings.includes('Évite les zones G7')) {
-    reasons.push('Évite les périmètres G7')
-    reasons.push('Contourne les zones de restriction')
-    reasons.push('Recommandé 12-18 juin 2026')
+    reasons.push(t.car.avoidsG7)
+    reasons.push(t.car.bypassesZones)
+    reasons.push(t.car.recommended)
   }
 
   return reasons
@@ -114,6 +116,10 @@ export function getRouteType(route: CarRoute): 'fastest' | 'alternative' | 'safe
 }
 
 export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
+  const t = useMapT()
+  const tRef = useRef(t)
+  tRef.current = t
+
   const [origin,      setOrigin]      = useState<SearchResult | null>(null)
   const [destination, setDestination] = useState<SearchResult | null>(null)
   const [routes,      setRoutes]      = useState<CarRoute[]>([])
@@ -153,7 +159,7 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
       pos => {
         setOrigin({
           id:    'gps',
-          title: 'Ma position',
+          title: tRef.current.searchBox.gpsTitle,
           lat:   pos.coords.latitude,
           lng:   pos.coords.longitude,
           type:  'address',
@@ -177,7 +183,7 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
       pos => {
         setOrigin({
           id:    'gps',
-          title: 'Ma position',
+          title: tRef.current.searchBox.gpsTitle,
           lat:   pos.coords.latitude,
           lng:   pos.coords.longitude,
           type:  'address',
@@ -220,10 +226,10 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
           )
         }
       } else {
-        setError('Aucun itinéraire trouvé.')
+        setError(tRef.current.car.noRoute)
       }
     } catch {
-      setError('Calcul indisponible. Vérifiez votre connexion.')
+      setError(tRef.current.car.calcError)
     } finally {
       setLoading(false)
     }
@@ -236,10 +242,10 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
   // Recalcul auto toutes les 2 minutes
   useEffect(() => {
     if (routes.length === 0) return
-    const t = setInterval(() => {
+    const interval = setInterval(() => {
       if (origin && destination) calculate(origin, destination)
     }, 120_000)
-    return () => clearInterval(t)
+    return () => clearInterval(interval)
   }, [routes.length, origin, destination, calculate])
 
   // ── Formatters ────────────────────────────────────────────────────────────────
@@ -277,7 +283,7 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
 
   // ── Shared route list renderer ────────────────────────────────────────────────
   const renderRoutes = () => routes.map((route, idx) => {
-    const reasons = getRouteReason(route, idx, routes)
+    const reasons = getRouteReason(route, idx, routes, t)
     return (
       <button
         key={route.id}
@@ -301,7 +307,7 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
                 className="text-[10px] px-1.5 py-0.5 rounded-full"
                 style={{ background: 'rgba(255,159,10,0.18)', color: '#FF9F0A' }}
               >
-                +{fmt(route.trafficDelay)} trafic
+                +{fmt(route.trafficDelay)} {t.car.trafficSuffix}
               </span>
             )}
             {route.warnings.includes('Évite les zones G7') && (
@@ -309,11 +315,11 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
                 className="text-[10px] px-1.5 py-0.5 rounded-full"
                 style={{ background: 'rgba(52,199,89,0.15)', color: '#34C759' }}
               >
-                G7 safe
+                {t.car.g7SafeLabel}
               </span>
             )}
             {route.alternative && !route.warnings.includes('Évite les zones G7') && (
-              <span className="text-[10px] text-white/25">Alternative</span>
+              <span className="text-[10px] text-white/25">{t.car.alternative}</span>
             )}
           </div>
           <div className="text-[11px] text-white/35">
@@ -334,7 +340,7 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
           )}
         </div>
         <div className="text-[10px] text-white/30 text-right mt-0.5 ml-2 shrink-0">
-          <div>Arrivée</div>
+          <div>{t.car.arrival}</div>
           <div className="font-medium text-white/50">
             {new Date(route.summary.arrivalTime).toLocaleTimeString('fr-CH', {
               hour: '2-digit', minute: '2-digit',
@@ -367,7 +373,7 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
         >
           <div className="flex items-center gap-2">
             <span className="text-base">🚗</span>
-            <span className="text-sm font-semibold text-white/85">Itinéraire voiture</span>
+            <span className="text-sm font-semibold text-white/85">{t.car.title}</span>
           </div>
           {onClose && (
             <button
@@ -387,7 +393,7 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
         {/* Origin + Destination fields */}
         <div className="px-3 pt-3 pb-2 space-y-2">
           <SearchBox
-            placeholder="Point de départ"
+            placeholder={t.car.origin}
             icon="🔵"
             value={origin?.title}
             loading={geoState === 'loading'}
@@ -396,7 +402,7 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
             onSelect={handleOriginSelect}
           />
           <SearchBox
-            placeholder="Destination"
+            placeholder={t.car.destination}
             icon="🔴"
             value={destination?.title}
             onSelect={handleDestinationSelect}
@@ -411,7 +417,7 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
                   style={{ animationDelay: `${i * 120}ms` }} />
               ))}
             </span>
-            <span className="text-xs text-white/45">Calcul de l&apos;itinéraire…</span>
+            <span className="text-xs text-white/45">{t.car.calculating}</span>
           </div>
         )}
         {error && <div className="px-4 pb-3 text-xs" style={{ color: '#FF453A' }}>{error}</div>}
@@ -420,7 +426,7 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
           <div className="pb-3">
             {renderRoutes()}
             <div className="px-4 pt-1">
-              <p className="text-[10px] text-white/20">Recalcul auto · 2 min · Trafic temps réel HERE</p>
+              <p className="text-[10px] text-white/20">{t.car.footer}</p>
             </div>
           </div>
         )}
@@ -450,7 +456,7 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
         >
           <div className="flex items-center gap-2">
             <span className="text-base">🚗</span>
-            <span className="text-sm font-semibold text-white/85">Itinéraire voiture</span>
+            <span className="text-sm font-semibold text-white/85">{t.car.title}</span>
             {routes.length > 0 && !loading && isPeek && (
               <span className="text-xs text-white/40">
                 · {fmt(routes[selected]?.summary.durationInTraffic ?? 0)}
@@ -505,7 +511,7 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
                       style={{ animationDelay: `${i * 120}ms` }} />
                   ))}
                 </span>
-                <span className="text-xs text-white/45">Calcul de l&apos;itinéraire…</span>
+                <span className="text-xs text-white/45">{t.car.calculating}</span>
               </div>
             )}
             {error && <div className="px-4 pb-3 text-xs" style={{ color: '#FF453A' }}>{error}</div>}
@@ -514,7 +520,7 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
               <div className="pb-3">
                 {renderRoutes()}
                 <div className="px-4 pt-1">
-                  <p className="text-[10px] text-white/20">Recalcul auto · 2 min · Trafic temps réel HERE</p>
+                  <p className="text-[10px] text-white/20">{t.car.footer}</p>
                 </div>
               </div>
             )}

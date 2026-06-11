@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react'
 import type { FilterState } from './FilterPanel'
+import { useMapT } from '@/i18n/map'
 
 // ── Liquid Glass system token ─────────────────────────────────────────────────
 export const LG_STYLE: React.CSSProperties = {
@@ -12,16 +13,6 @@ export const LG_STYLE: React.CSSProperties = {
   boxShadow:            'inset 0 0.5px 0 rgba(255,255,255,0.14), 0 8px 32px rgba(0,0,0,0.45)',
 }
 
-const TERRITORY_TOOLTIP = "Périmètres G7, zones de restriction et conditions d'accès — 8 au 18 juin 2026"
-
-// ── Layer definitions ─────────────────────────────────────────────────────────
-const LAYERS = [
-  { key: 'heatmap'   as keyof FilterState, icon: '🚦', label: 'Trafic',  accent: '#0A84FF'  },
-  { key: 'transport' as keyof FilterState, icon: '🚌', label: 'TPG',     accent: '#34C759'  },
-  { key: 'territory' as keyof FilterState, icon: '🗺️', label: 'Zones',   accent: '#FFD60A'  },
-  { key: 'alerts'    as keyof FilterState, icon: '⚠️', label: 'Alertes', accent: '#FF453A'  },
-]
-
 interface MapControlsProps {
   filters:      FilterState
   onChange:     (next: FilterState) => void
@@ -30,10 +21,18 @@ interface MapControlsProps {
 }
 
 export default function MapControls({ filters, onChange }: MapControlsProps) {
+  const t = useMapT()
   const [tooltip,          setTooltip]          = useState<string | null>(null)
   const [territoryTooltip, setTerritoryTooltip] = useState(false)
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [expanded, setExpanded] = useState(true)
+
+  const LAYERS = [
+    { key: 'heatmap'   as keyof FilterState, icon: '🚦', label: t.layers.traffic,  accent: '#0A84FF'  },
+    { key: 'transport' as keyof FilterState, icon: '🚌', label: t.layers.tpg,      accent: '#34C759'  },
+    { key: 'territory' as keyof FilterState, icon: '🗺️', label: t.layers.zones,    accent: '#FFD60A'  },
+    { key: 'alerts'    as keyof FilterState, icon: '⚠️', label: t.layers.alerts,   accent: '#FF453A'  },
+  ]
 
   const toggle = (key: keyof FilterState) => onChange({ ...filters, [key]: !filters[key] })
 
@@ -127,8 +126,8 @@ export default function MapControls({ filters, onChange }: MapControlsProps) {
               style={{ ...LG_STYLE, color: 'rgba(255,255,255,0.65)' }}
               onClick={() => setTerritoryTooltip(false)}
             >
-              <div className="font-semibold text-amber-400 mb-1">🗺️ Zones G7</div>
-              {TERRITORY_TOOLTIP}
+              <div className="font-semibold text-amber-400 mb-1">{t.layers.zonesG7Title}</div>
+              {t.layers.zonesG7Desc}
             </div>
           )}
         </div>

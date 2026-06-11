@@ -235,12 +235,12 @@ function LoginPageInner() {
             opacity:      busy ? 0.6 : 1,
           }}
         >
-          {busy ? 'Chargement…' : '👁 Explorer en mode invité · 1 min'}
+          {busy ? 'Chargement…' : '👁 Explorer en mode invité · 10 min'}
         </button>
 
         {/* Disclaimer */}
         <p className="text-center text-[12px] mt-6" style={{ color: 'var(--text-tertiary)' }}>
-          Accès invité limité à 60 secondes · Données Grand Genève
+          Accès invité limité à 10 minutes · Données Grand Genève
         </p>
 
         {/* Back */}

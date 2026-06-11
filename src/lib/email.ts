@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer'
+import type { G7Alert } from '@/data/types'
 
 function esc(s: string): string {
   return s
@@ -34,6 +35,7 @@ export interface JourneyAlertPayload {
   delayMinutes:  number
   departureHour: number
   departureMin:  number
+  g7Alerts?:     G7Alert[]
 }
 
 const STATUS_FR: Record<string, string> = {
@@ -43,10 +45,21 @@ const STATUS_FR: Record<string, string> = {
 }
 
 export async function sendJourneyAlert(payload: JourneyAlertPayload): Promise<void> {
-  const { to, journeyName, status, headline, detail, delayMinutes, departureHour, departureMin } = payload
+  const { to, journeyName, status, headline, detail, delayMinutes, departureHour, departureMin, g7Alerts } = payload
 
   const dep = `${String(departureHour).padStart(2,'0')}h${String(departureMin).padStart(2,'0')}`
   const subject = `${STATUS_FR[status] ?? '⚠️ Alerte'} — ${journeyName} · ${dep}`
+
+  let g7Section = ''
+  if (g7Alerts && g7Alerts.length > 0) {
+    const alertRows = g7Alerts.map(a => {
+      const bg   = a.severity === 'critical' ? 'rgba(255,69,58,0.08)'  : a.severity === 'warning' ? 'rgba(255,196,0,0.07)'  : 'rgba(255,255,255,0.03)'
+      const bd   = a.severity === 'critical' ? 'rgba(255,69,58,0.25)'  : a.severity === 'warning' ? 'rgba(255,196,0,0.20)'  : 'rgba(255,255,255,0.08)'
+      const icon = a.severity === 'critical' ? '🔴' : a.severity === 'warning' ? '🟡' : 'ℹ️'
+      return `<div style="background:${bg};border:1px solid ${bd};border-radius:10px;padding:10px 14px;margin-bottom:8px;"><div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.88);">${icon} ${esc(a.title)}</div><div style="font-size:12px;color:rgba(255,255,255,0.52);margin-top:4px;line-height:1.5;">${esc(a.detail)}</div></div>`
+    }).join('')
+    g7Section = `<div style="margin-bottom:20px;"><div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">⚠️ Alertes G7 actives aujourd'hui</div>${alertRows}</div>`
+  }
 
   const html = `
 <!DOCTYPE html>
@@ -84,6 +97,9 @@ export async function sendJourneyAlert(payload: JourneyAlertPayload): Promise<vo
       <div style="font-size:16px;font-weight:600;color:#fff;margin-bottom:10px;line-height:1.4;">${esc(headline)}</div>
       ${detail ? `<div style="font-size:14px;color:rgba(255,255,255,0.6);margin-bottom:16px;line-height:1.5;">${esc(detail)}</div>` : ''}
       ${delayMinutes > 0 ? `<div style="background:rgba(255,159,10,0.08);border:1px solid rgba(255,159,10,0.2);border-radius:12px;padding:12px 16px;font-size:13px;color:#FF9F0A;font-weight:600;margin-bottom:16px;">⏱ Retard estimé : +${delayMinutes} min · Départ prévu ${dep}</div>` : ''}
+
+      <!-- G7 Alerts -->
+      ${g7Section}
 
       <!-- CTA -->
       <a href="https://tif.borja-swiss-solutions.ch/map" style="display:inline-block;padding:12px 24px;background:#E8000E;color:#fff;text-decoration:none;border-radius:14px;font-size:14px;font-weight:700;margin-top:4px;">

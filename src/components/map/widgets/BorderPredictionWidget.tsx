@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { computeBorderPrediction } from '@/lib/features/border-prediction'
 import type { BorderPrediction } from '@/lib/features/border-prediction'
+import { useMapT } from '@/i18n/map'
 
 const CROSSINGS = [
   { id: 'bardonnex', name: 'Bardonnex' },
@@ -44,6 +45,7 @@ function BorderCard({ data }: { data: BorderPrediction }) {
 }
 
 export function BorderPredictionWidget() {
+  const t = useMapT()
   const { data: predictions } = useQuery<BorderPrediction[]>({
     queryKey: ['border-predictions'],
     queryFn: async () => {
@@ -72,7 +74,7 @@ export function BorderPredictionWidget() {
   return (
     <div className="px-4 py-2">
       <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-tertiary)' }}>
-        Passages frontière
+        {t.borderWidget.title}
       </p>
       {predictions.map(p => <BorderCard key={p.crossingId} data={p} />)}
     </div>

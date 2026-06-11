@@ -3,6 +3,9 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
+import { T, LANGUAGES } from '@/i18n/home'
+import type { Lang } from '@/i18n/home'
+import { LangSelector } from '@/components/LangSelector'
 
 interface DashData {
   alerts: Array<{ id: string; icon: string; title: string; severity: string; timeAgo: string }>
@@ -75,12 +78,7 @@ const STATIC_INC: IncSlide[] = [
   { id: '8', icon: '🚧', title: 'Travaux Rue de Rive, fermeture totale, déviation par Cours de Rive', severity: 'LOW', timeAgo: '00:00', source: 'Canton GE, SITG' },
 ]
 
-const WHY_SLIDES = [
-  { num: '01  Mobilité', title: 'Une infirmière. 7h45. Bardonnex fermée.', body: <><span className="before">Sans TIF</span> elle l&apos;apprend sur place après 20 min de queue. <span className="after">Avec TIF</span> alerte à 6h30, itinéraire choisi à la maison. Elle arrive à l&apos;heure.</> },
-  { num: '02  Sécurité', title: 'Une famille. Quai Wilson. Zone rouge.', body: <><span className="before">Sans TIF</span> bloquée face à un périmètre non signalé. <span className="after">Avec TIF</span> restriction visible dès 6h00 avec l&apos;alternative et la durée estimée.</> },
-  { num: '03  Entreprise', title: 'Un livreur. 14 arrêts. 4 zones fermées.', body: <><span className="before">Sans TIF</span> découvre les blocages un par un, perd 3 heures. <span className="after">Avec TIF</span> tournée planifiée sur la carte G7. 14 livraisons avant 16h.</> },
-  { num: '04  Réaction rapide', title: 'Un incident. Qui informe en premier ?', body: <><span className="before">Sans TIF</span> Twitter, rumeurs, Google Maps en retard. <span className="after">Avec TIF</span> sources officielles agrégées en 30 secondes, information vérifiée avant la confusion.</> },
-]
+// WHY_SLIDES content moved to i18n/home.ts → t.why.slides
 
 const WHY_DETAILS: DetailInfo[] = [
   { icon: '🏥', title: 'Scénario 01 : Mobilité professionnelle', rows: [
@@ -115,38 +113,25 @@ const WHY_DETAILS: DetailInfo[] = [
   ], note: 'TIF ne produit pas de données. Il les agrège et les attribue. Chaque information est traçable à sa source primaire.' },
 ]
 
-const SRC_SLIDES = [
-  { icon: '📡', name: 'Réseau Börja', desc: 'Signalements anonymes de la communauté TIF. Corrélation terrain pour affinage des données officielles.', live: 'Complémentaire', url: 'https://borja-swiss-solutions.ch', blue: true },
-  { icon: '🛣️', name: 'OFROU / ASTRA', desc: 'Trafic autoroutier A1, A40 et réseau national. Incidents, fermetures, travaux en temps réel.', live: 'Live  60s', url: 'https://www.astra.admin.ch', blue: false },
-  { icon: '🗺️', name: 'SITG Geneva', desc: "Système d'Information du Territoire Genevois. Voirie, événements et restrictions officielles.", live: 'Officiel Canton GE', url: 'https://ge.ch/sitg/', blue: false },
-  { icon: '🚌', name: 'TPG', desc: 'Perturbations, retards et déviations sur le réseau trams, bus et trolleybus du Grand Genève.', live: 'Live  30s', url: 'https://www.tpg.ch', blue: false },
-  { icon: '🚆', name: 'CFF / SBB + CEVA', desc: 'Léman Express, InterRegio, retards via OpenTransportData.swiss. Toutes lignes couvertes.', live: 'Live  30s', url: 'https://www.sbb.ch/fr', blue: false },
-  { icon: '🌩️', name: 'MétéoSuisse', desc: 'Alertes météo officielles, précipitations, orages et vigilance pour le Canton de Genève.', live: 'Officiel Confédération', url: 'https://www.meteoswiss.admin.ch', blue: false },
-  { icon: '🛂', name: 'Frontières CH-FR', desc: "Temps d'attente aux 8 postes frontaliers franco-suisses. Bardonnex, Moillesulaz, Ferney...", live: 'Live  5 min', url: 'https://www.bazg.admin.ch', blue: false },
-  { icon: '🚗', name: 'HERE Maps / Waze', desc: 'Données trafic communautaires. Incidents terrain, congestion, signalements citoyens.', live: 'Live  corrélation', url: 'https://www.here.com', blue: false },
+// desc + live moved to i18n/home.ts → t.src.slides
+const SRC_SLIDES_STATIC = [
+  { icon: '📡', name: 'Réseau Börja',    url: 'https://borja-swiss-solutions.ch', blue: true  },
+  { icon: '🛣️', name: 'OFROU / ASTRA',  url: 'https://www.astra.admin.ch',       blue: false },
+  { icon: '🗺️', name: 'SITG Geneva',     url: 'https://ge.ch/sitg/',              blue: false },
+  { icon: '🚌', name: 'TPG',             url: 'https://www.tpg.ch',               blue: false },
+  { icon: '🚆', name: 'CFF / SBB + CEVA',url: 'https://www.sbb.ch/fr',            blue: false },
+  { icon: '🌩️', name: 'MétéoSuisse',    url: 'https://www.meteoswiss.admin.ch',  blue: false },
+  { icon: '🛂', name: 'Frontières CH-FR',url: 'https://www.bazg.admin.ch',        blue: false },
+  { icon: '🚗', name: 'HERE Maps / Waze',url: 'https://www.here.com',             blue: false },
 ]
 
-const TC1_SLIDES = [
-  { icon: '🏢', name: 'Hébergement', desc: 'Infomaniak  Suisse  Données jamais hors UE', modal: 'm-hosting' },
-  { icon: '🔒', name: 'Protection des données', desc: 'RGPD  nLPD  Aucune donnée vendue', modal: 'm-rgpd' },
-  { icon: '📄', name: 'Confidentialité', desc: 'Données collectées  Durée  Droits', modal: 'm-privacy' },
-  { icon: '🛡️', name: 'Contact sécurité', desc: 'contact@borja-swiss-solutions.ch', modal: 'm-secu' },
-]
-const TC2_SLIDES = [
-  { icon: '❓', name: 'FAQ', desc: 'Questions fréquentes  Sources  Fiabilité', modal: 'm-faq' },
-  { icon: '📚', name: 'Documentation', desc: 'Guide utilisateur  Fonctionnalités', modal: 'm-doc' },
-  { icon: '🎯', name: "Cas d'usage", desc: 'Habitants  Frontaliers  Entreprises  G7', modal: 'm-usecases' },
-  { icon: '🏗️', name: 'Architecture', desc: 'Schéma simplifié  Sources  Flux', modal: 'm-archi' },
-]
+// name + desc moved to i18n/home.ts → t.trans.tc1Slides / tc2Slides
+const TC1_MODALS = ['m-hosting', 'm-rgpd', 'm-privacy', 'm-secu']
+const TC2_MODALS = ['m-faq', 'm-doc', 'm-usecases', 'm-archi']
+const TC1_ICONS  = ['🏢', '🔒', '📄', '🛡️']
+const TC2_ICONS  = ['❓', '📚', '🎯', '🏗️']
 
-const FAQ_ITEMS = [
-  { q: "TIF pendant le G7, c'est quoi exactement ?", a: "TIF centralise en temps réel toutes les perturbations liées au Sommet : zones rouges, routes fermées, restrictions TPG, délais aux frontières et alertes météo. Une seule source fiable, mise à jour toutes les 30 secondes depuis les sources officielles." },
-  { q: "Pourquoi ne pas juste utiliser Google Maps ou Twitter ?", a: "Google Maps a un délai de 5 à 15 minutes sur les restrictions G7 spécifiques. Twitter diffuse des rumeurs non vérifiées. TIF s'alimente directement aux sources officielles (Police Cantonale GE, OFROU, TPG, CFF) avec attribution traçable pour chaque information." },
-  { q: "Qui est réellement concerné ?", a: "Toute personne se déplaçant dans le Grand Genève du 11 au 18 juin 2026 : 47 000 frontaliers par jour, livreurs, professionnels de santé, habitants des communes sous restrictions, et touristes en visite pendant le Sommet." },
-  { q: "TIF peut-il vraiment éviter un blocage ?", a: "Si une restriction est publiée à 6h00 et que vous partez à 7h30, TIF vous alerte avant même que vous preniez le volant. Les scénarios présentés sont des situations réelles qui se produisent à chaque grand événement international à Genève." },
-  { q: "La plateforme est-elle vraiment gratuite, sans conditions ?", a: "Oui. Sans inscription, sans publicité, sans limite de fonctionnalités. TIF est financé par des contributions volontaires et Börja Swiss Solutions. L'accès public restera gratuit même après le G7." },
-  { q: "TIF remplace-t-il les communications officielles des autorités ?", a: "Non. TIF est un tableau de bord citoyen indépendant. Il agrège et synthétise les sources officielles mais ne les remplace pas. En cas d'urgence, suivez toujours les instructions directes des autorités cantonales." },
-]
+// FAQ_ITEMS content moved to i18n/home.ts → t.faq.items
 
 const STATIC_BORDERS: BorderRow[] = [
   { name: 'Bardonnex', waitMinutes: 22, status: 'MODERATE' },
@@ -159,12 +144,40 @@ const STATIC_BORDERS: BorderRow[] = [
 const CEVA_LINES = ['L1 Coppet Annemasse', 'L2 Bellegarde Évian', 'L3 Genève Annecy', 'L4 Cornavin Meyrin']
 
 export function HomeContent() {
+  const [lang, setLang] = useState<Lang>('fr')
+
+  useEffect(() => {
+    const saved = localStorage.getItem('tif-lang') as Lang | null
+    if (saved && LANGUAGES.some(l => l.code === saved)) setLang(saved)
+  }, [])
+
+  function changeLang(l: Lang) {
+    setLang(l)
+    localStorage.setItem('tif-lang', l)
+  }
+
+  const t = T[lang]
+
   const [clock, setClock] = useState('--:--')
   const [openModal, setOpenModal] = useState<string | null>(null)
   const [incModal, setIncModal] = useState<IncSlide | null>(null)
   const [detail, setDetail] = useState<DetailInfo | null>(null)
-  const [selectedAmt, setSelectedAmt] = useState<number | null>(null)
-  const [customAmt, setCustomAmt] = useState('')
+  const [selectedAmt,   setSelectedAmt]   = useState<number | null>(null)
+  const [customAmt,     setCustomAmt]     = useState('')
+  const [donateEmail,   setDonateEmail]   = useState('')
+  const [donateLoading, setDonateLoading] = useState(false)
+  const [donateError,   setDonateError]   = useState<string | null>(null)
+
+  const PAYMENT_LINK = 'https://buy.stripe.com/fZu5kCar71V38erfdR97G00'
+
+  function handleDonate() {
+    const amount = customAmt ? parseFloat(customAmt) : selectedAmt
+    if (!amount || amount < 1) { setDonateError('Choisissez un montant.'); return }
+    setDonateError(null)
+    const centimes = Math.round(amount * 100)
+    const url = `${PAYMENT_LINK}?prefilled_amount=${centimes}${donateEmail ? `&prefilled_email=${encodeURIComponent(donateEmail)}` : ''}`
+    window.open(url, '_blank')
+  }
   const [activeDots, setActiveDots] = useState<Record<string, number>>({})
   const [openFaq, setOpenFaq] = useState<number | null>(null)
   const [dashData, setDashData] = useState<DashData | null>(null)
@@ -294,20 +307,14 @@ export function HomeContent() {
       const lbl = a.icon === '🚆' ? 'CFF' : a.icon === '🚌' ? 'TPG' : a.icon === '⛈️' ? 'Météo' : a.icon === '⬡' ? 'G7' : 'Alerte'
       return { cls, label: lbl, text: a.title }
     })
-    const info = [
-      { cls: 'tb-b', label: 'TIF', text: '9 sources officielles connectées, mise à jour toutes les 30 secondes' },
-      { cls: 'tb-gold', label: 'G7', text: 'Sommet du Grand Genève du 11 au 18 juin 2026, restrictions en vigueur' },
-      { cls: 'tb-g', label: 'Frontières', text: '46 postes frontaliers sur la carte · Bardonnex, Ferney-Voltaire, Thônex-Vallard, Moillesulaz, Perly, Meyrin et 40 autres' },
-      { cls: 'tb-b', label: 'CEVA', text: 'Léman Express 4 lignes surveillées : L1, L2, L3, L4' },
-      { cls: 'tb-g', label: 'Info', text: '47 000 frontaliers par jour dans le Grand Genève concernés par les restrictions G7' },
-      { cls: 'tb-b', label: 'Sources', text: 'OFROU, Police Cantonale GE, TPG, CFF, MétéoSuisse, SITG, BAZG' },
-    ]
+    const TICKER_CLS = ['tb-b', 'tb-gold', 'tb-g', 'tb-b', 'tb-g', 'tb-b']
+    const info = t.ticker.map((item, i) => ({ cls: TICKER_CLS[i] ?? 'tb-b', label: item.label, text: item.text }))
     const combined = apiItems.length ? [...apiItems, ...info] : info
     return [...combined, ...combined]
-  }, [dashData])
+  }, [dashData, t])
 
   function borderLabel(status: string) {
-    return status === 'CLEAR' ? 'Fluide' : status === 'LIGHT' ? 'Léger' : status === 'MODERATE' ? 'Modéré' : status === 'HEAVY' ? 'Chargé' : 'Bloqué'
+    return status === 'CLEAR' ? t.common.borderClear : status === 'LIGHT' ? t.common.borderLight : status === 'MODERATE' ? t.common.borderModerate : status === 'HEAVY' ? t.common.borderHeavy : t.common.borderBlocked
   }
   function borderClass(status: string) {
     return status === 'CLEAR' || status === 'LIGHT' ? 'mt-ok' : status === 'HEAVY' || status === 'BLOCKED' ? 'mt-bad' : 'mt-warn'
@@ -438,10 +445,10 @@ export function HomeContent() {
       <nav id="nav">
         <a className="n-logo" href="#">TIF</a>
         <div className="n-links">
-          <a className="n-link" href="#live">Situation live</a>
-          <a className="n-link" href="#sources">Sources</a>
-          <a className="n-link" href="#soutien">Soutenir</a>
-          <a className="n-link" href="#confiance">Transparence</a>
+          <a className="n-link" href="#live">{t.nav.live}</a>
+          <a className="n-link" href="#sources">{t.nav.sources}</a>
+          <a className="n-link" href="#soutien">{t.nav.support}</a>
+          <a className="n-link" href="#confiance">{t.nav.transparency}</a>
         </div>
         <div className="n-right">
           <div className="n-live"><div className="n-live-dot" /><span>{clock}</span></div>
@@ -451,9 +458,11 @@ export function HomeContent() {
             style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: 'transparent', border: '1px solid var(--border)', borderRadius: '980px', padding: '5px 11px', fontSize: '13px', fontWeight: 500, color: 'var(--ink)', textDecoration: 'none', letterSpacing: '-.01em', whiteSpace: 'nowrap' }}
           >
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" /></svg>
-            <span>{user ? (user.name?.split(' ')[0] ?? user.email?.split('@')[0] ?? 'Compte') : 'Se connecter'}</span>
+            <span>{user ? (user.name?.split(' ')[0] ?? user.email?.split('@')[0] ?? t.nav.account) : t.nav.login}</span>
           </a>
-          <a className="n-cta" href={user ? '/map' : '/login'} onClick={handleOpenMap}>Carte live →</a>
+          <a className="n-cta" href={user ? '/map' : '/login'} onClick={handleOpenMap}>{t.nav.openMap}</a>
+          <a href="https://borja-swiss-solutions.ch" target="_blank" rel="noreferrer" style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ink)', textDecoration: 'none', letterSpacing: '-.01em' }}>Börja</a>
+          <LangSelector lang={lang} onChange={changeLang} />
         </div>
       </nav>
 
@@ -468,89 +477,89 @@ export function HomeContent() {
 
       {/* HERO */}
       <section className="hero">
-        <h1 className="hero-h1">Le Grand Genève,<br />en <span className="accent">temps réel.</span></h1>
+        <h1 className="hero-h1">{t.hero.h1a}<br />{t.hero.h1b} <span className="accent">{t.hero.accent}</span></h1>
         <p className="hero-p">
-          Un accident. Une route fermée. Une alerte G7.<br />
-          <strong>Ces informations existent.</strong> Elles sont dispersées.<br />
-          TIF les centralise. Avant qu&apos;il soit trop tard.
+          {t.hero.p1}<br />
+          <strong>{t.hero.p2}</strong><br />
+          {t.hero.p3}
         </p>
         <div className="hero-btns">
           <a className="btn-p" href={user ? '/map' : '/login'} onClick={handleOpenMap}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="2.5" fill="white" /><circle cx="7" cy="7" r="5.5" stroke="white" strokeWidth="1.5" /></svg>
-            Ouvrir la carte live
+            {t.hero.btn}
           </a>
         </div>
         <div className="scroll-cue" aria-hidden="true">
-          <span>Situation en direct</span>
+          <span>{t.hero.scrollCue}</span>
           <div className="scroll-arrow"><svg viewBox="0 0 14 14"><polyline points="2,5 7,10 12,5" /></svg></div>
         </div>
       </section>
 
       {/* DASHBOARD LIVE */}
       <section className="s s-alt" id="live">
-        <div className="s-label">Situation en direct</div>
-        <h2 className="s-h">Ce qui se passe<br />en ce moment</h2>
-        <p className="s-sub" style={{ marginBottom: lastRefresh ? '8px' : undefined }}>Mis à jour toutes les 30 secondes depuis les sources officielles.</p>
+        <div className="s-label">{t.dash.sectionLabel}</div>
+        <h2 className="s-h">{t.dash.h2a}<br />{t.dash.h2b}</h2>
+        <p className="s-sub" style={{ marginBottom: lastRefresh ? '8px' : undefined }}>{t.dash.sub}</p>
         {lastRefresh && (
           <div className="live-refresh-block" style={{ marginBottom: '40px' }}>
-            Actualisé à {lastRefresh.toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            {t.dash.updatedAt} {lastRefresh.toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
           </div>
         )}
         <div className="dash reveal">
           <div className="dash-row dash-row-4">
             {/* Trafic */}
-            <div className="dc" style={{ cursor: 'pointer' }} onClick={() => setDetail({ icon: '🚦', title: 'Trafic A1 et A40', rows: [{ label: 'Statut', value: trafficAlert ? trafficAlert.title : 'Normal, aucun incident' }, { label: 'Source', value: 'OFROU' }, { label: 'Mise à jour', value: 'Toutes les 60 secondes' }], note: 'Données issues du système de surveillance du réseau autoroutier suisse (OFROU). Couvre la A1 et la A40 dans le périmètre Grand Genève.' })}>
-              <div className="dc-top"><div className="dc-label">Trafic A1 / A40</div><div className="dc-live-dot" /></div>
-              <div className={`dc-val ${trafficAlert ? 'r' : 'b'}`}>{trafficAlert ? (trafficAlert.severity === 'CRITICAL' ? '⚠ Critique' : '⚠ Alerte') : 'Normal'}</div>
-              <div className="dc-desc">{trafficAlert ? trafficAlert.title : 'Autoroutes fluides, aucun incident signalé'}</div>
+            <div className="dc" style={{ cursor: 'pointer' }} onClick={() => setDetail({ icon: '🚦', title: t.dash.traffic.label, rows: [{ label: 'Statut', value: trafficAlert ? trafficAlert.title : t.common.normal }, { label: 'Source', value: 'OFROU' }, { label: 'Mise à jour', value: 'Toutes les 60s' }], note: 'Données issues du système de surveillance du réseau autoroutier suisse (OFROU).' })}>
+              <div className="dc-top"><div className="dc-label">{t.dash.traffic.label}</div><div className="dc-live-dot" /></div>
+              <div className={`dc-val ${trafficAlert ? 'r' : 'b'}`}>{trafficAlert ? (trafficAlert.severity === 'CRITICAL' ? t.dash.traffic.critical : t.dash.traffic.alert) : t.dash.traffic.normal}</div>
+              <div className="dc-desc">{trafficAlert ? trafficAlert.title : t.dash.traffic.descNormal}</div>
               <div className="dc-bar"><div className="dc-fill" style={{ width: `${traficBar}%`, background: trafficAlert ? 'var(--red)' : 'var(--blue)' }} /></div>
             </div>
             {/* TPG */}
-            <div className="dc" style={{ cursor: 'pointer' }} onClick={() => setDetail({ icon: '🚌', title: 'Perturbations TPG', rows: [{ label: 'Lignes touchées', value: uniqueTpgLines.length > 0 ? `${uniqueTpgLines.length} ligne${uniqueTpgLines.length > 1 ? 's' : ''}` : 'Aucune', color: uniqueTpgLines.length > 0 ? 'var(--orange)' : 'var(--green)' }, { label: 'Détail', value: uniqueTpgLines.length > 0 ? `Lignes ${uniqueTpgLines.join(', ')}` : 'Service normal sur tout le réseau' }, { label: 'Source', value: 'TPG (Transports Publics Genevois)' }, { label: 'Mise à jour', value: 'Toutes les 30 secondes' }], note: 'Les données TPG couvrent trams, bus et trolleybus dans le Grand Genève.' })}>
-              <div className="dc-top"><div className="dc-label">TPG perturbations</div><div className="dc-live-dot" /></div>
-              <div className={`dc-val ${uniqueTpgLines.length > 3 ? 'r' : uniqueTpgLines.length > 0 ? 'o' : 'b'}`}>{uniqueTpgLines.length > 0 ? `${uniqueTpgLines.length} ligne${uniqueTpgLines.length > 1 ? 's' : ''}` : 'Normal'}</div>
-              <div className="dc-desc">{uniqueTpgLines.length > 0 ? `Lignes ${uniqueTpgLines.slice(0, 4).join(', ')}${uniqueTpgLines.length > 4 ? ' et autres' : ''}` : 'Service normal, aucune déviation'}</div>
+            <div className="dc" style={{ cursor: 'pointer' }} onClick={() => setDetail({ icon: '🚌', title: t.dash.tpg.label, rows: [{ label: 'Lignes', value: uniqueTpgLines.length > 0 ? `${uniqueTpgLines.length} ${uniqueTpgLines.length > 1 ? t.dash.tpg.lines : t.dash.tpg.line}` : t.common.normal, color: uniqueTpgLines.length > 0 ? 'var(--orange)' : 'var(--green)' }, { label: 'Source', value: 'TPG' }, { label: 'Mise à jour', value: 'Toutes les 30s' }], note: 'Les données TPG couvrent trams, bus et trolleybus dans le Grand Genève.' })}>
+              <div className="dc-top"><div className="dc-label">{t.dash.tpg.label}</div><div className="dc-live-dot" /></div>
+              <div className={`dc-val ${uniqueTpgLines.length > 3 ? 'r' : uniqueTpgLines.length > 0 ? 'o' : 'b'}`}>{uniqueTpgLines.length > 0 ? `${uniqueTpgLines.length} ${uniqueTpgLines.length > 1 ? t.dash.tpg.lines : t.dash.tpg.line}` : t.dash.tpg.normal}</div>
+              <div className="dc-desc">{uniqueTpgLines.length > 0 ? `Lignes ${uniqueTpgLines.slice(0, 4).join(', ')}${uniqueTpgLines.length > 4 ? ` ${t.dash.tpg.other}` : ''}` : t.dash.tpg.descNormal}</div>
               <div className="dc-bar"><div className="dc-fill" style={{ width: `${Math.max(tpgBar, 5)}%`, background: uniqueTpgLines.length > 0 ? 'var(--orange)' : 'var(--blue)' }} /></div>
             </div>
             {/* CFF */}
-            <div className="dc" style={{ cursor: 'pointer' }} onClick={() => setDetail({ icon: '🚆', title: 'CFF / CEVA', rows: [{ label: 'Retard max', value: maxCffDelay > 0 ? `+${maxCffDelay} min` : 'Aucun', color: maxCffDelay > 0 ? 'var(--orange)' : 'var(--green)' }, { label: 'Ligne concernée', value: cffDelays[0] ? `${cffDelays[0].from} vers ${cffDelays[0].to}` : 'Aucune perturbation' }, { label: 'Léman Express', value: cevaOk ? 'Service normal' : 'Perturbé', color: cevaOk ? 'var(--green)' : 'var(--orange)' }, { label: 'Source', value: 'OpenTransportData.swiss' }], note: 'Couvre tous les trains CFF dans le périmètre Grand Genève et les 4 lignes du Léman Express (CEVA).' })}>
-              <div className="dc-top"><div className="dc-label">CFF / CEVA</div><div className="dc-live-dot" /></div>
-              <div className={`dc-val ${maxCffDelay > 10 ? 'r' : maxCffDelay > 0 ? 'o' : 'b'}`}>{maxCffDelay > 0 ? `+${maxCffDelay} min` : 'Normal'}</div>
-              <div className="dc-desc">{maxCffDelay > 0 ? (cffDelays[0] ? `${cffDelays[0].from} vers ${cffDelays[0].to}` : 'Retard en cours') : `Léman Express : ${cevaOk ? 'service normal' : 'perturbé'}`}</div>
+            <div className="dc" style={{ cursor: 'pointer' }} onClick={() => setDetail({ icon: '🚆', title: t.dash.cff.label, rows: [{ label: 'Retard max', value: maxCffDelay > 0 ? `+${maxCffDelay} min` : t.common.normal, color: maxCffDelay > 0 ? 'var(--orange)' : 'var(--green)' }, { label: t.dash.cff.leman, value: cevaOk ? t.dash.cff.lemanNormal : t.dash.cff.lemanDisrupted, color: cevaOk ? 'var(--green)' : 'var(--orange)' }, { label: 'Source', value: 'OpenTransportData.swiss' }], note: 'Couvre tous les trains CFF et les 4 lignes du Léman Express (CEVA).' })}>
+              <div className="dc-top"><div className="dc-label">{t.dash.cff.label}</div><div className="dc-live-dot" /></div>
+              <div className={`dc-val ${maxCffDelay > 10 ? 'r' : maxCffDelay > 0 ? 'o' : 'b'}`}>{maxCffDelay > 0 ? `+${maxCffDelay} min` : t.dash.cff.normal}</div>
+              <div className="dc-desc">{maxCffDelay > 0 ? (cffDelays[0] ? `${cffDelays[0].from} → ${cffDelays[0].to}` : t.dash.cff.delayOngoing) : `${t.dash.cff.leman} : ${cevaOk ? t.dash.cff.lemanNormal : t.dash.cff.lemanDisrupted}`}</div>
               <div className="dc-bar"><div className="dc-fill" style={{ width: `${Math.max(cffBar, 5)}%`, background: maxCffDelay > 0 ? 'var(--orange)' : 'var(--blue)' }} /></div>
             </div>
             {/* Météo */}
-            <div className="dc" style={{ cursor: 'pointer' }} onClick={() => setDetail({ icon: '🌩️', title: 'Météo MétéoSuisse', rows: [{ label: 'Statut', value: meteoAlert ? `Alerte ${meteoAlert.severity === 'CRITICAL' ? 'rouge' : 'orange'}` : 'Normal', color: meteoAlert ? (meteoAlert.severity === 'CRITICAL' ? 'var(--red)' : 'var(--yellow-text)') : 'var(--green)' }, { label: 'Détail', value: meteoAlert ? meteoAlert.title : "Pas d'alerte en cours pour le Canton de Genève" }, { label: 'Source', value: 'MétéoSuisse, Office fédéral de météorologie' }, { label: 'Mise à jour', value: 'En continu' }], note: 'Alertes officielles pour le Canton de Genève. MétéoSuisse est l\'autorité météorologique officielle de la Confédération suisse.' })}>
-              <div className="dc-top"><div className="dc-label">Météo MétéoSuisse</div><div className="dc-live-dot" /></div>
-              <div className={`dc-val ${meteoAlert ? (meteoAlert.severity === 'CRITICAL' ? 'r' : 'y') : 'b'}`}>{meteoAlert ? `⚠ ${meteoAlert.severity === 'CRITICAL' ? 'Rouge' : 'Orange'}` : 'Normal'}</div>
-              <div className="dc-desc">{meteoAlert ? meteoAlert.title : "Conditions normales, pas d'alerte active"}</div>
+            <div className="dc" style={{ cursor: 'pointer' }} onClick={() => setDetail({ icon: '🌩️', title: t.dash.meteo.label, rows: [{ label: 'Statut', value: meteoAlert ? `⚠ ${meteoAlert.severity === 'CRITICAL' ? t.dash.meteo.red : t.dash.meteo.orange}` : t.common.normal, color: meteoAlert ? (meteoAlert.severity === 'CRITICAL' ? 'var(--red)' : 'var(--yellow-text)') : 'var(--green)' }, { label: 'Source', value: 'MétéoSuisse' }, { label: 'Mise à jour', value: 'En continu' }], note: 'Alertes officielles pour le Canton de Genève.' })}>
+              <div className="dc-top"><div className="dc-label">{t.dash.meteo.label}</div><div className="dc-live-dot" /></div>
+              <div className={`dc-val ${meteoAlert ? (meteoAlert.severity === 'CRITICAL' ? 'r' : 'y') : 'b'}`}>{meteoAlert ? `⚠ ${meteoAlert.severity === 'CRITICAL' ? t.dash.meteo.red : t.dash.meteo.orange}` : t.dash.meteo.normal}</div>
+              <div className="dc-desc">{meteoAlert ? meteoAlert.title : t.dash.meteo.descNormal}</div>
               <div className="dc-bar"><div className="dc-fill" style={{ width: `${Math.max(meteoBar, 5)}%`, background: meteoAlert ? 'var(--yellow-text)' : 'var(--blue)' }} /></div>
             </div>
           </div>
           <div className="dash-row dash-row-3">
             {/* G7 */}
             <div className="dc">
-              <div className="g7-head"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><polygon points="5,1 9,3 9,7 5,9 1,7 1,3" stroke="currentColor" strokeWidth="1.2" /></svg>Veille G7, Restrictions actives</div>
+              <div className="g7-head"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><polygon points="5,1 9,3 9,7 5,9 1,7 1,3" stroke="currentColor" strokeWidth="1.2" /></svg>{t.dash.g7.label}</div>
               <div className="g7-grid">
-                <div className="g7m g7m-btn" onClick={() => setDetail({ icon: '🔴', title: `${g7Zones} Zones rouges actives`, rows: [{ label: 'Nombre', value: `${g7Zones} zones`, color: 'var(--red)' }, { label: 'Localisation', value: 'Palais des Nations, Quai Wilson, Rue de Lausanne, IATA' }, { label: 'Source', value: 'Police Cantonale GE, Dispositif G7' }, { label: 'Durée', value: '11 au 18 juin 2026' }], note: 'Les zones rouges sont strictement fermées à la circulation non autorisée. Des restrictions supplémentaires peuvent être activées sans préavis.' })}>
-                  <div className="g7m-l">Zones rouge</div><div className="g7m-v" style={{ color: 'var(--red)' }}>{g7Zones}</div><div className="g7m-d">Palais Nations, Quai Wilson, Rue de Lausanne, IATA</div>
+                <div className="g7m g7m-btn" onClick={() => setDetail({ icon: '🔴', title: `${g7Zones} ${t.dash.g7.zonesLabel}`, rows: [{ label: 'Nombre', value: `${g7Zones}`, color: 'var(--red)' }, { label: 'Source', value: 'Police Cantonale GE' }], note: t.dash.g7.zonesDesc })}>
+                  <div className="g7m-l">{t.dash.g7.zonesLabel}</div><div className="g7m-v" style={{ color: 'var(--red)' }}>{g7Zones}</div><div className="g7m-d">{t.dash.g7.zonesDesc}</div>
                 </div>
-                <div className="g7m g7m-btn" onClick={() => setDetail({ icon: '🚫', title: '11 Routes fermées', rows: [{ label: 'Nombre', value: '11 routes', color: 'var(--orange)' }, { label: 'Secteurs', value: 'Rive gauche et accès aéroport réglementés' }, { label: 'Source', value: 'Police Cantonale GE, SITG, OFROU' }, { label: 'Durée', value: '11 au 18 juin 2026' }], note: 'Les fermetures varient selon le programme journalier du Sommet. Consultez la carte live pour les itinéraires alternatifs.' })}>
-                  <div className="g7m-l">Routes fermées</div><div className="g7m-v" style={{ color: 'var(--orange)' }}>11</div><div className="g7m-d">Rive gauche et accès aéroport réglementés</div>
+                <div className="g7m g7m-btn" onClick={() => setDetail({ icon: '🚫', title: `11 ${t.dash.g7.roadsLabel}`, rows: [{ label: 'Nombre', value: '11', color: 'var(--orange)' }, { label: 'Source', value: 'Police Cantonale GE, SITG, OFROU' }], note: t.dash.g7.roadsDesc })}>
+                  <div className="g7m-l">{t.dash.g7.roadsLabel}</div><div className="g7m-v" style={{ color: 'var(--orange)' }}>11</div><div className="g7m-d">{t.dash.g7.roadsDesc}</div>
                 </div>
-                <div className="g7m g7m-btn" onClick={() => setDetail({ icon: '🚌', title: 'Lignes TPG impactées G7', rows: [{ label: 'Nombre', value: `${g7Lines.length > 0 ? g7Lines.length : 3} lignes`, color: 'var(--gold)' }, { label: 'Lignes', value: g7Lines.length > 0 ? `Lignes ${g7Lines.map(l => l.startsWith('L') ? l : `L${l}`).join(', ')}` : 'Selon dispositif G7 journalier' }, { label: 'Source', value: 'TPG en lien avec dispositif G7' }, { label: 'Durée', value: '11 au 18 juin 2026' }], note: 'Les déviations TPG sont publiées par TPG et intégrées automatiquement dans TIF.' })}>
-                  <div className="g7m-l">Lignes TPG impactées</div>
+                <div className="g7m g7m-btn" onClick={() => setDetail({ icon: '🚌', title: t.dash.g7.tpgLabel, rows: [{ label: 'Nombre', value: `${g7Lines.length > 0 ? g7Lines.length : 3}`, color: 'var(--gold)' }, { label: 'Source', value: 'TPG' }], note: t.dash.g7.tpgDesc })}>
+                  <div className="g7m-l">{t.dash.g7.tpgLabel}</div>
                   <div className="g7m-v" style={{ color: 'var(--gold)' }}>{g7Lines.length > 0 ? g7Lines.length : transport?.g7.isActive ? '—' : 3}</div>
-                  <div className="g7m-d">{g7Lines.length > 0 ? `Lignes ${g7Lines.slice(0, 4).map(l => l.startsWith('L') || l.startsWith('l') ? l : `L${l}`).join(', ')}` : 'Selon dispositif G7 en vigueur'}</div>
+                  <div className="g7m-d">{g7Lines.length > 0 ? `Lignes ${g7Lines.slice(0, 4).map(l => l.startsWith('L') || l.startsWith('l') ? l : `L${l}`).join(', ')}` : t.dash.g7.tpgDesc}</div>
                 </div>
-                <div className="g7m g7m-btn" onClick={() => setDetail({ icon: '📢', title: `${dashData?.alerts.length ?? 28} Alertes diffusées`, rows: [{ label: 'Total aujourd\'hui', value: `${dashData?.alerts.length ?? 28} alertes` }, { label: 'Sources', value: 'OFROU, Police GE, TPG, CFF, MétéoSuisse, BAZG' }, { label: 'Canaux', value: 'Tableau de bord TIF, carte live, veille G7' }, { label: 'Depuis', value: '06h00 ce matin' }], note: 'Chaque alerte est horodatée et attribuée à sa source primaire. Consultez la carte live pour le détail géolocalisé.' })}>
-                  <div className="g7m-l">Alertes diffusées</div><div className="g7m-v" style={{ color: 'var(--blue-d)' }}>{dashData?.alerts.length ?? 28}</div><div className="g7m-d">Depuis 06h00 ce matin</div>
+                <div className="g7m g7m-btn" onClick={() => setDetail({ icon: '📢', title: `${dashData?.alerts.length ?? 28} ${t.dash.g7.alertsLabel}`, rows: [{ label: 'Total', value: `${dashData?.alerts.length ?? 28}` }, { label: 'Sources', value: 'OFROU, Police GE, TPG, CFF, MétéoSuisse, BAZG' }], note: t.dash.g7.alertsFrom })}>
+                  <div className="g7m-l">{t.dash.g7.alertsLabel}</div><div className="g7m-v" style={{ color: 'var(--blue-d)' }}>{dashData?.alerts.length ?? 28}</div><div className="g7m-d">{t.dash.g7.alertsFrom}</div>
                 </div>
               </div>
             </div>
             {/* Frontières */}
             <div className="dc">
-              <div className="dc-top"><div className="dc-label">Frontières CH-FR</div><div className="dc-live-dot" /></div>
+              <div className="dc-top"><div className="dc-label">{t.dash.borders.label}</div><div className="dc-live-dot" /></div>
               <div className="mini-table" style={{ marginTop: '4px' }}>
                 {borders.map(b => (
                   <div key={b.name} className="mt-row mt-row-btn" onClick={() => setDetail({ icon: '🛂', title: b.name, rows: [{ label: 'Attente actuelle', value: b.waitMinutes < 2 ? '< 2 min' : `${b.waitMinutes} min`, color: borderClass(b.status) === 'mt-ok' ? 'var(--green)' : borderClass(b.status) === 'mt-bad' ? 'var(--red)' : 'var(--orange)' }, { label: 'Niveau', value: borderLabel(b.status) }, { label: 'Source', value: 'BAZG, Bureau fédéral des douanes suisses' }, { label: 'Fréquence', value: 'Mise à jour toutes les 5 min' }], note: "Temps indicatif. Peut varier selon les dispositifs G7 en vigueur et les contrôles douaniers renforcés pendant le Sommet." })}>
@@ -562,14 +571,14 @@ export function HomeContent() {
             </div>
             {/* CEVA */}
             <div className="dc">
-              <div className="dc-top"><div className="dc-label">Léman Express CEVA</div><div className="dc-live-dot" /></div>
+              <div className="dc-top"><div className="dc-label">{t.dash.ceva.label}</div><div className="dc-live-dot" /></div>
               <div className="mini-table" style={{ marginTop: '4px' }}>
                 {CEVA_LINES.map((line, i) => {
                   const disrupted = transport?.disruptions.cff.find(d => d.isCEVA && d.line.includes(`L${i + 1}`))
                   return (
                     <div key={line} className="mt-row mt-row-btn" onClick={() => setDetail({ icon: '🚆', title: `Léman Express ${line}`, rows: [{ label: 'Statut', value: disrupted?.delayMinutes ? `Retard +${disrupted.delayMinutes} min` : 'Service normal', color: disrupted ? 'var(--orange)' : 'var(--green)' }, { label: 'Tronçon', value: disrupted ? `${disrupted.from} vers ${disrupted.to}` : 'Toutes gares' }, { label: 'Source', value: 'CFF / SBB via OpenTransportData.swiss' }, { label: 'Mise à jour', value: 'Toutes les 30 secondes' }], note: 'Le Léman Express est le réseau ferroviaire transfrontalier franco-suisse desservant le Grand Genève. Géré par CFF côté suisse et SNCF côté français.' })}>
                       <span className="mt-name">{line}</span>
-                      <span className={`mt-val ${disrupted ? 'mt-warn' : 'mt-ok'}`}>{disrupted?.delayMinutes ? `+${disrupted.delayMinutes} min` : 'Normal'}</span>
+                      <span className={`mt-val ${disrupted ? 'mt-warn' : 'mt-ok'}`}>{disrupted?.delayMinutes ? `+${disrupted.delayMinutes} min` : t.common.normal}</span>
                     </div>
                   )
                 })}
@@ -578,11 +587,11 @@ export function HomeContent() {
           </div>
         </div>
         <div className="live-cta reveal">
-          <div className="lct"><strong>Vous venez de voir la situation en direct.</strong><br />La carte live regroupe tout ça en une seule vue : routes, TPG, G7, météo, frontières.</div>
+          <div className="lct"><strong>{t.dash.ctaStrong}</strong><br />{t.dash.ctaDesc}</div>
           <div className="lcb">
             <a className="lc-a" href={user ? '/map' : '/login'} onClick={handleOpenMap}>
               <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="2.2" fill="currentColor" /><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" strokeWidth="1.4" /></svg>
-              Ouvrir la carte live
+              {t.dash.ctaBtn}
             </a>
           </div>
         </div>
@@ -590,64 +599,66 @@ export function HomeContent() {
 
       {/* SOCIAL SHARING */}
       <section className="s reveal">
-        <div className="s-label">Partagez TIF</div>
-        <h2 className="s-h">Informez votre<br />entourage</h2>
-        <p className="s-sub">Plus les gens connaissent TIF avant le G7, moins il y a de blocages inutiles. Chaque partage peut éviter une heure perdue à quelqu&apos;un.</p>
+        <div className="s-label">{t.share.sectionLabel}</div>
+        <h2 className="s-h">{t.share.h2a}<br />{t.share.h2b}</h2>
+        <p className="s-sub">{t.share.sub}</p>
         <div className="share-btns">
           <a className="share-btn share-tw" href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`} target="_blank" rel="noreferrer">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
-            Partager sur X
+            {t.share.xBtn}
           </a>
           <a className="share-btn share-li" href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`} target="_blank" rel="noreferrer">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" /></svg>
-            Partager sur LinkedIn
+            {t.share.liBtn}
           </a>
           <a className="share-btn share-wa" href={`https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`} target="_blank" rel="noreferrer">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z" /></svg>
-            WhatsApp
+            {t.share.waBtn}
           </a>
           <button className="share-btn share-copy" onClick={copyLink}>
-            {copied ? '✓ Lien copié' : '🔗 Copier le lien'}
+            {copied ? t.share.copiedBtn : t.share.copyBtn}
           </button>
         </div>
       </section>
 
       {/* POURQUOI G7 */}
       <section className="s reveal">
-        <div className="s-label">Sommet G7</div>
-        <h2 className="s-h">Pourquoi chaque<br />minute compte</h2>
-        <p className="s-sub">Lors d&apos;un sommet international, la ville change de nature. Sans information centralisée, chaque perturbation touche des milliers de personnes simultanément.</p>
+        <div className="s-label">{t.why.sectionLabel}</div>
+        <h2 className="s-h">{t.why.h2a}<br />{t.why.h2b}</h2>
+        <p className="s-sub">{t.why.sub}</p>
         <div className="car-outer" style={{ maxWidth: '960px', margin: '0 auto' }}>
           <div className="car-head">
-            <span className="car-head-t">4 scénarios réels, cliquez pour le détail</span>
+            <span className="car-head-t">{t.why.carHead}</span>
             <div className="car-arrows">
               <button className="c-arr" onClick={() => carMove('why', -1)} aria-label="Précédent"><svg viewBox="0 0 11 11"><polyline points="7.5,1.5 3,5.5 7.5,9.5" /></svg></button>
               <button className="c-arr" onClick={() => carMove('why', 1)} aria-label="Suivant"><svg viewBox="0 0 11 11"><polyline points="3.5,1.5 8,5.5 3.5,9.5" /></svg></button>
             </div>
           </div>
           <div className="ctrack" id="ctr-why" ref={el => { carRefs.current['why'] = el }} onScroll={() => csync('why')}>
-            {[...WHY_SLIDES, ...WHY_SLIDES, ...WHY_SLIDES].map((s, i) => (
-              <div key={i} className="cslide" style={{ cursor: 'pointer' }} onClick={() => setDetail(WHY_DETAILS[i % WHY_SLIDES.length])}>
+            {[...t.why.slides, ...t.why.slides, ...t.why.slides].map((s, i) => (
+              <div key={i} className="cslide" style={{ cursor: 'pointer' }} onClick={() => setDetail(WHY_DETAILS[i % t.why.slides.length])}>
                 <div className="why-card">
-                  <div className="why-num">{s.num}</div>
+                  <div className="why-num">{String(i % t.why.slides.length + 1).padStart(2, '0')}{'  '}{s.numLabel}</div>
                   <div className="why-title">{s.title}</div>
-                  <div className="why-body">{s.body}</div>
-                  <div style={{ fontSize: '11px', color: 'var(--blue)', marginTop: '10px' }}>Voir l&apos;analyse complète →</div>
+                  <div className="why-body">
+                    <span className="before">{t.why.withoutTIF}</span>{' '}{s.withoutText}{' '}<span className="after">{t.why.withTIF}</span>{' '}{s.withText}
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'var(--blue)', marginTop: '10px' }}>{t.why.analyzeLink}</div>
                 </div>
               </div>
             ))}
           </div>
-          <Dots id="why" logical={WHY_SLIDES.length} />
+          <Dots id="why" logical={t.why.slides.length} />
         </div>
       </section>
 
       {/* FAQ */}
       <section className="s s-alt reveal">
-        <div className="s-label">Questions fréquentes</div>
-        <h2 className="s-h">Tout comprendre<br />en 30 secondes</h2>
-        <p className="s-sub">Ce que TIF apporte concrètement pendant le G7 et au quotidien.</p>
+        <div className="s-label">{t.faq.sectionLabel}</div>
+        <h2 className="s-h">{t.faq.h2a}<br />{t.faq.h2b}</h2>
+        <p className="s-sub">{t.faq.sub}</p>
         <div className="faq-wrap">
-          {FAQ_ITEMS.map((item, i) => (
+          {t.faq.items.map((item, i) => (
             <div key={i} className={`faq-item${openFaq === i ? ' open' : ''}`}>
               <button className="faq-q" onClick={() => setOpenFaq(openFaq === i ? null : i)}>{item.q}<span className="faq-icon">+</span></button>
               <div className="faq-body"><p>{item.a}</p></div>
@@ -658,13 +669,13 @@ export function HomeContent() {
 
       {/* PARKINGS */}
       <section className="s reveal" id="parkings">
-        <div className="s-label">Stationnement · P+R</div>
-        <h2 className="s-h">Parkings et<br />solutions actives</h2>
-        <p className="s-sub">Pendant le G7, garez votre voiture dans un P+R et prenez les transports publics directement au centre-ville. Moins d&apos;embouteillages, zéro stress.</p>
+        <div className="s-label">{t.prk.sectionLabel}</div>
+        <h2 className="s-h">{t.prk.h2a}<br />{t.prk.h2b}</h2>
+        <p className="s-sub">{t.prk.sub}</p>
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
           <div className="car-outer">
             <div className="car-head">
-              <span className="car-head-t">8 P+R principaux · accès TPG direct</span>
+              <span className="car-head-t">{t.prk.carHead}</span>
               <div className="car-arrows">
                 <button className="c-arr" onClick={() => carMove('prk', -1)} aria-label="Précédent"><svg viewBox="0 0 11 11"><polyline points="7.5,1.5 3,5.5 7.5,9.5" /></svg></button>
                 <button className="c-arr" onClick={() => carMove('prk', 1)} aria-label="Suivant"><svg viewBox="0 0 11 11"><polyline points="3.5,1.5 8,5.5 3.5,9.5" /></svg></button>
@@ -679,12 +690,12 @@ export function HomeContent() {
                     <div className="why-body" style={{ marginTop: '8px' }}>
                       <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.02em', marginBottom: '4px' }}>
                         {p.capacity.toLocaleString('fr-CH')}
-                        <span style={{ fontSize: '12px', fontWeight: 400, color: 'var(--text-secondary)', marginLeft: '4px' }}>places</span>
+                        <span style={{ fontSize: '12px', fontWeight: 400, color: 'var(--text-secondary)', marginLeft: '4px' }}>{t.prk.places}</span>
                       </div>
                       <div style={{ fontSize: '13px', color: 'var(--brand)', fontWeight: 600, marginBottom: '4px' }}>🚌 {p.tpg}</div>
-                      {p.hasRT && <div style={{ fontSize: '11px', color: 'var(--green)' }}>⚡ Disponibilité temps réel</div>}
+                      {p.hasRT && <div style={{ fontSize: '11px', color: 'var(--green)' }}>⚡ {t.prk.rt}</div>}
                     </div>
-                    <div style={{ fontSize: '11px', color: 'var(--blue)', marginTop: '10px' }}>Voir sur la carte →</div>
+                    <div style={{ fontSize: '11px', color: 'var(--blue)', marginTop: '10px' }}>{t.prk.viewMap}</div>
                   </div>
                 </div>
               ))}
@@ -693,159 +704,242 @@ export function HomeContent() {
           </div>
         </div>
         <div className="live-cta reveal" style={{ marginTop: '20px' }}>
-          <div className="lct"><strong>Stratégie P+R pendant le G7.</strong><br />Posez votre voiture en périphérie et rejoignez le centre en TPG. La plupart des P+R sont gratuits ou à très faible coût.</div>
+          <div className="lct"><strong>{t.prk.ctaStrong}</strong><br />{t.prk.ctaDesc}</div>
           <div className="lcb">
             <a className="lc-a" href={user ? '/map' : '/login'} onClick={handleOpenMap}>
               <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="2.2" fill="currentColor" /><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" strokeWidth="1.4" /></svg>
-              Voir les parkings sur la carte
+              {t.prk.ctaBtn}
             </a>
+          </div>
+        </div>
+      </section>
+
+      {/* LIGNE VERTE G7 */}
+      <section className="s reveal" id="ligne-verte">
+        <div className="s-label reveal">{t.lgv.sectionLabel}</div>
+        <h2 className="s-h reveal">{t.lgv.h2}</h2>
+        <p className="s-sub reveal">{t.lgv.sub}</p>
+        <div className="reveal" style={{ maxWidth: '560px', margin: '0 auto' }}>
+          {/* Card principale — numéro vert */}
+          <div style={{
+            background:   'var(--bg-card)',
+            border:       '1px solid var(--border)',
+            borderRadius: '20px',
+            padding:      '32px 28px',
+            boxShadow:    'var(--shadow-lg)',
+            textAlign:    'center',
+            marginBottom: '16px',
+          }}>
+            <div style={{ fontSize: '13px', fontWeight: 600, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--green)', marginBottom: '12px' }}>
+              {t.lgv.freeNumberLabel}
+            </div>
+            <a
+              href="tel:0800902456"
+              style={{
+                display:       'block',
+                fontSize:      'clamp(32px, 8vw, 48px)',
+                fontWeight:    800,
+                letterSpacing: '-0.03em',
+                color:         'var(--green)',
+                textDecoration:'none',
+                lineHeight:    1,
+                marginBottom:  '8px',
+              }}
+            >
+              0800 902 456
+            </a>
+            <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '24px' }}>
+              {t.lgv.freeCallLabel}
+            </div>
+            <div style={{ borderTop: '1px solid var(--border)', paddingTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px', textAlign: 'left' }}>
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                <span style={{ fontSize: '16px', flexShrink: 0, marginTop: '1px' }}>🕐</span>
+                <div>
+                  <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-tertiary)', letterSpacing: '.05em', textTransform: 'uppercase', marginBottom: '3px' }}>{t.lgv.hoursLabel}</div>
+                  <div style={{ fontSize: '14px', color: 'var(--text-primary)', lineHeight: 1.5 }}>
+                    Lun 1er – ven 5 juin 2026<br />
+                    Lun 8 – jeu 18 juin 2026<br />
+                    <span style={{ color: 'var(--text-secondary)' }}>11h – 19h</span>
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                <span style={{ fontSize: '16px', flexShrink: 0, marginTop: '1px' }}>🚨</span>
+                <div>
+                  <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-tertiary)', letterSpacing: '.05em', textTransform: 'uppercase', marginBottom: '3px' }}>{t.lgv.emergencyLabel}</div>
+                  <a href="tel:117" style={{ fontSize: '18px', fontWeight: 700, color: 'var(--red)', textDecoration: 'none', letterSpacing: '-0.01em' }}>117</a>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                <span style={{ fontSize: '16px', flexShrink: 0, marginTop: '1px' }}>📧</span>
+                <div>
+                  <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-tertiary)', letterSpacing: '.05em', textTransform: 'uppercase', marginBottom: '3px' }}>{t.lgv.pressLabel}</div>
+                  <div style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                    <a href="tel:+41224275600" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>+41 (0)22 427 56 00</a><br />
+                    <a href="mailto:communication@police.ge.ch" style={{ color: 'var(--blue-d)', textDecoration: 'none' }}>communication@police.ge.ch</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style={{ fontSize: '12px', color: 'var(--text-tertiary)', textAlign: 'center', lineHeight: 1.6 }}>
+            {t.lgv.sourceText}
           </div>
         </div>
       </section>
 
       {/* SOURCES */}
       <section className="s s-alt" id="sources">
-        <div className="s-label reveal">Sources officielles</div>
-        <h2 className="s-h reveal">Données vérifiées.<br />Tracées à la source.</h2>
-        <p className="s-sub reveal">Chaque information publiée sur TIF est attribuée à sa source officielle. Aucune donnée invérifiable. Cliquez pour accéder à chaque source.</p>
+        <div className="s-label reveal">{t.src.sectionLabel}</div>
+        <h2 className="s-h reveal">{t.src.h2a}<br />{t.src.h2b}</h2>
+        <p className="s-sub reveal">{t.src.sub}</p>
         <div className="car-outer reveal" style={{ maxWidth: '1040px', margin: '0 auto' }}>
           <div className="car-head">
-            <span className="car-head-t">9 sources officielles connectées</span>
+            <span className="car-head-t">{t.src.carHead}</span>
             <div className="car-arrows">
               <button className="c-arr" onClick={() => carMove('src', -1)} aria-label="Précédent"><svg viewBox="0 0 11 11"><polyline points="7.5,1.5 3,5.5 7.5,9.5" /></svg></button>
               <button className="c-arr" onClick={() => carMove('src', 1)} aria-label="Suivant"><svg viewBox="0 0 11 11"><polyline points="3.5,1.5 8,5.5 3.5,9.5" /></svg></button>
             </div>
           </div>
           <div className="ctrack" id="ctr-src" ref={el => { carRefs.current['src'] = el }} onScroll={() => csync('src')}>
-            {[...SRC_SLIDES, ...SRC_SLIDES, ...SRC_SLIDES].map((s, i) => (
-              <div key={i} className="cslide">
-                <a href={s.url} target="_blank" rel="noreferrer" style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
-                  <div className="src" style={{ cursor: 'pointer' }}>
-                    <div className="src-icon">{s.icon}</div>
-                    <div className="src-name">{s.name}</div>
-                    <div className="src-desc">{s.desc}</div>
-                    <div className="src-live" style={s.blue ? { color: 'var(--blue-d)' } : {}}>{s.live}</div>
-                  </div>
-                </a>
-              </div>
-            ))}
+            {[...SRC_SLIDES_STATIC, ...SRC_SLIDES_STATIC, ...SRC_SLIDES_STATIC].map((s, i) => {
+              const ts = t.src.slides[i % SRC_SLIDES_STATIC.length]
+              return (
+                <div key={i} className="cslide">
+                  <a href={s.url} target="_blank" rel="noreferrer" style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
+                    <div className="src" style={{ cursor: 'pointer' }}>
+                      <div className="src-icon">{s.icon}</div>
+                      <div className="src-name">{s.name}</div>
+                      <div className="src-desc">{ts.desc}</div>
+                      <div className="src-live" style={s.blue ? { color: 'var(--blue-d)' } : {}}>{ts.live}</div>
+                    </div>
+                  </a>
+                </div>
+              )
+            })}
           </div>
-          <Dots id="src" logical={SRC_SLIDES.length} />
+          <Dots id="src" logical={SRC_SLIDES_STATIC.length} />
         </div>
       </section>
 
       {/* CTA DARK */}
       <div className="cta-dark reveal">
-        <h2>Voir avant<br />tout le monde.</h2>
-        <p>La carte live est gratuite, sans inscription, sans publicité. Ouvrez-la maintenant, avant de prendre la route.</p>
+        <h2>{t.ctaDark.h2a}<br />{t.ctaDark.h2b}</h2>
+        <p>{t.ctaDark.p}</p>
         <div className="btns">
           <a className="btn-w" href={user ? '/map' : '/login'} onClick={handleOpenMap}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="2.5" fill="currentColor" /><circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.5" /></svg>
-            Ouvrir la carte live
+            {t.ctaDark.btn}
           </a>
         </div>
         <div className="cta-stats">
-          <div className="cta-stat"><div className="cta-stat-v">9</div><div className="cta-stat-l">sources officielles</div></div>
-          <div className="cta-stat"><div className="cta-stat-v">30s</div><div className="cta-stat-l">refresh automatique</div></div>
-          <div className="cta-stat"><div className="cta-stat-v">1M+</div><div className="cta-stat-l">personnes concernées</div></div>
+          <div className="cta-stat"><div className="cta-stat-v">7</div><div className="cta-stat-l">{t.ctaDark.stat1l}</div></div>
+          <div className="cta-stat"><div className="cta-stat-v">30s</div><div className="cta-stat-l">{t.ctaDark.stat2l}</div></div>
+          <div className="cta-stat"><div className="cta-stat-v">1M+</div><div className="cta-stat-l">{t.ctaDark.stat3l}</div></div>
         </div>
       </div>
 
       {/* CONTRIBUTION */}
       <section className="s s-alt" id="soutien">
-        <div className="s-label reveal">Soutenir le projet</div>
-        <h2 className="s-h reveal">TIF est gratuit.<br />Aidez-le à le rester.</h2>
-        <p className="s-sub reveal">Votre soutien finance l&apos;infrastructure, les nouvelles sources de données et la sécurité de la plateforme.</p>
+        <div className="s-label reveal">{t.contrib.sectionLabel}</div>
+        <h2 className="s-h reveal">{t.contrib.h2a}<br />{t.contrib.h2b}</h2>
+        <p className="s-sub reveal">{t.contrib.sub}</p>
         <div className="contrib-wrap reveal">
           <div className="cc">
-            <span className="cc-tag pub">Citoyen  Public</span>
-            <div className="cc-h">Faire un don<br />au projet</div>
-            <div className="cc-p">TIF est financé par des contributions volontaires. Chaque don améliore directement la résilience et la sécurité de l&apos;information pour tous les habitants du Grand Genève.</div>
+            <span className="cc-tag pub">{t.contrib.citizenTag}</span>
+            <div className="cc-h">{t.contrib.citizenH1}<br />{t.contrib.citizenH2}</div>
+            <div className="cc-p">{t.contrib.citizenP}</div>
             <div className="amts">
               {[5, 10, 20, 50].map(v => (<button key={v} className={`amt${selectedAmt === v && !customAmt ? ' sel' : ''}`} onClick={() => { setSelectedAmt(v); setCustomAmt('') }}>CHF {v}</button>))}
             </div>
             <input className="m-input" type="number" min="1" placeholder="Autre montant (CHF)" value={customAmt} onChange={e => { setCustomAmt(e.target.value); setSelectedAmt(null) }} style={{ marginBottom: '12px' }} />
-            <button className="btn-full green" onClick={() => openM('m-don')}>💚 Soutenir TIF</button>
-            <p className="cc-note">100% des dons vont au projet, aucune commission</p>
+            <button className="btn-full green" onClick={() => openM('m-don')}>{t.contrib.citizenBtn}</button>
+            <p className="cc-note">{t.contrib.citizenNote}</p>
           </div>
           <div className="cc">
-            <span className="cc-tag pro">Professionnel  Sur demande</span>
-            <div className="cc-h">Accès TIF Pro<br />pour votre organisation</div>
-            <div className="cc-p">Réservé aux collectivités, services publics, entreprises et professionnels de sécurité. Chaque demande est évaluée manuellement.</div>
+            <span className="cc-tag pro">{t.contrib.proTag}</span>
+            <div className="cc-h">{t.contrib.proH1}<br />{t.contrib.proH2}</div>
+            <div className="cc-p">{t.contrib.proP}</div>
             <ul className="pro-list">
-              {['API REST temps réel, flux de données brutes', 'Dashboard dédié avec alertes personnalisées', 'Export JSON/CSV et intégration webhooks', 'Support prioritaire, réponse sous 4h ouvrées', 'SLA contractuel, confidentialité des données'].map(item => (
-                <li key={item}><span className="check-icon"><svg viewBox="0 0 9 9"><polyline points="1.5,4.5 3.5,6.5 7.5,2.5" /></svg></span>{item}</li>
+              {t.contrib.proFeatures.map((item, idx) => (
+                <li key={idx}><span className="check-icon"><svg viewBox="0 0 9 9"><polyline points="1.5,4.5 3.5,6.5 7.5,2.5" /></svg></span>{item}</li>
               ))}
             </ul>
-            <button className="btn-full dark" onClick={() => openM('m-pro')}>Demander un accès Pro →</button>
-            <p className="cc-note">Délai de réponse : 2 à 5 jours ouvrés</p>
+            <button className="btn-full dark" onClick={() => openM('m-pro')}>{t.contrib.proBtn}</button>
+            <p className="cc-note">{t.contrib.proNote}</p>
           </div>
         </div>
       </section>
 
       {/* CONTACT BAND */}
       <div className="contact-band reveal">
-        <p>Une question ? Un partenariat ? Une idée ? <strong>Notre équipe est à Genève, 48h ouvrées.</strong></p>
-        <button className="btn-p" style={{ fontSize: '14px', padding: '11px 22px', cursor: 'pointer', border: 'none', whiteSpace: 'nowrap' }} onClick={() => openM('m-contact')}>✉ Nous contacter</button>
+        <p>{t.contactBand.text} <strong>{t.contactBand.strong}</strong></p>
+        <button className="btn-p" style={{ fontSize: '14px', padding: '11px 22px', cursor: 'pointer', border: 'none', whiteSpace: 'nowrap' }} onClick={() => openM('m-contact')}>{t.contactBand.btn}</button>
       </div>
 
       {/* TRANSPARENCE */}
       <section className="s" id="confiance">
-        <div className="s-label reveal">Confiance et Transparence</div>
-        <h2 className="s-h reveal">L'honnêteté<br />Comme façade.</h2>
-        <p className="s-sub reveal">Nous ne prétendons pas être certifiés. Nous préférons la transparence active et vous inviter à auditer la plateforme vous-même.</p>
+        <div className="s-label reveal">{t.trans.sectionLabel}</div>
+        <h2 className="s-h reveal">{t.trans.h2a}<br />{t.trans.h2b}</h2>
+        <p className="s-sub reveal">{t.trans.sub}</p>
         <div className="car-outer reveal" style={{ maxWidth: '960px', margin: '0 auto 3px' }}>
-          <div className="car-head"><span className="car-head-t">Données et légal</span>
+          <div className="car-head"><span className="car-head-t">{t.trans.legalHead}</span>
             <div className="car-arrows">
               <button className="c-arr" onClick={() => carMove('tc1', -1)}><svg viewBox="0 0 11 11"><polyline points="7.5,1.5 3,5.5 7.5,9.5" /></svg></button>
               <button className="c-arr" onClick={() => carMove('tc1', 1)}><svg viewBox="0 0 11 11"><polyline points="3.5,1.5 8,5.5 3.5,9.5" /></svg></button>
             </div>
           </div>
           <div className="ctrack" id="ctr-tc1" ref={el => { carRefs.current['tc1'] = el }} onScroll={() => csync('tc1')}>
-            {[...TC1_SLIDES, ...TC1_SLIDES, ...TC1_SLIDES].map((tc, i) => (
-              <div key={i} className="cslide"><div className="src" style={{ cursor: 'pointer' }} onClick={() => openM(tc.modal)}><div className="src-icon">{tc.icon}</div><div className="src-name">{tc.name}</div><div className="src-desc">{tc.desc}</div><div className="src-live" style={{ color: 'var(--blue)' }}>En savoir plus →</div></div></div>
-            ))}
+            {[...TC1_ICONS, ...TC1_ICONS, ...TC1_ICONS].map((icon, i) => {
+              const ts = t.trans.tc1Slides[i % TC1_ICONS.length]
+              return (
+                <div key={i} className="cslide"><div className="src" style={{ cursor: 'pointer' }} onClick={() => openM(TC1_MODALS[i % TC1_MODALS.length])}><div className="src-icon">{icon}</div><div className="src-name">{ts.name}</div><div className="src-desc">{ts.desc}</div><div className="src-live" style={{ color: 'var(--blue)' }}>{t.trans.learnMore}</div></div></div>
+              )
+            })}
           </div>
-          <Dots id="tc1" logical={TC1_SLIDES.length} />
+          <Dots id="tc1" logical={TC1_ICONS.length} />
         </div>
         <div className="car-outer reveal" style={{ maxWidth: '960px', margin: '0 auto 24px' }}>
-          <div className="car-head"><span className="car-head-t">Documentation</span>
+          <div className="car-head"><span className="car-head-t">{t.trans.docHead}</span>
             <div className="car-arrows">
               <button className="c-arr" onClick={() => carMove('tc2', -1)}><svg viewBox="0 0 11 11"><polyline points="7.5,1.5 3,5.5 7.5,9.5" /></svg></button>
               <button className="c-arr" onClick={() => carMove('tc2', 1)}><svg viewBox="0 0 11 11"><polyline points="3.5,1.5 8,5.5 3.5,9.5" /></svg></button>
             </div>
           </div>
           <div className="ctrack" id="ctr-tc2" ref={el => { carRefs.current['tc2'] = el }} onScroll={() => csync('tc2')}>
-            {[...TC2_SLIDES, ...TC2_SLIDES, ...TC2_SLIDES].map((tc, i) => (
-              <div key={i} className="cslide"><div className="src" style={{ cursor: 'pointer' }} onClick={() => openM(tc.modal)}><div className="src-icon">{tc.icon}</div><div className="src-name">{tc.name}</div><div className="src-desc">{tc.desc}</div><div className="src-live" style={{ color: 'var(--blue)' }}>Voir →</div></div></div>
-            ))}
+            {[...TC2_ICONS, ...TC2_ICONS, ...TC2_ICONS].map((icon, i) => {
+              const ts = t.trans.tc2Slides[i % TC2_ICONS.length]
+              return (
+                <div key={i} className="cslide"><div className="src" style={{ cursor: 'pointer' }} onClick={() => openM(TC2_MODALS[i % TC2_MODALS.length])}><div className="src-icon">{icon}</div><div className="src-name">{ts.name}</div><div className="src-desc">{ts.desc}</div><div className="src-live" style={{ color: 'var(--blue)' }}>{t.trans.seeMore}</div></div></div>
+              )
+            })}
           </div>
-          <Dots id="tc2" logical={TC2_SLIDES.length} />
+          <Dots id="tc2" logical={TC2_ICONS.length} />
         </div>
         <div className="audit-card reveal">
-          <h3>Niveau 3, Audit participatif, sur demande</h3>
-          <p>Börja Swiss Solutions invite les professionnels à auditer gratuitement la plateforme. Cybersécurité, collectivités, experts SIG, services d&apos;urgence, votre regard nous intéresse.</p>
+          <h3>{t.trans.auditH3}</h3>
+          <p>{t.trans.auditP}</p>
           <div className="audit-actions">
-            <div className="aa" onClick={() => openM('m-vuln')}><div><div className="aa-title">Signalement des vulnérabilités</div><div className="aa-sub">Responsible disclosure, délai, contact chiffré</div></div><div className="aa-arr">→</div></div>
-            <div className="aa" onClick={() => openM('m-audit')}><div><div className="aa-title">Demander un accès audit complet</div><div className="aa-sub">Architecture détaillée, API sandbox, session technique</div></div><div className="aa-arr">→</div></div>
-            <div className="aa" onClick={() => openM('m-partner')}><div><div className="aa-title">Partenariat institutionnel</div><div className="aa-sub">Collectivités, services d&apos;urgence, ONG, autorités</div></div><div className="aa-arr">→</div></div>
+            <div className="aa" onClick={() => openM('m-vuln')}><div><div className="aa-title">{t.trans.vulnTitle}</div><div className="aa-sub">{t.trans.vulnSub}</div></div><div className="aa-arr">→</div></div>
+            <div className="aa" onClick={() => openM('m-audit')}><div><div className="aa-title">{t.trans.auditTitle}</div><div className="aa-sub">{t.trans.auditSub}</div></div><div className="aa-arr">→</div></div>
+            <div className="aa" onClick={() => openM('m-partner')}><div><div className="aa-title">{t.trans.partnerTitle}</div><div className="aa-sub">{t.trans.partnerSub}</div></div><div className="aa-arr">→</div></div>
           </div>
           <div style={{ padding: '12px 0 0', borderTop: '1px solid var(--border-l)', marginTop: '12px' }}>
-            <p style={{ fontSize: '11px', color: 'var(--ink3)', margin: 0 }}>⚠ TIF agrège des informations publiques et ne constitue pas une plateforme officielle d&apos;alerte des autorités cantonales ou fédérales.</p>
+            <p style={{ fontSize: '11px', color: 'var(--ink3)', margin: 0 }}>⚠ {t.trans.disclaimer}</p>
           </div>
         </div>
       </section>
 
       {/* FINAL */}
       <section className="final reveal">
-        <h2>Voir. Comprendre. <span className="accent">Anticiper.</span></h2>
-        <p>Gratuit. Sans inscription. RGPD conforme. Hébergé en Suisse.</p>
+        <h2>{t.final.h2} <span className="accent">{t.final.accent}</span></h2>
+        <p>{t.final.p}</p>
         <div className="btns">
           <a className="btn-p" href={user ? '/map' : '/login'} onClick={handleOpenMap}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="2.5" fill="white" /><circle cx="7" cy="7" r="5.5" stroke="white" strokeWidth="1.5" /></svg>
-            Ouvrir la carte live
+            {t.final.mapBtn}
           </a>
-          <a className="btn-s" href="#soutien">Soutenir TIF</a>
+          <a className="btn-s" href="#soutien">{t.final.supportBtn}</a>
         </div>
       </section>
 
@@ -853,17 +947,17 @@ export function HomeContent() {
       <footer>
         <div className="ft">
           <div className="ft-top">
-            <div className="ft-brand"><p>TIF</p><span>Tableau de bord citoyen, Grand Genève, par Börja Swiss Solutions RI</span></div>
+            <div className="ft-brand"><p>TIF</p><span>{t.footer.tagline}</span></div>
             <div className="ft-links">
-              <a href="#live">Situation live</a><a href="#sources">Sources</a>
-              <a href="#soutien">Soutenir</a><a href="#confiance">Transparence</a>
-              <a href="#" onClick={e => { e.preventDefault(); openM('m-contact') }}>Contact</a>
-              <a href="#" onClick={e => { e.preventDefault(); openM('m-privacy') }}>Confidentialité</a>
+              <a href="#live">{t.footer.live}</a><a href="#sources">{t.footer.sources}</a>
+              <a href="#soutien">{t.footer.support}</a><a href="#confiance">{t.footer.transparency}</a>
+              <a href="#" onClick={e => { e.preventDefault(); openM('m-contact') }}>{t.footer.contact}</a>
+              <a href="#" onClick={e => { e.preventDefault(); openM('m-privacy') }}>{t.footer.privacy}</a>
             </div>
           </div>
           <div className="ft-bottom">
-            <p>© 2025 Börja Swiss Solutions RI, Genève, Suisse</p>
-            <p>RGPD, nLPD, Hébergé en Suisse, Données anonymisées</p>
+            <p>{t.footer.copyright}</p>
+            <p>{t.footer.legal}</p>
           </div>
         </div>
       </footer>
@@ -949,16 +1043,19 @@ export function HomeContent() {
       {/* ─── MODALS ─── */}
       {[
         { id: 'm-don', tag: { bg: 'var(--green-bg)', c: 'var(--green)', label: 'Public' }, title: 'Soutenir TIF', content: (
-          <><div className="m-note">💚 100% des dons vont au projet TIF, aucune commission</div>
+          <><div className="m-note">💚 100% des dons vont au projet TIF — paiement sécurisé Stripe</div>
           <p>TIF est gratuit et le restera. Votre soutien finance les infrastructures serveur, l&apos;intégration de nouvelles sources et l&apos;amélioration de la sécurité au bénéfice de tous.</p>
           <h4>Montant</h4>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '7px', marginBottom: '8px' }}>
-            {[5, 10, 20, 50].map(v => <button key={v} className={`amt${selectedAmt === v && !customAmt ? ' sel' : ''}`} onClick={() => { setSelectedAmt(v); setCustomAmt('') }}>CHF {v}</button>)}
+            {[5, 10, 20, 50].map(v => <button key={v} className={`amt${selectedAmt === v && !customAmt ? ' sel' : ''}`} onClick={() => { setSelectedAmt(v); setCustomAmt(''); setDonateError(null) }}>CHF {v}</button>)}
           </div>
-          <input className="m-input" type="number" min="1" placeholder="Autre montant (CHF)" value={customAmt} onChange={e => { setCustomAmt(e.target.value); setSelectedAmt(null) }} />
-          <input className="m-input" type="email" placeholder="Email (optionnel, pour reçu)" />
-          <p style={{ fontSize: '11px' }}>Contact pour le paiement : <strong style={{ color: 'var(--ink)' }}>contact@borja-swiss-solutions.ch</strong></p>
-          <button className="m-submit g">💚 Confirmer le don</button></>
+          <input className="m-input" type="number" min="1" placeholder="Autre montant (CHF)" value={customAmt} onChange={e => { setCustomAmt(e.target.value); setSelectedAmt(null); setDonateError(null) }} />
+          <input className="m-input" type="email" placeholder="Email (optionnel — pour reçu)" value={donateEmail} onChange={e => setDonateEmail(e.target.value)} />
+          {donateError && <p style={{ fontSize: '12px', color: 'var(--red)', margin: '4px 0 8px' }}>{donateError}</p>}
+          <button className="m-submit g" onClick={handleDonate}>
+            💚 Soutenir TIF par carte
+          </button>
+          <p style={{ fontSize: '11px', textAlign: 'center', marginTop: '8px' }}>Paiement sécurisé · Stripe · Visa, Mastercard, TWINT</p></>
         )},
         { id: 'm-pro', tag: { bg: 'var(--blue-bg)', c: 'var(--blue-d)', label: 'Professionnel' }, title: 'Accès TIF Pro', content: (
           <><p>Réservé aux collectivités, services publics, entreprises et professionnels de sécurité. Chaque demande est évaluée manuellement.</p>
@@ -1014,7 +1111,7 @@ export function HomeContent() {
           <div className="m-row"><label>Délai</label><span>24h ouvrées maximum</span></div>
           <p style={{ marginTop: '14px' }}>Aucune action légale contre un chercheur agissant de bonne foi.</p></>
         )},
-        { id: 'm-faq', tag: { bg: 'var(--green-bg)', c: 'var(--green)', label: 'Public' }, title: 'FAQ', content: (<>{FAQ_ITEMS.map((item, i) => <div key={i}><h4>{item.q}</h4><p>{item.a}</p></div>)}</>) },
+        { id: 'm-faq', tag: { bg: 'var(--green-bg)', c: 'var(--green)', label: 'Public' }, title: 'FAQ', content: (<>{t.faq.items.map((item, i) => <div key={i}><h4>{item.q}</h4><p>{item.a}</p></div>)}</>) },
         { id: 'm-doc', tag: { bg: 'var(--green-bg)', c: 'var(--green)', label: 'Public' }, title: 'Documentation', content: (
           <><p>Documentation complète bientôt disponible.</p>
           <ul><li>Prise en main, naviguer sur la carte</li><li>Alertes, configurer des notifications par zone</li><li>Carte live, couches de données et filtres</li><li>Veille G7, tableau de bord pendant le Sommet</li></ul>
@@ -1028,7 +1125,7 @@ export function HomeContent() {
         )},
         { id: 'm-archi', tag: { bg: 'var(--green-bg)', c: 'var(--green)', label: 'Simplifié' }, title: 'Architecture générale', content: (
           <><div className="m-note">Présentation simplifiée. Documentation technique sur demande.</div>
-          <ul><li>Sources officielles → connecteurs (pull toutes les 30s)</li><li>Validation et normalisation des données</li><li>Corrélation croisée multi-sources</li><li>API interne → Frontend via WebSocket</li><li>Hébergement exclusivement Suisse (Infomaniak)</li></ul></>
+          <ul><li>Sources officielles → connecteurs (pull toutes les 30s)</li><li>Validation et normalisation des données</li><li>Corrélation croisée multi-sources</li><li>API interne → Frontend via WebSocket</li><li>Hébergement UE — Vercel, Neon (Francfort), Upstash (Dublin) · migration Suisse prévue</li></ul></>
         )},
         { id: 'm-vuln', tag: { bg: 'var(--blue-bg)', c: 'var(--blue-d)', label: 'Professionnels' }, title: 'Signalement des vulnérabilités', content: (
           <><div className="m-note">⚠ Agir de bonne foi et dans le respect de la loi suisse.</div>
