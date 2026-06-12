@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import type mapboxgl from 'mapbox-gl'
 import { springs } from '@/lib/animations/springs'
 import { useMapT } from '@/i18n/map'
@@ -14,11 +14,70 @@ const LG: React.CSSProperties = {
 }
 
 interface SearchResult {
-  id: string
-  title: string
-  lat: number
-  lng: number
-  type: string
+  id:        string
+  title:     string
+  subtitle?: string
+  lat:       number
+  lng:       number
+  type:      string
+}
+
+interface MapboxFeature {
+  id:          string
+  text:        string
+  place_name:  string
+  place_type:  string[]
+  center:      [number, number]
+  properties?: { category?: string }
+}
+
+const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
+const PROXIMITY    = '6.1432,46.2044'
+const BBOX         = '5.80,46.00,6.65,46.55'
+const TYPES        = 'place,locality,neighborhood,address,poi,district'
+
+function toSearchResult(f: MapboxFeature): SearchResult {
+  const [lng, lat] = f.center
+  const commaIdx   = f.place_name.indexOf(',')
+  const subtitle   = commaIdx !== -1 ? f.place_name.slice(commaIdx + 2) : undefined
+  return {
+    id:       f.id,
+    title:    f.text,
+    subtitle: subtitle !== f.text ? subtitle : undefined,
+    lat, lng,
+    type:     f.place_type[0] ?? 'address',
+  }
+}
+
+async function geocodeDirect(query: string, signal: AbortSignal): Promise<SearchResult[]> {
+  if (!MAPBOX_TOKEN || query.trim().length < 2) return []
+  const url =
+    `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query.trim())}.json` +
+    `?access_token=${MAPBOX_TOKEN}` +
+    `&proximity=${PROXIMITY}` +
+    `&bbox=${BBOX}` +
+    `&language=fr` +
+    `&limit=6` +
+    `&types=${TYPES}`
+  const res = await fetch(url, { signal, cache: 'no-store' })
+  if (!res.ok) return []
+  const data = await res.json() as { features?: MapboxFeature[] }
+  return (data.features ?? []).map(toSearchResult)
+}
+
+function highlightMatch(title: string, query: string): React.ReactNode {
+  if (!query || query.length < 2) return title
+  const idx = title.toLowerCase().indexOf(query.toLowerCase())
+  if (idx === -1) return title
+  return (
+    <>
+      {title.slice(0, idx)}
+      <strong style={{ color: 'rgba(255,255,255,1)', fontWeight: 600 }}>
+        {title.slice(idx, idx + query.length)}
+      </strong>
+      {title.slice(idx + query.length)}
+    </>
+  )
 }
 
 interface SearchBarProps {
@@ -35,6 +94,7 @@ export function SearchBar({ map }: SearchBarProps) {
   const [results,        setResults]        = useState<SearchResult[]>([])
   const [loading,        setLoading]        = useState(false)
   const [recentSearches, setRecentSearches] = useState<SearchResult[]>([])
+  const abortRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
     try {
@@ -50,17 +110,34 @@ export function SearchBar({ map }: SearchBarProps) {
   }, [isOpen])
 
   useEffect(() => {
-    if (!query || query.length < 2) { setResults([]); return }
+    // Cancel any previous in-flight request
+    abortRef.current?.abort()
+
+    if (!query || query.length < 2) {
+      setResults([])
+      setLoading(false)
+      return
+    }
+
+    const controller = new AbortController()
+    abortRef.current  = controller
+
     const timer = setTimeout(async () => {
       setLoading(true)
       try {
-        const res  = await fetch(`/api/v1/routing/geocode?q=${encodeURIComponent(query)}&bbox=5.9,46.1,6.5,46.5`)
-        const data = await res.json()
-        setResults((Array.isArray(data) ? data : (data.results ?? [])).slice(0, 6))
-      } catch { setResults([]) }
-      finally { setLoading(false) }
-    }, 300)
-    return () => clearTimeout(timer)
+        const res = await geocodeDirect(query, controller.signal)
+        setResults(res)
+      } catch (e) {
+        if ((e as Error).name !== 'AbortError') setResults([])
+      } finally {
+        setLoading(false)
+      }
+    }, 150)
+
+    return () => {
+      clearTimeout(timer)
+      controller.abort()
+    }
   }, [query])
 
   const handleSelect = useCallback((result: SearchResult) => {
@@ -68,7 +145,6 @@ export function SearchBar({ map }: SearchBarProps) {
     setRecentSearches(updated)
     try { localStorage.setItem('tif:recent-searches', JSON.stringify(updated)) } catch { /* ignore */ }
 
-    // Déclenche le calcul d'itinéraire depuis ma position → destination
     window.dispatchEvent(new CustomEvent('tif:route-to', { detail: result }))
     map?.flyTo({ center: [result.lng, result.lat], zoom: 14, duration: 700, essential: true })
     setIsOpen(false)
@@ -95,13 +171,7 @@ export function SearchBar({ map }: SearchBarProps) {
         <a
           href="/"
           className="flex-shrink-0 flex items-center justify-center"
-          style={{
-            ...LG,
-            width: 52,
-            height: 52,
-            borderRadius: 16,
-            transition: springs.search,
-          }}
+          style={{ ...LG, width: 52, height: 52, borderRadius: 16, transition: springs.search }}
           aria-label="Accueil"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.75)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -113,9 +183,7 @@ export function SearchBar({ map }: SearchBarProps) {
     )
   }
 
-  // QuickFilters: top = 52+12+8 = 72px, height 40px → bottom à 112px
-  // Le dropdown apparaît sous les filtres pour ne pas les couvrir
-  const RESULTS_TOP = 'calc(52px + 12px + 8px + 40px + 8px)' // 120px
+  const RESULTS_TOP = 'calc(52px + 12px + 8px + 40px + 8px)'
 
   return (
     <>
@@ -125,7 +193,7 @@ export function SearchBar({ map }: SearchBarProps) {
         onClick={() => { setIsOpen(false); setQuery(''); setResults([]) }}
       />
 
-      {/* Champ de saisie — reste en haut, au niveau de la barre */}
+      {/* Champ de saisie */}
       <div
         className="fixed top-0 left-0 right-0 z-30 mx-4 mt-3 overflow-hidden"
         style={{ ...LG, borderRadius: 16 }}
@@ -154,7 +222,7 @@ export function SearchBar({ map }: SearchBarProps) {
         </div>
       </div>
 
-      {/* Résultats — positionnés SOUS les filtres */}
+      {/* Résultats */}
       {(results.length > 0 || recentSearches.length > 0) && (
         <div
           className="fixed left-0 right-0 z-30 mx-4 overflow-hidden"
@@ -168,10 +236,19 @@ export function SearchBar({ map }: SearchBarProps) {
                   onClick={() => handleSelect(r)}
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors active:bg-white/5"
                 >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2" strokeLinecap="round">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2" strokeLinecap="round" className="flex-shrink-0">
                     <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/>
                   </svg>
-                  <span className="text-sm truncate" style={{ color: 'rgba(255,255,255,0.75)' }}>{r.title}</span>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm truncate" style={{ color: 'rgba(255,255,255,0.80)' }}>
+                      {highlightMatch(r.title, query)}
+                    </div>
+                    {r.subtitle && (
+                      <div className="text-[11px] truncate mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                        {r.subtitle}
+                      </div>
+                    )}
+                  </div>
                 </button>
               ))
             ) : (
@@ -183,8 +260,13 @@ export function SearchBar({ map }: SearchBarProps) {
                     onClick={() => handleSelect(r)}
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors active:bg-white/5"
                   >
-                    <span className="text-sm">🕐</span>
-                    <span className="text-sm truncate" style={{ color: 'rgba(255,255,255,0.65)' }}>{r.title}</span>
+                    <span className="text-sm flex-shrink-0">🕐</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm truncate" style={{ color: 'rgba(255,255,255,0.65)' }}>{r.title}</div>
+                      {r.subtitle && (
+                        <div className="text-[11px] truncate mt-0.5" style={{ color: 'rgba(255,255,255,0.30)' }}>{r.subtitle}</div>
+                      )}
+                    </div>
                   </button>
                 ))}
               </>
