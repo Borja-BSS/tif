@@ -12,7 +12,7 @@ const LG_MODAL: React.CSSProperties = {
 }
 
 export function WelcomeModals() {
-  const [step, setStep] = useState<'g7' | 'features' | null>(null)
+  const [step, setStep] = useState<'g7' | 'survey' | 'features' | null>(null)
   const t = useMapT()
 
   useEffect(() => {
@@ -21,15 +21,20 @@ export function WelcomeModals() {
 
   if (!step) return null
 
-  const dismiss = () => {
-    setStep(null)
+  const dismiss = () => setStep(null)
+
+  const goAfterG7 = () => {
+    const done = typeof window !== 'undefined' && localStorage.getItem('tif_survey_v1')
+    setStep(done ? 'features' : 'survey')
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
       <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.72)' }} />
       {step === 'g7'
-        ? <G7Modal      w={t.welcome} onNext={() => setStep('features')} />
+        ? <G7Modal       w={t.welcome} onNext={goAfterG7} />
+        : step === 'survey'
+        ? <SurveyModal   w={t.welcome} onNext={() => setStep('features')} />
         : <FeaturesModal w={t.welcome} onDismiss={dismiss} />
       }
     </div>
@@ -76,6 +81,90 @@ function G7Modal({ w, onNext }: { w: WelcomeT; onNext: () => void }) {
         style={{ background: 'var(--brand)' }}
       >
         {w.g7Btn}
+      </button>
+    </div>
+  )
+}
+
+function SurveyModal({ w, onNext }: { w: WelcomeT; onNext: () => void }) {
+  const [vote, setVote]       = useState<'yes' | 'no' | null>(null)
+  const [feedback, setFeedback] = useState('')
+  const [sending, setSending]   = useState(false)
+
+  const handleSubmit = async () => {
+    if (!vote) return
+    setSending(true)
+    try {
+      await fetch('/api/v1/survey', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vote, feedback: feedback.trim() }),
+      })
+    } catch {}
+    localStorage.setItem('tif_survey_v1', '1')
+    onNext()
+  }
+
+  return (
+    <div className="relative z-10 w-full max-w-sm rounded-3xl p-6" style={LG_MODAL}>
+      <div className="text-center mb-5">
+        <div className="text-5xl mb-3">📱</div>
+        <h2 className="text-[16px] font-bold text-white mb-2 leading-snug">{w.surveyTitle}</h2>
+        <p className="text-[12px] font-medium" style={{ color: 'rgba(255,255,255,0.45)' }}>
+          {w.surveySub}
+        </p>
+      </div>
+
+      <div className="flex gap-3 mb-4">
+        <button
+          onClick={() => setVote('yes')}
+          className="flex-1 py-3 rounded-2xl text-[13px] font-bold transition-all active:scale-95"
+          style={{
+            background: vote === 'yes' ? 'rgba(52,199,89,0.16)' : 'rgba(255,255,255,0.05)',
+            border: `1.5px solid ${vote === 'yes' ? 'rgba(52,199,89,0.65)' : 'rgba(255,255,255,0.10)'}`,
+            color: vote === 'yes' ? '#34C759' : 'rgba(255,255,255,0.65)',
+          }}
+        >
+          {w.surveyYes}
+        </button>
+        <button
+          onClick={() => setVote('no')}
+          className="flex-1 py-3 rounded-2xl text-[13px] font-bold transition-all active:scale-95"
+          style={{
+            background: vote === 'no' ? 'rgba(255,59,48,0.13)' : 'rgba(255,255,255,0.05)',
+            border: `1.5px solid ${vote === 'no' ? 'rgba(255,59,48,0.55)' : 'rgba(255,255,255,0.10)'}`,
+            color: vote === 'no' ? '#FF3B30' : 'rgba(255,255,255,0.65)',
+          }}
+        >
+          {w.surveyNo}
+        </button>
+      </div>
+
+      <textarea
+        value={feedback}
+        onChange={e => setFeedback(e.target.value.slice(0, 500))}
+        placeholder={w.surveyFeedbackPh}
+        rows={3}
+        className="w-full rounded-2xl px-3.5 py-3 text-[13px] resize-none outline-none mb-4"
+        style={{
+          background:  'rgba(255,255,255,0.05)',
+          border:      '1px solid rgba(255,255,255,0.10)',
+          color:       'rgba(255,255,255,0.85)',
+          caretColor:  'white',
+        }}
+      />
+
+      <button
+        onClick={handleSubmit}
+        disabled={!vote || sending}
+        className="w-full py-3.5 rounded-2xl text-[14px] font-bold text-white transition-opacity active:opacity-80"
+        style={{
+          background: vote ? 'var(--brand)' : 'rgba(255,255,255,0.07)',
+          opacity:    (!vote || sending) ? 0.55 : 1,
+          cursor:     vote && !sending ? 'pointer' : 'not-allowed',
+        }}
+      >
+        {sending ? '…' : w.surveyBtn}
       </button>
     </div>
   )

@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { redis } from '@/lib/redis'
+
+const SURVEY_KEY_YES      = 'tif:survey:v1:yes'
+const SURVEY_KEY_NO       = 'tif:survey:v1:no'
+const SURVEY_KEY_FEEDBACK = 'tif:survey:v1:feedback'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,8 +19,11 @@ export async function GET(req: NextRequest) {
   const week  = new Date(today.getTime() - 7  * 86400000)
   const month = new Date(today.getTime() - 30 * 86400000)
 
-  const [todaySessions, weekSessions, monthSessions, eventsByType, recentEvents] =
+  const [surveyYes, surveyNo, surveyFeedback, todaySessions, weekSessions, monthSessions, eventsByType, recentEvents] =
     await Promise.all([
+      redis.get<number>(SURVEY_KEY_YES).catch(() => 0),
+      redis.get<number>(SURVEY_KEY_NO).catch(() => 0),
+      redis.lrange(SURVEY_KEY_FEEDBACK, 0, 99).catch(() => [] as string[]),
       db.tifAnalytic.findMany({
         where: { createdAt: { gte: today } },
         select: { sessionId: true },
@@ -44,7 +52,17 @@ export async function GET(req: NextRequest) {
       }),
     ])
 
+  const parsedFeedback = (surveyFeedback as string[]).map(s => {
+    try { return JSON.parse(s) } catch { return { text: s } }
+  })
+
   return NextResponse.json({
+    survey: {
+      yes:      surveyYes  ?? 0,
+      no:       surveyNo   ?? 0,
+      total:    (surveyYes ?? 0) + (surveyNo ?? 0),
+      feedback: parsedFeedback,
+    },
     sessions: {
       today: todaySessions.length,
       week:  weekSessions.length,

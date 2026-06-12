@@ -137,6 +137,9 @@ export interface MapT {
     feat5L: string; feat5D: string
     feat6L: string; feat6D: string
     feat7L: string; feat7D: string
+    surveyTitle: string; surveySub: string
+    surveyYes: string; surveyNo: string
+    surveyFeedbackPh: string; surveyBtn: string
   }
 }
 
@@ -389,6 +392,11 @@ const FR: MapT = {
     feat5L: 'Parkings P+R',      feat5D: 'Disponibilités en temps réel',
     feat6L: 'Mon trajet',        feat6D: 'Itinéraire personnalisé sauvegardé',
     feat7L: 'Événements',        feat7D: '34 événements culturels à Genève',
+    surveyTitle: 'Une app mobile TIF vous intéresserait-elle ?',
+    surveySub: '📱 Gratuit · Douanes & trafic · Notifications G7',
+    surveyYes: '✓ Oui, clairement !', surveyNo: '✗ Non merci',
+    surveyFeedbackPh: 'Vos idées ou suggestions (optionnel)…',
+    surveyBtn: 'Continuer →',
   },
 }
 
@@ -641,6 +649,11 @@ const EN: MapT = {
     feat5L: 'P+R Car parks',     feat5D: 'Real-time availability',
     feat6L: 'My trip',           feat6D: 'Saved personalised itinerary',
     feat7L: 'Events',            feat7D: '34 cultural events in Geneva',
+    surveyTitle: 'Would a TIF mobile app interest you?',
+    surveySub: '📱 Free · Borders & traffic · G7 notifications',
+    surveyYes: '✓ Yes, definitely!', surveyNo: '✗ No thanks',
+    surveyFeedbackPh: 'Your ideas or suggestions (optional)…',
+    surveyBtn: 'Continue →',
   },
 }
 
@@ -893,6 +906,11 @@ const DE: MapT = {
     feat5L: 'P+R-Parkplätze',       feat5D: 'Verfügbarkeit in Echtzeit',
     feat6L: 'Meine Route',          feat6D: 'Gespeicherter persönlicher Weg',
     feat7L: 'Veranstaltungen',      feat7D: '34 Kulturveranstaltungen in Genf',
+    surveyTitle: 'Würde Sie eine TIF-App interessieren?',
+    surveySub: '📱 Kostenlos · Grenzen & Verkehr · G7-Benachrichtigungen',
+    surveyYes: '✓ Ja, auf jeden Fall!', surveyNo: '✗ Nein danke',
+    surveyFeedbackPh: 'Ihre Ideen oder Vorschläge (optional)…',
+    surveyBtn: 'Weiter →',
   },
 }
 
@@ -1145,6 +1163,11 @@ const IT: MapT = {
     feat5L: 'Parcheggi P+R',       feat5D: 'Disponibilità in tempo reale',
     feat6L: 'Il mio percorso',     feat6D: 'Itinerario personale salvato',
     feat7L: 'Eventi',              feat7D: '34 eventi culturali a Ginevra',
+    surveyTitle: "Ti interesserebbe un'app mobile TIF?",
+    surveySub: '📱 Gratuita · Frontiere & traffico · Notifiche G7',
+    surveyYes: '✓ Sì, certamente!', surveyNo: '✗ No grazie',
+    surveyFeedbackPh: 'Le tue idee o suggerimenti (facoltativo)…',
+    surveyBtn: 'Continua →',
   },
 }
 
@@ -1397,6 +1420,11 @@ const ES: MapT = {
     feat5L: 'Parkings P+R',        feat5D: 'Disponibilidad en tiempo real',
     feat6L: 'Mi ruta',             feat6D: 'Itinerario personal guardado',
     feat7L: 'Eventos',             feat7D: '34 eventos culturales en Ginebra',
+    surveyTitle: '¿Le interesaría una app móvil TIF?',
+    surveySub: '📱 Gratis · Fronteras & tráfico · Notificaciones G7',
+    surveyYes: '✓ ¡Sí, claramente!', surveyNo: '✗ No gracias',
+    surveyFeedbackPh: 'Sus ideas o sugerencias (opcional)…',
+    surveyBtn: 'Continuar →',
   },
 }
 
@@ -1649,6 +1677,11 @@ const PT: MapT = {
     feat5L: 'Parques P+R',          feat5D: 'Disponibilidade em tempo real',
     feat6L: 'O meu percurso',       feat6D: 'Itinerário pessoal guardado',
     feat7L: 'Eventos',              feat7D: '34 eventos culturais em Genebra',
+    surveyTitle: 'Teria interesse numa app móvel TIF?',
+    surveySub: '📱 Gratuita · Fronteiras & tráfego · Notificações G7',
+    surveyYes: '✓ Sim, com certeza!', surveyNo: '✗ Não, obrigado',
+    surveyFeedbackPh: 'As suas ideias ou sugestões (opcional)…',
+    surveyBtn: 'Continuar →',
   },
 }
 
@@ -1901,6 +1934,11 @@ const SQ: MapT = {
     feat5L: 'Parking P+R',          feat5D: 'Disponueshmëria në kohë reale',
     feat6L: 'Rruga ime',            feat6D: 'Itinerar personal i ruajtur',
     feat7L: 'Ngjarje',              feat7D: '34 ngjarje kulturore në Gjenevë',
+    surveyTitle: 'Do t\'ju interesonte një aplikacion TIF?',
+    surveySub: '📱 Falas · Kufijtë & trafiku · Njoftime G7',
+    surveyYes: '✓ Po, patjetër!', surveyNo: '✗ Jo, faleminderit',
+    surveyFeedbackPh: 'Idetë ose sugjerimet tuaja (opsionale)…',
+    surveyBtn: 'Vazhdo →',
   },
 }
 
@@ -2153,6 +2191,11 @@ const JA: MapT = {
     feat5L: 'P+R駐車場',        feat5D: 'リアルタイム空き状況',
     feat6L: 'マイルート',       feat6D: '保存済みの個人ルート',
     feat7L: 'イベント',         feat7D: 'ジュネーヴの文化イベント34件',
+    surveyTitle: 'TIFモバイルアプリに興味がありますか？',
+    surveySub: '📱 無料 · 国境＆交通 · G7通知',
+    surveyYes: '✓ はい、ぜひ！', surveyNo: '✗ いいえ、結構です',
+    surveyFeedbackPh: 'アイデアやご意見（任意）…',
+    surveyBtn: '続ける →',
   },
 }
 
@@ -2405,6 +2448,11 @@ const ZH: MapT = {
     feat5L: 'P+R停车场',  feat5D: '实时车位信息',
     feat6L: '我的路线',   feat6D: '保存的个人行程',
     feat7L: '活动',       feat7D: '日内瓦34场文化活动',
+    surveyTitle: '您有兴趣使用TIF手机应用吗？',
+    surveySub: '📱 免费 · 边境及交通 · G7通知',
+    surveyYes: '✓ 是的，当然！', surveyNo: '✗ 不，谢谢',
+    surveyFeedbackPh: '您的想法或建议（可选）…',
+    surveyBtn: '继续 →',
   },
 }
 
