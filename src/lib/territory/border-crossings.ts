@@ -187,14 +187,14 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'fossard', name: 'Fossard',
-    lat: 46.195, lng: 6.213,
+    lat: 46.1836465, lng: 6.1950107,
     type: 'secondary', capacity: 'low',
     franceSide: 'east',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '🔒 Fermé du 12 au 18 juin 2026',
-    nearestOpen: 'Moillesulaz (1 km) · Thônex-Vallard (2 km)',
+    nearestOpen: 'Moillesulaz (2 km) · Thônex-Vallard (3 km)',
   },
   {
     id: 'mategnin', name: 'Mategnin',
@@ -295,6 +295,83 @@ const CROSSINGS: Crossing[] = [
     g7Info: '🔒 Fermé du 12 au 18 juin 2026',
     nearestOpen: 'Bardonnex (18 km) · Perly (16 km)',
   },
+  {
+    id: 'mandement', name: 'Mandement (Satigny)',
+    lat: 46.2018913, lng: 5.9718478,
+    type: 'secondary', capacity: 'low',
+    franceSide: 'west',
+    hours: '06:00–20:00 (hors G7)',
+    vehicles: ['Voitures', 'Motos'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
+    nearestOpen: 'Meyrin (12 km)',
+  },
+  {
+    id: 'dardagny', name: 'Dardagny',
+    lat: 46.1900628, lng: 5.9820292,
+    type: 'secondary', capacity: 'low',
+    franceSide: 'west',
+    hours: '06:00–20:00 (hors G7)',
+    vehicles: ['Voitures', 'Motos'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
+    nearestOpen: 'Meyrin (11 km)',
+  },
+  {
+    id: 'valleiry', name: 'Valleiry',
+    lat: 46.1336524, lng: 5.9774808,
+    type: 'secondary', capacity: 'low',
+    franceSide: 'west',
+    hours: '06:00–20:00 (hors G7)',
+    vehicles: ['Voitures', 'Motos'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
+    nearestOpen: 'Perly (18 km) · Bardonnex (19 km)',
+  },
+  {
+    id: 'avusy', name: 'Avusy',
+    lat: 46.1427496, lng: 6.0088161,
+    type: 'secondary', capacity: 'low',
+    franceSide: 'west',
+    hours: '06:00–20:00 (hors G7)',
+    vehicles: ['Voitures', 'Motos'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
+    nearestOpen: 'Perly (12 km) · Bardonnex (12 km)',
+  },
+  {
+    id: 'avusy-sezegnin', name: 'Avusy Sézegnin',
+    lat: 46.1427656, lng: 6.0087949,
+    type: 'tertiary', capacity: 'low',
+    franceSide: 'west',
+    hours: '06:00–20:00 (hors G7)',
+    vehicles: ['Voitures', 'Motos'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
+    nearestOpen: 'Perly (12 km) · Bardonnex (12 km)',
+  },
+  {
+    id: 'soral-mangons', name: 'Soral — Rte des Mangons',
+    lat: 46.1426323, lng: 6.0470017,
+    type: 'secondary', capacity: 'low',
+    franceSide: 'south',
+    hours: '06:00–20:00 (hors G7)',
+    vehicles: ['Voitures'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
+    nearestOpen: 'Perly (7 km) · Bardonnex (8 km)',
+  },
+  {
+    id: 'pas-de-lechelle', name: 'Pas-de-l\'Échelle',
+    lat: 46.1664299, lng: 6.1884322,
+    type: 'secondary', capacity: 'low',
+    franceSide: 'east',
+    hours: '06:00–20:00 (hors G7)',
+    vehicles: ['Voitures', 'Motos', 'Piétons'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
+    nearestOpen: 'Thônex-Vallard (4 km) · Moillesulaz (4 km)',
+  },
 
   // ── TIER 3 — Accès restreint / piétons-vélos, FERMÉS pendant G7 ───────────
 
@@ -311,14 +388,14 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'bossey', name: 'Bossey',
-    lat: 46.15300, lng: 6.20500,
+    lat: 46.1548324, lng: 6.1608997,
     type: 'tertiary', capacity: 'low',
-    franceSide: 'east',
+    franceSide: 'south',
     hours: 'Piétons / Vélos uniquement',
     vehicles: ['Piétons', 'Vélos'],
     vignettes: ['CNI ou passeport obligatoire'],
     g7Info: '🔒 Fermé du 12 au 18 juin 2026 · Traversée piétonne/vélo',
-    nearestOpen: 'Veyrier (3 km) · Moillesulaz (6 km)',
+    nearestOpen: 'Bardonnex (9 km) · Perly (8 km)',
   },
   {
     id: 'troinex', name: 'Troinex',
@@ -765,7 +842,7 @@ export function computeCrossingStatus(
   return                                       { status: 'CLEAR',    jamFactor: 0 }
 }
 
-const CACHE_KEY = 'tif:layer:border-crossings:v12'
+const CACHE_KEY = 'tif:layer:border-crossings:v13'
 const CACHE_TTL = 120
 
 export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
