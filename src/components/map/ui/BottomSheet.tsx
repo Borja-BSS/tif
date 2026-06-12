@@ -2168,7 +2168,15 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
     <div
       ref={containerRef}
       className="fixed bottom-0 left-0 right-0 z-30 flex flex-col overflow-hidden"
-      style={LG}
+      style={{
+        ...LG,
+        '--text-primary':   'rgba(255,255,255,0.92)',
+        '--text-secondary': 'rgba(255,255,255,0.60)',
+        '--text-tertiary':  'rgba(255,255,255,0.40)',
+        '--bg-card':        'rgba(255,255,255,0.06)',
+        '--bg':             'rgba(255,255,255,0.03)',
+        '--border':         'rgba(255,255,255,0.10)',
+      } as React.CSSProperties}
     >
       {/* Header drag zone — touch géré par listeners natifs (useEffect) */}
       <div ref={headerRef}>
