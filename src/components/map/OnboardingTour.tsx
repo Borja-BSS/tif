@@ -81,10 +81,17 @@ export function OnboardingTour({ onDone }: Props) {
   const [dims, setDims] = useState({ w: 0, h: 0 })
 
   useEffect(() => {
-    const upd = () => setDims({ w: window.innerWidth, h: window.innerHeight })
+    const upd = () => setDims({
+      w: window.visualViewport?.width  ?? window.innerWidth,
+      h: window.visualViewport?.height ?? window.innerHeight,
+    })
     upd()
     window.addEventListener('resize', upd)
-    return () => window.removeEventListener('resize', upd)
+    window.visualViewport?.addEventListener('resize', upd)
+    return () => {
+      window.removeEventListener('resize', upd)
+      window.visualViewport?.removeEventListener('resize', upd)
+    }
   }, [])
 
   useEffect(() => {
@@ -92,16 +99,25 @@ export function OnboardingTour({ onDone }: Props) {
     if (!step.target) { setRect(null); return }
 
     let tries = 0
-    const measure = () => {
+    let cancelled = false
+
+    const snap = (el: HTMLElement) => {
+      el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
+      setTimeout(() => { if (!cancelled) setRect(el.getBoundingClientRect()) }, 300)
+    }
+
+    const find = () => {
       const el = document.querySelector<HTMLElement>(step.target!)
-      if (el) { setRect(el.getBoundingClientRect()); return true }
+      if (el) { snap(el); return true }
       return false
     }
 
-    if (!measure()) {
-      const id = setInterval(() => { if (measure() || ++tries > 15) clearInterval(id) }, 80)
-      return () => clearInterval(id)
+    if (!find()) {
+      const id = setInterval(() => { if (find() || ++tries > 15) clearInterval(id) }, 80)
+      return () => { cancelled = true; clearInterval(id) }
     }
+
+    return () => { cancelled = true }
   }, [idx])
 
   useEffect(() => {
