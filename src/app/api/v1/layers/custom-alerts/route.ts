@@ -30,6 +30,7 @@ export async function GET() {
         type:        a.type,
         title:       a.title,
         description: a.description ?? '',
+        source:      a.source ?? '',
         color:       a.color ?? TYPE_COLOR[a.type] ?? '#636366',
         icon:        TYPE_ICON[a.type] ?? '⚠️',
         radius:      a.radius ?? 0,

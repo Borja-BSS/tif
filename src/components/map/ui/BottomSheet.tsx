@@ -680,8 +680,12 @@ function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
     staleTime:       60000,
   })
   const [showBanner, setShowBanner] = useState(false)
+  const [selectedAlert, setSelectedAlert] = useState<{
+    id: string; type: string; title: string; description: string; source: string
+    color: string; icon: string; lng: number; lat: number
+  } | null>(null)
 
-  const { data: customAlertsGeo } = useQuery<{ features: { properties: { id: string; type: string; title: string; description: string; color: string; icon: string }; geometry: { coordinates: [number, number] } }[] }>({
+  const { data: customAlertsGeo } = useQuery<{ features: { properties: { id: string; type: string; title: string; description: string; source: string; color: string; icon: string }; geometry: { coordinates: [number, number] } }[] }>({
     queryKey:        ['tif-custom-alerts-panel'],
     queryFn:         () => fetch('/api/v1/layers/custom-alerts').then(r => r.json()),
     refetchInterval: 30_000,
@@ -724,6 +728,7 @@ function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
     type:        f.properties.type,
     title:       f.properties.title,
     description: f.properties.description,
+    source:      f.properties.source,
     color:       f.properties.color,
     icon:        f.properties.icon,
     lng:         f.geometry.coordinates[0],
@@ -745,6 +750,88 @@ function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
     }
   }, [isLoading, alerts.length])
 
+  // ── Fiche détail d'une alerte admin ────────────────────────────────────────
+  if (selectedAlert) {
+    const a = selectedAlert
+    let validSource: string | null = null
+    try {
+      const u = new URL(a.source)
+      if (u.protocol === 'http:' || u.protocol === 'https:') validSource = a.source
+    } catch { /* invalid URL */ }
+
+    return (
+      <div className="space-y-3">
+        {/* Retour */}
+        <button
+          onClick={() => setSelectedAlert(null)}
+          className="flex items-center gap-2 text-[12px] active:opacity-60 transition-opacity"
+          style={{ color: 'var(--text-tertiary)' }}
+        >
+          <svg width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+            <path d="M6 1L1 6l5 5"/>
+          </svg>
+          Retour aux alertes
+        </button>
+
+        {/* Carte principale */}
+        <div className="rounded-2xl p-4" style={{ background: `${a.color}12`, border: `1px solid ${a.color}35` }}>
+          <div className="flex items-start gap-3">
+            <span className="text-3xl flex-shrink-0">{a.icon}</span>
+            <div className="flex-1 min-w-0">
+              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: a.color }}>
+                {customAlertTypeLabel(a.type)}
+              </span>
+              <h2 className="text-base font-bold leading-snug mt-0.5" style={{ color: '#fff' }}>{a.title}</h2>
+            </div>
+          </div>
+          {a.description && (
+            <p className="text-[13px] leading-relaxed mt-3" style={{ color: 'rgba(255,255,255,0.70)' }}>
+              {a.description}
+            </p>
+          )}
+        </div>
+
+        {/* Voir sur la carte */}
+        <button
+          onClick={() => { flyTo(a.lng, a.lat); setSelectedAlert(null) }}
+          className="w-full flex items-center justify-center gap-2 rounded-2xl py-3 font-semibold text-sm"
+          style={{ background: 'var(--brand)', color: '#fff' }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          Voir sur la carte
+        </button>
+
+        {/* Source */}
+        {validSource && (
+          <div className="rounded-2xl p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+            <p className="text-[10px] font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-tertiary)' }}>
+              Source officielle
+            </p>
+            <a
+              href={validSource}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-between rounded-xl px-3 py-2.5 active:scale-[0.98] transition-transform"
+              style={{ background: 'var(--bg)', border: '1px solid var(--border)' }}
+            >
+              <span className="text-[13px] font-medium truncate" style={{ color: 'var(--brand)' }}>
+                {(() => { try { return new URL(validSource).host } catch { return validSource } })()}
+              </span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2.5" strokeLinecap="round" className="flex-shrink-0 ml-2">
+                <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
+                <polyline points="15 3 21 3 21 9"/>
+                <line x1="10" y1="14" x2="21" y2="3"/>
+              </svg>
+            </a>
+          </div>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-2">
       {/* Bulletins G7 planifiés — route + TPG */}
@@ -760,13 +847,13 @@ function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
             {customAlerts.map(a => (
               <button
                 key={a.id}
-                className="w-full flex items-center gap-3 rounded-2xl px-3 py-2.5 text-left"
+                className="w-full flex items-center gap-3 rounded-2xl px-3 py-2.5 text-left active:scale-[0.98] transition-transform"
                 style={{
                   background:     `${a.color}15`,
                   border:         `0.5px solid ${a.color}40`,
                   backdropFilter: 'blur(20px)',
                 }}
-                onClick={() => flyTo(a.lng, a.lat)}
+                onClick={() => setSelectedAlert(a)}
               >
                 <span className="text-xl flex-shrink-0">{a.icon}</span>
                 <div className="flex-1 min-w-0">
@@ -775,9 +862,9 @@ function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
                     <p className="text-[11px] truncate mt-0.5" style={{ color: 'rgba(255,255,255,0.55)' }}>{a.description}</p>
                   )}
                 </div>
-                <span className="text-[10px] font-medium flex-shrink-0 px-2 py-0.5 rounded-full" style={{ background: `${a.color}25`, color: a.color }}>
-                  {customAlertTypeLabel(a.type)}
-                </span>
+                <svg width="6" height="10" viewBox="0 0 6 10" fill="none" stroke={a.color} strokeWidth="1.5" strokeLinecap="round" className="flex-shrink-0 opacity-60">
+                  <path d="M1 1l4 4-4 4"/>
+                </svg>
               </button>
             ))}
           </div>
