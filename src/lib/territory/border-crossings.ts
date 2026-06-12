@@ -402,6 +402,14 @@ const CROSSINGS: Crossing[] = [
     g7Info: '🔒 Fermé du 12 au 18 juin 2026', nearestOpen: 'Meyrin (4 km)',
   },
   {
+    id: 'versoix-ferney', name: 'Versoix / Ferney',
+    lat: 46.2608456, lng: 6.1197727, type: 'secondary', capacity: 'low',
+    franceSide: 'west',
+    hours: '06:00–22:00 (hors G7)', vehicles: ['Voitures', 'Motos'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026', nearestOpen: 'Ferney-Voltaire (1 km) · Meyrin (5 km)',
+  },
+  {
     id: 'thoiry', name: 'Thoiry / Saint-Jean-de-Gonville',
     lat: 46.25000, lng: 5.98850, type: 'secondary', capacity: 'low',
     franceSide: 'west',
