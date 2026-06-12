@@ -5,6 +5,7 @@ export interface CustomAlert {
   type:        CustomAlertType
   title:       string
   description?: string
+  source?:     string    // URL source (lien externe)
   lat:         number
   lng:         number
   radius?:     number    // mètres — pour les zones de restriction circulaires

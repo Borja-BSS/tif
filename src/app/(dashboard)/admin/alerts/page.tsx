@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import { firebaseAuth } from '@/lib/firebase'
 import type { CustomAlert, CustomAlertType } from '@/data/custom-alerts'
@@ -11,6 +13,7 @@ interface AlertForm {
   type:        CustomAlertType
   title:       string
   description: string
+  source:      string
   lat:         string
   lng:         string
   radius:      string
@@ -23,6 +26,7 @@ const EMPTY_FORM: AlertForm = {
   type:        'barrage',
   title:       '',
   description: '',
+  source:      '',
   lat:         '46.2',
   lng:         '6.15',
   radius:      '',
@@ -59,6 +63,7 @@ function fmtDate(iso: string): string {
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function AdminAlertsPage() {
   const { user, loading: authLoading } = useAuth()
+  const pathname = usePathname()
 
   const ADMIN_EMAILS = ['lostropicosbox@gmail.com', 'aruncalstas@gmail.com']
   const isAdmin = !!user && ADMIN_EMAILS.includes(user.email ?? '')
@@ -170,6 +175,7 @@ export default function AdminAlertsPage() {
         type:        form.type,
         title:       form.title,
         description: form.description || undefined,
+        source:      form.source.trim() || undefined,
         lat:         parseFloat(form.lat),
         lng:         parseFloat(form.lng),
         radius:      form.radius ? parseFloat(form.radius) : undefined,
@@ -221,6 +227,7 @@ export default function AdminAlertsPage() {
       type:        a.type,
       title:       a.title,
       description: a.description ?? '',
+      source:      a.source ?? '',
       lat:         String(a.lat),
       lng:         String(a.lng),
       radius:      a.radius ? String(a.radius) : '',
@@ -259,11 +266,34 @@ export default function AdminAlertsPage() {
     <div className="min-h-screen bg-[#0d0d10] text-white font-mono pb-20">
 
       {/* ── Header ───────────────────────────────────────────────────── */}
-      <header className="px-6 pt-8 pb-5 border-b border-white/[0.06]">
+      <header className="px-6 pt-8 pb-4">
         <p className="text-[10px] text-white/30 uppercase tracking-[0.18em]">TIF — Admin</p>
-        <h1 className="text-xl font-semibold text-white/90 mt-1">Gestion des alertes</h1>
         <p className="text-[11px] text-white/30 mt-0.5">{user.email}</p>
       </header>
+
+      {/* ── Nav tabs ─────────────────────────────────────────────────── */}
+      <nav className="flex gap-0 px-4 border-b border-white/[0.06]">
+        {[
+          { label: 'Alertes', href: '/admin/alerts' },
+          { label: 'Sondage', href: '/admin/survey' },
+        ].map(tab => {
+          const active = pathname === tab.href
+          return (
+            <Link
+              key={tab.href}
+              href={tab.href}
+              className="px-5 py-2.5 text-[12px] font-mono transition-colors"
+              style={{
+                color:        active ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.3)',
+                borderBottom: active ? '1.5px solid rgba(255,255,255,0.6)' : '1.5px solid transparent',
+                marginBottom: -1,
+              }}
+            >
+              {tab.label}
+            </Link>
+          )
+        })}
+      </nav>
 
       <div className="px-4 pt-6 max-w-3xl mx-auto space-y-8">
 
@@ -315,6 +345,16 @@ export default function AdminAlertsPage() {
               value={form.description}
               onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
               className="w-full rounded-xl px-4 py-2.5 text-[13px] outline-none resize-none"
+              style={{ background: 'rgba(255,255,255,0.06)', border: '0.5px solid rgba(255,255,255,0.12)', color: '#fff' }}
+            />
+
+            {/* Source URL */}
+            <input
+              type="url"
+              placeholder="Source — URL (optionnel)"
+              value={form.source}
+              onChange={e => setForm(f => ({ ...f, source: e.target.value }))}
+              className="w-full rounded-xl px-4 py-2.5 text-[13px] outline-none"
               style={{ background: 'rgba(255,255,255,0.06)', border: '0.5px solid rgba(255,255,255,0.12)', color: '#fff' }}
             />
 
@@ -449,6 +489,17 @@ export default function AdminAlertsPage() {
                       </div>
                       {a.description && (
                         <p className="text-[11px] mt-0.5 truncate" style={{ color: 'rgba(255,255,255,0.45)' }}>{a.description}</p>
+                      )}
+                      {a.source && (
+                        <a
+                          href={a.source}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[10px] mt-0.5 truncate block"
+                          style={{ color: '#007AFF' }}
+                        >
+                          🔗 {a.source.replace(/^https?:\/\//, '')}
+                        </a>
                       )}
                       <div className="flex items-center gap-3 mt-1 flex-wrap">
                         <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.3)' }}>

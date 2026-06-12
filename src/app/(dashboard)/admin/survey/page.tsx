@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 
 const ADMIN_EMAILS = ['lostropicosbox@gmail.com', 'aruncalstas@gmail.com']
@@ -21,6 +23,7 @@ interface SurveyData {
 
 export default function AdminSurveyPage() {
   const { user, loading } = useAuth()
+  const pathname = usePathname()
   const [data,    setData]    = useState<SurveyData | null>(null)
   const [error,   setError]   = useState<string | null>(null)
   const [fetching, setFetching] = useState(false)
@@ -67,12 +70,38 @@ export default function AdminSurveyPage() {
     : 0
 
   return (
-    <div className="min-h-screen bg-[#0d0d10] text-white p-6 font-mono">
-      <header className="mb-8">
+    <div className="min-h-screen bg-[#0d0d10] text-white font-mono">
+      {/* ── Header ───────────────────────────────────────────────────── */}
+      <header className="px-6 pt-8 pb-4">
         <p className="text-[10px] text-white/30 uppercase tracking-[0.18em]">TIF — Admin</p>
-        <h1 className="text-xl font-semibold text-white/90 mt-1">Sondage App Mobile</h1>
-        <p className="text-[11px] text-white/30 mt-1">{user.email}</p>
+        <p className="text-[11px] text-white/30 mt-0.5">{user.email}</p>
       </header>
+
+      {/* ── Nav tabs ─────────────────────────────────────────────────── */}
+      <nav className="flex gap-0 px-4 border-b border-white/[0.06] mb-8">
+        {[
+          { label: 'Alertes', href: '/admin/alerts' },
+          { label: 'Sondage', href: '/admin/survey' },
+        ].map(tab => {
+          const active = pathname === tab.href
+          return (
+            <Link
+              key={tab.href}
+              href={tab.href}
+              className="px-5 py-2.5 text-[12px] transition-colors"
+              style={{
+                color:        active ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.3)',
+                borderBottom: active ? '1.5px solid rgba(255,255,255,0.6)' : '1.5px solid transparent',
+                marginBottom: -1,
+              }}
+            >
+              {tab.label}
+            </Link>
+          )
+        })}
+      </nav>
+
+      <div className="px-6">
 
       {fetching && (
         <p className="text-[12px] text-white/25 mb-6">Chargement…</p>
@@ -161,6 +190,7 @@ export default function AdminSurveyPage() {
           </section>
         </>
       )}
+      </div>
     </div>
   )
 }

@@ -45,6 +45,7 @@ export async function POST(req: NextRequest) {
     type:        body.type,
     title:       body.title.trim(),
     description: body.description?.trim() || undefined,
+    source:      body.source?.trim() || undefined,
     lat:         Number(body.lat),
     lng:         Number(body.lng),
     radius:      body.radius ? Number(body.radius) : undefined,
