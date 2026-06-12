@@ -281,10 +281,9 @@ function buildPopupHTML(props: Record<string, unknown>): string {
     </div>`
 }
 
-// ── Force client-side status consistency ─────────────────────────────────────
-// Ensures map dot color always matches CrossingDetail in BottomSheet.
-// HERE API may have stale/different colors; we override color+status with
-// time-based client computation while keeping HERE wait times when available.
+// ── Merge API data with client-side fallback ──────────────────────────────────
+// Trust server (HERE live) when dataQuality is 'live' or 'g7-directive'.
+// Fall back to time-based client computation only for 'synthetic' data.
 function mergeWithClientStatus(apiData: FeatureCollection): FeatureCollection {
   const now = new Date()
   return {
@@ -292,6 +291,13 @@ function mergeWithClientStatus(apiData: FeatureCollection): FeatureCollection {
     features: apiData.features.map(f => {
       const p = f.properties as Record<string, unknown>
       if (p.type !== 'border') return f
+
+      // Server has live HERE data or G7 directive — trust it completely
+      if (p.dataQuality === 'live' || p.dataQuality === 'g7-directive') {
+        return { ...f, properties: { ...p, waitMinutes: p.waitTimeMinutes ?? 0 } }
+      }
+
+      // Synthetic fallback: use client time-based computation
       const crossing = ALL_CROSSINGS.find(c => c.id === String(p.id ?? ''))
       if (!crossing) return f
       const { status, color, icon, waitMinutes } = computeInstantStatus(crossing, now)

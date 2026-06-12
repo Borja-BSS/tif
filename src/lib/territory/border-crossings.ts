@@ -73,7 +73,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'thonex-vallard', name: 'Thônex-Vallard',
-    lat: 46.1942, lng: 6.2236,
+    lat: 46.1881120, lng: 6.2027720,
     type: 'main', capacity: 'medium',
     hours: '24h/24, 7j/7',
     vehicles: ['Voitures', 'Camions', 'Cars', 'Motos'],
@@ -86,7 +86,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'moillesulaz', name: 'Moillesulaz',
-    lat: 46.1946, lng: 6.2055,
+    lat: 46.1922427, lng: 6.2064349,
     type: 'main', capacity: 'medium',
     hours: '24h/24, 7j/7',
     vehicles: ['Voitures', 'Motos', 'Piétons', 'Vélos', 'Tram D'],
@@ -182,7 +182,7 @@ const CROSSINGS: Crossing[] = [
   },
   {
     id: 'mategnin', name: 'Mategnin',
-    lat: 46.23231, lng: 6.10601,
+    lat: 46.2437796, lng: 6.0923679,
     type: 'secondary', capacity: 'low',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures', 'Motos'],
@@ -347,7 +347,7 @@ const CROSSINGS: Crossing[] = [
   // ── Extension Grand Genève — Pays de Gex ────────────────────────────────────
   {
     id: 'prevessin-moens', name: 'Prévessin-Moëns',
-    lat: 46.25000, lng: 6.04850, type: 'main', capacity: 'medium',
+    lat: 46.2457785, lng: 6.0820011, type: 'main', capacity: 'medium',
     hours: '24h/24', vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert · Zone CERN · Contrôles fréquents',
@@ -496,17 +496,15 @@ const CROSSINGS: Crossing[] = [
 const G7_START_UTC = new Date('2026-06-11T22:01:00Z')
 const G7_END_UTC   = new Date('2026-06-18T21:59:00Z')
 
+// Synchronized with border-crossings-client.ts G7_OPEN set
 const G7_AUTHORIZED = new Set([
-  // Genève — 24/7 pendant G7
   'bardonnex', 'thonex-vallard', 'moillesulaz', 'meyrin', 'ferney-voltaire', 'perly', 'anieres',
-  // Extension Grand Genève — ouverts pendant G7
-  'prevessin-moens', 'divonne', 'leaz', 'la-cure', 'vallorbe', 'bois-d-amont',
+  'divonne', 'leaz', 'la-cure', 'vallorbe', 'bois-d-amont',
   'les-hopitaux-neufs', 'saint-Laurent', 'douvaine', 'thonon',
-  'annemasse-gaillard', 'saint-julien', 'collonges',
 ])
 const G7_MACARON = new Set(['bardonnex', 'thonex-vallard'])
 
-// ── HERE Traffic flow matching ────────────────────────────────────────────────
+// ── HERE Traffic flow — queue-length algorithm ────────────────────────────────
 
 function distM(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const dlat = (lat1 - lat2) * 111_000
@@ -514,33 +512,99 @@ function distM(lat1: number, lng1: number, lat2: number, lng2: number): number {
   return Math.sqrt(dlat * dlat + dlng * dlng)
 }
 
-// Find the nearest HERE flow segment within maxDistM metres of a given point.
-function nearestFlow(
-  lat: number, lng: number,
-  flow: FlowFeatureCollection,
-  maxDistM = 400,
-): { jamFactor: number; confidence: number } | null {
-  let bestDist = maxDistM
-  let best: { jamFactor: number; confidence: number } | null = null
-
-  for (const f of flow.features) {
-    for (const [fLng, fLat] of f.geometry.coordinates) {
-      const d = distM(lat, lng, fLat, fLng)
-      if (d < bestDist) {
-        bestDist = d
-        best = { jamFactor: f.properties.jamFactor, confidence: f.properties.confidence }
-      }
-    }
+function segmentLengthM(coords: [number, number][]): number {
+  let len = 0
+  for (let i = 1; i < coords.length; i++) {
+    const [lng1, lat1] = coords[i - 1]
+    const [lng2, lat2] = coords[i]
+    len += distM(lat1, lng1, lat2, lng2)
   }
-  return best
+  return len
 }
 
-// jamFactor (0–10) → BorderStatus. Never returns BLOCKED — closures come from G7 directives only.
-function jamToStatus(jam: number): BorderStatus {
-  if (jam < 1.5) return 'CLEAR'
-  if (jam < 3.5) return 'LIGHT'
-  if (jam < 6.0) return 'MODERATE'
-  return 'HEAVY'
+interface QueueAnalysis {
+  queueLengthM:  number   // total length of slow segments within radius
+  peakJamFactor: number   // max jam factor among slow segments
+  confidence:    number
+}
+
+const FLOW_JAM_THRESHOLD = 2.0  // HERE jam < 2 = green, above = yellow/orange/red
+const QUEUE_SEARCH_RADIUS = 1_000  // metres — captures queues up to 1 km from crossing
+
+/**
+ * Analyse the approach queue for a crossing by measuring the total length of
+ * slow HERE segments within QUEUE_SEARCH_RADIUS.
+ *
+ * Logic:
+ *   • Short queue (< 300 m, yellow)   → LIGHT wait
+ *   • Growing queue (300–600 m, orange) → MODERATE wait
+ *   • Long queue (600 m–1.2 km, red)  → HEAVY wait
+ *   • Queue extends > 1.2 km from crossing → severe HEAVY wait
+ *
+ * This directly implements the "file tire vers l'arrière" detection:
+ * the longer the slow zone extends from the crossing, the longer the wait.
+ */
+function analyzeApproachQueue(
+  lat: number, lng: number,
+  flow: FlowFeatureCollection,
+): QueueAnalysis {
+  let queueLengthM  = 0
+  let peakJam       = 0
+  let maxConfidence = 0
+
+  for (const f of flow.features) {
+    const { jamFactor, confidence } = f.properties
+    if (jamFactor < FLOW_JAM_THRESHOLD) continue  // green segment — skip
+
+    // Check whether any point on this segment is within the search radius
+    let withinRadius = false
+    for (const [fLng, fLat] of f.geometry.coordinates) {
+      if (distM(lat, lng, fLat, fLng) <= QUEUE_SEARCH_RADIUS) {
+        withinRadius = true
+        break
+      }
+    }
+    if (!withinRadius) continue
+
+    queueLengthM += segmentLengthM(f.geometry.coordinates)
+    if (jamFactor  > peakJam)       peakJam       = jamFactor
+    if (confidence > maxConfidence) maxConfidence = confidence
+  }
+
+  return { queueLengthM, peakJamFactor: peakJam, confidence: maxConfidence }
+}
+
+/**
+ * Map queue length + peak jam factor to a border status and estimated wait.
+ * G7 period applies a ×1.5 multiplier (reinforced controls).
+ */
+function queueToStatusAndWait(
+  q: QueueAnalysis,
+  isG7: boolean,
+): { status: BorderStatus; waitMinutes: number } {
+  const { queueLengthM, peakJamFactor } = q
+  const g7 = isG7 ? 1.5 : 1.0
+
+  if (queueLengthM < 80 || peakJamFactor < FLOW_JAM_THRESHOLD) {
+    return { status: 'CLEAR', waitMinutes: 0 }
+  }
+  // Yellow / light orange on approach — queue forming
+  if (queueLengthM < 300 && peakJamFactor < 5) {
+    return { status: 'LIGHT', waitMinutes: Math.round(5 * g7) }
+  }
+  // Orange persists or starts turning red — queue 300–600 m
+  if (queueLengthM < 600 || (peakJamFactor < 6 && queueLengthM < 800)) {
+    const wait = Math.round((10 + queueLengthM / 60) * g7)
+    return { status: 'MODERATE', waitMinutes: Math.min(wait, 28) }
+  }
+  // Red extends past crossing — queue 600 m–1.2 km
+  if (queueLengthM < 1_200) {
+    const wait = Math.round((28 + (queueLengthM - 600) / 25) * g7)
+    return { status: 'HEAVY', waitMinutes: Math.min(wait, 56) }
+  }
+  // Severe: queue > 1.2 km, pulling far behind the crossing
+  const wait = Math.round((56 + (queueLengthM - 1_200) / 15) * g7)
+  return { status: 'HEAVY', waitMinutes: Math.min(wait, 90) }
 }
 
 const STATUS_COLOR: Record<BorderStatus, string> = {
@@ -558,8 +622,9 @@ function isG7Period(date: Date): boolean {
   return date >= G7_START_UTC && date < G7_END_UTC
 }
 
-function estimatedWait(status: BorderStatus, capacity: Capacity): number {
-  const base: Record<BorderStatus, number> = { CLEAR: 0, LIGHT: 3, MODERATE: 10, HEAVY: 25, BLOCKED: 60 }
+// Synthetic fallback (no HERE data available) — time-of-day estimate
+function syntheticWait(status: BorderStatus, capacity: Capacity): number {
+  const base: Record<BorderStatus, number> = { CLEAR: 0, LIGHT: 4, MODERATE: 12, HEAVY: 28, BLOCKED: 60 }
   const mult: Record<Capacity, number>     = { high: 1.2, medium: 1.0, low: 0.8 }
   return Math.round(base[status] * mult[capacity])
 }
@@ -595,7 +660,7 @@ export function computeCrossingStatus(
   return                                       { status: 'CLEAR',    jamFactor: 0 }
 }
 
-const CACHE_KEY = 'tif:layer:border-crossings:v8'
+const CACHE_KEY = 'tif:layer:border-crossings:v9'
 const CACHE_TTL = 120
 
 export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
@@ -628,6 +693,7 @@ export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
     let confidence: number
     let dataQuality: BorderProperties['dataQuality']
     let g7Status: G7Status | null = null
+    let waitTimeMinutes = 0
 
     if (g7Active && !G7_AUTHORIZED.has(c.id)) {
       // Hard G7 closure — directive overrides everything
@@ -640,40 +706,43 @@ export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
       confidence  = 1.0
       dataQuality = 'g7-directive'
     } else {
-      // Try HERE live traffic for the base status
-      const live = flow ? nearestFlow(c.lat, c.lng, flow) : null
+      // Try HERE live traffic — queue-length algorithm
+      const queue = flow ? analyzeApproachQueue(c.lat, c.lng, flow) : null
 
-      if (live) {
-        status      = jamToStatus(live.jamFactor)
-        jamFactor   = live.jamFactor
-        confidence  = live.confidence
-        source      = g7Active ? 'G7-directive' : 'here-live'
-        dataQuality = g7Active ? 'g7-directive' : 'live'
+      if (queue && queue.peakJamFactor >= FLOW_JAM_THRESHOLD) {
+        const derived  = queueToStatusAndWait(queue, g7Active)
+        status         = derived.status
+        jamFactor      = queue.peakJamFactor
+        waitTimeMinutes = derived.waitMinutes
+        confidence     = queue.confidence
+        source         = g7Active ? 'G7-directive' : 'here-live'
+        dataQuality    = g7Active ? 'g7-directive' : 'live'
         liveCount++
       } else {
-        const computed = computeCrossingStatus(c, now)
-        status      = computed.status
-        jamFactor   = computed.jamFactor
-        confidence  = 0.3
-        source      = g7Active ? 'G7-directive' : 'synthetic-calibrated'
-        dataQuality = g7Active ? 'g7-directive' : 'synthetic'
+        const computed  = computeCrossingStatus(c, now)
+        status          = computed.status
+        jamFactor       = computed.jamFactor
+        waitTimeMinutes = syntheticWait(status, c.capacity)
+        confidence      = 0.3
+        source          = g7Active ? 'G7-directive' : 'synthetic-calibrated'
+        dataQuality     = g7Active ? 'g7-directive' : 'synthetic'
       }
 
       // Apply G7 adjustments on top of live/synthetic base
       if (g7Active) {
         if (G7_MACARON.has(c.id)) {
-          status    = status === 'BLOCKED' ? 'MODERATE' : status
-          color     = G7_MACARON_COLOR
-          icon      = '🛂'
-          g7Status  = 'macaron'
+          status     = status === 'BLOCKED' ? 'MODERATE' : status
+          color      = G7_MACARON_COLOR
+          icon       = '🛂'
+          g7Status   = 'macaron'
           confidence = 1.0
         } else {
-          // Open during G7 but without macaron — minimum LIGHT, G7 penalty +2
-          status    = status === 'CLEAR' ? 'LIGHT' : status === 'LIGHT' ? 'MODERATE' : status
-          jamFactor = Math.min(jamFactor + 2, 9)
-          color     = STATUS_COLOR[status]
-          icon      = '🛂'
-          g7Status  = 'open'
+          // Open during G7 — minimum LIGHT, G7 penalty (+2 jam)
+          if (status === 'CLEAR') status = 'LIGHT'
+          jamFactor  = Math.min(jamFactor + 2, 9)
+          color      = STATUS_COLOR[status]
+          icon       = '🛂'
+          g7Status   = 'open'
           confidence = 1.0
         }
       } else {
@@ -692,7 +761,7 @@ export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
         capacity:        c.capacity,
         status,
         jamFactor,
-        waitTimeMinutes: estimatedWait(status, c.capacity),
+        waitTimeMinutes,
         direction:       'both',
         icon,
         color,
