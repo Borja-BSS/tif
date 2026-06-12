@@ -41,6 +41,8 @@ export interface MapT {
     sources: string
     accident: string; construction: string; congestion: string; roadClosure: string
     tpgDisruption: string; weather: string; incident: string
+    closedCrossingsTitle: string; nearestOpen: string
+    adminAlertsTitle: string; barrage: string; restriction: string
   }
   parkingSection: {
     parcRelais: string; places: string; rtTitle: string; rtSubPart: string
@@ -209,6 +211,8 @@ const FR: MapT = {
     accident: '🚗 Accident', construction: '🚧 Travaux', congestion: '🚦 Bouchon',
     roadClosure: '🚫 Route fermée', tpgDisruption: '🚌 Perturbation TPG',
     weather: '⛈️ Météo', incident: '⚠️ Incident',
+    closedCrossingsTitle: 'Passages fermés G7', nearestOpen: 'Plus proche ouvert',
+    adminAlertsTitle: 'Alertes actives', barrage: '🚧 Barrage', restriction: '🚫 Zone de restriction',
   },
   parkingSection: {
     parcRelais: 'parcs relais', places: 'places',
@@ -459,6 +463,8 @@ const EN: MapT = {
     accident: '🚗 Accident', construction: '🚧 Works', congestion: '🚦 Congestion',
     roadClosure: '🚫 Road closed', tpgDisruption: '🚌 TPG disruption',
     weather: '⛈️ Weather', incident: '⚠️ Incident',
+    closedCrossingsTitle: 'G7 Closed Crossings', nearestOpen: 'Nearest open',
+    adminAlertsTitle: 'Active Alerts', barrage: '🚧 Roadblock', restriction: '🚫 Restriction zone',
   },
   parkingSection: {
     parcRelais: 'P+R car parks', places: 'spaces',
@@ -709,6 +715,8 @@ const DE: MapT = {
     accident: '🚗 Unfall', construction: '🚧 Baustelle', congestion: '🚦 Stau',
     roadClosure: '🚫 Strasse gesperrt', tpgDisruption: '🚌 TPG-Störung',
     weather: '⛈️ Wetter', incident: '⚠️ Vorfall',
+    closedCrossingsTitle: 'G7-Gesperrte Übergänge', nearestOpen: 'Nächster geöffnet',
+    adminAlertsTitle: 'Aktive Warnungen', barrage: '🚧 Sperre', restriction: '🚫 Sperrzone',
   },
   parkingSection: {
     parcRelais: 'P+R-Parkplätze', places: 'Plätze',
@@ -959,6 +967,8 @@ const IT: MapT = {
     accident: '🚗 Incidente', construction: '🚧 Cantiere', congestion: '🚦 Ingorgo',
     roadClosure: '🚫 Strada chiusa', tpgDisruption: '🚌 Perturbazione TPG',
     weather: '⛈️ Meteo', incident: '⚠️ Incidente',
+    closedCrossingsTitle: 'Valichi chiusi G7', nearestOpen: 'Più vicino aperto',
+    adminAlertsTitle: 'Allerte attive', barrage: '🚧 Blocco stradale', restriction: '🚫 Zona di restrizione',
   },
   parkingSection: {
     parcRelais: 'parcheggi P+R', places: 'posti',
@@ -1209,6 +1219,8 @@ const ES: MapT = {
     accident: '🚗 Accidente', construction: '🚧 Obras', congestion: '🚦 Atasco',
     roadClosure: '🚫 Carretera cortada', tpgDisruption: '🚌 Perturbación TPG',
     weather: '⛈️ Tiempo', incident: '⚠️ Incidente',
+    closedCrossingsTitle: 'Pasos cerrados G7', nearestOpen: 'Más cercano abierto',
+    adminAlertsTitle: 'Alertas activas', barrage: '🚧 Bloqueo', restriction: '🚫 Zona de restricción',
   },
   parkingSection: {
     parcRelais: 'aparcamientos P+R', places: 'plazas',
@@ -1459,6 +1471,8 @@ const PT: MapT = {
     accident: '🚗 Acidente', construction: '🚧 Obras', congestion: '🚦 Congestionamento',
     roadClosure: '🚫 Estrada fechada', tpgDisruption: '🚌 Perturbação TPG',
     weather: '⛈️ Tempo', incident: '⚠️ Incidente',
+    closedCrossingsTitle: 'Postos fechados G7', nearestOpen: 'Mais próximo aberto',
+    adminAlertsTitle: 'Alertas ativas', barrage: '🚧 Bloqueio', restriction: '🚫 Zona de restrição',
   },
   parkingSection: {
     parcRelais: 'parques P+R', places: 'lugares',
@@ -1709,6 +1723,8 @@ const SQ: MapT = {
     accident: '🚗 Aksident', construction: '🚧 Punime', congestion: '🚦 Bllokadë',
     roadClosure: '🚫 Rrugë e mbyllur', tpgDisruption: '🚌 Ndërprerje TPG',
     weather: '⛈️ Mot', incident: '⚠️ Incident',
+    closedCrossingsTitle: 'Kalime kufitare të mbyllura G7', nearestOpen: 'Më i afërt i hapur',
+    adminAlertsTitle: 'Alarme aktive', barrage: '🚧 Bllokadë rrugore', restriction: '🚫 Zonë kufizimi',
   },
   parkingSection: {
     parcRelais: 'parkingje P+R', places: 'vende',
@@ -1959,6 +1975,8 @@ const JA: MapT = {
     accident: '🚗 交通事故', construction: '🚧 工事', congestion: '🚦 渋滞',
     roadClosure: '🚫 道路閉鎖', tpgDisruption: '🚌 TPG運休',
     weather: '⛈️ 天気', incident: '⚠️ インシデント',
+    closedCrossingsTitle: 'G7閉鎖口', nearestOpen: '最寄の開放口',
+    adminAlertsTitle: 'アクティブ警報', barrage: '🚧 通行止め', restriction: '🚫 制限区域',
   },
   parkingSection: {
     parcRelais: 'P+R駐車場', places: '台',
@@ -2209,6 +2227,8 @@ const ZH: MapT = {
     accident: '🚗 交通事故', construction: '🚧 施工', congestion: '🚦 拥堵',
     roadClosure: '🚫 道路关闭', tpgDisruption: '🚌 TPG中断',
     weather: '⛈️ 天气', incident: '⚠️ 事件',
+    closedCrossingsTitle: 'G7关闭口岸', nearestOpen: '最近开放口',
+    adminAlertsTitle: '当前警报', barrage: '🚧 路障', restriction: '🚫 限制区',
   },
   parkingSection: {
     parcRelais: 'P+R停车场', places: '个车位',

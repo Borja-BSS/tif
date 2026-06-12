@@ -681,6 +681,13 @@ function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
   })
   const [showBanner, setShowBanner] = useState(false)
 
+  const { data: customAlertsGeo } = useQuery<{ features: { properties: { id: string; type: string; title: string; description: string; color: string; icon: string }; geometry: { coordinates: [number, number] } }[] }>({
+    queryKey:        ['tif-custom-alerts-panel'],
+    queryFn:         () => fetch('/api/v1/layers/custom-alerts').then(r => r.json()),
+    refetchInterval: 30_000,
+    staleTime:       30_000,
+  })
+
   const alerts = (geoJson?.features ?? []).map((f, i) => ({
     id:          String(f.properties.id ?? i),
     icon:        String(f.properties.icon ?? '⚠️'),
@@ -704,6 +711,32 @@ function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
     map.flyTo({ center: [lng, lat], zoom: 14, duration: 900, essential: true })
   }
 
+  const nowAlert  = new Date()
+  const isG7Alert = nowAlert >= new Date('2026-06-11T22:01:00Z') && nowAlert <= new Date('2026-06-18T21:59:00Z')
+  const blockedCrossings = isG7Alert
+    ? ALL_CROSSINGS
+        .filter(c => computeInstantStatus(c, nowAlert).status === 'BLOCKED' && c.nearestOpen != null)
+        .sort((a, b) => a.name.localeCompare(b.name))
+    : []
+
+  const customAlerts = (customAlertsGeo?.features ?? []).map(f => ({
+    id:          f.properties.id,
+    type:        f.properties.type,
+    title:       f.properties.title,
+    description: f.properties.description,
+    color:       f.properties.color,
+    icon:        f.properties.icon,
+    lng:         f.geometry.coordinates[0],
+    lat:         f.geometry.coordinates[1],
+  }))
+
+  const customAlertTypeLabel = (type: string) =>
+    type === 'barrage'     ? t.alertsSection.barrage
+    : type === 'accident'  ? t.alertsSection.accident
+    : type === 'restriction' ? t.alertsSection.restriction
+    : type === 'info'      ? t.alertsSection.incident
+    : t.alertsSection.incident
+
   useEffect(() => {
     if (!isLoading && alerts.length === 0) {
       setShowBanner(true)
@@ -716,6 +749,76 @@ function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
     <div className="space-y-2">
       {/* Bulletins G7 planifiés — route + TPG */}
       <G7BulletinsPanel categories={['route', 'tpg']} title={t.alertsSection.g7RouteTpg} />
+
+      {/* ── Alertes admin actives ─────────────────────────────────────── */}
+      {customAlerts.length > 0 && (
+        <>
+          <p className="text-[10px] font-semibold uppercase tracking-wider mt-4 mb-2" style={{ color: 'var(--text-tertiary)' }}>
+            {t.alertsSection.adminAlertsTitle}
+          </p>
+          <div className="space-y-2">
+            {customAlerts.map(a => (
+              <button
+                key={a.id}
+                className="w-full flex items-center gap-3 rounded-2xl px-3 py-2.5 text-left"
+                style={{
+                  background:     `${a.color}15`,
+                  border:         `0.5px solid ${a.color}40`,
+                  backdropFilter: 'blur(20px)',
+                }}
+                onClick={() => flyTo(a.lng, a.lat)}
+              >
+                <span className="text-xl flex-shrink-0">{a.icon}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] font-semibold truncate" style={{ color: '#fff' }}>{a.title}</p>
+                  {a.description && (
+                    <p className="text-[11px] truncate mt-0.5" style={{ color: 'rgba(255,255,255,0.55)' }}>{a.description}</p>
+                  )}
+                </div>
+                <span className="text-[10px] font-medium flex-shrink-0 px-2 py-0.5 rounded-full" style={{ background: `${a.color}25`, color: a.color }}>
+                  {customAlertTypeLabel(a.type)}
+                </span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* ── Passages fermés G7 ───────────────────────────────────────── */}
+      {blockedCrossings.length > 0 && (
+        <>
+          <p className="text-[10px] font-semibold uppercase tracking-wider mt-4 mb-2" style={{ color: 'var(--text-tertiary)' }}>
+            {t.alertsSection.closedCrossingsTitle}
+          </p>
+          <div className="space-y-1.5">
+            {blockedCrossings.map(c => (
+              <button
+                key={c.id}
+                className="w-full flex items-center gap-3 rounded-2xl px-3 py-2 text-left"
+                style={{
+                  background:     'rgba(255,59,48,0.10)',
+                  border:         '0.5px solid rgba(255,59,48,0.35)',
+                  backdropFilter: 'blur(20px)',
+                }}
+                onClick={() => c.lng != null && c.lat != null && flyTo(c.lng!, c.lat!)}
+              >
+                <span className="text-base flex-shrink-0">🚫</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] font-semibold truncate" style={{ color: 'rgba(255,255,255,0.9)' }}>{c.name}</p>
+                  {c.nearestOpen && (
+                    <p className="text-[11px] truncate mt-0.5" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                      {t.alertsSection.nearestOpen}: {c.nearestOpen}
+                    </p>
+                  )}
+                </div>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="flex-shrink-0">
+                  <path d="M5 3l4 4-4 4" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
 
       <p className="text-[10px] font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-tertiary)', marginTop: 16 }}>
         {t.alertsSection.incidents}
