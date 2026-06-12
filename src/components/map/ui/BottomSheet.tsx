@@ -276,8 +276,11 @@ function DouanesDetail({ onSelect, map }: {
   const now      = new Date()
   const crossings = ALL_CROSSINGS.map(c => ({ c, s: computeInstantStatus(c, now) }))
     .sort((a, b) => {
-      const order = { CLEAR: 0, LIGHT: 1, MODERATE: 2, HEAVY: 3, BLOCKED: 4 }
-      return order[a.s.status] - order[b.s.status]
+      // Fermées toujours en dernier
+      if (a.s.status === 'BLOCKED' && b.s.status !== 'BLOCKED') return 1
+      if (b.s.status === 'BLOCKED' && a.s.status !== 'BLOCKED') return -1
+      // Sinon : plus d'attente en premier
+      return b.s.waitMinutes - a.s.waitMinutes
     })
 
   const handleTap = (c: CrossingStatic) => {
