@@ -386,12 +386,20 @@ const CROSSINGS: Crossing[] = [
     g7Info: '✓ Ouvert · Zone CERN · Contrôles fréquents',
   },
   {
-    id: 'sauverny', name: 'Sauverny (Bois-Châton)',
+    id: 'sauverny', name: 'Sauverny',
     lat: 46.3114, lng: 6.1204, type: 'secondary', capacity: 'low',
     franceSide: 'west',
     hours: '06:00–22:00 (hors G7)', vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '🔒 Fermé du 12 au 18 juin 2026', nearestOpen: 'Meyrin (5 km) · Ferney-Voltaire (7 km)',
+  },
+  {
+    id: 'bois-chaton', name: 'Bois-Châton',
+    lat: 46.2869728, lng: 6.1045552, type: 'secondary', capacity: 'low',
+    franceSide: 'west',
+    hours: '06:00–22:00 (hors G7)', vehicles: ['Voitures', 'Motos'],
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
+    g7Info: '🔒 Fermé du 12 au 18 juin 2026', nearestOpen: 'Meyrin (4 km)',
   },
   {
     id: 'thoiry', name: 'Thoiry / Saint-Jean-de-Gonville',
