@@ -8,6 +8,8 @@ type BorderStatus   = 'CLEAR' | 'LIGHT' | 'MODERATE' | 'HEAVY' | 'BLOCKED'
 type Capacity       = 'high' | 'medium' | 'low'
 type CrossingType   = 'motorway' | 'main' | 'secondary' | 'tertiary'
 type G7Status       = 'open' | 'closed' | 'macaron'
+type FranceSide     = 'north' | 'south' | 'east' | 'west'
+type WaitDirection  = 'fr-ch' | 'ch-fr' | 'both' | null
 
 interface Crossing {
   id:           string
@@ -16,11 +18,12 @@ interface Crossing {
   lng:          number
   type:         CrossingType
   capacity:     Capacity
-  hours:        string        // horaires normaux
-  vehicles:     string[]      // types de véhicules autorisés
-  vignettes:    string[]      // documents/vignettes requis
-  g7Info:       string        // info spécifique G7
-  nearestOpen?: string        // alternative si fermé G7
+  hours:        string
+  vehicles:     string[]
+  vignettes:    string[]
+  g7Info:       string
+  nearestOpen?: string
+  franceSide:   FranceSide   // geographic direction from crossing toward France
 }
 
 export interface BorderProperties {
@@ -32,6 +35,7 @@ export interface BorderProperties {
   status:          BorderStatus
   jamFactor:       number
   waitTimeMinutes: number
+  waitDirection:   WaitDirection
   direction:       'both'
   icon:            string
   color:           string
@@ -61,6 +65,7 @@ const CROSSINGS: Crossing[] = [
     id: 'bardonnex', name: 'Bardonnex',
     lat: 46.14952, lng: 6.09693,
     type: 'motorway', capacity: 'high',
+    franceSide: 'south',
     hours: '24h/24, 7j/7',
     vehicles: ['Voitures', 'Camions', 'Cars', 'Motos'],
     vignettes: [
@@ -75,6 +80,7 @@ const CROSSINGS: Crossing[] = [
     id: 'thonex-vallard', name: 'Thônex-Vallard',
     lat: 46.1881120, lng: 6.2027720,
     type: 'main', capacity: 'medium',
+    franceSide: 'east',
     hours: '24h/24, 7j/7',
     vehicles: ['Voitures', 'Camions', 'Cars', 'Motos'],
     vignettes: [
@@ -88,6 +94,7 @@ const CROSSINGS: Crossing[] = [
     id: 'moillesulaz', name: 'Moillesulaz',
     lat: 46.1922427, lng: 6.2064349,
     type: 'main', capacity: 'medium',
+    franceSide: 'east',
     hours: '24h/24, 7j/7',
     vehicles: ['Voitures', 'Motos', 'Piétons', 'Vélos', 'Tram D'],
     vignettes: [
@@ -101,6 +108,7 @@ const CROSSINGS: Crossing[] = [
     id: 'meyrin', name: 'Meyrin',
     lat: 46.23466, lng: 6.05046,
     type: 'main', capacity: 'medium',
+    franceSide: 'west',
     hours: '24h/24, 7j/7',
     vehicles: ['Voitures', 'Camions', 'Motos'],
     vignettes: [
@@ -114,6 +122,7 @@ const CROSSINGS: Crossing[] = [
     id: 'ferney-voltaire', name: 'Ferney-Voltaire',
     lat: 46.25005, lng: 6.11905,
     type: 'main', capacity: 'medium',
+    franceSide: 'north',
     hours: '24h/24, 7j/7',
     vehicles: ['Voitures', 'Motos', 'Cars'],
     vignettes: [
@@ -127,6 +136,7 @@ const CROSSINGS: Crossing[] = [
     id: 'perly', name: 'Perly',
     lat: 46.15234, lng: 6.09103,
     type: 'secondary', capacity: 'low',
+    franceSide: 'south',
     hours: '24h/24, 7j/7',
     vehicles: ['Voitures', 'Motos'],
     vignettes: [
@@ -139,6 +149,7 @@ const CROSSINGS: Crossing[] = [
     id: 'anieres', name: 'Anières',
     lat: 46.26932, lng: 6.23901,
     type: 'secondary', capacity: 'low',
+    franceSide: 'east',
     hours: '24h/24, 7j/7',
     vehicles: ['Voitures', 'Motos'],
     vignettes: [
@@ -154,6 +165,7 @@ const CROSSINGS: Crossing[] = [
     id: 'croix-de-rozon', name: 'Croix-de-Rozon',
     lat: 46.14351, lng: 6.13836,
     type: 'secondary', capacity: 'low',
+    franceSide: 'south',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
@@ -164,6 +176,7 @@ const CROSSINGS: Crossing[] = [
     id: 'veyrier', name: 'Veyrier',
     lat: 46.16631, lng: 6.18840,
     type: 'secondary', capacity: 'low',
+    franceSide: 'east',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures', 'Motos', 'Piétons'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
@@ -174,6 +187,7 @@ const CROSSINGS: Crossing[] = [
     id: 'fossard', name: 'Fossard',
     lat: 46.195, lng: 6.213,
     type: 'secondary', capacity: 'low',
+    franceSide: 'east',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
@@ -184,6 +198,7 @@ const CROSSINGS: Crossing[] = [
     id: 'mategnin', name: 'Mategnin',
     lat: 46.2437796, lng: 6.0923679,
     type: 'secondary', capacity: 'low',
+    franceSide: 'west',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
@@ -194,6 +209,7 @@ const CROSSINGS: Crossing[] = [
     id: 'mon-idee', name: 'Mon-Idée',
     lat: 46.20654, lng: 6.25008,
     type: 'secondary', capacity: 'low',
+    franceSide: 'east',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
@@ -204,6 +220,7 @@ const CROSSINGS: Crossing[] = [
     id: 'monniaz', name: 'Monniaz',
     lat: 46.24155, lng: 6.30836,
     type: 'secondary', capacity: 'low',
+    franceSide: 'east',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
@@ -214,6 +231,7 @@ const CROSSINGS: Crossing[] = [
     id: 'chancy', name: 'Chancy',
     lat: 46.14442, lng: 5.96583,
     type: 'secondary', capacity: 'low',
+    franceSide: 'west',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
@@ -224,6 +242,7 @@ const CROSSINGS: Crossing[] = [
     id: 'avully', name: 'Avully',
     lat: 46.1618, lng: 5.9778,
     type: 'secondary', capacity: 'low',
+    franceSide: 'west',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
@@ -234,6 +253,7 @@ const CROSSINGS: Crossing[] = [
     id: 'la-plaine', name: 'La Plaine',
     lat: 46.17737, lng: 5.99153,
     type: 'secondary', capacity: 'low',
+    franceSide: 'west',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
@@ -244,6 +264,7 @@ const CROSSINGS: Crossing[] = [
     id: 'communaux-ambilly', name: 'Communaux d\'Ambilly',
     lat: 46.1958, lng: 6.2180,
     type: 'secondary', capacity: 'low',
+    franceSide: 'east',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures', 'Riverains'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
@@ -254,6 +275,7 @@ const CROSSINGS: Crossing[] = [
     id: 'hermance', name: 'Hermance',
     lat: 46.30283, lng: 6.24758,
     type: 'secondary', capacity: 'low',
+    franceSide: 'east',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures', 'Piétons', 'Vélos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
@@ -264,6 +286,7 @@ const CROSSINGS: Crossing[] = [
     id: 'soral', name: 'Soral',
     lat: 46.13712, lng: 6.03616,
     type: 'secondary', capacity: 'low',
+    franceSide: 'west',
     hours: '06:00–20:00 (hors G7)',
     vehicles: ['Voitures'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
@@ -277,6 +300,7 @@ const CROSSINGS: Crossing[] = [
     id: 'landecy', name: 'Landecy',
     lat: 46.1395, lng: 6.0756,
     type: 'tertiary', capacity: 'low',
+    franceSide: 'south',
     hours: 'Restreint (locaux)',
     vehicles: ['Voitures', 'Riverains'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
@@ -287,6 +311,7 @@ const CROSSINGS: Crossing[] = [
     id: 'bossey', name: 'Bossey',
     lat: 46.15300, lng: 6.20500,
     type: 'tertiary', capacity: 'low',
+    franceSide: 'east',
     hours: 'Piétons / Vélos uniquement',
     vehicles: ['Piétons', 'Vélos'],
     vignettes: ['CNI ou passeport obligatoire'],
@@ -297,6 +322,7 @@ const CROSSINGS: Crossing[] = [
     id: 'troinex', name: 'Troinex',
     lat: 46.1616, lng: 6.1530,
     type: 'tertiary', capacity: 'low',
+    franceSide: 'south',
     hours: 'Restreint (locaux)',
     vehicles: ['Voitures'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
@@ -307,6 +333,7 @@ const CROSSINGS: Crossing[] = [
     id: 'compesieres', name: 'Compesières',
     lat: 46.14950, lng: 6.07338,
     type: 'tertiary', capacity: 'low',
+    franceSide: 'south',
     hours: '06:00–18:00 (hors G7)',
     vehicles: ['Voitures'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
@@ -317,6 +344,7 @@ const CROSSINGS: Crossing[] = [
     id: 'bernex', name: 'Bernex',
     lat: 46.16040, lng: 6.04523,
     type: 'tertiary', capacity: 'low',
+    franceSide: 'west',
     hours: 'Restreint (locaux)',
     vehicles: ['Voitures'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
@@ -327,6 +355,7 @@ const CROSSINGS: Crossing[] = [
     id: 'ecogia', name: 'Écogia (Satigny)',
     lat: 46.23400, lng: 6.00800,
     type: 'tertiary', capacity: 'low',
+    franceSide: 'west',
     hours: 'Restreint (agricole/local)',
     vehicles: ['Voitures', 'Tracteurs'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
@@ -337,6 +366,7 @@ const CROSSINGS: Crossing[] = [
     id: 'veigy', name: 'Veigy',
     lat: 46.27652, lng: 6.24683,
     type: 'tertiary', capacity: 'low',
+    franceSide: 'east',
     hours: 'Restreint (locaux)',
     vehicles: ['Voitures'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
@@ -348,6 +378,7 @@ const CROSSINGS: Crossing[] = [
   {
     id: 'prevessin-moens', name: 'Prévessin-Moëns',
     lat: 46.2457785, lng: 6.0820011, type: 'main', capacity: 'medium',
+    franceSide: 'west',
     hours: '24h/24', vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert · Zone CERN · Contrôles fréquents',
@@ -355,6 +386,7 @@ const CROSSINGS: Crossing[] = [
   {
     id: 'sauverny', name: 'Sauverny',
     lat: 46.28694, lng: 6.10450, type: 'secondary', capacity: 'low',
+    franceSide: 'west',
     hours: '06:00–22:00', vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '⚠️ Contrôles renforcés pendant G7', nearestOpen: 'Meyrin (5 km)',
@@ -362,6 +394,7 @@ const CROSSINGS: Crossing[] = [
   {
     id: 'thoiry', name: 'Thoiry / Saint-Jean-de-Gonville',
     lat: 46.25000, lng: 5.98850, type: 'secondary', capacity: 'low',
+    franceSide: 'west',
     hours: '06:00–22:00', vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '⚠️ Contrôles renforcés pendant G7', nearestOpen: 'La Plaine (12 km)',
@@ -369,6 +402,7 @@ const CROSSINGS: Crossing[] = [
   {
     id: 'peron', name: 'Péron',
     lat: 46.17900, lng: 5.91050, type: 'secondary', capacity: 'low',
+    franceSide: 'west',
     hours: '06:00–20:00', vehicles: ['Voitures'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '⚠️ Contrôles renforcés pendant G7', nearestOpen: 'La Plaine (15 km)',
@@ -376,6 +410,7 @@ const CROSSINGS: Crossing[] = [
   {
     id: 'divonne', name: 'Divonne-les-Bains',
     lat: 46.34573, lng: 6.15228, type: 'main', capacity: 'medium',
+    franceSide: 'west',
     hours: '24h/24', vehicles: ['Voitures', 'Motos', 'Piétons'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert 24/7 · Accès lac et casino',
@@ -383,6 +418,7 @@ const CROSSINGS: Crossing[] = [
   {
     id: 'leaz', name: 'Léaz / Longeray',
     lat: 45.93400, lng: 5.81200, type: 'main', capacity: 'medium',
+    franceSide: 'west',
     hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert · Entrée A40 côté français',
@@ -392,6 +428,7 @@ const CROSSINGS: Crossing[] = [
   {
     id: 'la-cure', name: 'La Cure / Les Rousses',
     lat: 46.46478, lng: 6.07300, type: 'main', capacity: 'medium',
+    franceSide: 'west',
     hours: '24h/24 (sauf neige)', vehicles: ['Voitures', 'Motos', 'Piétons', 'Vélos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert · Route D1084 ↔ Givrine · Fermé si neige abondante',
@@ -399,6 +436,7 @@ const CROSSINGS: Crossing[] = [
   {
     id: 'saint-cergue', name: 'Saint-Cergue (Col de la Givrine)',
     lat: 46.4200, lng: 6.0820, type: 'secondary', capacity: 'low',
+    franceSide: 'west',
     hours: '24h/24 (saison)', vehicles: ['Voitures', 'Motos', 'Vélos', 'Piétons'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert · Passage Nyon ↔ Morez FR', nearestOpen: 'La Cure (15 km)',
@@ -406,6 +444,7 @@ const CROSSINGS: Crossing[] = [
   {
     id: 'vallorbe', name: 'Vallorbe',
     lat: 46.7282, lng: 6.4018, type: 'main', capacity: 'high',
+    franceSide: 'west',
     hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Train', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise', 'Vignette CH recommandée'],
     g7Info: '✓ Ouvert · Douane principale Vaud · Ligne CFF Lausanne-Paris',
@@ -413,6 +452,7 @@ const CROSSINGS: Crossing[] = [
   {
     id: 'bois-d-amont', name: "Bois-d'Amont (Les Rousses)",
     lat: 46.54842, lng: 6.15903, type: 'secondary', capacity: 'low',
+    franceSide: 'west',
     hours: '24h/24 (saison ski)', vehicles: ['Voitures', 'Motos', 'Piétons'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert · Zone ski transfrontalière Les Rousses ↔ Suisse',
@@ -420,6 +460,7 @@ const CROSSINGS: Crossing[] = [
   {
     id: 'saint-Laurent', name: 'Saint-Laurent-en-Grandvaux',
     lat: 46.5810, lng: 6.1150, type: 'secondary', capacity: 'low',
+    franceSide: 'west',
     hours: '06:00–22:00', vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert · Jura ↔ Vaud · Vers Champagnole', nearestOpen: 'La Cure (20 km)',
@@ -427,6 +468,7 @@ const CROSSINGS: Crossing[] = [
   {
     id: 'les-hopitaux-neufs', name: 'Les Hôpitaux-Neufs / Pontarlier',
     lat: 46.7735, lng: 6.3715, type: 'main', capacity: 'medium',
+    franceSide: 'west',
     hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert · Axe RN57 Pontarlier ↔ Vallorbe (CH)',
@@ -436,6 +478,7 @@ const CROSSINGS: Crossing[] = [
   {
     id: 'douvaine', name: 'Douvaine',
     lat: 46.30283, lng: 6.31200, type: 'main', capacity: 'medium',
+    franceSide: 'east',
     hours: '24h/24', vehicles: ['Voitures', 'Motos', 'Camions'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert · Axe Annemasse ↔ Thonon · Surveillance renforcée G7',
@@ -443,6 +486,7 @@ const CROSSINGS: Crossing[] = [
   {
     id: 'sciez', name: 'Sciez / Ballaison',
     lat: 46.34158, lng: 6.39015, type: 'secondary', capacity: 'low',
+    franceSide: 'east',
     hours: '06:00–22:00', vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '⚠️ Contrôles pendant G7', nearestOpen: 'Douvaine (8 km)',
@@ -450,6 +494,7 @@ const CROSSINGS: Crossing[] = [
   {
     id: 'excenevex', name: 'Excenevex / Yvoire',
     lat: 46.37162, lng: 6.32362, type: 'tertiary', capacity: 'low',
+    franceSide: 'east',
     hours: 'Piétons / Vélos / Riverains', vehicles: ['Piétons', 'Vélos', 'Voitures riverains'],
     vignettes: ['CNI ou passeport obligatoire'],
     g7Info: '⚠️ Contrôles renforcés G7 · Rive lac Léman', nearestOpen: 'Douvaine (9 km)',
@@ -457,6 +502,7 @@ const CROSSINGS: Crossing[] = [
   {
     id: 'thonon', name: 'Thonon-les-Bains',
     lat: 46.37609, lng: 6.47516, type: 'main', capacity: 'medium',
+    franceSide: 'south',
     hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert · Axe vers Évian et Valais · Renforcé G7',
@@ -464,6 +510,7 @@ const CROSSINGS: Crossing[] = [
   {
     id: 'evian', name: 'Évian-les-Bains',
     lat: 46.40163, lng: 6.59467, type: 'main', capacity: 'medium',
+    franceSide: 'south',
     hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise', 'Pass G7 requis 12-18 juin'],
     g7Info: '🏛️ SITE G7 · Contrôles maximaux 8-18 juin · Accès très restreint sans accréditation',
@@ -472,6 +519,7 @@ const CROSSINGS: Crossing[] = [
   {
     id: 'annemasse-gaillard', name: 'Annemasse / Gaillard',
     lat: 46.1944, lng: 6.2278, type: 'main', capacity: 'high',
+    franceSide: 'east',
     hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Motos', 'Piétons', 'Tram'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise', "Crit'Air / Stick'AIR (ZFE Annemasse)"],
     g7Info: '✓ Ouvert · Axe principal Genève ↔ Annecy · Contrôles renforcés G7',
@@ -479,6 +527,7 @@ const CROSSINGS: Crossing[] = [
   {
     id: 'saint-julien', name: 'Saint-Julien-en-Genevois',
     lat: 46.15063, lng: 6.08890, type: 'main', capacity: 'high',
+    franceSide: 'south',
     hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Cars', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert 24/7 · Axe A41 vers Annecy · Renforcé G7',
@@ -486,6 +535,7 @@ const CROSSINGS: Crossing[] = [
   {
     id: 'collonges', name: 'Collonges-sous-Salève',
     lat: 46.13300, lng: 6.14900, type: 'secondary', capacity: 'medium',
+    franceSide: 'south',
     hours: '24h/24', vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     g7Info: '✓ Ouvert · A40 direction Annecy / Sallanches',
@@ -524,6 +574,8 @@ function segmentLengthM(coords: [number, number][]): number {
 
 interface QueueAnalysis {
   queueLengthM:  number   // total length of slow segments within radius
+  frQueueM:      number   // queue on French side (cars waiting to enter CH)
+  chQueueM:      number   // queue on Swiss side (cars waiting to enter FR)
   peakJamFactor: number   // max jam factor among slow segments
   confidence:    number
 }
@@ -534,44 +586,58 @@ const QUEUE_SEARCH_RADIUS = 1_000  // metres — captures queues up to 1 km from
 /**
  * Analyse the approach queue for a crossing by measuring the total length of
  * slow HERE segments within QUEUE_SEARCH_RADIUS.
- *
- * Logic:
- *   • Short queue (< 300 m, yellow)   → LIGHT wait
- *   • Growing queue (300–600 m, orange) → MODERATE wait
- *   • Long queue (600 m–1.2 km, red)  → HEAVY wait
- *   • Queue extends > 1.2 km from crossing → severe HEAVY wait
- *
- * This directly implements the "file tire vers l'arrière" detection:
- * the longer the slow zone extends from the crossing, the longer the wait.
+ * Splits segments by geographic side (franceSide) to determine wait direction.
  */
 function analyzeApproachQueue(
   lat: number, lng: number,
+  franceSide: FranceSide,
   flow: FlowFeatureCollection,
 ): QueueAnalysis {
-  let queueLengthM  = 0
+  let frQueueM      = 0
+  let chQueueM      = 0
   let peakJam       = 0
   let maxConfidence = 0
 
   for (const f of flow.features) {
     const { jamFactor, confidence } = f.properties
-    if (jamFactor < FLOW_JAM_THRESHOLD) continue  // green segment — skip
+    if (jamFactor < FLOW_JAM_THRESHOLD) continue
 
-    // Check whether any point on this segment is within the search radius
     let withinRadius = false
+    let centLat = 0, centLng = 0
+
     for (const [fLng, fLat] of f.geometry.coordinates) {
-      if (distM(lat, lng, fLat, fLng) <= QUEUE_SEARCH_RADIUS) {
-        withinRadius = true
-        break
-      }
+      if (distM(lat, lng, fLat, fLng) <= QUEUE_SEARCH_RADIUS) withinRadius = true
+      centLat += fLat
+      centLng += fLng
     }
     if (!withinRadius) continue
 
-    queueLengthM += segmentLengthM(f.geometry.coordinates)
+    const n = f.geometry.coordinates.length
+    centLat /= n
+    centLng /= n
+
+    const len = segmentLengthM(f.geometry.coordinates)
+
+    // Determine which side of the crossing this segment is on
+    const onFrSide = franceSide === 'south' ? centLat < lat
+      : franceSide === 'north'               ? centLat > lat
+      : franceSide === 'east'                ? centLng > lng
+      :                                        centLng < lng  // west
+
+    if (onFrSide) frQueueM += len
+    else          chQueueM += len
+
     if (jamFactor  > peakJam)       peakJam       = jamFactor
     if (confidence > maxConfidence) maxConfidence = confidence
   }
 
-  return { queueLengthM, peakJamFactor: peakJam, confidence: maxConfidence }
+  return {
+    queueLengthM: frQueueM + chQueueM,
+    frQueueM,
+    chQueueM,
+    peakJamFactor: peakJam,
+    confidence: maxConfidence,
+  }
 }
 
 /**
@@ -672,7 +738,7 @@ export function computeCrossingStatus(
   return                                       { status: 'CLEAR',    jamFactor: 0 }
 }
 
-const CACHE_KEY = 'tif:layer:border-crossings:v10'
+const CACHE_KEY = 'tif:layer:border-crossings:v11'
 const CACHE_TTL = 120
 
 export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
@@ -706,6 +772,7 @@ export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
     let dataQuality: BorderProperties['dataQuality']
     let g7Status: G7Status | null = null
     let waitTimeMinutes = 0
+    let waitDirection: WaitDirection = null
 
     if (g7Active && !G7_AUTHORIZED.has(c.id)) {
       // Hard G7 closure — directive overrides everything
@@ -719,7 +786,7 @@ export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
       dataQuality = 'g7-directive'
     } else {
       // Try HERE live traffic — queue-length algorithm
-      const queue = flow ? analyzeApproachQueue(c.lat, c.lng, flow) : null
+      const queue = flow ? analyzeApproachQueue(c.lat, c.lng, c.franceSide, flow) : null
 
       if (queue && queue.peakJamFactor >= FLOW_JAM_THRESHOLD) {
         const derived  = queueToStatusAndWait(queue, g7Active)
@@ -730,6 +797,17 @@ export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
         source         = g7Active ? 'G7-directive' : 'here-live'
         dataQuality    = g7Active ? 'g7-directive' : 'live'
         liveCount++
+
+        // Determine direction: which side has the longer queue?
+        const { frQueueM, chQueueM } = queue
+        if (frQueueM > 50 && chQueueM > 50) {
+          const ratio = Math.max(frQueueM, chQueueM) / Math.min(frQueueM, chQueueM)
+          waitDirection = ratio < 2 ? 'both' : frQueueM > chQueueM ? 'fr-ch' : 'ch-fr'
+        } else if (frQueueM > 50) {
+          waitDirection = 'fr-ch'
+        } else if (chQueueM > 50) {
+          waitDirection = 'ch-fr'
+        }
       } else {
         const computed  = computeCrossingStatus(c, now)
         status          = computed.status
@@ -777,6 +855,7 @@ export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
         status,
         jamFactor,
         waitTimeMinutes,
+        waitDirection,
         direction:       'both',
         icon,
         color,
