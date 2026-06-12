@@ -27,10 +27,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: 'Invalid token' }, { status: 401 })
     }
 
-    const data = await fbRes.json() as { users?: { email?: string; localId?: string }[] }
+    const data = await fbRes.json() as { users?: { email?: string; localId?: string; emailVerified?: boolean }[] }
     const fbUser = data.users?.[0]
     if (!fbUser?.localId) {
       return NextResponse.json({ ok: false, error: 'User not found' }, { status: 401 })
+    }
+    if (!fbUser.emailVerified) {
+      return NextResponse.json({ ok: false, error: 'Email not verified' }, { status: 401 })
     }
 
     const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET!)
