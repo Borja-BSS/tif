@@ -123,13 +123,23 @@ function getCrossingSources(id: string, isG7: boolean): OfficialSource[] {
 }
 
 // ── Fiche détail d'une douane ─────────────────────────────────────────────────
-function CrossingDetail({ crossing, onBack: _onBack, onLocate, waitDirection, waitFrCh, waitChFr }: {
-  crossing:      CrossingStatic
-  onBack:        () => void
-  onLocate:      (c: CrossingStatic) => void
-  waitDirection?: string | null
-  waitFrCh?:     number | null
-  waitChFr?:     number | null
+const LIVE_STATUS_COLOR: Record<string, string> = {
+  CLEAR:    '#34C759',
+  LIGHT:    '#30D158',
+  MODERATE: '#FF9500',
+  HEAVY:    '#FF3B30',
+  BLOCKED:  '#636366',
+}
+
+function CrossingDetail({ crossing, onBack: _onBack, onLocate, waitDirection, waitFrCh, waitChFr, liveStatus, liveWaitMinutes }: {
+  crossing:        CrossingStatic
+  onBack:          () => void
+  onLocate:        (c: CrossingStatic) => void
+  waitDirection?:  string | null
+  waitFrCh?:       number | null
+  waitChFr?:       number | null
+  liveStatus?:     string | null
+  liveWaitMinutes?: number | null
 }) {
   const t   = useMapT()
   const now = new Date()
@@ -141,10 +151,15 @@ function CrossingDetail({ crossing, onBack: _onBack, onLocate, waitDirection, wa
 
   const sources = getCrossingSources(crossing.id, isG7Period)
 
-  const statusLabel = s.status === 'BLOCKED'  ? t.crossing.closed
-    : s.status === 'HEAVY'    ? t.crossing.heavy.replace('{n}', String(s.waitMinutes))
-    : s.status === 'MODERATE' ? t.crossing.moderate.replace('{n}', String(s.waitMinutes))
-    : s.status === 'LIGHT'    ? t.crossing.light.replace('{n}', String(s.waitMinutes))
+  // Utilise le statut live (HERE) s'il est disponible, sinon le calcul synthétique
+  const displayStatus   = liveStatus      ?? s.status
+  const displayWait     = liveWaitMinutes ?? s.waitMinutes
+  const displayColor    = LIVE_STATUS_COLOR[displayStatus] ?? s.color
+
+  const statusLabel = displayStatus === 'BLOCKED'  ? t.crossing.closed
+    : displayStatus === 'HEAVY'    ? t.crossing.heavy.replace('{n}', String(displayWait))
+    : displayStatus === 'MODERATE' ? t.crossing.moderate.replace('{n}', String(displayWait))
+    : displayStatus === 'LIGHT'    ? t.crossing.light.replace('{n}', String(displayWait))
     : t.crossing.clear
 
   const typeLabel = crossing.type === 'motorway' ? t.crossing.motorway
@@ -156,7 +171,7 @@ function CrossingDetail({ crossing, onBack: _onBack, onLocate, waitDirection, wa
     <div>
       {/* Header */}
       <div className="rounded-2xl p-4 mb-3"
-        style={{ background: `${s.color}10`, border: `1px solid ${s.color}35` }}>
+        style={{ background: `${displayColor}10`, border: `1px solid ${displayColor}35` }}>
         <div className="flex items-start gap-3">
           <span className="text-3xl">{s.icon}</span>
           <div className="flex-1">
@@ -168,29 +183,29 @@ function CrossingDetail({ crossing, onBack: _onBack, onLocate, waitDirection, wa
         </div>
         <div className="mt-3 space-y-1.5">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: s.color }} />
-            <span className="text-sm font-semibold" style={{ color: s.color }}>{statusLabel}</span>
+            <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: displayColor }} />
+            <span className="text-sm font-semibold" style={{ color: displayColor }}>{statusLabel}</span>
           </div>
-          {s.status !== 'BLOCKED' && (
+          {displayStatus !== 'BLOCKED' && (
             <div className="mt-2 space-y-1">
               <div className="flex items-center justify-between pl-4 pr-1">
                 <span className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
                   🚗 France → Suisse
                 </span>
-                <span className="text-[12px] font-semibold" style={{ color: s.color }}>
+                <span className="text-[12px] font-semibold" style={{ color: displayColor }}>
                   {waitFrCh != null
                     ? (waitFrCh === 0 ? 'Libre' : `${waitFrCh} min`)
-                    : (s.waitMinutes === 0 ? 'Libre' : `${s.waitMinutes} min`)}
+                    : (displayWait === 0 ? 'Libre' : `${displayWait} min`)}
                 </span>
               </div>
               <div className="flex items-center justify-between pl-4 pr-1">
                 <span className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
                   🚗 Suisse → France
                 </span>
-                <span className="text-[12px] font-semibold" style={{ color: s.color }}>
+                <span className="text-[12px] font-semibold" style={{ color: displayColor }}>
                   {waitChFr != null
                     ? (waitChFr === 0 ? 'Libre' : `${waitChFr} min`)
-                    : (s.waitMinutes === 0 ? 'Libre' : `${s.waitMinutes} min`)}
+                    : (displayWait === 0 ? 'Libre' : `${displayWait} min`)}
                 </span>
               </div>
             </div>
@@ -244,17 +259,17 @@ function CrossingDetail({ crossing, onBack: _onBack, onLocate, waitDirection, wa
       {crossing.g7Info && (
         <div className="rounded-2xl p-4 mb-3"
           style={{
-            background: s.status === 'BLOCKED' ? 'rgba(255,69,58,0.08)' : 'rgba(255,149,0,0.08)',
-            border:     s.status === 'BLOCKED' ? '1px solid rgba(255,69,58,0.25)' : '1px solid rgba(255,149,0,0.25)',
+            background: displayStatus === 'BLOCKED' ? 'rgba(255,69,58,0.08)' : 'rgba(255,149,0,0.08)',
+            border:     displayStatus === 'BLOCKED' ? '1px solid rgba(255,69,58,0.25)' : '1px solid rgba(255,149,0,0.25)',
           }}>
           <p className="text-[10px] font-semibold uppercase tracking-wider mb-2"
-            style={{ color: s.status === 'BLOCKED' ? '#FF453A' : '#FF9F0A' }}>
+            style={{ color: displayStatus === 'BLOCKED' ? '#FF453A' : '#FF9F0A' }}>
             🏛️ G7 · 12 au 18 juin 2026
           </p>
           <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
             {crossing.g7Info}
           </p>
-          {crossing.nearestOpen && s.status === 'BLOCKED' && (
+          {crossing.nearestOpen && displayStatus === 'BLOCKED' && (
             <div className="mt-2 pt-2" style={{ borderTop: '1px solid rgba(255,69,58,0.15)' }}>
               <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>
                 <span style={{ color: '#30D158' }}>{t.crossing.alternative}</span>
@@ -1924,9 +1939,11 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
   const [isOpen,              setIsOpen]              = useState(false)
   const [detailView,          setDetailView]          = useState<DetailView>('overview')
   const [selectedCrossing,    setSelectedCrossing]    = useState<CrossingStatic | null>(null)
-  const [selectedWaitDir,     setSelectedWaitDir]     = useState<string | null>(null)
-  const [selectedWaitFrCh,   setSelectedWaitFrCh]   = useState<number | null>(null)
-  const [selectedWaitChFr,   setSelectedWaitChFr]   = useState<number | null>(null)
+  const [selectedWaitDir,        setSelectedWaitDir]        = useState<string | null>(null)
+  const [selectedWaitFrCh,      setSelectedWaitFrCh]      = useState<number | null>(null)
+  const [selectedWaitChFr,      setSelectedWaitChFr]      = useState<number | null>(null)
+  const [selectedLiveStatus,    setSelectedLiveStatus]    = useState<string | null>(null)
+  const [selectedLiveWaitMin,   setSelectedLiveWaitMin]   = useState<number | null>(null)
   const [selectedEvent,       setSelectedEvent]       = useState<string | null>(null)
 
   // ── Refs drag ──────────────────────────────────────────────────────────────
@@ -2126,11 +2143,13 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
     if (filterId) onFilterChange(filterId)
   }, [animateTo, onFilterChange])
 
-  const openCrossing = useCallback((c: CrossingStatic, waitDir?: string | null, frCh?: number | null, chFr?: number | null) => {
+  const openCrossing = useCallback((c: CrossingStatic, waitDir?: string | null, frCh?: number | null, chFr?: number | null, liveStatus?: string | null, liveWaitMin?: number | null) => {
     setSelectedCrossing(c)
     setSelectedWaitDir(waitDir ?? null)
     setSelectedWaitFrCh(frCh ?? null)
     setSelectedWaitChFr(chFr ?? null)
+    setSelectedLiveStatus(liveStatus ?? null)
+    setSelectedLiveWaitMin(liveWaitMin ?? null)
     setDetailView('overview')
     animateTo(getFullH(), true)
   }, [animateTo])
@@ -2138,9 +2157,9 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
   // Écoute les clics sur les pastilles de douane depuis la carte
   useEffect(() => {
     const handler = (e: Event) => {
-      const { id, waitDirection, waitFrCh, waitChFr } = (e as CustomEvent<{ id: string; waitDirection?: string | null; waitFrCh?: number | null; waitChFr?: number | null }>).detail
+      const { id, waitDirection, waitFrCh, waitChFr, liveStatus, liveWaitMinutes } = (e as CustomEvent<{ id: string; waitDirection?: string | null; waitFrCh?: number | null; waitChFr?: number | null; liveStatus?: string | null; liveWaitMinutes?: number | null }>).detail
       const crossing = ALL_CROSSINGS.find(c => c.id === id)
-      if (crossing) openCrossing(crossing, waitDirection, waitFrCh, waitChFr)
+      if (crossing) openCrossing(crossing, waitDirection, waitFrCh, waitChFr, liveStatus, liveWaitMinutes)
     }
     window.addEventListener('tif:crossing-select', handler)
     return () => window.removeEventListener('tif:crossing-select', handler)
@@ -2267,6 +2286,8 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
               waitDirection={selectedWaitDir}
               waitFrCh={selectedWaitFrCh}
               waitChFr={selectedWaitChFr}
+              liveStatus={selectedLiveStatus}
+              liveWaitMinutes={selectedLiveWaitMin}
             />
           ) : selectedEvent ? (
             <EventDetail slug={selectedEvent} onBack={() => setSelectedEvent(null)} />
