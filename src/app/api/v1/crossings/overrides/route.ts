@@ -5,7 +5,8 @@ import { getOverrides, setOverride, clearOverride } from '@/lib/territory/crossi
 
 export const dynamic = 'force-dynamic'
 
-const ADMIN_EMAILS = ['lostropicosbox@gmail.com', 'aruncalstas@gmail.com']
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS ?? 'lostropicosbox@gmail.com')
+  .split(',').map(s => s.trim().toLowerCase())
 
 async function verifyAdmin(req: NextRequest): Promise<string | null> {
   // Defense-in-depth: browsers never send custom headers cross-origin without CORS preflight
@@ -16,7 +17,7 @@ async function verifyAdmin(req: NextRequest): Promise<string | null> {
     const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET!)
     const { payload } = await jwtVerify(cookie, secret)
     const email = payload.email as string | undefined
-    if (!email || !ADMIN_EMAILS.includes(email)) return null
+    if (!email || !ADMIN_EMAILS.includes(email.toLowerCase())) return null
     return email
   } catch { return null }
 }

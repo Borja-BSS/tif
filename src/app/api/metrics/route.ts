@@ -1,9 +1,14 @@
-import { NextResponse } from 'next/server'
-import { getMetrics, SLO_TARGETS } from '@/lib/metrics'
+import { NextRequest, NextResponse } from 'next/server'
+import { getMetrics, SLO_TARGETS }  from '@/lib/metrics'
 
 const MONITORED_ROUTES = Object.keys(SLO_TARGETS)
+const ADMIN_KEY = process.env.TIF_ADMIN_API_KEY
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const key = req.headers.get('x-api-key')
+  if (!ADMIN_KEY || !key || key !== ADMIN_KEY) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
   const metrics = await getMetrics(MONITORED_ROUTES)
 
   const sloStatus = metrics.map(m => {
