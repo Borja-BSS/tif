@@ -1,5 +1,6 @@
 import { NextResponse }  from 'next/server'
 import type { NextRequest } from 'next/server'
+import { jwtVerify } from 'jose'
 import { getOverrides, setOverride, clearOverride } from '@/lib/territory/crossing-overrides'
 
 export const dynamic = 'force-dynamic'
@@ -7,15 +8,12 @@ export const dynamic = 'force-dynamic'
 const ADMIN_EMAILS = ['lostropicosbox@gmail.com', 'aruncalstas@gmail.com']
 
 async function verifyAdmin(req: NextRequest): Promise<string | null> {
-  const token = req.headers.get('authorization')?.replace('Bearer ', '')
-  if (!token) return null
+  const cookie = req.cookies.get('tif-firebase-token')?.value
+  if (!cookie) return null
   try {
-    const res = await fetch(
-      `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${process.env.NEXT_PUBLIC_FIREBASE_API_KEY}`,
-      { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ idToken: token }) },
-    )
-    const json = await res.json() as { users?: { email?: string }[] }
-    const email = json.users?.[0]?.email ?? null
+    const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET!)
+    const { payload } = await jwtVerify(cookie, secret)
+    const email = payload.email as string | undefined
     if (!email || !ADMIN_EMAILS.includes(email)) return null
     return email
   } catch { return null }

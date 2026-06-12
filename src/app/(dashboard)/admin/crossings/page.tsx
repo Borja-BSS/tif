@@ -4,7 +4,6 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
-import { firebaseAuth } from '@/lib/firebase'
 import { ALL_CROSSINGS } from '@/lib/territory/border-crossings-client'
 import type { CrossingOverride } from '@/lib/territory/crossing-overrides'
 
@@ -45,11 +44,7 @@ export default function AdminCrossingsPage() {
   const markerRef = useRef<unknown>(null)
   const markersMapRef = useRef<Map<string, unknown>>(new Map())
 
-  const getToken = useCallback(async (): Promise<string> => {
-    const fbUser = firebaseAuth.currentUser
-    if (!fbUser) throw new Error('Not authenticated')
-    return fbUser.getIdToken()
-  }, [])
+  // Auth via cookie tif-firebase-token — envoyé automatiquement, pas besoin de Bearer token
 
   // ── Load overrides ──────────────────────────────────────────────────────────
   const loadOverrides = useCallback(async () => {
@@ -171,7 +166,6 @@ export default function AdminCrossingsPage() {
     setSaving(true)
     setMsg(null)
     try {
-      const token   = await getToken()
       const payload: Record<string, unknown> = { id: selected }
       if (formStatus) payload.status      = formStatus
       if (formWait)   payload.waitMinutes = parseInt(formWait, 10)
@@ -185,7 +179,7 @@ export default function AdminCrossingsPage() {
 
       const res = await fetch('/api/v1/crossings/overrides', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
       if (!res.ok) throw new Error((await res.json() as { error: string }).error)
@@ -204,10 +198,9 @@ export default function AdminCrossingsPage() {
     setSaving(true)
     setMsg(null)
     try {
-      const token = await getToken()
       await fetch('/api/v1/crossings/overrides', {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: selected }),
       })
       await loadOverrides()
