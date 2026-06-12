@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -74,7 +76,7 @@ export default function AdminSurveyPage() {
       {/* ── Header ───────────────────────────────────────────────────── */}
       <header className="px-6 pt-8 pb-4">
         <p className="text-[10px] text-white/30 uppercase tracking-[0.18em]">TIF — Admin</p>
-        <p className="text-[11px] text-white/30 mt-0.5">{user.email}</p>
+        <p className="text-[11px] text-white/30 mt-0.5">{user?.email ?? ''}</p>
       </header>
 
       {/* ── Nav tabs ─────────────────────────────────────────────────── */}
