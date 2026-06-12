@@ -37,8 +37,10 @@ export async function GET(req: NextRequest) {
       redis.lrange(KEY_FEEDBACK, 0, 199),
     ])
 
-    const feedback = (Array.isArray(rawFeedback) ? rawFeedback as string[] : []).map(s => {
-      try { return JSON.parse(s) } catch { return { text: s } }
+    const feedback = (Array.isArray(rawFeedback) ? rawFeedback : []).map((s: unknown) => {
+      if (typeof s === 'object' && s !== null) return s
+      if (typeof s === 'string') { try { return JSON.parse(s) } catch {} }
+      return { text: String(s ?? '') }
     })
 
     return NextResponse.json({
