@@ -60,8 +60,8 @@ function fmtDate(iso: string): string {
 export default function AdminAlertsPage() {
   const { user, loading: authLoading } = useAuth()
 
-  const ADMIN_EMAIL = 'lostropicosbox@gmail.com'
-  const isAdmin = !!user && user.email === ADMIN_EMAIL
+  const ADMIN_EMAILS = ['lostropicosbox@gmail.com', 'aruncalstas@gmail.com']
+  const isAdmin = !!user && ADMIN_EMAILS.includes(user.email ?? '')
 
   const [alerts,    setAlerts]    = useState<CustomAlert[]>([])
   const [fetching,  setFetching]  = useState(false)
