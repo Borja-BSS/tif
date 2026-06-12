@@ -36,7 +36,7 @@ export const ALL_CROSSINGS: CrossingStatic[] = [
   { id: 'croix-de-rozon', name: 'Croix-de-Rozon', lat: 46.14351, lng: 6.13836, type: 'secondary', capacity: 'low', hours: '06:00–20:00', vehicles: ['Voitures', 'Motos'], pedestrian: false, g7Info: '🔒 Fermé 12-18 juin 2026', nearestOpen: 'Bardonnex (7 km)' },
   { id: 'veyrier', name: 'Veyrier', lat: 46.16631, lng: 6.18840, type: 'secondary', capacity: 'low', hours: '06:00–20:00', vehicles: ['Voitures', 'Motos', 'Piétons'], pedestrian: true, g7Info: '🔒 Fermé 12-18 juin 2026', nearestOpen: 'Moillesulaz (5 km)' },
   { id: 'fossard', name: 'Fossard', lat: 46.1940, lng: 6.2110, type: 'secondary', capacity: 'low', hours: '06:00–20:00', vehicles: ['Voitures'], pedestrian: false, g7Info: '🔒 Fermé 12-18 juin 2026', nearestOpen: 'Moillesulaz (1 km)' },
-  { id: 'mategnin', name: 'Mategnin', lat: 46.23231, lng: 6.10601, type: 'secondary', capacity: 'low', hours: '06:00–20:00', vehicles: ['Voitures', 'Motos'], pedestrian: false, g7Info: '🔒 Fermé 12-18 juin 2026', nearestOpen: 'Meyrin (3 km)' },
+  { id: 'mategnin', name: 'Mategnin', lat: 46.2437796, lng: 6.0923679, type: 'secondary', capacity: 'low', hours: '06:00–20:00', vehicles: ['Voitures', 'Motos'], pedestrian: false, g7Info: '🔒 Fermé 12-18 juin 2026', nearestOpen: 'Meyrin (3 km)' },
   { id: 'mon-idee', name: 'Mon-Idée', lat: 46.2021, lng: 6.2242, type: 'secondary', capacity: 'low', hours: '06:00–20:00', vehicles: ['Voitures'], pedestrian: false, g7Info: '🔒 Fermé 12-18 juin 2026', nearestOpen: 'Thônex-Vallard (2 km)' },
   { id: 'monniaz', name: 'Monniaz', lat: 46.2415, lng: 6.3083, type: 'secondary', capacity: 'low', hours: '06:00–20:00', vehicles: ['Voitures'], pedestrian: false, g7Info: '🔒 Macaron requis · Ouvert 06:00–09:30 / 15:30–19:00 · Hors macaron : fermé · 12-18 juin (source : ge.ch)', nearestOpen: 'Anières (3 km)' },
   { id: 'chancy', name: 'Chancy', lat: 46.14442, lng: 5.96583, type: 'secondary', capacity: 'low', hours: '06:00–20:00', vehicles: ['Voitures', 'Motos'], pedestrian: false, g7Info: '🔒 Macaron requis · Ouvert 06:00–09:30 / 15:30–19:00 · Hors macaron : fermé · 12-18 juin (source : ge.ch)', nearestOpen: 'Perly (11 km)' },
@@ -55,8 +55,8 @@ export const ALL_CROSSINGS: CrossingStatic[] = [
   { id: 'veigy', name: 'Veigy', lat: 46.27652, lng: 6.24683, type: 'tertiary', capacity: 'low', hours: 'Restreint (locaux)', vehicles: ['Voitures'], pedestrian: false, g7Info: '🔒 Fermé 12-18 juin 2026', nearestOpen: 'Anières (5 km)' },
 
   // ── NOUVEAU — Pays de Gex (Ain) ──────────────────────────────────────────────
-  { id: 'prevessin-moens', name: 'Prévessin-Moëns', lat: 46.2476, lng: 6.0794, type: 'main', capacity: 'medium', hours: '24h/24', vehicles: ['Voitures', 'Motos'], pedestrian: false, g7Info: '✓ Ouvert · Zone CERN · Contrôles fréquents', nearestOpen: undefined },
-  { id: 'sauverny', name: 'Sauverny', lat: 46.3739, lng: 6.1629, type: 'secondary', capacity: 'low', hours: '06:00–22:00', vehicles: ['Voitures', 'Motos'], pedestrian: false, g7Info: '⚠️ Contrôles renforcés pendant G7', nearestOpen: 'Divonne (3 km)' },
+  { id: 'prevessin-moens', name: 'Prévessin-Moëns', lat: 46.2457785, lng: 6.0820011, type: 'main', capacity: 'medium', hours: '24h/24', vehicles: ['Voitures', 'Motos'], pedestrian: false, g7Info: '🔒 Fermé 12-18 juin 2026', nearestOpen: 'Meyrin (5 km)' },
+  { id: 'sauverny', name: 'Sauverny', lat: 46.3739, lng: 6.1629, type: 'secondary', capacity: 'low', hours: '06:00–22:00', vehicles: ['Voitures', 'Motos'], pedestrian: false, g7Info: '🔒 Fermé 12-18 juin 2026', nearestOpen: 'Divonne (3 km)' },
   { id: 'thoiry', name: 'Thoiry / Saint-Jean-de-Gonville', lat: 46.2444, lng: 5.9837, type: 'secondary', capacity: 'low', hours: '06:00–22:00', vehicles: ['Voitures', 'Motos'], pedestrian: false, g7Info: '⚠️ Contrôles renforcés pendant G7', nearestOpen: 'La Plaine (12 km)' },
   { id: 'peron', name: 'Péron', lat: 46.1878, lng: 5.9237, type: 'secondary', capacity: 'low', hours: '06:00–20:00', vehicles: ['Voitures'], pedestrian: false, g7Info: '⚠️ Contrôles renforcés pendant G7', nearestOpen: 'La Plaine (10 km)' },
   { id: 'divonne', name: 'Divonne-les-Bains', lat: 46.34573, lng: 6.15228, type: 'main', capacity: 'medium', hours: '24h/24', vehicles: ['Voitures', 'Motos', 'Piétons'], pedestrian: true, g7Info: '✓ Ouvert 24h/24 · Canton Vaud — pas de fermeture G7 · Contrôles renforcés possibles · Accès lac et casino (source : admin.ch)', nearestOpen: undefined },
@@ -87,7 +87,7 @@ export const ALL_CROSSINGS: CrossingStatic[] = [
 
 const G7_START = new Date('2026-06-11T22:01:00Z')
 const G7_END   = new Date('2026-06-18T21:59:00Z')
-const G7_OPEN  = new Set(['bardonnex','thonex-vallard','moillesulaz','meyrin','ferney-voltaire','perly','anieres','prevessin-moens','divonne','leaz','la-cure','vallorbe','bois-d-amont','les-hopitaux-neufs','saint-Laurent','douvaine','thonon','sauverny'])
+const G7_OPEN  = new Set(['bardonnex','thonex-vallard','moillesulaz','meyrin','ferney-voltaire','perly','anieres','divonne','leaz','la-cure','vallorbe','bois-d-amont','les-hopitaux-neufs','saint-Laurent','douvaine','thonon'])
 
 export function computeInstantStatus(c: CrossingStatic, now: Date): { status: BorderStatus; color: string; icon: string; waitMinutes: number } {
   const isG7 = now >= G7_START && now <= G7_END
