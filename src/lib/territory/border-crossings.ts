@@ -577,6 +577,10 @@ function analyzeApproachQueue(
 /**
  * Map queue length + peak jam factor to a border status and estimated wait.
  * G7 period applies a ×1.5 multiplier (reinforced controls).
+ *
+ * Weighted score: queueLengthM × (peakJamFactor/10)^1.5
+ * This prevents many parallel mildly-congested roads (e.g. nearby motorway)
+ * from inflating the result. jamFactor 2.9 → weight 0.16; jamFactor 9.3 → 0.90.
  */
 function queueToStatusAndWait(
   q: QueueAnalysis,
@@ -585,25 +589,33 @@ function queueToStatusAndWait(
   const { queueLengthM, peakJamFactor } = q
   const g7 = isG7 ? 1.5 : 1.0
 
-  if (queueLengthM < 80 || peakJamFactor < FLOW_JAM_THRESHOLD) {
+  if (queueLengthM < 50 || peakJamFactor < FLOW_JAM_THRESHOLD) {
     return { status: 'CLEAR', waitMinutes: 0 }
   }
-  // Yellow / light orange on approach — queue forming
-  if (queueLengthM < 300 && peakJamFactor < 5) {
+
+  // Weighted score: proportional to both queue extent AND jam intensity
+  const jamWeight = Math.pow(peakJamFactor / 10, 1.5)
+  const score     = queueLengthM * jamWeight
+
+  if (score < 80 || peakJamFactor < FLOW_JAM_THRESHOLD) {
+    return { status: 'CLEAR', waitMinutes: 0 }
+  }
+  // Yellow / light orange — queue forming (score < 250, jam < 5)
+  if (score < 250 && peakJamFactor < 5) {
     return { status: 'LIGHT', waitMinutes: Math.round(5 * g7) }
   }
-  // Orange persists or starts turning red — queue 300–600 m
-  if (queueLengthM < 600 || (peakJamFactor < 6 && queueLengthM < 800)) {
-    const wait = Math.round((10 + queueLengthM / 60) * g7)
-    return { status: 'MODERATE', waitMinutes: Math.min(wait, 28) }
+  // Orange persists — score 250–600
+  if (score < 600) {
+    const wait = Math.round((10 + score / 60) * g7)
+    return { status: 'MODERATE', waitMinutes: Math.min(wait, Math.round(28 * g7)) }
   }
-  // Red extends past crossing — queue 600 m–1.2 km
-  if (queueLengthM < 1_200) {
-    const wait = Math.round((28 + (queueLengthM - 600) / 25) * g7)
-    return { status: 'HEAVY', waitMinutes: Math.min(wait, 56) }
+  // Red extends past crossing — score 600–1 200
+  if (score < 1_200) {
+    const wait = Math.round((28 + (score - 600) / 25) * g7)
+    return { status: 'HEAVY', waitMinutes: Math.min(wait, Math.round(56 * g7)) }
   }
-  // Severe: queue > 1.2 km, pulling far behind the crossing
-  const wait = Math.round((56 + (queueLengthM - 1_200) / 15) * g7)
+  // Severe: score > 1 200 — queue pulling far behind crossing
+  const wait = Math.round((56 + (score - 1_200) / 15) * g7)
   return { status: 'HEAVY', waitMinutes: Math.min(wait, 90) }
 }
 
@@ -660,7 +672,7 @@ export function computeCrossingStatus(
   return                                       { status: 'CLEAR',    jamFactor: 0 }
 }
 
-const CACHE_KEY = 'tif:layer:border-crossings:v9'
+const CACHE_KEY = 'tif:layer:border-crossings:v10'
 const CACHE_TTL = 120
 
 export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
@@ -738,7 +750,10 @@ export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
           confidence = 1.0
         } else {
           // Open during G7 — minimum LIGHT, G7 penalty (+2 jam)
-          if (status === 'CLEAR') status = 'LIGHT'
+          if (status === 'CLEAR') {
+            status = 'LIGHT'
+            if (waitTimeMinutes === 0) waitTimeMinutes = syntheticWait('LIGHT', c.capacity)
+          }
           jamFactor  = Math.min(jamFactor + 2, 9)
           color      = STATUS_COLOR[status]
           icon       = '🛂'
