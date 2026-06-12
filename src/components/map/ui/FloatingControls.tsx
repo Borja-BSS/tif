@@ -220,6 +220,7 @@ export function FloatingControls({ map }: FloatingControlsProps) {
       <div className="fixed z-20" style={{ right: 16, bottom: 'calc(56px + 24px)' }}>
       <button
         onClick={handleGPS}
+        data-onboarding="gps-btn"
         style={{ ...BTN_BASE, background: bg, border, color }}
         aria-label="Se localiser"
       >

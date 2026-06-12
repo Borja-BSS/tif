@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useMapT } from '@/i18n/map'
+import { OnboardingTour, fireConfetti } from './OnboardingTour'
+
+const UPDATE_KEY = 'tif:update:v2'
 
 const LG_MODAL: React.CSSProperties = {
   background:           'rgba(18,18,24,0.96)',
@@ -11,22 +14,44 @@ const LG_MODAL: React.CSSProperties = {
   boxShadow:            'inset 0 0.5px 0 rgba(255,255,255,0.22), 0 24px 80px rgba(0,0,0,0.65)',
 }
 
+type Step = 'g7' | 'survey' | 'features' | 'update' | null
+
 export function WelcomeModals() {
-  const [step, setStep] = useState<'g7' | 'survey' | 'features' | null>(null)
+  const [step,       setStep]       = useState<Step>(null)
+  const [tourActive, setTourActive] = useState(false)
   const t = useMapT()
 
   useEffect(() => {
     setStep('g7')
   }, [])
 
-  if (!step) return null
-
-  const dismiss = () => setStep(null)
-
   const goAfterG7 = () => {
-    const done = typeof window !== 'undefined' && localStorage.getItem('tif_survey_v1')
-    setStep(done ? 'features' : 'survey')
+    const surveyDone = typeof window !== 'undefined' && localStorage.getItem('tif_survey_v1')
+    setStep(surveyDone ? 'features' : 'survey')
   }
+
+  const goAfterFeatures = () => {
+    const updateSeen = typeof window !== 'undefined' && localStorage.getItem(UPDATE_KEY)
+    setStep(updateSeen ? null : 'update')
+  }
+
+  const handleSkipUpdate = () => {
+    localStorage.setItem(UPDATE_KEY, '1')
+    fireConfetti()
+    setStep(null)
+  }
+
+  const handleDiscover = () => {
+    localStorage.setItem(UPDATE_KEY, '1')
+    setStep(null)
+    setTourActive(true)
+  }
+
+  if (tourActive) {
+    return <OnboardingTour onDone={() => setTourActive(false)} />
+  }
+
+  if (!step) return null
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
@@ -35,13 +60,19 @@ export function WelcomeModals() {
         ? <G7Modal       w={t.welcome} onNext={goAfterG7} />
         : step === 'survey'
         ? <SurveyModal   w={t.welcome} onNext={() => setStep('features')} />
-        : <FeaturesModal w={t.welcome} onDismiss={dismiss} />
+        : step === 'features'
+        ? <FeaturesModal w={t.welcome} onDismiss={goAfterFeatures} />
+        : step === 'update'
+        ? <UpdateModal onSkip={handleSkipUpdate} onDiscover={handleDiscover} />
+        : null
       }
     </div>
   )
 }
 
 type WelcomeT = ReturnType<typeof useMapT>['welcome']
+
+// ── Existing modals (unchanged) ───────────────────────────────────────────────
 
 function G7Modal({ w, onNext }: { w: WelcomeT; onNext: () => void }) {
   return (
@@ -87,7 +118,7 @@ function G7Modal({ w, onNext }: { w: WelcomeT; onNext: () => void }) {
 }
 
 function SurveyModal({ w, onNext }: { w: WelcomeT; onNext: () => void }) {
-  const [vote, setVote]       = useState<'yes' | 'no' | null>(null)
+  const [vote, setVote]         = useState<'yes' | 'no' | null>(null)
   const [feedback, setFeedback] = useState('')
   const [sending, setSending]   = useState(false)
 
@@ -223,6 +254,81 @@ function FeaturesModal({ w, onDismiss }: { w: WelcomeT; onDismiss: () => void })
       >
         {w.featBtn}
       </button>
+    </div>
+  )
+}
+
+// ── NEW — Mise à jour popup (one-time, key: tif:update:v2) ────────────────────
+
+const NEW_FEATURES = [
+  { icon: '🛂', label: 'Temps d\'attente directionnels', desc: 'FR→CH et CH→FR affichés séparément sur chaque douane', isNew: true },
+  { icon: '🗓️', label: 'Agenda événements', desc: 'Filtres par jour, lieu et prix (gratuit / payant)', isNew: true },
+  { icon: '⚠️', label: 'Alertes partageables', desc: 'Incidents en direct, partageables en un tap', isNew: true },
+  { icon: '⭐', label: 'Mon Trajet', desc: 'Alertes personnalisées sur ton chemin habituel', isNew: true },
+  { icon: '🚦', label: 'Trafic HERE amélioré', desc: 'Embouteillages : rouge toujours visible par-dessus le vert', isNew: true },
+  { icon: '🤖', label: 'Assistant IA optimisé', desc: 'Réponses plus rapides, données live intégrées', isNew: true },
+]
+
+function UpdateModal({ onSkip, onDiscover }: { onSkip: () => void; onDiscover: () => void }) {
+  return (
+    <div className="relative z-10 w-full max-w-sm rounded-3xl p-6 max-h-[90vh] overflow-y-auto" style={LG_MODAL}>
+
+      <div className="text-center mb-4">
+        <div className="text-4xl mb-2">✨</div>
+        <h2 className="text-[17px] font-bold text-white mb-1">Nouvelle mise à jour</h2>
+        <p className="text-[12px]" style={{ color: 'rgba(255,255,255,0.42)' }}>
+          Voici ce qui a été ajouté depuis ta dernière visite
+        </p>
+      </div>
+
+      <div className="space-y-2 mb-5">
+        {NEW_FEATURES.map(f => (
+          <div
+            key={f.label}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
+            style={{
+              background: 'rgba(10,132,255,0.07)',
+              border:     '1px solid rgba(10,132,255,0.22)',
+            }}
+          >
+            <span className="text-xl flex-shrink-0">{f.icon}</span>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <p className="text-[13px] font-semibold text-white">{f.label}</p>
+                <span
+                  className="text-[9px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0"
+                  style={{ background: 'rgba(10,132,255,0.25)', color: '#0A84FF' }}
+                >
+                  NOUVEAU
+                </span>
+              </div>
+              <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.42)' }}>{f.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* CTAs */}
+      <div className="flex gap-3">
+        <button
+          onClick={onDiscover}
+          className="flex-1 py-3.5 rounded-2xl text-[14px] font-bold text-white transition-opacity active:opacity-80"
+          style={{ background: 'var(--brand)' }}
+        >
+          Découvrir 🚀
+        </button>
+        <button
+          onClick={onSkip}
+          className="py-3.5 px-5 rounded-2xl text-[14px] font-semibold transition-opacity active:opacity-70"
+          style={{
+            background: 'rgba(255,255,255,0.06)',
+            border:     '0.5px solid rgba(255,255,255,0.14)',
+            color:      'rgba(255,255,255,0.52)',
+          }}
+        >
+          Passer
+        </button>
+      </div>
     </div>
   )
 }

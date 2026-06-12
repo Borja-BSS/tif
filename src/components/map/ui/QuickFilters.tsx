@@ -49,6 +49,7 @@ export function QuickFilters({ active, onChange, showJourney = false }: QuickFil
           <button
             key={f.id}
             onClick={() => onChange(f.id)}
+            data-onboarding={`filter-${f.id}`}
             className="flex items-center gap-1.5 px-4 flex-shrink-0 rounded-full text-[13px] font-medium"
             style={{
               ...PILL_BASE,

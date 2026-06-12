@@ -123,6 +123,7 @@ export function AiAssistant() {
         <button
           onClick={() => setOpen(true)}
           aria-label="Assistant IA"
+          data-onboarding="ai-btn"
           className="w-11 h-11 rounded-xl flex items-center justify-center
             bg-white/80 dark:bg-white/10
             border border-black/10 dark:border-white/20
