@@ -60,17 +60,9 @@ async function buildLiveContext(): Promise<string> {
 }
 
 // ── System prompt ─────────────────────────────────────────────────────────────
-function buildSystem(liveCtx: string, now: Date): string {
-  const dateStr = now.toLocaleDateString('fr-CH', {
-    weekday: 'long', day: 'numeric', month: 'long',
-    hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Zurich',
-  })
-
-  return `Tu es l'Assistant TIF, expert en mobilité du Grand Genève, déployé par Börja Swiss Solutions pendant le G7 2026.
-Date/heure (Genève) : ${dateStr}
-
-━━━ DONNÉES LIVE ━━━
-${liveCtx}
+// Partie statique — évaluée une fois au démarrage du module, mise en cache côté Anthropic.
+// NE PAS inclure la date/heure ni les données live (elles sont dans le bloc dynamique).
+const STATIC_SYSTEM = `Tu es l'Assistant TIF, expert en mobilité du Grand Genève, déployé par Börja Swiss Solutions pendant le G7 2026.
 
 ━━━ CONTEXTE G7 2026 ━━━
 Sommet G7 : Évian-les-Bains, 15–17 juin 2026
@@ -179,6 +171,14 @@ RÉPONSE SI DEMANDE SUSPECTE OU DANGEREUSE (mot pour mot) :
 4. CONCISION : l'utilisateur est sur mobile. Réponses courtes et actionnables (3–5 phrases max, sauf itinéraire détaillé).
 
 5. LANGUE : français par défaut. Adapte-toi si l'utilisateur écrit en anglais, allemand ou italien.`
+
+// Partie dynamique — date/heure + données live (change à chaque appel, non cachée)
+function buildDynamicBlock(liveCtx: string, now: Date): string {
+  const dateStr = now.toLocaleDateString('fr-CH', {
+    weekday: 'long', day: 'numeric', month: 'long',
+    hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Zurich',
+  })
+  return `Date/heure (Genève) : ${dateStr}\n\n━━━ DONNÉES LIVE ━━━\n${liveCtx}`
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -223,9 +223,9 @@ export async function POST(req: NextRequest) {
     return new Response('messages required', { status: 400 })
   }
 
-  // 3. Sanitize: roles, length, history depth
+  // 3. Sanitize: roles, length, history depth (6 messages max = 3 échanges)
   const safe = messages
-    .slice(-10)
+    .slice(-6)
     .filter(m => m.role === 'user' || m.role === 'assistant')
     .map(m => ({
       role: m.role as 'user' | 'assistant',
@@ -235,18 +235,29 @@ export async function POST(req: NextRequest) {
 
   if (!safe.length) return sseStream("Message vide. Pose ta question.")
 
-  // 4. Build system prompt with live data
+  // 4. Build system blocks — statique (mis en cache) + dynamique (live data)
+  const now     = new Date()
   const liveCtx = await buildLiveContext()
-  const system  = buildSystem(liveCtx, new Date())
+  const systemBlocks: Anthropic.Messages.TextBlockParam[] = [
+    {
+      type:          'text',
+      text:          STATIC_SYSTEM,
+      cache_control: { type: 'ephemeral' },  // ~1 500 tokens cachés 5 min, relus à 10% du prix
+    },
+    {
+      type: 'text',
+      text: buildDynamicBlock(liveCtx, now),  // date + données live — non cachées
+    },
+  ]
 
   // 5. Stream response
   const readable = new ReadableStream({
     async start(controller) {
       try {
         const stream = await client.messages.stream({
-          model:      'claude-opus-4-8',
-          max_tokens: 600,
-          system,
+          model:      'claude-haiku-4-5',  // 5× moins cher, 2× plus rapide qu'Opus
+          max_tokens: 350,                  // réponses mobiles courtes
+          system:     systemBlocks,
           messages:   safe,
         })
 
