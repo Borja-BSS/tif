@@ -113,6 +113,11 @@ export function computeInstantStatus(c: CrossingStatic, now: Date): { status: Bo
     if (status === 'CLEAR') status = 'LIGHT'
   }
 
+  // Override G7 : Moillesulaz — 50 min d'attente minimum (contrôles renforcés)
+  if (isG7 && c.id === 'moillesulaz') {
+    return { status: 'HEAVY', color: STATUS_COLOR['HEAVY'], icon: '🛂', waitMinutes: 50 }
+  }
+
   const waitMap: Record<BorderStatus, Record<'high'|'medium'|'low', number>> = {
     CLEAR:    { high: 0,  medium: 0,  low: 0  },
     LIGHT:    { high: 3,  medium: 4,  low: 2  },
