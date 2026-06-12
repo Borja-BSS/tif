@@ -123,11 +123,13 @@ function getCrossingSources(id: string, isG7: boolean): OfficialSource[] {
 }
 
 // ── Fiche détail d'une douane ─────────────────────────────────────────────────
-function CrossingDetail({ crossing, onBack: _onBack, onLocate, waitDirection }: {
+function CrossingDetail({ crossing, onBack: _onBack, onLocate, waitDirection, waitFrCh, waitChFr }: {
   crossing:      CrossingStatic
   onBack:        () => void
   onLocate:      (c: CrossingStatic) => void
   waitDirection?: string | null
+  waitFrCh?:     number | null
+  waitChFr?:     number | null
 }) {
   const t   = useMapT()
   const now = new Date()
@@ -169,13 +171,28 @@ function CrossingDetail({ crossing, onBack: _onBack, onLocate, waitDirection }: 
             <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: s.color }} />
             <span className="text-sm font-semibold" style={{ color: s.color }}>{statusLabel}</span>
           </div>
-          {waitDirection && waitDirection !== 'null' && s.status !== 'BLOCKED' && s.status !== 'CLEAR' && (
-            <div className="flex items-center gap-2 pl-4">
-              <span className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
-                {waitDirection === 'fr-ch' ? '🚗 Sens : France → Suisse'
-                  : waitDirection === 'ch-fr' ? '🚗 Sens : Suisse → France'
-                  : '🚗 Sens : Bidirectionnel'}
-              </span>
+          {s.status !== 'BLOCKED' && (
+            <div className="mt-2 space-y-1">
+              <div className="flex items-center justify-between pl-4 pr-1">
+                <span className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
+                  🚗 France → Suisse
+                </span>
+                <span className="text-[12px] font-semibold" style={{ color: s.color }}>
+                  {waitFrCh != null
+                    ? (waitFrCh === 0 ? 'Libre' : `${waitFrCh} min`)
+                    : (s.waitMinutes === 0 ? 'Libre' : `${s.waitMinutes} min`)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between pl-4 pr-1">
+                <span className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
+                  🚗 Suisse → France
+                </span>
+                <span className="text-[12px] font-semibold" style={{ color: s.color }}>
+                  {waitChFr != null
+                    ? (waitChFr === 0 ? 'Libre' : `${waitChFr} min`)
+                    : (s.waitMinutes === 0 ? 'Libre' : `${s.waitMinutes} min`)}
+                </span>
+              </div>
             </div>
           )}
         </div>
@@ -1908,6 +1925,8 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
   const [detailView,          setDetailView]          = useState<DetailView>('overview')
   const [selectedCrossing,    setSelectedCrossing]    = useState<CrossingStatic | null>(null)
   const [selectedWaitDir,     setSelectedWaitDir]     = useState<string | null>(null)
+  const [selectedWaitFrCh,   setSelectedWaitFrCh]   = useState<number | null>(null)
+  const [selectedWaitChFr,   setSelectedWaitChFr]   = useState<number | null>(null)
   const [selectedEvent,       setSelectedEvent]       = useState<string | null>(null)
 
   // ── Refs drag ──────────────────────────────────────────────────────────────
@@ -2107,9 +2126,11 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
     if (filterId) onFilterChange(filterId)
   }, [animateTo, onFilterChange])
 
-  const openCrossing = useCallback((c: CrossingStatic, waitDir?: string | null) => {
+  const openCrossing = useCallback((c: CrossingStatic, waitDir?: string | null, frCh?: number | null, chFr?: number | null) => {
     setSelectedCrossing(c)
     setSelectedWaitDir(waitDir ?? null)
+    setSelectedWaitFrCh(frCh ?? null)
+    setSelectedWaitChFr(chFr ?? null)
     setDetailView('overview')
     animateTo(getFullH(), true)
   }, [animateTo])
@@ -2117,9 +2138,9 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
   // Écoute les clics sur les pastilles de douane depuis la carte
   useEffect(() => {
     const handler = (e: Event) => {
-      const { id, waitDirection } = (e as CustomEvent<{ id: string; waitDirection?: string | null }>).detail
+      const { id, waitDirection, waitFrCh, waitChFr } = (e as CustomEvent<{ id: string; waitDirection?: string | null; waitFrCh?: number | null; waitChFr?: number | null }>).detail
       const crossing = ALL_CROSSINGS.find(c => c.id === id)
-      if (crossing) openCrossing(crossing, waitDirection)
+      if (crossing) openCrossing(crossing, waitDirection, waitFrCh, waitChFr)
     }
     window.addEventListener('tif:crossing-select', handler)
     return () => window.removeEventListener('tif:crossing-select', handler)
@@ -2244,6 +2265,8 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
               onBack={goBack}
               onLocate={locateCrossing}
               waitDirection={selectedWaitDir}
+              waitFrCh={selectedWaitFrCh}
+              waitChFr={selectedWaitChFr}
             />
           ) : selectedEvent ? (
             <EventDetail slug={selectedEvent} onBack={() => setSelectedEvent(null)} />

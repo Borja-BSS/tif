@@ -22,6 +22,7 @@ import { GuestBanner }        from '@/components/guest/GuestBanner'
 import { GuestExpiredModal }  from '@/components/guest/GuestExpiredModal'
 import { GuestWelcomeModal }  from '@/components/guest/GuestWelcomeModal'
 import { WelcomeModals }      from '@/components/map/WelcomeModals'
+import { AiAssistant }       from '@/components/map/ui/AiAssistant'
 
 const MapView = dynamicImport(() => import('@/components/map/MapView'), { ssr: false })
 
@@ -103,6 +104,9 @@ export default function MapPage() {
 
       {/* Layer 5: FloatingControls — GPS uniquement */}
       <FloatingControls map={mapRef} />
+
+      {/* Layer 5b: AI Assistant — bouton flottant gauche */}
+      <AiAssistant />
 
       {/* Layer 6: G7Mode overlay */}
       {isG7Active && <G7Mode map={mapRef} />}

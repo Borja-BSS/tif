@@ -482,7 +482,9 @@ export default function BorderCrossingsLayer({ map, activeFilter = 'all' }: Bord
         if (!id) return
         e.originalEvent.stopPropagation()
         const waitDirection = props.waitDirection != null ? String(props.waitDirection) : null
-        window.dispatchEvent(new CustomEvent('tif:crossing-select', { detail: { id, waitDirection } }))
+        const waitFrCh = props.waitFrChMinutes != null ? Number(props.waitFrChMinutes) : null
+        const waitChFr = props.waitChFrMinutes != null ? Number(props.waitChFrMinutes) : null
+        window.dispatchEvent(new CustomEvent('tif:crossing-select', { detail: { id, waitDirection, waitFrCh, waitChFr } }))
       }
 
       // click (desktop) + touchend (mobile) — guarded via shared isPinching()

@@ -34,8 +34,10 @@ export interface BorderProperties {
   capacity:        Capacity
   status:          BorderStatus
   jamFactor:       number
-  waitTimeMinutes: number
-  waitDirection:   WaitDirection
+  waitTimeMinutes:  number
+  waitFrChMinutes:  number   // wait France → Suisse (based on French-side queue)
+  waitChFrMinutes:  number   // wait Suisse → France (based on Swiss-side queue)
+  waitDirection:    WaitDirection
   direction:       'both'
   icon:            string
   color:           string
@@ -576,7 +578,9 @@ interface QueueAnalysis {
   queueLengthM:  number   // total length of slow segments within radius
   frQueueM:      number   // queue on French side (cars waiting to enter CH)
   chQueueM:      number   // queue on Swiss side (cars waiting to enter FR)
-  peakJamFactor: number   // max jam factor among slow segments
+  frPeakJam:     number   // peak jam factor on French-side segments
+  chPeakJam:     number   // peak jam factor on Swiss-side segments
+  peakJamFactor: number   // max jam factor overall
   confidence:    number
 }
 
@@ -595,7 +599,8 @@ function analyzeApproachQueue(
 ): QueueAnalysis {
   let frQueueM      = 0
   let chQueueM      = 0
-  let peakJam       = 0
+  let frPeakJam     = 0
+  let chPeakJam     = 0
   let maxConfidence = 0
 
   for (const f of flow.features) {
@@ -624,10 +629,14 @@ function analyzeApproachQueue(
       : franceSide === 'east'                ? centLng > lng
       :                                        centLng < lng  // west
 
-    if (onFrSide) frQueueM += len
-    else          chQueueM += len
+    if (onFrSide) {
+      frQueueM += len
+      if (jamFactor > frPeakJam) frPeakJam = jamFactor
+    } else {
+      chQueueM += len
+      if (jamFactor > chPeakJam) chPeakJam = jamFactor
+    }
 
-    if (jamFactor  > peakJam)       peakJam       = jamFactor
     if (confidence > maxConfidence) maxConfidence = confidence
   }
 
@@ -635,7 +644,9 @@ function analyzeApproachQueue(
     queueLengthM: frQueueM + chQueueM,
     frQueueM,
     chQueueM,
-    peakJamFactor: peakJam,
+    frPeakJam,
+    chPeakJam,
+    peakJamFactor: Math.max(frPeakJam, chPeakJam),
     confidence: maxConfidence,
   }
 }
@@ -738,7 +749,7 @@ export function computeCrossingStatus(
   return                                       { status: 'CLEAR',    jamFactor: 0 }
 }
 
-const CACHE_KEY = 'tif:layer:border-crossings:v11'
+const CACHE_KEY = 'tif:layer:border-crossings:v12'
 const CACHE_TTL = 120
 
 export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
@@ -772,6 +783,8 @@ export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
     let dataQuality: BorderProperties['dataQuality']
     let g7Status: G7Status | null = null
     let waitTimeMinutes = 0
+    let waitFrChMinutes = 0
+    let waitChFrMinutes = 0
     let waitDirection: WaitDirection = null
 
     if (g7Active && !G7_AUTHORIZED.has(c.id)) {
@@ -798,7 +811,13 @@ export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
         dataQuality    = g7Active ? 'g7-directive' : 'live'
         liveCount++
 
-        // Determine direction: which side has the longer queue?
+        // Per-direction wait times: each side's queue analysed independently
+        const frQ = { ...queue, queueLengthM: queue.frQueueM, peakJamFactor: queue.frPeakJam }
+        const chQ = { ...queue, queueLengthM: queue.chQueueM, peakJamFactor: queue.chPeakJam }
+        waitFrChMinutes = queueToStatusAndWait(frQ, g7Active).waitMinutes
+        waitChFrMinutes = queueToStatusAndWait(chQ, g7Active).waitMinutes
+
+        // Determine dominant direction: which side has the longer queue?
         const { frQueueM, chQueueM } = queue
         if (frQueueM > 50 && chQueueM > 50) {
           const ratio = Math.max(frQueueM, chQueueM) / Math.min(frQueueM, chQueueM)
@@ -813,6 +832,9 @@ export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
         status          = computed.status
         jamFactor       = computed.jamFactor
         waitTimeMinutes = syntheticWait(status, c.capacity)
+        // No directional HERE data — show same estimate for both directions
+        waitFrChMinutes = waitTimeMinutes
+        waitChFrMinutes = waitTimeMinutes
         confidence      = 0.3
         source          = g7Active ? 'G7-directive' : 'synthetic-calibrated'
         dataQuality     = g7Active ? 'g7-directive' : 'synthetic'
@@ -855,6 +877,8 @@ export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
         status,
         jamFactor,
         waitTimeMinutes,
+        waitFrChMinutes,
+        waitChFrMinutes,
         waitDirection,
         direction:       'both',
         icon,

@@ -2,6 +2,7 @@
   "functions": {
     "src/app/api/v1/layers/alerts/route.ts":       { "maxDuration": 30 },
     "src/app/api/v1/layers/alerts/flush/route.ts": { "maxDuration": 10 },
-    "src/app/api/v1/layers/construction/route.ts": { "maxDuration": 30 }
+    "src/app/api/v1/layers/construction/route.ts": { "maxDuration": 30 },
+    "src/app/api/v1/ai/chat/route.ts":             { "maxDuration": 60 }
   }
 }
