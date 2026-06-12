@@ -9,10 +9,10 @@ interface Message {
 }
 
 const SUGGESTIONS = [
-  "Quelles douanes sont ouvertes ce week-end ?",
-  "Comment aller à Évian en transport ?",
-  "Y a-t-il des événements gratuits à Genève ?",
-  "A1 vers Bardonnex : quelle alternative ?",
+  "Quelle douane est la moins encombrée en ce moment ?",
+  "A1 fermée vers Bardonnex : quelle alternative ?",
+  "Comment aller à Annemasse sans voiture ?",
+  "Quels événements à Genève ce week-end ?",
 ]
 
 export function AiAssistant() {
@@ -156,7 +156,10 @@ export function AiAssistant() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-bold text-gray-900 dark:text-white">Assistant TIF</p>
-              <p className="text-[11px] text-gray-500 dark:text-white/50">G7 Grand Genève · Fable 5</p>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                <p className="text-[11px] text-gray-500 dark:text-white/50">Données live · Mobilité G7</p>
+              </div>
             </div>
             <button
               onClick={() => setOpen(false)}
@@ -177,6 +180,9 @@ export function AiAssistant() {
               <div className="space-y-3">
                 <p className="text-sm text-center py-4 text-gray-500 dark:text-white/50">
                   Pose une question sur la mobilité G7
+                </p>
+                <p className="text-[11px] text-center text-gray-400 dark:text-white/30 -mt-2 mb-1">
+                  Douanes, transports, itinéraires, événements — périmètre Grand Genève uniquement
                 </p>
                 <div className="grid grid-cols-1 gap-2">
                   {SUGGESTIONS.map(s => (
