@@ -15,12 +15,6 @@ const SUGGESTIONS = [
   "A1 vers Bardonnex : quelle alternative ?",
 ]
 
-const LG: React.CSSProperties = {
-  background:           'rgba(18,18,22,0.92)',
-  backdropFilter:       'blur(48px) saturate(200%) brightness(1.05)',
-  WebkitBackdropFilter: 'blur(48px) saturate(200%) brightness(1.05)',
-}
-
 export function AiAssistant() {
   const [open,     setOpen]     = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
@@ -129,16 +123,13 @@ export function AiAssistant() {
         <button
           onClick={() => setOpen(true)}
           aria-label="Assistant IA"
+          className="w-11 h-11 rounded-xl flex items-center justify-center
+            bg-white/80 dark:bg-white/10
+            border border-black/10 dark:border-white/20
+            shadow-md"
           style={{
-            width: 44, height: 44,
-            borderRadius: 12,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: open ? 'rgba(94,92,230,0.25)' : 'rgba(255,255,255,0.07)',
-            border: open ? '0.5px solid rgba(94,92,230,0.6)' : '0.5px solid rgba(255,255,255,0.22)',
-            backdropFilter:       'blur(40px) saturate(200%) brightness(1.06)',
-            WebkitBackdropFilter: 'blur(40px) saturate(200%) brightness(1.06)',
-            boxShadow: 'inset 0 0.5px 0 rgba(255,255,255,0.28), 0 4px 20px rgba(0,0,0,0.12)',
-            cursor: 'pointer',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
           }}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -152,28 +143,26 @@ export function AiAssistant() {
 
       {/* Chat panel overlay */}
       {open && (
-        <div
-          className="fixed inset-0 z-50 flex flex-col"
-          style={LG}
-        >
+        <div className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-[#0d0d11]">
+
           {/* Header */}
-          <div className="flex items-center gap-3 px-4 py-3 flex-shrink-0"
-            style={{ borderBottom: '0.5px solid rgba(255,255,255,0.12)' }}>
+          <div className="flex items-center gap-3 px-4 py-3 flex-shrink-0 border-b border-black/10 dark:border-white/10">
             <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: 'rgba(94,92,230,0.2)', border: '0.5px solid rgba(94,92,230,0.4)' }}>
+              style={{ background: 'rgba(94,92,230,0.15)', border: '1px solid rgba(94,92,230,0.3)' }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                 <path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z"
                   fill="rgba(94,92,230,0.9)"/>
               </svg>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>Assistant TIF</p>
-              <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>G7 Grand Genève · Fable 5</p>
+              <p className="text-sm font-bold text-gray-900 dark:text-white">Assistant TIF</p>
+              <p className="text-[11px] text-gray-500 dark:text-white/50">G7 Grand Genève · Fable 5</p>
             </div>
             <button
               onClick={() => setOpen(false)}
-              className="w-8 h-8 flex items-center justify-center rounded-xl"
-              style={{ background: 'rgba(255,255,255,0.07)', color: 'var(--text-secondary)' }}
+              className="w-8 h-8 flex items-center justify-center rounded-xl
+                bg-black/5 dark:bg-white/10
+                text-gray-600 dark:text-white/70"
               aria-label="Fermer">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                 <line x1="18" y1="6" x2="6" y2="18"/>
@@ -186,18 +175,17 @@ export function AiAssistant() {
           <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
             {messages.length === 0 && (
               <div className="space-y-3">
-                <p className="text-sm text-center py-4" style={{ color: 'var(--text-secondary)' }}>
+                <p className="text-sm text-center py-4 text-gray-500 dark:text-white/50">
                   Pose une question sur la mobilité G7
                 </p>
                 <div className="grid grid-cols-1 gap-2">
                   {SUGGESTIONS.map(s => (
                     <button key={s} onClick={() => send(s)}
-                      className="text-left text-[13px] rounded-2xl px-4 py-3"
-                      style={{
-                        background: 'rgba(255,255,255,0.05)',
-                        border: '0.5px solid rgba(255,255,255,0.12)',
-                        color: 'var(--text-primary)',
-                      }}>
+                      className="text-left text-[13px] rounded-2xl px-4 py-3
+                        bg-gray-100 dark:bg-white/8
+                        border border-black/8 dark:border-white/10
+                        text-gray-800 dark:text-white
+                        active:opacity-70">
                       {s}
                     </button>
                   ))}
@@ -208,23 +196,19 @@ export function AiAssistant() {
             {messages.map((m, i) => (
               <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div
-                  className="max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed"
+                  className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                    m.role === 'user'
+                      ? 'text-white rounded-br-md'
+                      : 'text-gray-800 dark:text-white rounded-bl-md bg-gray-100 dark:bg-white/10 border border-black/8 dark:border-white/10'
+                  }`}
                   style={m.role === 'user' ? {
-                    background: 'rgba(94,92,230,0.25)',
-                    border: '0.5px solid rgba(94,92,230,0.35)',
-                    color: '#fff',
-                    borderBottomRightRadius: 6,
-                  } : {
-                    background: 'rgba(255,255,255,0.07)',
-                    border: '0.5px solid rgba(255,255,255,0.12)',
-                    color: 'var(--text-primary)',
-                    borderBottomLeftRadius: 6,
-                  }}>
+                    background: 'rgba(94,92,230,0.85)',
+                  } : undefined}>
                   {m.content || (m.streaming && (
-                    <span className="inline-flex gap-1 items-center" style={{ color: 'var(--text-tertiary)' }}>
-                      <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: 'currentColor', animationDelay: '0ms' }} />
-                      <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: 'currentColor', animationDelay: '150ms' }} />
-                      <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: 'currentColor', animationDelay: '300ms' }} />
+                    <span className="inline-flex gap-1 items-center text-gray-400 dark:text-white/40">
+                      <span className="w-1.5 h-1.5 rounded-full animate-bounce bg-current" style={{ animationDelay: '0ms' }} />
+                      <span className="w-1.5 h-1.5 rounded-full animate-bounce bg-current" style={{ animationDelay: '150ms' }} />
+                      <span className="w-1.5 h-1.5 rounded-full animate-bounce bg-current" style={{ animationDelay: '300ms' }} />
                     </span>
                   ))}
                 </div>
@@ -234,13 +218,11 @@ export function AiAssistant() {
           </div>
 
           {/* Input */}
-          <div className="flex-shrink-0 px-4 pb-safe-bottom py-3"
-            style={{ borderTop: '0.5px solid rgba(255,255,255,0.10)' }}>
-            <div className="flex items-center gap-2 rounded-2xl px-4 py-2"
-              style={{
-                background: 'rgba(255,255,255,0.07)',
-                border: '0.5px solid rgba(255,255,255,0.15)',
-              }}>
+          <div className="flex-shrink-0 px-4 py-3 border-t border-black/10 dark:border-white/10"
+            style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
+            <div className="flex items-center gap-2 rounded-2xl px-4 py-2
+              bg-gray-100 dark:bg-white/8
+              border border-black/10 dark:border-white/15">
               <input
                 ref={inputRef}
                 value={input}
@@ -248,16 +230,16 @@ export function AiAssistant() {
                 onKeyDown={handleKey}
                 placeholder="Pose une question..."
                 disabled={busy}
-                className="flex-1 bg-transparent text-sm outline-none"
-                style={{ color: 'var(--text-primary)' }}
+                className="flex-1 bg-transparent text-sm outline-none
+                  text-gray-900 dark:text-white
+                  placeholder:text-gray-400 dark:placeholder:text-white/35"
               />
               <button
                 onClick={() => send(input)}
                 disabled={busy || !input.trim()}
-                className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 transition-opacity"
+                className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 transition-opacity disabled:opacity-40"
                 style={{
-                  background: input.trim() && !busy ? 'rgba(94,92,230,0.8)' : 'rgba(255,255,255,0.08)',
-                  opacity: busy ? 0.5 : 1,
+                  background: input.trim() && !busy ? 'rgba(94,92,230,0.9)' : 'rgba(128,128,128,0.2)',
                 }}
                 aria-label="Envoyer">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -267,6 +249,7 @@ export function AiAssistant() {
               </button>
             </div>
           </div>
+
         </div>
       )}
     </>
