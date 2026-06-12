@@ -2,8 +2,9 @@
 
 import { useEffect, useRef } from 'react'
 import mapboxgl from 'mapbox-gl'
-import type { FeatureCollection } from 'geojson'
+import type { FeatureCollection, Feature, Geometry } from 'geojson'
 import { buildInstantGeoJSON, computeInstantStatus, ALL_CROSSINGS } from '@/lib/territory/border-crossings-client'
+import type { CrossingOverride } from '@/lib/territory/crossing-overrides'
 import { isPinching } from '@/lib/multiTouchGuard'
 import type { FilterId } from '@/components/map/ui/QuickFilters'
 
@@ -12,7 +13,8 @@ interface BorderCrossingsLayerProps {
   activeFilter?: FilterId
 }
 
-const REFRESH_MS   = 120_000
+const REFRESH_MS        = 120_000
+const OVERRIDES_POLL_MS =  10_000
 const SOURCE_ID    = 'tif-border-crossings'
 const LAYER_SHADOW = 'tif-border-shadow'
 const LAYER_DOT    = 'tif-border-dot'     // cercle coloré — toujours visible, aucune image
@@ -130,6 +132,49 @@ function injectPopupStyle() {
     .tif-popup-badge { display:inline-block; font-size:10px; font-weight:600; padding:2px 7px; border-radius:5px; }
   `
   document.head.appendChild(s)
+}
+
+// ── Admin overrides fetch ─────────────────────────────────────────────────────
+async function fetchOverrides(): Promise<Record<string, CrossingOverride>> {
+  try {
+    const res = await fetch('/api/v1/crossings/overrides', { cache: 'no-store' })
+    if (!res.ok) return {}
+    return res.json() as Promise<Record<string, CrossingOverride>>
+  } catch { return {} }
+}
+
+const STATUS_COLOR_MAP: Record<string, string> = {
+  CLEAR: '#34C759', LIGHT: '#30D158', MODERATE: '#FF9500', HEAVY: '#FF3B30', BLOCKED: '#636366',
+}
+
+function applyOverrides(
+  geojson: FeatureCollection,
+  overrides: Record<string, CrossingOverride>,
+): FeatureCollection {
+  if (Object.keys(overrides).length === 0) return geojson
+  return {
+    ...geojson,
+    features: geojson.features.map(f => {
+      const p  = f.properties as Record<string, unknown>
+      const ov = overrides[String(p.id ?? '')]
+      if (!ov) return f
+
+      const props: Record<string, unknown> = { ...p }
+      if (ov.status) {
+        props.status = ov.status
+        props.color  = STATUS_COLOR_MAP[ov.status] ?? '#636366'
+        props.icon   = ov.status === 'BLOCKED' ? '🔒' : '🛂'
+      }
+      if (ov.waitMinutes !== undefined) props.waitMinutes = ov.waitMinutes
+
+      const geometry: Geometry =
+        ov.lat !== undefined && ov.lng !== undefined
+          ? { type: 'Point', coordinates: [ov.lng, ov.lat] }
+          : f.geometry
+
+      return { ...f, geometry, properties: props } as Feature
+    }),
+  }
 }
 
 // ── Data fetch — 4s timeout strict ────────────────────────────────────────────
@@ -357,9 +402,11 @@ function removeLayers(m: mapboxgl.Map) {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function BorderCrossingsLayer({ map, activeFilter = 'all' }: BorderCrossingsLayerProps) {
-  const timerRef     = useRef<ReturnType<typeof setInterval> | null>(null)
-  const prefetchRef  = useRef<FeatureCollection | null>(null)
-  const prefetchDone = useRef(false)
+  const timerRef       = useRef<ReturnType<typeof setInterval> | null>(null)
+  const overridesTimer = useRef<ReturnType<typeof setInterval> | null>(null)
+  const prefetchRef    = useRef<FeatureCollection | null>(null)
+  const prefetchDone   = useRef(false)
+  const overridesRef   = useRef<Record<string, CrossingOverride>>({})
 
   useEffect(() => {
     let cancelled = false
@@ -370,6 +417,25 @@ export default function BorderCrossingsLayer({ map, activeFilter = 'all' }: Bord
     })
     return () => { cancelled = true }
   }, [])
+
+  // Poll overrides every 10s — apply to map without full reload
+  useEffect(() => {
+    if (!map) return
+    const poll = async () => {
+      const ov = await fetchOverrides()
+      overridesRef.current = ov
+      if (!prefetchRef.current) return
+      const base    = mergeWithClientStatus(prefetchRef.current)
+      const applied = applyOverrides(base, ov)
+      const src     = map.getSource(SOURCE_ID) as mapboxgl.GeoJSONSource | undefined
+      if (!src) return
+      // Rebuild with overrides applied (reuse applyData geometry logic)
+      applyData(map, applied)
+    }
+    fetchOverrides().then(ov => { overridesRef.current = ov })
+    overridesTimer.current = setInterval(poll, OVERRIDES_POLL_MS)
+    return () => { if (overridesTimer.current) clearInterval(overridesTimer.current) }
+  }, [map])
 
   // Visibility toggle — hide border layers when transit or alerts filter is active
   useEffect(() => {
@@ -428,14 +494,17 @@ export default function BorderCrossingsLayer({ map, activeFilter = 'all' }: Bord
     const runWithFallback = async () => {
       // 1. Affichage IMMÉDIAT des cercles colorés (pas d'images requises)
       const instant = buildInstantGeoJSON(new Date())
-      await applyData(map, instant as unknown as FeatureCollection)
+      await applyData(map, applyOverrides(instant as unknown as FeatureCollection, overridesRef.current))
       setupEvents()
       // 2. Pré-charger les images emoji en parallèle + données live
       const [live] = await Promise.all([
         fetchBorderData(),
         preloadCommonImages(map),
       ])
-      if (live) await applyData(map, mergeWithClientStatus(live))
+      if (live) {
+        prefetchRef.current = live
+        await applyData(map, applyOverrides(mergeWithClientStatus(live), overridesRef.current))
+      }
     }
 
     if (map.isStyleLoaded()) {
@@ -451,7 +520,8 @@ export default function BorderCrossingsLayer({ map, activeFilter = 'all' }: Bord
     timerRef.current = setInterval(async () => {
       const data = await fetchBorderData()
       if (!data) return
-      applyData(map, mergeWithClientStatus(data))
+      prefetchRef.current = data
+      applyData(map, applyOverrides(mergeWithClientStatus(data), overridesRef.current))
     }, REFRESH_MS)
 
     return () => {
@@ -464,7 +534,7 @@ export default function BorderCrossingsLayer({ map, activeFilter = 'all' }: Bord
         removeLayers(map)
       } catch { /* map détruite */ }
     }
-  }, [map])
+  }, [map])  // eslint-disable-line react-hooks/exhaustive-deps
 
   return null
 }
