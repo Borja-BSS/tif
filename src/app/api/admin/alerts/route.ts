@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     type:        body.type,
     title:       body.title.trim(),
     description: body.description?.trim() || undefined,
-    source:      body.source?.trim() || undefined,
+    source:      (() => { const s = body.source?.trim(); if (!s) return undefined; try { const u = new URL(s); return (u.protocol === 'http:' || u.protocol === 'https:') ? s : undefined; } catch { return undefined; } })(),
     lat:         Number(body.lat),
     lng:         Number(body.lng),
     radius:      body.radius ? Number(body.radius) : undefined,

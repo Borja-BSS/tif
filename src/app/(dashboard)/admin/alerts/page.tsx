@@ -490,17 +490,24 @@ export default function AdminAlertsPage() {
                       {a.description && (
                         <p className="text-[11px] mt-0.5 truncate" style={{ color: 'rgba(255,255,255,0.45)' }}>{a.description}</p>
                       )}
-                      {a.source && (
-                        <a
-                          href={a.source}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[10px] mt-0.5 truncate block"
-                          style={{ color: '#007AFF' }}
-                        >
-                          🔗 {a.source.replace(/^https?:\/\//, '')}
-                        </a>
-                      )}
+                      {(() => {
+                        if (!a.source) return null
+                        try {
+                          const u = new URL(a.source)
+                          if (u.protocol !== 'http:' && u.protocol !== 'https:') return null
+                          return (
+                            <a
+                              href={u.toString()}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[10px] mt-0.5 truncate block"
+                              style={{ color: '#007AFF' }}
+                            >
+                              🔗 {u.host}
+                            </a>
+                          )
+                        } catch { return null }
+                      })()}
                       <div className="flex items-center gap-3 mt-1 flex-wrap">
                         <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.3)' }}>
                           {fmtDate(a.activeFrom)}{a.activeTo ? ` → ${fmtDate(a.activeTo)}` : ' → ∞'}
