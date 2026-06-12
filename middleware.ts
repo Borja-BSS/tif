@@ -30,15 +30,21 @@ export async function middleware(req: NextRequest) {
   const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET)
 
   if (!token) {
-    // Guest token check — ajout additionnel, rien d'existant modifié
+    // Guest token check
     const guestToken = req.cookies.get('tif-guest-token')?.value
     if (guestToken) {
       try {
         await jwtVerify(guestToken, secret)
         return res
-      } catch {
-        return NextResponse.redirect(new URL('/login', req.url))
-      }
+      } catch {}
+    }
+    // Firebase session token (set by /api/auth/firebase-session after Firebase login)
+    const firebaseToken = req.cookies.get('tif-firebase-token')?.value
+    if (firebaseToken) {
+      try {
+        await jwtVerify(firebaseToken, secret)
+        return res
+      } catch {}
     }
     return NextResponse.redirect(new URL('/login', req.url))
   }

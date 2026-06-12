@@ -63,8 +63,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const phoneConfirmation = useRef<ConfirmationResult | null>(null)
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(firebaseAuth, fbUser => {
-      setUser(fbUser ? toAuthUser(fbUser) : null)
+    const unsub = onAuthStateChanged(firebaseAuth, async fbUser => {
+      if (fbUser) {
+        // Exchange Firebase token for a server-side session cookie
+        // so the Next.js middleware lets this user through
+        try {
+          const idToken = await fbUser.getIdToken()
+          await fetch('/api/auth/firebase-session', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ idToken }),
+          })
+        } catch {}
+        setUser(toAuthUser(fbUser))
+      } else {
+        setUser(null)
+      }
       setLoading(false)
     })
     return unsub
