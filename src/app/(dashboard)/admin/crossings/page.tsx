@@ -179,7 +179,7 @@ export default function AdminCrossingsPage() {
 
       const res = await fetch('/api/v1/crossings/overrides', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
         body: JSON.stringify(payload),
       })
       if (!res.ok) throw new Error((await res.json() as { error: string }).error)
@@ -200,7 +200,7 @@ export default function AdminCrossingsPage() {
     try {
       await fetch('/api/v1/crossings/overrides', {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
         body: JSON.stringify({ id: selected }),
       })
       await loadOverrides()

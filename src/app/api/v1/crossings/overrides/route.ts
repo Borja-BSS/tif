@@ -8,6 +8,8 @@ export const dynamic = 'force-dynamic'
 const ADMIN_EMAILS = ['lostropicosbox@gmail.com', 'aruncalstas@gmail.com']
 
 async function verifyAdmin(req: NextRequest): Promise<string | null> {
+  // Defense-in-depth: browsers never send custom headers cross-origin without CORS preflight
+  if (req.headers.get('x-requested-with') !== 'fetch') return null
   const cookie = req.cookies.get('tif-firebase-token')?.value
   if (!cookie) return null
   try {
