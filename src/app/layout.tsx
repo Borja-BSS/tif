@@ -126,6 +126,14 @@ export default function RootLayout({
           </Providers>
           <CookieConsent />
         </ThemeProvider>
+        {/* Live presence beacon — ping toutes les 60s pour compteur en direct admin */}
+        <script dangerouslySetInnerHTML={{ __html: `(function(){
+          var sid=sessionStorage.getItem('tif_sid');
+          if(!sid){sid=Math.random().toString(36).slice(2)+Date.now().toString(36);sessionStorage.setItem('tif_sid',sid);}
+          function ping(){fetch('/api/v1/live-count',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:sid}),keepalive:true}).catch(function(){});}
+          ping();
+          setInterval(ping,60000);
+        })();` }} />
       </body>
     </html>
   )
