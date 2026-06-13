@@ -8,6 +8,13 @@ interface Message {
   streaming?: boolean
 }
 
+function formatMsg(text: string): string {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '$1')  // **bold** → bold
+    .replace(/\*(.*?)\*/g,    '$1')   // *italic* → italic
+    .replace(/^- /gm,         '• ')   // - item → • item
+}
+
 const SUGGESTIONS = [
   "Quelle douane est la moins encombrée en ce moment ?",
   "A1 fermée vers Bardonnex : quelle alternative ?",
@@ -210,14 +217,19 @@ export function AiAssistant() {
                   }`}
                   style={m.role === 'user' ? {
                     background: 'rgba(94,92,230,0.85)',
-                  } : undefined}>
-                  {m.content || (m.streaming && (
-                    <span className="inline-flex gap-1 items-center text-gray-400 dark:text-white/40">
-                      <span className="w-1.5 h-1.5 rounded-full animate-bounce bg-current" style={{ animationDelay: '0ms' }} />
-                      <span className="w-1.5 h-1.5 rounded-full animate-bounce bg-current" style={{ animationDelay: '150ms' }} />
-                      <span className="w-1.5 h-1.5 rounded-full animate-bounce bg-current" style={{ animationDelay: '300ms' }} />
-                    </span>
-                  ))}
+                  } : {
+                    whiteSpace: 'pre-wrap',
+                  }}>
+                  {m.role === 'assistant'
+                    ? (formatMsg(m.content) || (m.streaming && (
+                        <span className="inline-flex gap-1 items-center text-gray-400 dark:text-white/40">
+                          <span className="w-1.5 h-1.5 rounded-full animate-bounce bg-current" style={{ animationDelay: '0ms' }} />
+                          <span className="w-1.5 h-1.5 rounded-full animate-bounce bg-current" style={{ animationDelay: '150ms' }} />
+                          <span className="w-1.5 h-1.5 rounded-full animate-bounce bg-current" style={{ animationDelay: '300ms' }} />
+                        </span>
+                      )))
+                    : m.content
+                  }
                 </div>
               </div>
             ))}
