@@ -113,6 +113,7 @@ export interface MapT {
     backToList: string
     venue: string
     price: string
+    priceUnknown: string
     dates: string
     links: string
     g7AccessTitle: string
@@ -361,6 +362,7 @@ const FR: MapT = {
     backToList: 'Tous les événements',
     venue: 'Lieu',
     price: 'Prix',
+    priceUnknown: 'Prix inconnu',
     dates: 'Dates',
     links: 'Liens',
     g7AccessTitle: '🏛️ Accès pendant le G7',
@@ -618,6 +620,7 @@ const EN: MapT = {
     backToList: 'All events',
     venue: 'Venue',
     price: 'Price',
+    priceUnknown: 'Price unknown',
     dates: 'Dates',
     links: 'Links',
     g7AccessTitle: '🏛️ G7 Access',
@@ -875,6 +878,7 @@ const DE: MapT = {
     backToList: 'Alle Veranstaltungen',
     venue: 'Veranstaltungsort',
     price: 'Preis',
+    priceUnknown: 'Preis unbekannt',
     dates: 'Termine',
     links: 'Links',
     g7AccessTitle: '🏛️ Zugang während G7',
@@ -1132,6 +1136,7 @@ const IT: MapT = {
     backToList: 'Tutti gli eventi',
     venue: 'Luogo',
     price: 'Prezzo',
+    priceUnknown: 'Prezzo sconosciuto',
     dates: 'Date',
     links: 'Link',
     g7AccessTitle: '🏛️ Accesso durante il G7',
@@ -1389,6 +1394,7 @@ const ES: MapT = {
     backToList: 'Todos los eventos',
     venue: 'Lugar',
     price: 'Precio',
+    priceUnknown: 'Precio desconocido',
     dates: 'Fechas',
     links: 'Enlaces',
     g7AccessTitle: '🏛️ Acceso durante el G7',
@@ -1646,6 +1652,7 @@ const PT: MapT = {
     backToList: 'Todos os eventos',
     venue: 'Local',
     price: 'Preço',
+    priceUnknown: 'Preço desconhecido',
     dates: 'Datas',
     links: 'Links',
     g7AccessTitle: '🏛️ Acesso durante o G7',
@@ -1903,6 +1910,7 @@ const SQ: MapT = {
     backToList: 'Të gjitha ngjarjet',
     venue: 'Vendi',
     price: 'Çmimi',
+    priceUnknown: 'Çmim i panjohur',
     dates: 'Datat',
     links: 'Lidhjet',
     g7AccessTitle: '🏛️ Aksesi gjatë G7',
@@ -2160,6 +2168,7 @@ const JA: MapT = {
     backToList: 'すべてのイベント',
     venue: '会場',
     price: '料金',
+    priceUnknown: '料金不明',
     dates: '日程',
     links: 'リンク',
     g7AccessTitle: '🏛️ G7期間中のアクセス',
@@ -2417,6 +2426,7 @@ const ZH: MapT = {
     backToList: '所有活动',
     venue: '场地',
     price: '价格',
+    priceUnknown: '价格未知',
     dates: '日期',
     links: '链接',
     g7AccessTitle: '🏛️ G7期间通行',

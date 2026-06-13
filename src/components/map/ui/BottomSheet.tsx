@@ -1800,12 +1800,12 @@ function EventDetail({ slug, onBack }: { slug: string; onBack: () => void }) {
       </div>
 
       {/* Prix */}
-      {item.priceInfo && (
-        <div className="rounded-2xl p-3 mb-3" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-          <p className="text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text-tertiary)' }}>{t.eventsSection.price}</p>
-          <p className="text-[13px] font-medium" style={{ color: 'var(--text-primary)' }}>{item.priceInfo}</p>
-        </div>
-      )}
+      <div className="rounded-2xl p-3 mb-3" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+        <p className="text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text-tertiary)' }}>{t.eventsSection.price}</p>
+        <p className="text-[13px] font-medium" style={{ color: item.priceInfo ? 'var(--text-primary)' : 'var(--text-tertiary)' }}>
+          {item.priceInfo ?? t.eventsSection.priceUnknown}
+        </p>
+      </div>
 
       {/* Dates */}
       <div className="rounded-2xl p-3 mb-3" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
@@ -1866,7 +1866,7 @@ function EventsPanel({ onSelect }: { onSelect: (slug: string) => void }) {
   if (todayOnly)   filteredEvents = filteredEvents.filter(ev => ev.occurrences.some(o => o.date === today))
   if (venueFilter) filteredEvents = filteredEvents.filter(ev => ev.venue.name === venueFilter)
   filteredEvents = priceFilter === 'free' ? filteredEvents.filter(isFree)
-    : priceFilter === 'paid' ? filteredEvents.filter(ev => !isFree(ev))
+    : priceFilter === 'paid' ? filteredEvents.filter(ev => !ev.priceInfo || !isFree(ev))
     : filteredEvents
 
   const byCategory = filteredEvents.reduce<Record<string, EventItem[]>>((acc, ev) => {
@@ -1967,15 +1967,13 @@ function EventsPanel({ onSelect }: { onSelect: (slug: string) => void }) {
                         {firstDate ? ` · ${formatDate(firstDate.date)}${ev.occurrences.length > 1 ? ` +${ev.occurrences.length - 1}` : ''}` : ''}
                       </p>
                     </div>
-                    {ev.priceInfo && (
-                      <span className="text-[10px] font-semibold flex-shrink-0 px-1.5 py-0.5 rounded-lg"
-                        style={{
-                          background: isFree(ev) ? 'rgba(52,199,89,0.12)' : 'rgba(255,255,255,0.06)',
-                          color:      isFree(ev) ? '#30D158'               : 'var(--text-tertiary)',
-                        }}>
-                        {isFree(ev) ? 'Gratuit' : ev.priceInfo}
-                      </span>
-                    )}
+                    <span className="text-[10px] font-semibold flex-shrink-0 px-1.5 py-0.5 rounded-lg"
+                      style={{
+                        background: !ev.priceInfo ? 'rgba(255,255,255,0.04)' : isFree(ev) ? 'rgba(52,199,89,0.12)' : 'rgba(255,255,255,0.06)',
+                        color:      !ev.priceInfo ? 'var(--text-tertiary)'   : isFree(ev) ? '#30D158'               : 'var(--text-tertiary)',
+                      }}>
+                      {!ev.priceInfo ? t.eventsSection.priceUnknown : isFree(ev) ? 'Gratuit' : ev.priceInfo}
+                    </span>
                     <svg width="6" height="10" viewBox="0 0 6 10" fill="none" stroke="var(--text-tertiary)" strokeWidth="1.5" strokeLinecap="round">
                       <path d="M1 1l4 4-4 4"/>
                     </svg>
