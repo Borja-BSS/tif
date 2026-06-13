@@ -92,6 +92,8 @@ const PRELOAD_MARKERS = [
   { color: '#FF9500', strokeColor: '#FFFFFF', emoji: '🛂', slug: 'ctrl' },  // MODERATE
   { color: '#FF3B30', strokeColor: '#FF3B30', emoji: '🛂', slug: 'ctrl' },  // HEAVY
   { color: '#34C759', strokeColor: '#5AC8FA', emoji: '🛂', slug: 'ctrl' },  // CLEAR macaron
+  { color: '#FF9500', strokeColor: '#FFFFFF', emoji: '🚂', slug: 'train' }, // MODERATE rail (G7)
+  { color: '#30D158', strokeColor: '#FFFFFF', emoji: '🚂', slug: 'train' }, // LIGHT rail
 ]
 
 async function preloadCommonImages(m: mapboxgl.Map) {
@@ -329,7 +331,7 @@ function featureImgProps(f: { properties: unknown }) {
   const color       = String(p.color ?? '#8E8E93')
   const emoji       = String(p.icon ?? '🛂')
   const strokeColor = isClosed ? '#FF3B30' : g7Status === 'macaron' ? '#5AC8FA' : '#FFFFFF'
-  const slug        = emoji === '🔒' ? 'lock' : 'ctrl'
+  const slug        = emoji === '🔒' ? 'lock' : emoji === '🚂' ? 'train' : 'ctrl'
   const imgId       = `tif-bc-${color.replace('#', '')}-${strokeColor.replace('#', '')}-${slug}`
   return { color, strokeColor, emoji, imgId }
 }
