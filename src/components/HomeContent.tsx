@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext'
 import { T, LANGUAGES } from '@/i18n/home'
 import type { Lang } from '@/i18n/home'
 import { LangSelector } from '@/components/LangSelector'
+import { computeInstantStatus, ALL_CROSSINGS } from '@/lib/territory/border-crossings-client'
 
 interface DashData {
   alerts: Array<{ id: string; icon: string; title: string; severity: string; timeAgo: string }>
@@ -133,13 +134,17 @@ const TC2_ICONS  = ['❓', '📚', '🎯', '🏗️']
 
 // FAQ_ITEMS content moved to i18n/home.ts → t.faq.items
 
-const STATIC_BORDERS: BorderRow[] = [
-  { name: 'Bardonnex', waitMinutes: 22, status: 'MODERATE' },
-  { name: 'Moillesulaz', waitMinutes: 8, status: 'LIGHT' },
-  { name: 'Ferney', waitMinutes: 5, status: 'CLEAR' },
-  { name: 'Thônex', waitMinutes: 3, status: 'CLEAR' },
-  { name: 'Vallard', waitMinutes: 41, status: 'HEAVY' },
-]
+const BORDER_HOME_IDS = ['bardonnex', 'thonex-vallard', 'moillesulaz', 'meyrin', 'ferney-voltaire']
+
+function getInitialBorders(): BorderRow[] {
+  const now = new Date()
+  return BORDER_HOME_IDS.map(id => {
+    const c = ALL_CROSSINGS.find(x => x.id === id)
+    if (!c) return { name: id, waitMinutes: 0, status: 'CLEAR' }
+    const { status, waitMinutes } = computeInstantStatus(c, now)
+    return { name: c.name, waitMinutes, status }
+  })
+}
 
 const CEVA_LINES = ['L1 Coppet Annemasse', 'L2 Bellegarde Évian', 'L3 Genève Annecy', 'L4 Cornavin Meyrin']
 
@@ -182,7 +187,7 @@ export function HomeContent() {
   const [openFaq, setOpenFaq] = useState<number | null>(null)
   const [dashData, setDashData] = useState<DashData | null>(null)
   const [transport, setTransport] = useState<TransportData | null>(null)
-  const [borders, setBorders] = useState<BorderRow[]>(STATIC_BORDERS)
+  const [borders, setBorders] = useState<BorderRow[]>(getInitialBorders)
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null)
   const [copied, setCopied] = useState(false)
   const [proForm, setProForm] = useState({ name: '', organisation: '', email: '', fonction: '', message: '', loading: false, success: false, error: '' })

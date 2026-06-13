@@ -141,9 +141,11 @@ function CrossingDetail({ crossing, onBack: _onBack, onLocate, waitDirection, wa
   liveStatus?:     string | null
   liveWaitMinutes?: number | null
 }) {
-  const t   = useMapT()
-  const now = new Date()
-  const s   = computeInstantStatus(crossing, now)
+  const t        = useMapT()
+  const now      = new Date()
+  const s        = computeInstantStatus(crossing, now)
+  const liveData = useLiveCrossings()
+  const live     = liveData[crossing.id]
 
   const G7_START   = new Date('2026-06-08T00:00:00Z')
   const G7_END     = new Date('2026-06-18T23:59:59Z')
@@ -151,10 +153,10 @@ function CrossingDetail({ crossing, onBack: _onBack, onLocate, waitDirection, wa
 
   const sources = getCrossingSources(crossing.id, isG7Period)
 
-  // Utilise le statut live (HERE) s'il est disponible, sinon le calcul synthétique
-  const displayStatus   = liveStatus      ?? s.status
-  const displayWait     = liveWaitMinutes ?? s.waitMinutes
-  const displayColor    = LIVE_STATUS_COLOR[displayStatus] ?? s.color
+  // Utilise le statut live (HERE/dispatch) s'il est disponible, sinon le calcul synthétique
+  const displayStatus   = liveStatus      ?? live?.status      ?? s.status
+  const displayWait     = liveWaitMinutes ?? live?.waitMinutes ?? s.waitMinutes
+  const displayColor    = LIVE_STATUS_COLOR[displayStatus]     ?? s.color
 
   const statusLabel = crossing.type === 'rail'
     ? (isG7Period ? 'Arrivez 45 min avant le départ' : 'Arrivez 30 min avant le départ')
