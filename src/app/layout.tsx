@@ -62,6 +62,62 @@ export default function RootLayout({
             __html: `(function(){var t=localStorage.getItem('tif-theme');var m=window.matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.classList.add(t||(m?'dark':'light'));})();`,
           }}
         />
+        {/* hreflang — même URL pour toutes les langues (sélecteur intégré) */}
+        <link rel="alternate" hrefLang="fr" href="https://tif.borja-swiss-solutions.ch/" />
+        <link rel="alternate" hrefLang="en" href="https://tif.borja-swiss-solutions.ch/" />
+        <link rel="alternate" hrefLang="de" href="https://tif.borja-swiss-solutions.ch/" />
+        <link rel="alternate" hrefLang="pt" href="https://tif.borja-swiss-solutions.ch/" />
+        <link rel="alternate" hrefLang="es" href="https://tif.borja-swiss-solutions.ch/" />
+        <link rel="alternate" hrefLang="ar" href="https://tif.borja-swiss-solutions.ch/" />
+        <link rel="alternate" hrefLang="x-default" href="https://tif.borja-swiss-solutions.ch/" />
+        {/* JSON-LD — SoftwareApplication + Organization */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "SoftwareApplication",
+                  "name": "TIF — Intelligence Territoriale Grand Genève",
+                  "alternateName": "TIF",
+                  "applicationCategory": "TravelApplication",
+                  "operatingSystem": "Web",
+                  "url": "https://tif.borja-swiss-solutions.ch",
+                  "description": "Application temps réel pour la mobilité frontalière dans le Grand Genève. Douanes, trafic, transports publics et alertes G7 — sources officielles agrégées.",
+                  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CHF" },
+                  "inLanguage": ["fr","en","de","pt","es","ar","it","ru","uk"],
+                  "featureList": [
+                    "Temps d'attente douanes en temps réel",
+                    "Carte trafic Grand Genève",
+                    "Alertes G7 Évian 2026",
+                    "Transports publics TPG/CFF/Léman Express",
+                    "Assistant IA multilingue",
+                    "9 langues supportées",
+                    "Gratuit, sans inscription"
+                  ],
+                  "publisher": {
+                    "@type": "Organization",
+                    "name": "Börja Swiss Solutions",
+                    "url": "https://borja-swiss-solutions.ch",
+                    "founder": { "@type": "Person", "name": "Arun Calstas" },
+                    "address": { "@type": "PostalAddress", "addressLocality": "Genève", "addressCountry": "CH" }
+                  }
+                },
+                {
+                  "@type": "WebSite",
+                  "url": "https://tif.borja-swiss-solutions.ch",
+                  "name": "TIF — Intelligence Territoriale Grand Genève",
+                  "potentialAction": {
+                    "@type": "SearchAction",
+                    "target": "https://tif.borja-swiss-solutions.ch/map",
+                    "query-input": "required name=search_term_string"
+                  }
+                }
+              ]
+            })
+          }}
+        />
       </head>
       <body className="min-h-full flex flex-col">
         <ThemeProvider>
