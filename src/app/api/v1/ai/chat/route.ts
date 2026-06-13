@@ -177,6 +177,7 @@ PHASES FINALES (heure suisse CEST) :
 FAN ZONES DU GRAND GENÈVE :
 • ❌ Pas de grande fan zone officielle en Ville de Genève (contrainte G7)
 • ✅ Bars et terrasses genevois AUTORISÉS avec écran (jusqu'à minuit semaine / 2h weekend)
+• ✅ Gradi24 Village FanZone (Plan-les-Ouates GE) — Rte de la Galaise 24, 11 juin–19 juil, TOUS les matchs sur écran géant, @gradi24fanzone
 • ✅ Fan zone Nyon — Cantine de Rive, 11 juin–19 juil, ~40 matchs, gratuit
 • ✅ Fan zone Saint-Genis-Pouilly (France) — Place Jean Monnet, 9–19 juillet, QF/SF/Finale, gratuit, places limitées, ouverture 19h00
 • ✅ Fan zone privée Crowne Plaza Geneva — groupes 25+, sur réservation

@@ -556,6 +556,24 @@ export const events: EventItem[] = [
     verif: 'confirmed',
   },
   {
+    id: 'fanzone-gradi24', slug: 'fanzone-gradi24-village-plan-les-ouates',
+    title: '⚽ Fan Zone Gradi24 Village — Plan-les-Ouates', category: 'football',
+    description: "Fan zone ouverte tout le Mondial. Tous les matchs sur écran géant, ambiance village festif. À Plan-les-Ouates, facilement accessible depuis Genève.",
+    venue: {
+      name: 'Gradi24 Village FanZone',
+      address: 'Rte de la Galaise 24, 1228 Plan-les-Ouates',
+      area: 'GE', lat: 46.1671, lng: 6.1230,
+    },
+    occurrences: [
+      { date: '2026-06-11', note: '11 juin – 19 juillet · tous les matchs sur écran géant' },
+    ],
+    priceInfo: 'À confirmer sur place',
+    links: [
+      { label: 'TikTok @gradi24fanzone', url: 'https://www.tiktok.com/@gradi24fanzone', kind: 'info', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
     id: 'fanzone-nyon', slug: 'fanzone-cantine-de-rive-nyon',
     title: '⚽ Fan Zone Nyon — Cantine de Rive', category: 'football',
     description: "Vaste fan zone organisée par l'association Etaris sous la Cantine de Rive à Nyon. Écran géant, bar, restauration et animations. Environ 40 matchs retransmis sur toute la durée du Mondial. 25 km de Genève.",
