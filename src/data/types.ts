@@ -1,6 +1,6 @@
 export type EventCategory =
   | 'theatre' | 'comedie' | 'concert' | 'classique' | 'nightlife'
-  | 'danse' | 'art' | 'sport' | 'festival'
+  | 'danse' | 'art' | 'sport' | 'festival' | 'football'
 
 export type VerifStatus = 'confirmed' | 'plausible' | 'unverified'
 export type LinkStatus  = 'verified' | 'to_confirm' | 'venue_fallback'

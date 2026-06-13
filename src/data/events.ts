@@ -489,6 +489,131 @@ export const events: EventItem[] = [
     links: [],
     verif: 'unverified',
   },
+  // ── FOOTBALL & COUPE DU MONDE FIFA 2026 ─────────────────────────────────────
+  {
+    id: 'worldcup-2026', slug: 'coupe-du-monde-fifa-2026',
+    title: '⚽ Coupe du Monde FIFA 2026', category: 'football',
+    description: "104 matchs, 48 nations. USA, Canada & Mexique. Pas de grande fan zone officielle à Genève (G7), mais bars et terrasses autorisés avec écran jusqu'à minuit (semaine) / 2h (weekend). Fan zones à Nyon et Saint-Genis-Pouilly.",
+    venue: {
+      name: 'Bars & terrasses de Genève',
+      address: 'Cafés, bars et terrasses de la Ville de Genève',
+      area: 'GE', lat: 46.2044, lng: 6.1432,
+    },
+    occurrences: [
+      { date: '2026-06-11', note: '11 juin – 19 juillet 2026 · 104 matchs' },
+    ],
+    priceInfo: 'Gratuit (bars autorisés par la Ville)',
+    links: [
+      { label: 'RTS — Où voir les matchs en Suisse romande', url: 'https://www.rts.ch/info/suisse/2026/article/ou-regarder-la-coupe-du-monde-2026-en-suisse-romande-fan-zones-et-bars-29266676.html', kind: 'info', status: 'verified' },
+      { label: 'Grand Genève — Fan Zone', url: 'https://www.grand-geneve.org/evenements/fan-zone-coupe-du-monde-fifa-2026/', kind: 'info', status: 'verified' },
+    ],
+    verif: 'confirmed',
+    g7AccessNotes: ['Pas de grande fan zone officielle à Genève (contraintes G7)', 'Cafés et terrasses autorisés à diffuser les matchs'],
+  },
+  {
+    id: 'nati-qatar-suisse', slug: 'nati-qatar-vs-suisse',
+    title: '🇨🇭 Nati — Qatar vs Suisse (Gr. B)', category: 'football',
+    description: "Premier match de la Nati à la Coupe du Monde 2026. Joué à Levi's Stadium, Santa Clara (Californie). Voir dans les bars genevois autorisés avec écran.",
+    venue: {
+      name: 'Bars & terrasses de Genève',
+      address: 'Cafés, bars et terrasses de la Ville de Genève',
+      area: 'GE', lat: 46.2044, lng: 6.1432,
+    },
+    occurrences: [{ date: '2026-06-13', start: '21:00', note: 'CEST · Levi\'s Stadium, Santa Clara CA' }],
+    links: [
+      { label: 'Calendrier FIFA', url: 'https://www.foxsports.com/stories/soccer/switzerland-world-cup-2026-schedule-locations-dates-times', kind: 'info', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'nati-suisse-bosnie', slug: 'nati-suisse-vs-bosnie',
+    title: '🇨🇭 Nati — Suisse vs Bosnie-Herzégovine (Gr. B)', category: 'football',
+    description: "Deuxième match de la Nati. Joué à Inglewood, Californie. Voir dans les bars genevois autorisés avec écran.",
+    venue: {
+      name: 'Bars & terrasses de Genève',
+      address: 'Cafés, bars et terrasses de la Ville de Genève',
+      area: 'GE', lat: 46.2044, lng: 6.1432,
+    },
+    occurrences: [{ date: '2026-06-18', start: '21:00', note: 'CEST · Inglewood, Californie' }],
+    links: [
+      { label: 'Calendrier FIFA', url: 'https://www.foxsports.com/stories/soccer/switzerland-world-cup-2026-schedule-locations-dates-times', kind: 'info', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'nati-suisse-canada', slug: 'nati-suisse-vs-canada',
+    title: '🇨🇭 Nati — Suisse vs Canada (Gr. B)', category: 'football',
+    description: "Troisième match de la Nati (dernier de la phase de groupes). Joué à Vancouver, Canada. Voir dans les bars genevois autorisés avec écran.",
+    venue: {
+      name: 'Bars & terrasses de Genève',
+      address: 'Cafés, bars et terrasses de la Ville de Genève',
+      area: 'GE', lat: 46.2044, lng: 6.1432,
+    },
+    occurrences: [{ date: '2026-06-24', start: '21:00', note: 'CEST · Vancouver, Canada' }],
+    links: [
+      { label: 'Calendrier FIFA', url: 'https://www.foxsports.com/stories/soccer/switzerland-world-cup-2026-schedule-locations-dates-times', kind: 'info', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'fanzone-nyon', slug: 'fanzone-cantine-de-rive-nyon',
+    title: '⚽ Fan Zone Nyon — Cantine de Rive', category: 'football',
+    description: "Vaste fan zone organisée par l'association Etaris sous la Cantine de Rive à Nyon. Écran géant, bar, restauration et animations. Environ 40 matchs retransmis sur toute la durée du Mondial. 25 km de Genève.",
+    venue: {
+      name: 'Cantine de Rive (Nyon)',
+      address: 'Rive du lac, 1260 Nyon',
+      area: 'autour', lat: 46.3821, lng: 6.2376,
+    },
+    occurrences: [
+      { date: '2026-06-11', note: '11 juin – 19 juillet · tous les matchs sélectionnés' },
+    ],
+    priceInfo: 'Entrée libre',
+    links: [
+      { label: 'RTS — Nyon fan zone', url: 'https://www.rts.ch/info/suisse/2026/article/ou-regarder-la-coupe-du-monde-2026-en-suisse-romande-fan-zones-et-bars-29266676.html', kind: 'info', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'fanzone-saint-genis', slug: 'fanzone-saint-genis-pouilly',
+    title: '⚽ Fan Zone Saint-Genis-Pouilly (France)', category: 'football',
+    description: "Fan zone officielle de la Ville de Saint-Genis-Pouilly. Écran géant, cage football, bubble football, freestyle, châteaux gonflables, trampolines, tir de précision, tombola, animations, bar et restauration. Gratuit. Places limitées.",
+    venue: {
+      name: 'Place Jean Monnet',
+      address: 'Place Jean Monnet, 01630 Saint-Genis-Pouilly',
+      area: 'autour', lat: 46.2432, lng: 6.0278,
+    },
+    occurrences: [
+      { date: '2026-07-09', start: '19:00', note: 'Quart de finale · places limitées' },
+      { date: '2026-07-10', start: '19:00', note: 'Quart de finale · places limitées' },
+      { date: '2026-07-11', start: '19:00', note: 'Quart de finale · places limitées' },
+      { date: '2026-07-14', start: '19:00', note: 'Demi-finale' },
+      { date: '2026-07-15', start: '19:00', note: 'Demi-finale' },
+      { date: '2026-07-19', start: '19:00', note: '🏆 Finale — arriver tôt' },
+    ],
+    priceInfo: 'Gratuit — places limitées',
+    links: [
+      { label: 'Grand Genève — Fan Zone officielle', url: 'https://www.grand-geneve.org/evenements/fan-zone-coupe-du-monde-fifa-2026/', kind: 'info', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'fanzone-crowne-plaza', slug: 'fanzone-crowne-plaza-geneve',
+    title: '⚽ Fan Zone Privée — Crowne Plaza Geneva', category: 'football',
+    description: "Fan zone privée réservée aux groupes (25 personnes minimum). Projection sur grand écran, ambiance exclusive. Réservation obligatoire à l'avance. Idéal pour entreprises et groupes.",
+    venue: {
+      name: 'Crowne Plaza Geneva',
+      address: 'Avenue Louis-Casaï 75-77, 1216 Cointrin',
+      area: 'Grand-Saconnex', lat: 46.2258, lng: 6.1094,
+    },
+    occurrences: [
+      { date: '2026-06-11', note: '11 juin – 19 juillet · sur réservation uniquement' },
+    ],
+    priceInfo: 'Sur réservation (groupes 25+)',
+    links: [
+      { label: 'Crowne Plaza Geneva', url: 'https://geneva.crowneplaza.com/en/2026-world-cup/', kind: 'venue', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
   {
     id: 'fete-musique', slug: 'fete-de-la-musique-geneve',
     title: 'Fête de la Musique de Genève', category: 'festival',
@@ -521,6 +646,7 @@ export const CATEGORY_LABELS: Record<string, string> = {
   art:       'Art',
   sport:     'Sport',
   festival:  'Festival',
+  football:  'Football & Mondial',
 }
 
 export const CATEGORY_ICONS: Record<string, string> = {
@@ -533,4 +659,5 @@ export const CATEGORY_ICONS: Record<string, string> = {
   art:       '🎨',
   sport:     '🥊',
   festival:  '🎪',
+  football:  '⚽',
 }
