@@ -352,10 +352,18 @@ function CrossingDetail({ crossing, onBack: _onBack, onLocate, waitDirection, wa
 // ── Live crossing data (partagé depuis BorderCrossingsLayer via event) ────────
 type LiveEntry = { status: string; waitMinutes: number; color: string }
 
+// Cache module-level : persist le dernier dispatch même quand les composants démontent/remontent.
+// Sans ce cache, DouanesDetail monté après le premier dispatch (carte déjà chargée) resterait
+// vide jusqu'au prochain refresh (2 min), affichant les valeurs client au lieu des valeurs live.
+let _liveCache: Record<string, LiveEntry> = {}
+
 function useLiveCrossings(): Record<string, LiveEntry> {
-  const [liveData, setLiveData] = useState<Record<string, LiveEntry>>({})
+  const [liveData, setLiveData] = useState<Record<string, LiveEntry>>(_liveCache)
   useEffect(() => {
-    const handler = (e: Event) => setLiveData((e as CustomEvent<Record<string, LiveEntry>>).detail)
+    const handler = (e: Event) => {
+      _liveCache = (e as CustomEvent<Record<string, LiveEntry>>).detail
+      setLiveData(_liveCache)
+    }
     window.addEventListener('tif:crossings-live-update', handler)
     return () => window.removeEventListener('tif:crossings-live-update', handler)
   }, [])
