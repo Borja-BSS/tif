@@ -287,25 +287,45 @@ function buildPopupHTML(props: Record<string, unknown>): string {
 // Trust server (HERE live) when dataQuality is 'live' or 'g7-directive'.
 // Fall back to time-based client computation only for 'synthetic' data.
 function mergeWithClientStatus(apiData: FeatureCollection): FeatureCollection {
-  const now = new Date()
-  return {
-    ...apiData,
-    features: apiData.features.map(f => {
-      const p = f.properties as Record<string, unknown>
-      if (p.type !== 'border') return f
+  const now    = new Date()
+  const apiIds = new Set(
+    apiData.features.map(f => (f.properties as Record<string, unknown>)?.id),
+  )
 
-      // Server has live HERE data or G7 directive — trust it completely
-      if (p.dataQuality === 'live' || p.dataQuality === 'g7-directive') {
-        return { ...f, properties: { ...p, waitMinutes: p.waitTimeMinutes ?? 0 } }
+  const merged = apiData.features.map(f => {
+    const p = f.properties as Record<string, unknown>
+    if (p.type !== 'border') return f
+
+    if (p.dataQuality === 'live' || p.dataQuality === 'g7-directive') {
+      return { ...f, properties: { ...p, waitMinutes: p.waitTimeMinutes ?? 0 } }
+    }
+
+    const crossing = ALL_CROSSINGS.find(c => c.id === String(p.id ?? ''))
+    if (!crossing) return f
+    const { status, color, icon, waitMinutes } = computeInstantStatus(crossing, now)
+    return { ...f, properties: { ...p, status, color, icon, waitMinutes: p.waitTimeMinutes ?? waitMinutes } }
+  })
+
+  // Ajouter les crossings client-only absents de l'API (ex: rail — pas de données HERE)
+  const isG7 = now >= new Date('2026-06-11T22:01:00Z') && now <= new Date('2026-06-18T21:59:00Z')
+  const clientOnly = ALL_CROSSINGS
+    .filter(c => !apiIds.has(c.id))
+    .map(c => {
+      const { status, color, icon, waitMinutes } = computeInstantStatus(c, now)
+      return {
+        type: 'Feature' as const,
+        geometry: { type: 'Point' as const, coordinates: [c.lng, c.lat] },
+        properties: {
+          id: c.id, name: c.name, type: 'border',
+          status, color, icon, waitMinutes,
+          hours: c.hours, vehicles: c.vehicles.join(' · '),
+          g7Info: c.g7Info, nearestOpen: c.nearestOpen ?? '',
+          pedestrian: c.pedestrian, dataQuality: 'synthetic', g7Period: isG7,
+        },
       }
+    })
 
-      // Synthetic fallback: use client time-based computation
-      const crossing = ALL_CROSSINGS.find(c => c.id === String(p.id ?? ''))
-      if (!crossing) return f
-      const { status, color, icon, waitMinutes } = computeInstantStatus(crossing, now)
-      return { ...f, properties: { ...p, status, color, icon, waitMinutes: p.waitTimeMinutes ?? waitMinutes } }
-    }),
-  }
+  return { ...apiData, features: [...merged, ...clientOnly] }
 }
 
 function dispatchLiveUpdate(geojson: FeatureCollection): void {
