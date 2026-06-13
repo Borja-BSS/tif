@@ -562,6 +562,7 @@ export const events: EventItem[] = [
     venue: {
       name: 'Gradi24 Village FanZone',
       address: 'Rte de la Galaise 24, 1228 Plan-les-Ouates',
+      phone: '+41 22 512 60 59',
       area: 'GE', lat: 46.1671, lng: 6.1230,
     },
     occurrences: [
