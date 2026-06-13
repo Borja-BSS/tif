@@ -25,7 +25,7 @@ export interface MapT {
   crossing: {
     closed: string; heavy: string; moderate: string; light: string; clear: string
     freeShort: string; closedShort: string
-    motorway: string; main: string; secondary: string; local: string
+    motorway: string; main: string; secondary: string; local: string; rail: string
     viewOnMap: string; practicalInfo: string; schedule: string
     vehicles: string; pedestrian: string; officialSources: string; alternative: string
     crossings: string; open24: string; closedG7: string
@@ -180,7 +180,7 @@ const FR: MapT = {
     clear: 'Libre · Sans attente',
     freeShort: 'Libre', closedShort: 'Fermé',
     motorway: 'Autoroute', main: 'Route principale',
-    secondary: 'Route secondaire', local: 'Voie locale / piétonne',
+    secondary: 'Route secondaire', local: 'Voie locale / piétonne', rail: 'Douane ferroviaire (TGV)',
     viewOnMap: 'Voir sur la carte',
     practicalInfo: 'Infos pratiques',
     schedule: 'Horaires',
@@ -437,7 +437,7 @@ const EN: MapT = {
     clear: 'Open · No wait',
     freeShort: 'Open', closedShort: 'Closed',
     motorway: 'Motorway', main: 'Main road',
-    secondary: 'Secondary road', local: 'Local / pedestrian road',
+    secondary: 'Secondary road', local: 'Local / pedestrian road', rail: 'Rail border (TGV)',
     viewOnMap: 'View on map',
     practicalInfo: 'Practical info',
     schedule: 'Opening hours',
@@ -694,7 +694,7 @@ const DE: MapT = {
     clear: 'Frei · Keine Wartezeit',
     freeShort: 'Frei', closedShort: 'Gesperrt',
     motorway: 'Autobahn', main: 'Hauptstrasse',
-    secondary: 'Nebenstrasse', local: 'Lokal- / Fussgängerweg',
+    secondary: 'Nebenstrasse', local: 'Lokal- / Fussgängerweg', rail: 'Bahnzoll (TGV)',
     viewOnMap: 'Auf Karte anzeigen',
     practicalInfo: 'Praktische Infos',
     schedule: 'Öffnungszeiten',
@@ -951,7 +951,7 @@ const IT: MapT = {
     clear: 'Libero · Senza attesa',
     freeShort: 'Libero', closedShort: 'Chiuso',
     motorway: 'Autostrada', main: 'Strada principale',
-    secondary: 'Strada secondaria', local: 'Strada locale / pedonale',
+    secondary: 'Strada secondaria', local: 'Strada locale / pedonale', rail: 'Dogana ferroviaria (TGV)',
     viewOnMap: 'Vedi sulla mappa',
     practicalInfo: 'Info pratiche',
     schedule: 'Orari',
@@ -1208,7 +1208,7 @@ const ES: MapT = {
     clear: 'Libre · Sin espera',
     freeShort: 'Libre', closedShort: 'Cerrado',
     motorway: 'Autopista', main: 'Carretera principal',
-    secondary: 'Carretera secundaria', local: 'Vía local / peatonal',
+    secondary: 'Carretera secundaria', local: 'Vía local / peatonal', rail: 'Aduana ferroviaria (TGV)',
     viewOnMap: 'Ver en el mapa',
     practicalInfo: 'Información práctica',
     schedule: 'Horarios',
@@ -1465,7 +1465,7 @@ const PT: MapT = {
     clear: 'Livre · Sem espera',
     freeShort: 'Livre', closedShort: 'Fechado',
     motorway: 'Autoestrada', main: 'Estrada principal',
-    secondary: 'Estrada secundária', local: 'Via local / pedonal',
+    secondary: 'Estrada secundária', local: 'Via local / pedonal', rail: 'Alfândega ferroviária (TGV)',
     viewOnMap: 'Ver no mapa',
     practicalInfo: 'Informações práticas',
     schedule: 'Horários',
@@ -1722,7 +1722,7 @@ const SQ: MapT = {
     clear: 'I lirë · Pa pritje',
     freeShort: 'I lirë', closedShort: 'I mbyllur',
     motorway: 'Autostradë', main: 'Rrugë kryesore',
-    secondary: 'Rrugë dytësore', local: 'Rrugë lokale / këmbësorëve',
+    secondary: 'Rrugë dytësore', local: 'Rrugë lokale / këmbësorëve', rail: 'Doganë hekurudhore (TGV)',
     viewOnMap: 'Shiko në hartë',
     practicalInfo: 'Informacion praktik',
     schedule: 'Orari',
@@ -1979,7 +1979,7 @@ const JA: MapT = {
     clear: '空いている · 待ち時間なし',
     freeShort: '空き', closedShort: '閉鎖',
     motorway: '高速道路', main: '幹線道路',
-    secondary: '準幹線道路', local: '地方道路 / 歩行者可',
+    secondary: '準幹線道路', local: '地方道路 / 歩行者可', rail: '鉄道通関 (TGV)',
     viewOnMap: '地図で見る',
     practicalInfo: '実用情報',
     schedule: '営業時間',
@@ -2236,7 +2236,7 @@ const ZH: MapT = {
     clear: '通畅 · 无需等待',
     freeShort: '畅通', closedShort: '关闭',
     motorway: '高速公路', main: '主干道',
-    secondary: '次干道', local: '地方道路 / 行人可通行',
+    secondary: '次干道', local: '地方道路 / 行人可通行', rail: '铁路海关 (TGV)',
     viewOnMap: '在地图上查看',
     practicalInfo: '实用信息',
     schedule: '开放时间',

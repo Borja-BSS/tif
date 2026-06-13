@@ -4,7 +4,7 @@ export type BorderStatus = 'CLEAR' | 'LIGHT' | 'MODERATE' | 'HEAVY' | 'BLOCKED'
 
 export interface CrossingStatic {
   id: string; name: string; lat: number; lng: number
-  type: 'motorway' | 'main' | 'secondary' | 'tertiary'
+  type: 'motorway' | 'main' | 'secondary' | 'tertiary' | 'rail'
   capacity: 'high' | 'medium' | 'low'
   hours: string; vehicles: string[]; pedestrian: boolean
   g7Info: string; nearestOpen?: string
@@ -24,6 +24,9 @@ const STATUS_COLOR: Record<BorderStatus, string> = {
 
 // All Grand Genève border crossings — extended to include Vaud, Gex, Haute-Savoie area
 export const ALL_CROSSINGS: CrossingStatic[] = [
+  // ── RAIL — Douane ferroviaire ────────────────────────────────────────────────
+  { id: 'cornavin-tgv', name: 'Cornavin — Douane TGV', lat: 46.2101, lng: 6.1422, type: 'rail', capacity: 'medium', hours: 'Selon horaires TGV Lyria', vehicles: ['TGV Lyria', 'Trains internationaux CFF'], pedestrian: true, g7Info: '🚂 Contrôles renforcés G7 · CH→FR : arrivez 45 min avant le départ, contrôle Douane CH + PAF France à quai · FR→CH : contrôle PAF France à bord ou sur quai à l\'arrivée · Pièce d\'identité obligatoire', nearestOpen: undefined },
+
   // ── TIER 1 — Geneva canton, 24/7 ────────────────────────────────────────────
   { id: 'bardonnex', name: 'Bardonnex', lat: 46.14952, lng: 6.09693, type: 'motorway', capacity: 'high', hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Cars', 'Motos'], pedestrian: false, g7Info: '⭐ Poste macaron prioritaire · Accès prioritaire réservé au personnel essentiel des services critiques · Douanes secondaires ouvertes sur plages horaires dédiées · Pièce d\'identité obligatoire · Contrôles systématiques 12–18 juin · Des temps d\'attente sont à prévoir', nearestOpen: undefined },
   { id: 'thonex-vallard', name: 'Thônex-Vallard', lat: 46.1881120, lng: 6.2027720, type: 'main', capacity: 'medium', hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Motos'], pedestrian: false, g7Info: '⭐ Poste macaron prioritaire · Accès prioritaire réservé au personnel essentiel des services critiques · Douanes secondaires ouvertes sur plages horaires dédiées · Pièce d\'identité obligatoire · Contrôles systématiques 12–18 juin · Des temps d\'attente sont à prévoir', nearestOpen: undefined },
@@ -100,6 +103,13 @@ const G7_OPEN  = new Set(['bardonnex','thonex-vallard','moillesulaz','meyrin','f
 
 export function computeInstantStatus(c: CrossingStatic, now: Date): { status: BorderStatus; color: string; icon: string; waitMinutes: number } {
   const isG7 = now >= G7_START && now <= G7_END
+
+  // Rail crossings: fixed process time, not affected by road G7 closures
+  if (c.type === 'rail') {
+    const status: BorderStatus = isG7 ? 'MODERATE' : 'LIGHT'
+    const waitMinutes          = isG7 ? 45 : 30
+    return { status, color: STATUS_COLOR[status], icon: '🚂', waitMinutes }
+  }
 
   if (isG7 && !G7_OPEN.has(c.id)) {
     return { status: 'BLOCKED', color: '#636366', icon: '🔒', waitMinutes: 0 }

@@ -156,7 +156,9 @@ function CrossingDetail({ crossing, onBack: _onBack, onLocate, waitDirection, wa
   const displayWait     = liveWaitMinutes ?? s.waitMinutes
   const displayColor    = LIVE_STATUS_COLOR[displayStatus] ?? s.color
 
-  const statusLabel = displayStatus === 'BLOCKED'  ? t.crossing.closed
+  const statusLabel = crossing.type === 'rail'
+    ? (isG7Period ? 'Arrivez 45 min avant le départ' : 'Arrivez 30 min avant le départ')
+    : displayStatus === 'BLOCKED'  ? t.crossing.closed
     : displayStatus === 'HEAVY'    ? t.crossing.heavy.replace('{n}', String(displayWait))
     : displayStatus === 'MODERATE' ? t.crossing.moderate.replace('{n}', String(displayWait))
     : displayStatus === 'LIGHT'    ? t.crossing.light.replace('{n}', String(displayWait))
@@ -165,6 +167,7 @@ function CrossingDetail({ crossing, onBack: _onBack, onLocate, waitDirection, wa
   const typeLabel = crossing.type === 'motorway' ? t.crossing.motorway
     : crossing.type === 'main'      ? t.crossing.main
     : crossing.type === 'secondary' ? t.crossing.secondary
+    : crossing.type === 'rail'      ? t.crossing.rail
     : t.crossing.local
 
   return (
@@ -188,26 +191,39 @@ function CrossingDetail({ crossing, onBack: _onBack, onLocate, waitDirection, wa
           </div>
           {displayStatus !== 'BLOCKED' && (
             <div className="mt-2 space-y-1">
-              <div className="flex items-center justify-between pl-4 pr-1">
-                <span className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
-                  🚗 France → Suisse
-                </span>
-                <span className="text-[12px] font-semibold" style={{ color: displayColor }}>
-                  {waitFrCh != null
-                    ? (waitFrCh === 0 ? 'Libre' : `${waitFrCh} min`)
-                    : (displayWait === 0 ? 'Libre' : `${displayWait} min`)}
-                </span>
-              </div>
-              <div className="flex items-center justify-between pl-4 pr-1">
-                <span className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
-                  🚗 Suisse → France
-                </span>
-                <span className="text-[12px] font-semibold" style={{ color: displayColor }}>
-                  {waitChFr != null
-                    ? (waitChFr === 0 ? 'Libre' : `${waitChFr} min`)
-                    : (displayWait === 0 ? 'Libre' : `${displayWait} min`)}
-                </span>
-              </div>
+              {crossing.type === 'rail' ? (<>
+                <div className="flex items-center justify-between pl-4 pr-1">
+                  <span className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>🚂 Départ CH → FR</span>
+                  <span className="text-[12px] font-semibold" style={{ color: displayColor }}>
+                    {isG7Period ? '45 min avant' : '30 min avant'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between pl-4 pr-1">
+                  <span className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>🚂 Arrivée FR → CH</span>
+                  <span className="text-[12px] font-semibold" style={{ color: displayColor }}>~5–10 min</span>
+                </div>
+              </>) : (<>
+                <div className="flex items-center justify-between pl-4 pr-1">
+                  <span className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
+                    🚗 France → Suisse
+                  </span>
+                  <span className="text-[12px] font-semibold" style={{ color: displayColor }}>
+                    {waitFrCh != null
+                      ? (waitFrCh === 0 ? 'Libre' : `${waitFrCh} min`)
+                      : (displayWait === 0 ? 'Libre' : `${displayWait} min`)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between pl-4 pr-1">
+                  <span className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
+                    🚗 Suisse → France
+                  </span>
+                  <span className="text-[12px] font-semibold" style={{ color: displayColor }}>
+                    {waitChFr != null
+                      ? (waitChFr === 0 ? 'Libre' : `${waitChFr} min`)
+                      : (displayWait === 0 ? 'Libre' : `${displayWait} min`)}
+                  </span>
+                </div>
+              </>)}
             </div>
           )}
         </div>
@@ -239,7 +255,7 @@ function CrossingDetail({ crossing, onBack: _onBack, onLocate, waitDirection, wa
           </div>
         </div>
         <div className="flex items-start gap-2.5">
-          <span className="text-base flex-shrink-0">🚗</span>
+          <span className="text-base flex-shrink-0">{crossing.type === 'rail' ? '🚂' : '🚗'}</span>
           <div>
             <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{t.crossing.vehicles}</p>
             <p className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
@@ -247,12 +263,32 @@ function CrossingDetail({ crossing, onBack: _onBack, onLocate, waitDirection, wa
             </p>
           </div>
         </div>
-        {crossing.pedestrian && (
+        {crossing.type !== 'rail' && crossing.pedestrian && (
           <div className="flex items-center gap-2.5">
             <span className="text-base">🚶</span>
             <p className="text-sm" style={{ color: 'var(--text-primary)' }}>{t.crossing.pedestrian}</p>
           </div>
         )}
+        {crossing.type === 'rail' && (<>
+          <div className="flex items-start gap-2.5">
+            <span className="text-base flex-shrink-0">🔵</span>
+            <div>
+              <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Départ Genève → Paris / Lyon</p>
+              <p className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
+                Présentez-vous au quai {isG7Period ? '45' : '30'} min avant le départ · Contrôle Douane CH + PAF France à quai · Pièce d&apos;identité obligatoire
+              </p>
+            </div>
+          </div>
+          <div className="flex items-start gap-2.5">
+            <span className="text-base flex-shrink-0">🟢</span>
+            <div>
+              <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Arrivée Paris → Genève</p>
+              <p className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
+                Contrôle PAF France à bord ou sur quai à l&apos;arrivée · ~5–10 min
+              </p>
+            </div>
+          </div>
+        </>)}
       </div>
 
       {/* Info G7 */}
