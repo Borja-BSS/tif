@@ -306,6 +306,21 @@ function mergeWithClientStatus(apiData: FeatureCollection): FeatureCollection {
   }
 }
 
+function dispatchLiveUpdate(geojson: FeatureCollection): void {
+  const liveMap: Record<string, { status: string; waitMinutes: number; color: string }> = {}
+  for (const f of geojson.features) {
+    const p = f.properties as Record<string, unknown>
+    if (p.type !== 'border' || !p.id) continue
+    if (p.dataQuality !== 'live' && p.dataQuality !== 'g7-directive') continue
+    liveMap[String(p.id)] = {
+      status:      String(p.status ?? ''),
+      waitMinutes: Number(p.waitTimeMinutes ?? 0),
+      color:       String(p.color ?? ''),
+    }
+  }
+  window.dispatchEvent(new CustomEvent('tif:crossings-live-update', { detail: liveMap }))
+}
+
 // ── Layer management ──────────────────────────────────────────────────────────
 function featureImgProps(f: { properties: unknown }) {
   const p           = f.properties as Record<string, unknown>
@@ -515,6 +530,7 @@ export default function BorderCrossingsLayer({ map, activeFilter = 'all' }: Bord
       if (live) {
         prefetchRef.current = live
         await applyData(map, applyOverrides(mergeWithClientStatus(live), overridesRef.current))
+        dispatchLiveUpdate(live)
       }
     }
 
@@ -533,6 +549,7 @@ export default function BorderCrossingsLayer({ map, activeFilter = 'all' }: Bord
       if (!data) return
       prefetchRef.current = data
       applyData(map, applyOverrides(mergeWithClientStatus(data), overridesRef.current))
+      dispatchLiveUpdate(data)
     }, REFRESH_MS)
 
     return () => {

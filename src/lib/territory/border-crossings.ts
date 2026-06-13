@@ -668,37 +668,55 @@ function segmentLengthM(coords: [number, number][]): number {
 }
 
 interface QueueAnalysis {
-  queueLengthM:  number   // total length of slow segments within radius
-  frQueueM:      number   // queue on French side (cars waiting to enter CH)
-  chQueueM:      number   // queue on Swiss side (cars waiting to enter FR)
-  frPeakJam:     number   // peak jam factor on French-side segments
-  chPeakJam:     number   // peak jam factor on Swiss-side segments
-  peakJamFactor: number   // max jam factor overall
+  frDelayS:      number   // delay seconds on French approach (FR→CH queue)
+  chDelayS:      number   // delay seconds on Swiss approach (CH→FR queue)
+  frPeakJam:     number
+  chPeakJam:     number
+  peakJamFactor: number
   confidence:    number
+  segmentCount:  number
 }
 
-const FLOW_JAM_THRESHOLD = 2.0  // HERE jam < 2 = green, above = yellow/orange/red
-const QUEUE_SEARCH_RADIUS = 1_000  // metres — captures queues up to 1 km from crossing
+// jam < 3.5 = normal variation (rush hour), not an actual border queue
+const FLOW_JAM_THRESHOLD     = 3.5
+// 500m — tight enough to capture approach road only, not parallel roads 600m away
+const QUEUE_SEARCH_RADIUS    = 500
+// skip unreliable HERE segments
+const MIN_SEGMENT_CONFIDENCE = 0.3
+// G7 controls add ~20% overhead vs baseline (was 1.5 — too aggressive)
+const G7_WAIT_FACTOR         = 1.2
+
+// Time spent at the booth itself, based on how congested the approach is
+function processingMinutes(peakJam: number): number {
+  if (peakJam < 5) return 2
+  if (peakJam < 7) return 4
+  return 8
+}
 
 /**
- * Analyse the approach queue for a crossing by measuring the total length of
- * slow HERE segments within QUEUE_SEARCH_RADIUS.
- * Splits segments by geographic side (franceSide) to determine wait direction.
+ * Speed-delay method: extra_time = Σ len × 3.6 × (1/speed − 1/freeFlow)
+ * where len is in metres and speeds in km/h.
+ *
+ * Replaces the old score = queueLengthM × (jamFactor/10)^1.5 which summed ALL
+ * slow roads within 1000m — motorway, parallel streets, etc. — producing false
+ * 90-min waits on empty crossings.
  */
 function analyzeApproachQueue(
   lat: number, lng: number,
   franceSide: FranceSide,
   flow: FlowFeatureCollection,
 ): QueueAnalysis {
-  let frQueueM      = 0
-  let chQueueM      = 0
-  let frPeakJam     = 0
-  let chPeakJam     = 0
+  let frDelayS     = 0
+  let chDelayS     = 0
+  let frPeakJam    = 0
+  let chPeakJam    = 0
   let maxConfidence = 0
+  let segmentCount  = 0
 
   for (const f of flow.features) {
-    const { jamFactor, confidence } = f.properties
-    if (jamFactor < FLOW_JAM_THRESHOLD) continue
+    const { jamFactor, confidence, speed, freeFlow } = f.properties
+    if (jamFactor < FLOW_JAM_THRESHOLD)        continue
+    if (confidence < MIN_SEGMENT_CONFIDENCE)   continue
 
     let withinRadius = false
     let centLat = 0, centLng = 0
@@ -716,77 +734,57 @@ function analyzeApproachQueue(
 
     const len = segmentLengthM(f.geometry.coordinates)
 
-    // Determine which side of the crossing this segment is on
+    // Extra seconds vs free-flow for this segment (floor speeds to avoid div/0)
+    const safeSpeed    = Math.max(speed, 1)
+    const safeFreeFlow = Math.max(freeFlow, 10)
+    const delayS = len * 3.6 * (1 / safeSpeed - 1 / safeFreeFlow)
+
     const onFrSide = franceSide === 'south' ? centLat < lat
-      : franceSide === 'north'               ? centLat > lat
-      : franceSide === 'east'                ? centLng > lng
-      :                                        centLng < lng  // west
+      : franceSide === 'north'              ? centLat > lat
+      : franceSide === 'east'               ? centLng > lng
+      :                                       centLng < lng
 
     if (onFrSide) {
-      frQueueM += len
+      frDelayS += delayS
       if (jamFactor > frPeakJam) frPeakJam = jamFactor
     } else {
-      chQueueM += len
+      chDelayS += delayS
       if (jamFactor > chPeakJam) chPeakJam = jamFactor
     }
 
     if (confidence > maxConfidence) maxConfidence = confidence
+    segmentCount++
   }
 
   return {
-    queueLengthM: frQueueM + chQueueM,
-    frQueueM,
-    chQueueM,
-    frPeakJam,
-    chPeakJam,
+    frDelayS, chDelayS, frPeakJam, chPeakJam,
     peakJamFactor: Math.max(frPeakJam, chPeakJam),
     confidence: maxConfidence,
+    segmentCount,
   }
 }
 
 /**
- * Map queue length + peak jam factor to a border status and estimated wait.
- * G7 period applies a ×1.5 multiplier (reinforced controls).
- *
- * Weighted score: queueLengthM × (peakJamFactor/10)^1.5
- * This prevents many parallel mildly-congested roads (e.g. nearby motorway)
- * from inflating the result. jamFactor 2.9 → weight 0.16; jamFactor 9.3 → 0.90.
+ * Wait = (queue drive-through time + booth processing) × G7 factor.
+ * Max cap: 60 min (realistic Geneva-area ceiling even in worst G7 conditions).
  */
 function queueToStatusAndWait(
   q: QueueAnalysis,
   isG7: boolean,
 ): { status: BorderStatus; waitMinutes: number } {
-  const { queueLengthM, peakJamFactor } = q
-  const g7 = isG7 ? 1.5 : 1.0
-
-  if (queueLengthM < 50 || peakJamFactor < FLOW_JAM_THRESHOLD) {
+  if (q.peakJamFactor < FLOW_JAM_THRESHOLD || q.segmentCount === 0) {
     return { status: 'CLEAR', waitMinutes: 0 }
   }
 
-  // Weighted score: proportional to both queue extent AND jam intensity
-  const jamWeight = Math.pow(peakJamFactor / 10, 1.5)
-  const score     = queueLengthM * jamWeight
+  const g7Factor = isG7 ? G7_WAIT_FACTOR : 1.0
+  const driveMin = (q.frDelayS + q.chDelayS) / 60
+  const procMin  = processingMinutes(q.peakJamFactor)
+  const wait     = Math.round((driveMin + procMin) * g7Factor)
 
-  if (score < 80 || peakJamFactor < FLOW_JAM_THRESHOLD) {
-    return { status: 'CLEAR', waitMinutes: 0 }
-  }
-  // Yellow / light orange — queue forming (score < 250, jam < 5)
-  if (score < 250 && peakJamFactor < 5) {
-    return { status: 'LIGHT', waitMinutes: Math.round(5 * g7) }
-  }
-  // Orange persists — score 250–600
-  if (score < 600) {
-    const wait = Math.round((10 + score / 60) * g7)
-    return { status: 'MODERATE', waitMinutes: Math.min(wait, Math.round(28 * g7)) }
-  }
-  // Red extends past crossing — score 600–1 200
-  if (score < 1_200) {
-    const wait = Math.round((28 + (score - 600) / 25) * g7)
-    return { status: 'HEAVY', waitMinutes: Math.min(wait, Math.round(56 * g7)) }
-  }
-  // Severe: score > 1 200 — queue pulling far behind crossing
-  const wait = Math.round((56 + (score - 1_200) / 15) * g7)
-  return { status: 'HEAVY', waitMinutes: Math.min(wait, 90) }
+  if (wait < 3)  return { status: 'CLEAR',    waitMinutes: 0 }
+  if (wait < 9)  return { status: 'LIGHT',    waitMinutes: wait }
+  if (wait < 28) return { status: 'MODERATE', waitMinutes: wait }
+  return             { status: 'HEAVY',    waitMinutes: Math.min(wait, 60) }
 }
 
 const STATUS_COLOR: Record<BorderStatus, string> = {
@@ -806,8 +804,8 @@ function isG7Period(date: Date): boolean {
 
 // Synthetic fallback (no HERE data available) — time-of-day estimate
 function syntheticWait(status: BorderStatus, capacity: Capacity): number {
-  const base: Record<BorderStatus, number> = { CLEAR: 0, LIGHT: 4, MODERATE: 12, HEAVY: 28, BLOCKED: 60 }
-  const mult: Record<Capacity, number>     = { high: 1.2, medium: 1.0, low: 0.8 }
+  const base: Record<BorderStatus, number> = { CLEAR: 0, LIGHT: 3, MODERATE: 9, HEAVY: 16, BLOCKED: 35 }
+  const mult: Record<Capacity, number>     = { high: 1.15, medium: 1.0, low: 0.85 }
   return Math.round(base[status] * mult[capacity])
 }
 
@@ -827,7 +825,7 @@ export function computeCrossingStatus(
     if (isNight)                        return { status: 'CLEAR',    jamFactor: 1 }
     if (isWeekend && !isEveningPeak)    return { status: 'LIGHT',    jamFactor: 2 }
     if (isMorningPeak)                  return { status: 'MODERATE', jamFactor: 5 }
-    if (isEveningPeak && isFriday)      return { status: 'HEAVY',    jamFactor: 7 }
+    if (isEveningPeak && isFriday)      return { status: 'MODERATE', jamFactor: 5 }
     if (isEveningPeak)                  return { status: 'MODERATE', jamFactor: 5 }
     return                                     { status: 'LIGHT',    jamFactor: 2 }
   }
@@ -842,7 +840,7 @@ export function computeCrossingStatus(
   return                                       { status: 'CLEAR',    jamFactor: 0 }
 }
 
-const CACHE_KEY = 'tif:layer:border-crossings:v13'
+const CACHE_KEY = 'tif:layer:border-crossings:v15'
 const CACHE_TTL = 120
 
 export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
@@ -894,30 +892,28 @@ export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
       // Try HERE live traffic — queue-length algorithm
       const queue = flow ? analyzeApproachQueue(c.lat, c.lng, c.franceSide, flow) : null
 
-      if (queue && queue.peakJamFactor >= FLOW_JAM_THRESHOLD) {
-        const derived  = queueToStatusAndWait(queue, g7Active)
-        status         = derived.status
-        jamFactor      = queue.peakJamFactor
+      if (queue && queue.segmentCount > 0) {
+        const derived   = queueToStatusAndWait(queue, g7Active)
+        status          = derived.status
+        jamFactor       = queue.peakJamFactor
         waitTimeMinutes = derived.waitMinutes
-        confidence     = queue.confidence
-        source         = g7Active ? 'G7-directive' : 'here-live'
-        dataQuality    = g7Active ? 'g7-directive' : 'live'
+        confidence      = queue.confidence
+        source          = g7Active ? 'G7-directive' : 'here-live'
+        dataQuality     = g7Active ? 'g7-directive' : 'live'
         liveCount++
 
-        // Per-direction wait times: each side's queue analysed independently
-        const frQ = { ...queue, queueLengthM: queue.frQueueM, peakJamFactor: queue.frPeakJam }
-        const chQ = { ...queue, queueLengthM: queue.chQueueM, peakJamFactor: queue.chPeakJam }
-        waitFrChMinutes = queueToStatusAndWait(frQ, g7Active).waitMinutes
-        waitChFrMinutes = queueToStatusAndWait(chQ, g7Active).waitMinutes
+        // Per-direction wait: each side computed from its own delay + processing
+        const g7f = g7Active ? G7_WAIT_FACTOR : 1.0
+        waitFrChMinutes = Math.min(Math.round(((queue.frDelayS / 60) + processingMinutes(queue.frPeakJam)) * g7f), 60)
+        waitChFrMinutes = Math.min(Math.round(((queue.chDelayS / 60) + processingMinutes(queue.chPeakJam)) * g7f), 60)
 
-        // Determine dominant direction: which side has the longer queue?
-        const { frQueueM, chQueueM } = queue
-        if (frQueueM > 50 && chQueueM > 50) {
-          const ratio = Math.max(frQueueM, chQueueM) / Math.min(frQueueM, chQueueM)
-          waitDirection = ratio < 2 ? 'both' : frQueueM > chQueueM ? 'fr-ch' : 'ch-fr'
-        } else if (frQueueM > 50) {
+        // Dominant direction: > 15s delay on a side = meaningful queue
+        if (queue.frDelayS > 15 && queue.chDelayS > 15) {
+          const ratio = Math.max(queue.frDelayS, queue.chDelayS) / Math.min(queue.frDelayS, queue.chDelayS)
+          waitDirection = ratio < 2 ? 'both' : queue.frDelayS > queue.chDelayS ? 'fr-ch' : 'ch-fr'
+        } else if (queue.frDelayS > 15) {
           waitDirection = 'fr-ch'
-        } else if (chQueueM > 50) {
+        } else if (queue.chDelayS > 15) {
           waitDirection = 'ch-fr'
         }
       } else {

@@ -311,6 +311,19 @@ function CrossingDetail({ crossing, onBack: _onBack, onLocate, waitDirection, wa
   )
 }
 
+// ── Live crossing data (partagé depuis BorderCrossingsLayer via event) ────────
+type LiveEntry = { status: string; waitMinutes: number; color: string }
+
+function useLiveCrossings(): Record<string, LiveEntry> {
+  const [liveData, setLiveData] = useState<Record<string, LiveEntry>>({})
+  useEffect(() => {
+    const handler = (e: Event) => setLiveData((e as CustomEvent<Record<string, LiveEntry>>).detail)
+    window.addEventListener('tif:crossings-live-update', handler)
+    return () => window.removeEventListener('tif:crossings-live-update', handler)
+  }, [])
+  return liveData
+}
+
 // ── Liste des douanes ─────────────────────────────────────────────────────────
 function DouanesDetail({ onSelect, map }: {
   onSelect: (c: CrossingStatic) => void
@@ -318,7 +331,12 @@ function DouanesDetail({ onSelect, map }: {
 }) {
   const t        = useMapT()
   const now      = new Date()
-  const crossings = ALL_CROSSINGS.map(c => ({ c, s: computeInstantStatus(c, now) }))
+  const liveData = useLiveCrossings()
+  const crossings = ALL_CROSSINGS.map(c => {
+    const s    = computeInstantStatus(c, now)
+    const live = liveData[c.id]
+    return { c, s: live ? { ...s, status: live.status as typeof s.status, waitMinutes: live.waitMinutes, color: live.color } : s }
+  })
     .sort((a, b) => {
       // Fermées toujours en dernier
       if (a.s.status === 'BLOCKED' && b.s.status !== 'BLOCKED') return 1
@@ -1563,14 +1581,16 @@ function ToutOverview({ data, onSelect }: {
   data?: DashboardData
   onSelect: (v: DetailView) => void
 }) {
-  const t         = useMapT()
-  const now       = new Date()
+  const t          = useMapT()
+  const now        = new Date()
+  const liveData   = useLiveCrossings()
+  const getStatus  = (c: CrossingStatic) => liveData[c.id]?.status ?? computeInstantStatus(c, now).status
   const alertCount = data?.alerts.length ?? 0
   const hasIssue   = data?.network && Object.values(data.network).some(v => v !== 'normal')
-  const blocked    = ALL_CROSSINGS.filter(c => computeInstantStatus(c, now).status === 'BLOCKED').length
+  const blocked    = ALL_CROSSINGS.filter(c => getStatus(c) === 'BLOCKED').length
   const heavy      = ALL_CROSSINGS.find(c => {
-    const s = computeInstantStatus(c, now)
-    return s.status === 'HEAVY' || s.status === 'MODERATE'
+    const st = getStatus(c)
+    return st === 'HEAVY' || st === 'MODERATE'
   })
 
   return (
@@ -1795,14 +1815,15 @@ function EventsPanel({ onSelect }: { onSelect: (slug: string) => void }) {
   const [todayOnly,   setTodayOnly]   = useState(false)
   const [venueFilter, setVenueFilter] = useState('')
 
-  const today = new Date().toISOString().slice(0, 10)
+  const d = new Date()
+  const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 
   const venueNames = [...new Set(events.map(e => e.venue.name))].sort((a, b) => a.localeCompare(b, 'fr'))
 
   const isFree = (ev: EventItem): boolean => {
-    if (!ev.priceInfo) return false
+    if (!ev.priceInfo) return true
     const p = ev.priceInfo.toLowerCase()
-    return p.includes('gratuit') || p.startsWith('entrée libre')
+    return p.includes('gratuit') || p.includes('libre') || p === '0' || p === 'free'
   }
 
   let filteredEvents = events
@@ -2150,7 +2171,6 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
     setSelectedWaitChFr(chFr ?? null)
     setSelectedLiveStatus(liveStatus ?? null)
     setSelectedLiveWaitMin(liveWaitMin ?? null)
-    setDetailView('overview')
     animateTo(getFullH(), true)
   }, [animateTo])
 
@@ -2184,6 +2204,11 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
     map.flyTo({ center: [c.lng, c.lat], zoom: 15, duration: 900, essential: true })
     animateTo(COMPACT_H, true)
   }, [map, animateTo])
+
+  // Scroll to top + reset on every view change
+  useEffect(() => {
+    contentRef.current?.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
+  }, [detailView, selectedCrossing, selectedEvent])
 
   const goBack = useCallback(() => {
     if (selectedCrossing) {
@@ -2264,6 +2289,8 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
 
       {/* Expanded content — always rendered, height+overflow-hidden masque quand compact */}
       <div ref={contentRef} className="flex-1 overflow-y-auto px-4 pb-6" style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
+        <div key={`${detailView}|${selectedCrossing?.id ?? ''}|${selectedEvent ?? ''}`}
+             style={{ animation: 'fadeUp 0.18s cubic-bezier(0.23, 1, 0.32, 1)' }}>
 
           {/* Bouton retour */}
           {showBack && (
@@ -2273,7 +2300,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
               <svg width="8" height="13" viewBox="0 0 8 13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <path d="M7 1L1 6.5 7 12"/>
               </svg>
-              {selectedCrossing ? t.back.allBorders : selectedEvent ? t.eventsSection.backToList : t.back.back}
+              {selectedCrossing ? (detailView === 'douanes' ? t.back.allBorders : t.back.back) : selectedEvent ? t.eventsSection.backToList : t.back.back}
             </button>
           )}
 
@@ -2309,6 +2336,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
             : <G7Detail />
           }
         </div>
+      </div>
 
       <div className="flex-shrink-0" style={{ height: 'env(safe-area-inset-bottom, 0px)' }} />
     </div>

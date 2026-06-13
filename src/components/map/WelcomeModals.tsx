@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useMapT } from '@/i18n/map'
 import { OnboardingTour, fireConfetti } from './OnboardingTour'
 
-const UPDATE_KEY = 'tif:update:v3'
+const UPDATE_KEY = 'tif:update:v4'
 
 const LG_MODAL: React.CSSProperties = {
   background:           'rgba(18,18,24,0.96)',
