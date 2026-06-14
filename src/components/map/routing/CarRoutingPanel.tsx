@@ -239,6 +239,15 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
   // ── Shared route list renderer ────────────────────────────────────────────────
   const renderRoutes = () => routes.map((route, idx) => {
     const reasons = getRouteReason(route, idx, routes, t)
+
+    // Detect open crossing (server prefixes the label "Via [Name]" for official crossings)
+    const openCrossingLabel = route.warnings.find(
+      w => w.startsWith('Via ') && w !== 'Via centre-ville',
+    )
+    const hasManifestationWarning = route.warnings.some(w => w.includes('manifestation'))
+    const hasA1Warning            = route.warnings.some(w => w.includes('A1 fermée'))
+    const hasG7LongerNotice       = openCrossingLabel || hasA1Warning
+
     return (
       <button
         key={route.id}
@@ -250,6 +259,7 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
         }}
       >
         <div className="flex-1 min-w-0">
+          {/* ── Time + badges ── */}
           <div className="flex items-center gap-2 mb-0.5">
             <span
               className="text-base font-bold"
@@ -277,12 +287,59 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
               <span className="text-[10px] text-white/25">{t.car.alternative}</span>
             )}
           </div>
+
+          {/* ── Distance ── */}
           <div className="text-[11px] text-white/35">
             {fmtDist(route.summary.distance)}
-            {route.warnings.length > 0 && !route.warnings.includes('Évite les zones G7') && (
-              <span className="ml-2 text-amber-400/70">⚠ {route.warnings[0]}</span>
-            )}
           </div>
+
+          {/* ── Open crossing notice ── */}
+          {openCrossingLabel && (
+            <div
+              className="mt-1.5 rounded-lg px-2 py-1.5 flex items-start gap-1.5"
+              style={{ background: 'rgba(52,199,89,0.10)', border: '1px solid rgba(52,199,89,0.25)' }}
+            >
+              <span className="text-[11px]" style={{ color: '#34C759' }}>✅</span>
+              <div>
+                <p className="text-[10px] font-semibold leading-tight" style={{ color: '#34C759' }}>
+                  Douane ouverte vérifiée — {openCrossingLabel.replace('Via ', '')}
+                </p>
+                <p className="text-[9px] mt-0.5" style={{ color: 'rgba(52,199,89,0.65)' }}>
+                  Itinéraire optimisé G7 · peut être plus long que d'habitude
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* ── Manifestation zone warning ── */}
+          {hasManifestationWarning && (
+            <div
+              className="mt-1.5 rounded-lg px-2 py-1.5 flex items-start gap-1.5"
+              style={{ background: 'rgba(255,159,10,0.10)', border: '1px solid rgba(255,159,10,0.30)' }}
+            >
+              <span className="text-[11px]">⚠️</span>
+              <div>
+                <p className="text-[10px] font-semibold leading-tight" style={{ color: '#FF9F0A' }}>
+                  Zone de manifestation NO-G7
+                </p>
+                <p className="text-[9px] mt-0.5" style={{ color: 'rgba(255,159,10,0.65)' }}>
+                  Perturbations importantes attendues sur cet itinéraire
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* ── G7 longer delay note (A1 closed but no specific crossing label) ── */}
+          {hasG7LongerNotice && !openCrossingLabel && (
+            <div className="mt-1.5 flex items-center gap-1">
+              <span className="text-[9px]" style={{ color: 'rgba(255,159,10,0.7)' }}>ℹ</span>
+              <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                A1 fermée — itinéraire sans autoroute, délai possible
+              </span>
+            </div>
+          )}
+
+          {/* ── Reasons ── */}
           {reasons.length > 0 && (
             <div className="mt-1.5 space-y-0.5">
               {reasons.map((r, ri) => (
@@ -294,6 +351,8 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
             </div>
           )}
         </div>
+
+        {/* ── Arrival time ── */}
         <div className="text-[10px] text-white/30 text-right mt-0.5 ml-2 shrink-0">
           <div>{t.car.arrival}</div>
           <div className="font-medium text-white/50">

@@ -197,12 +197,25 @@ function findBlockedCrossing(
   return null
 }
 
-// Returns true if the route passes within 800m of any border crossing (open or closed).
-function passesNearAnyCrossing(geometry: [number, number][]): boolean {
-  for (const pt of geometry) {
-    for (const c of ALL_CROSSINGS_COORDS) {
-      if (haversine({ lat: pt[1], lng: pt[0] }, c) < 800) return true
-    }
+// Returns true if the STRAIGHT LINE from→to passes within 5 km of any known
+// border crossing. This is the reliable cross-border detector: it works even
+// when the actual road geometry takes a detour away from crossing coordinates.
+function journeyLikelyCrossesBorder(
+  from: { lat: number; lng: number },
+  to:   { lat: number; lng: number },
+): boolean {
+  const dLat = to.lat - from.lat
+  const dLng = to.lng - from.lng
+  const lenSq = dLat * dLat + dLng * dLng
+  if (lenSq === 0) return false
+
+  for (const c of ALL_CROSSINGS_COORDS) {
+    // Project c onto the segment from→to (t clamped to [0,1])
+    const t    = Math.max(0, Math.min(1,
+      ((c.lat - from.lat) * dLat + (c.lng - from.lng) * dLng) / lenSq,
+    ))
+    const proj = { lat: from.lat + t * dLat, lng: from.lng + t * dLng }
+    if (haversine(c, proj) < 5000) return true  // within 5 km of direct path
   }
   return false
 }
@@ -361,8 +374,8 @@ export async function calculateCarRoute(req: CarRouteRequest): Promise<CarRoute[
     toCarRoute(r, `route-${idx}`, idx > 0, g7, a1Closed, manifestation),
   )
 
-  // Is this a cross-border journey? (primary route passes near any crossing)
-  const isCrossBorder = g7 && passesNearAnyCrossing(candidates[0].geometry)
+  // Is this a cross-border journey? (straight line from→to passes near any crossing)
+  const isCrossBorder = g7 && journeyLikelyCrossesBorder(req.from, req.to)
 
   // ── Step 2a: cross-border — route via open crossings ─────────────────────────
   if (isCrossBorder) {
@@ -404,7 +417,22 @@ export async function calculateCarRoute(req: CarRouteRequest): Promise<CarRoute[
       valid.push(candidate)
     }
 
-    if (valid.length === 0) return fallback(req, a1Closed)
+    if (valid.length === 0) {
+      // All open-crossing routes failed — return primary Mapbox route with a warning
+      // rather than a straight line. The route may pass through a closed crossing
+      // but is far better than no route at all.
+      const best = candidates[0]
+      return [{
+        ...best,
+        id: 'route-0',
+        alternative: false,
+        warnings: [
+          '⚠️ Itinéraire direct — vérifiez les conditions aux douanes avant de partir',
+          ...best.warnings,
+        ],
+        blockedCrossing: undefined,
+      }]
+    }
 
     return valid.map((r, i) => ({ ...r, alternative: i > 0 }))
   }
@@ -438,7 +466,10 @@ export async function calculateCarRoute(req: CarRouteRequest): Promise<CarRoute[
     }
   }
 
-  if (valid.length === 0) return fallback(req, a1Closed)
+  if (valid.length === 0) {
+    // Return the primary Mapbox route rather than a straight line
+    return [{ ...candidates[0], id: 'route-0', alternative: false, blockedCrossing: undefined }]
+  }
 
   return valid.map((r, i) => ({ ...r, alternative: i > 0 }))
 }
