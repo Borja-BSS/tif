@@ -279,7 +279,8 @@ export default function SearchHandle({ map }: SearchHandleProps) {
     .then(r => r.json())
     .then(d => {
       if (d.routes?.length) {
-        setCarRoutes(d.routes)
+        const sorted = [...d.routes].sort((a: CarRoute, b: CarRoute) => a.summary.durationInTraffic - b.summary.durationInTraffic)
+        setCarRoutes(sorted)
         setState('route')
         setSheetSize('peek')
         if (map && d.routes[0].geometry?.length > 1) {
@@ -536,11 +537,17 @@ export default function SearchHandle({ map }: SearchHandleProps) {
         <div className="flex-1 overflow-y-auto px-4 py-3">
           {activeTab === 'car' && carRoutes.map((route, i) => {
             const isSelected = i === selectedCarIdx
+            const openCrossing = route.warnings.find((w: string) => w.startsWith('Via ') && w !== 'Via centre-ville')
+            const hasManifestationWarning = route.warnings.some((w: string) => w.includes('manifestation'))
+            const hasA1Warning = route.warnings.some((w: string) => w.includes('A1 fermée'))
+            const slower = i > 0 ? Math.ceil((route.summary.durationInTraffic - carRoutes[0].summary.durationInTraffic) / 60) : 0
             const reasons = i === 0
               ? ['Itinéraire le plus rapide', route.trafficDelay === 0 ? 'Trafic fluide' : null].filter(Boolean) as string[]
-              : route.warnings.includes('Évite les zones G7')
-                ? ['Évite périmètres G7', 'Recommandé 12-18 juin']
-                : ['Via centre-ville', `+${Math.ceil((route.summary.duration - carRoutes[0].summary.duration)/60)} min`]
+              : openCrossing
+                ? (slower > 0 ? [`+${slower} min vs le plus rapide`] : [])
+                : route.warnings.includes('Évite les zones G7')
+                  ? ['Évite périmètres G7', 'Recommandé 12-18 juin']
+                  : [`Via centre-ville`, `+${slower} min`]
             const routeColor = route.warnings.includes('Évite les zones G7') ? '#34C759' : isSelected ? '#0A84FF' : 'rgba(255,255,255,0.45)'
             return (
               <button
@@ -570,6 +577,41 @@ export default function SearchHandle({ map }: SearchHandleProps) {
                 <div className="flex flex-col gap-0.5 mb-2">
                   {reasons.map(r => <span key={r} className="text-[10px] text-white/40">✓ {r}</span>)}
                 </div>
+
+                {/* ── Douane ouverte badge ── */}
+                {openCrossing && (
+                  <div className="mb-2 rounded-xl px-2 py-1.5 flex items-center gap-1.5"
+                    style={{ background: 'rgba(52,199,89,0.10)', border: '1px solid rgba(52,199,89,0.25)' }}>
+                    <span className="text-[10px]" style={{ color: '#34C759' }}>✅</span>
+                    <div>
+                      <p className="text-[10px] font-semibold leading-tight" style={{ color: '#34C759' }}>
+                        Douane ouverte vérifiée — {openCrossing.replace('Via ', '')}
+                      </p>
+                      <p className="text-[9px] mt-0.5" style={{ color: 'rgba(52,199,89,0.6)' }}>
+                        Itinéraire optimisé G7
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Zone manifestation warning ── */}
+                {hasManifestationWarning && (
+                  <div className="mb-2 rounded-xl px-2 py-1.5 flex items-center gap-1.5"
+                    style={{ background: 'rgba(255,159,10,0.10)', border: '1px solid rgba(255,159,10,0.30)' }}>
+                    <span className="text-[10px]">⚠️</span>
+                    <p className="text-[10px] font-semibold leading-tight" style={{ color: '#FF9F0A' }}>
+                      Zone de manifestation NO-G7 — perturbations importantes
+                    </p>
+                  </div>
+                )}
+
+                {/* ── A1 notice (sans badge douane) ── */}
+                {hasA1Warning && !openCrossing && (
+                  <p className="mb-2 text-[9px]" style={{ color: 'rgba(255,69,58,0.7)' }}>
+                    ⛔ A1 fermée — itinéraire sans autoroute
+                  </p>
+                )}
+
                 {isSelected && destination && (
                   <button
                     onClick={e => {
