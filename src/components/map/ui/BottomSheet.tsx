@@ -443,6 +443,19 @@ function DouanesDetail({ onSelect, map }: {
   )
 }
 
+// ── Helpers de formatage de période ──────────────────────────────────────────
+function fmtTime(d: Date) {
+  return d.toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Zurich' })
+}
+function fmtPeriod(from: Date, to: Date) {
+  const diffMs = to.getTime() - from.getTime()
+  if (diffMs >= 86400000) {
+    const opts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', timeZone: 'Europe/Zurich' }
+    return `${from.toLocaleDateString('fr-CH', opts)} – ${to.toLocaleDateString('fr-CH', opts)}`
+  }
+  return `${fmtTime(from)}–${fmtTime(to)}`
+}
+
 // ── Transport ─────────────────────────────────────────────────────────────────
 interface TpgDisruptionItem { lineNumber: string; type: string; description: string; detectedAt?: string }
 interface CffDisruptionItem { line: string; type: string; description: string; isCEVA?: boolean; delayMinutes?: number; detectedAt?: string }
@@ -592,6 +605,67 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
           </div>
         </div>
       )}
+
+      {/* ── Zones d'impact TPG ───────────────────────────────────────── */}
+      {IMPACT_ZONES.filter(z => z.type === 'TRANSPORT_DISRUPTION').map(zone => {
+        const color = zone.strokeColor
+        return (
+          <div key={zone.id} className="rounded-2xl p-4 space-y-3"
+            style={{ background: `${color}12`, border: `1px solid ${color}35` }}>
+            <div className="flex items-start gap-3">
+              <span className="text-2xl flex-shrink-0">🟠</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color }}>
+                  Réseau TPG · Perturbations G7
+                </p>
+                <p className="text-sm font-bold leading-snug mt-0.5" style={{ color: 'var(--text-primary)' }}>
+                  {zone.title}
+                </p>
+              </div>
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 text-center"
+                style={{ background: `${color}20`, color, minWidth: 60 }}>
+                {fmtPeriod(zone.activeFrom, zone.activeTo)}
+              </span>
+            </div>
+            {zone.lines && zone.lines.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {zone.lines.map(l => (
+                  <span key={l} className="text-[11px] font-bold px-2 py-0.5 rounded-lg"
+                    style={{ background: `${color}22`, color, border: `1px solid ${color}40` }}>
+                    {l}
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="space-y-1">
+              {zone.description.split('\n').map((line, i) => {
+                if (!line.trim()) return null
+                const isBullet = line.startsWith('*')
+                const isHeader = !isBullet && /[A-ZÉÈÊÀÙÂÎÛÔ]{3,}/.test(line)
+                if (isBullet) return (
+                  <p key={i} className="pl-3 text-[12px]" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                    {line.replace(/^\*\s*/, '· ')}
+                  </p>
+                )
+                if (isHeader) return (
+                  <p key={i} className="text-[10px] font-bold uppercase tracking-wider pt-1.5"
+                    style={{ color: `${color}CC` }}>
+                    {line}
+                  </p>
+                )
+                return (
+                  <p key={i} className="text-[12px] font-semibold" style={{ color: 'rgba(255,255,255,0.80)' }}>
+                    {line}
+                  </p>
+                )
+              })}
+            </div>
+            <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.30)' }}>
+              {zone.source} · {zone.sourceRef}
+            </p>
+          </div>
+        )
+      })}
 
       <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>
         {t.transport.networkStatus}
@@ -1011,18 +1085,6 @@ function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
         )}
       </div>
     )
-  }
-
-  const fmtTime = (d: Date) =>
-    d.toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Zurich' })
-
-  const fmtPeriod = (from: Date, to: Date) => {
-    const diffMs = to.getTime() - from.getTime()
-    if (diffMs >= 86400000) {
-      const opts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', timeZone: 'Europe/Zurich' }
-      return `${from.toLocaleDateString('fr-CH', opts)} – ${to.toLocaleDateString('fr-CH', opts)}`
-    }
-    return `${fmtTime(from)}–${fmtTime(to)}`
   }
 
   return (
