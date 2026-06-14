@@ -61,7 +61,7 @@ export default function CustomAlertsLayer({ map }: Props) {
     const seen = new Set<string>()
 
     features.forEach(f => {
-      const { id, color, icon, title, description, radius } = f.properties
+      const { id, type, color, icon, title, description, radius } = f.properties
       const [lng, lat] = f.geometry.coordinates
       seen.add(id)
 

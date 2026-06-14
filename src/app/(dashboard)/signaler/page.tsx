@@ -12,7 +12,7 @@ const LG: React.CSSProperties = {
   WebkitBackdropFilter: 'blur(48px) saturate(200%) brightness(1.05)',
 }
 
-type Step = 'category' | 'subcategory' | 'priority' | 'description' | 'location' | 'media' | 'confirm'
+type Step = 'category' | 'subcategory' | 'priority' | 'description' | 'location' | 'media' | 'confirm' | 'done'
 
 export default function SignalerPage() {
   const router = useRouter()
@@ -81,7 +81,8 @@ export default function SignalerPage() {
         setSubmitting(false)
         return
       }
-      router.push('/map?submitted=1')
+      setStep('done')
+      setSubmitting(false)
     } catch {
       setError('Erreur réseau — réessayez')
       setSubmitting(false)
@@ -98,7 +99,7 @@ export default function SignalerPage() {
     confirm:     true,
   }
 
-  const STEPS: Step[] = ['category','subcategory','priority','description','location','media','confirm']
+  const STEPS: Step[] = ['category','subcategory','priority','description','location','media','confirm','done']
   const stepIdx = STEPS.indexOf(step)
   const progress = ((stepIdx + 1) / STEPS.length) * 100
 
@@ -376,10 +377,69 @@ export default function SignalerPage() {
             </div>
           )
         })()}
+
+        {/* ── Étape done : Merci + Partager ───────────────────────────── */}
+        {step === 'done' && (() => {
+          const shareUrl   = 'https://tif.borja-swiss-solutions.ch'
+          const shareText  = encodeURIComponent('Je viens de signaler un incident sur TIF — la carte temps réel du Grand Genève 👇')
+          const shareTitle = 'TIF — Signalement Grand Genève'
+          const hasNativeShare = typeof navigator !== 'undefined' && !!navigator.share
+          const handleNativeShare = async () => {
+            try { await navigator.share({ title: shareTitle, url: shareUrl }) } catch {}
+          }
+          return (
+            <div className="flex flex-col items-center text-center space-y-5 py-6">
+              <div className="text-6xl">✅</div>
+              <div>
+                <h2 className="text-[20px] font-bold text-white mb-1">Merci pour votre signalement !</h2>
+                <p className="text-[13px]" style={{ color: 'rgba(255,255,255,0.50)' }}>
+                  Il sera examiné avant publication sur la carte.
+                </p>
+              </div>
+
+              <div className="w-full rounded-2xl p-4 space-y-2" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)' }}>
+                <p className="text-[12px] font-semibold uppercase tracking-widest mb-3" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  Partager l&apos;info
+                </p>
+                {hasNativeShare ? (
+                  <button onClick={handleNativeShare}
+                    className="w-full flex items-center justify-center gap-2 rounded-2xl py-3.5 font-bold text-[14px] active:scale-[0.97] transition-transform"
+                    style={{ background: 'rgba(10,132,255,0.15)', border: '1px solid rgba(10,132,255,0.35)', color: '#0A84FF' }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                      <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
+                    </svg>
+                    Partager via…
+                  </button>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    {([
+                      { label: 'WhatsApp',  color: '#25D366', href: `https://wa.me/?text=${shareText}%20${encodeURIComponent(shareUrl)}` },
+                      { label: 'Facebook',  color: '#1877F2', href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}` },
+                      { label: 'Instagram', color: '#E1306C', href: 'https://www.instagram.com/' },
+                      { label: 'Snapchat',  color: '#FFFC00', href: `https://www.snapchat.com/scan?attachmentUrl=${encodeURIComponent(shareUrl)}` },
+                    ] as { label: string; color: string; href: string }[]).map(s => (
+                      <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer"
+                        className="flex items-center justify-center rounded-2xl py-3 font-semibold text-[13px] active:scale-[0.97] transition-transform"
+                        style={{ background: `${s.color}18`, border: `1px solid ${s.color}44`, color: s.color === '#FFFC00' ? '#b8a800' : s.color }}>
+                        {s.label}
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <button onClick={() => { window.location.href = '/map' }}
+                className="w-full flex items-center justify-center gap-2 rounded-2xl py-4 font-bold text-[15px] active:scale-[0.97] transition-transform"
+                style={{ background: 'rgba(255,255,255,0.08)', border: '0.5px solid rgba(255,255,255,0.14)', color: 'rgba(255,255,255,0.85)' }}>
+                ← Retour à la carte
+              </button>
+            </div>
+          )
+        })()}
       </div>
 
       {/* Footer bouton Suivant (sauf confirm qui a son propre submit) */}
-      {step !== 'category' && step !== 'subcategory' && step !== 'priority' && step !== 'confirm' && (
+      {step !== 'category' && step !== 'subcategory' && step !== 'priority' && step !== 'confirm' && step !== 'done' && (
         <div className="flex-shrink-0 px-4 pb-safe-bottom pb-6 pt-3" style={{ background: 'rgba(10,10,10,0.85)', borderTop: '0.5px solid rgba(255,255,255,0.08)' }}>
           <button
             onClick={goNext}

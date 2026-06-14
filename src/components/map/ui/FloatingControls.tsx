@@ -242,7 +242,14 @@ export function FloatingControls({ map }: FloatingControlsProps) {
               </div>
 
               <button
-                onClick={() => { setShowReportModal(false); router.push('/signaler') }}
+                onClick={() => {
+                  // Marque tous les modaux comme vus — l'utilisateur est déjà sur la carte
+                  localStorage.setItem('tif:update:v4', '1')
+                  localStorage.setItem('tif:g7:v1', '1')
+                  localStorage.setItem('tif:features:v1', '1')
+                  setShowReportModal(false)
+                  window.location.href = '/signaler'
+                }}
                 className="w-full flex items-center justify-center gap-2 rounded-2xl py-3.5 font-bold text-[14px] active:scale-[0.97] transition-transform"
                 style={{ background: 'linear-gradient(135deg, #FF453A, #FF2D55)', color: '#fff', boxShadow: '0 4px 16px rgba(255,59,48,0.35)' }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
