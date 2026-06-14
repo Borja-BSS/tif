@@ -15,7 +15,7 @@ export async function GET() {
         id, category, subcategory, priority, description, lat, lng, address, createdAt,
       }))
     return NextResponse.json({ signalements: approved }, {
-      headers: { 'Cache-Control': 'public, max-age=30, stale-while-revalidate=60' },
+      headers: { 'Cache-Control': 'no-store' },
     })
   } catch {
     return NextResponse.json({ signalements: [] })

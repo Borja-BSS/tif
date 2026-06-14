@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import mapboxgl from 'mapbox-gl'
-import { SIGNAL_CATEGORIES, PRIORITY_LEVELS } from '@/data/signalement-categories'
+import { SIGNAL_CATEGORIES } from '@/data/signalement-categories'
 
 interface PublicSignalement {
   id:          string
