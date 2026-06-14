@@ -35,10 +35,11 @@ const A1AP: [number, number][] = [
 ]
 
 // Sortie Vengeron / Genève-Lac (fermée 14 juin 06h–24h)
+// Bretelle de sortie A1 → Vernier/Genève-Lac, entre Meyrin et Lancy-Bachet
 const VENGERON: [number, number][] = [
-  [6.107, 46.265],
-  [6.119, 46.271],
-  [6.136, 46.274],
+  [6.087, 46.203],
+  [6.094, 46.207],
+  [6.101, 46.213],
 ]
 
 export const G7_ROAD_CLOSURES: Feature<LineString, G7RoadClosureProps>[] = [
