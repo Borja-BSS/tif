@@ -5,8 +5,8 @@ import { useMapT } from '@/i18n/map'
 import { OnboardingTour, fireConfetti } from './OnboardingTour'
 
 const UPDATE_KEY   = 'tif:update:v4'
-const G7_KEY       = 'tif:g7:v1'
-const FEATURES_KEY = 'tif:features:v1'
+const G7_KEY       = 'tif:g7:v2'
+const FEATURES_KEY = 'tif:features:v2'
 
 const LG_MODAL: React.CSSProperties = {
   background:           'rgba(18,18,24,0.96)',
@@ -25,6 +25,13 @@ export function WelcomeModals() {
 
   // Determine which step to show — each popup is shown only once (guarded by localStorage)
   useEffect(() => {
+    // Si l'utilisateur revient depuis /signaler, skip les modals pour cette session
+    if (sessionStorage.getItem('tif:from-signaler')) {
+      sessionStorage.removeItem('tif:from-signaler')
+      setStep(null)
+      return
+    }
+
     const updateSeen   = localStorage.getItem(UPDATE_KEY)
     const g7Seen       = localStorage.getItem(G7_KEY)
     const surveyDone   = localStorage.getItem('tif_survey_v1')

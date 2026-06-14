@@ -243,10 +243,8 @@ export function FloatingControls({ map }: FloatingControlsProps) {
 
               <button
                 onClick={() => {
-                  // Marque tous les modaux comme vus — l'utilisateur est déjà sur la carte
-                  localStorage.setItem('tif:update:v4', '1')
-                  localStorage.setItem('tif:g7:v1', '1')
-                  localStorage.setItem('tif:features:v1', '1')
+                  // Flag temporaire (sessionStorage) — WelcomeModals l'efface après vérification
+                  sessionStorage.setItem('tif:from-signaler', '1')
                   setShowReportModal(false)
                   window.location.href = '/signaler'
                 }}
