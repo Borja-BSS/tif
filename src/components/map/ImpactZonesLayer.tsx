@@ -80,7 +80,7 @@ export default function ImpactZonesLayer({ map, activeFilter }: Props) {
     if (!map) return
     if (map.getSource(SRC_ID)) return   // déjà initialisé (idle peut se déclencher après style.load)
 
-    const geojson = getImpactZoneGeoJSON(IMPACT_ZONES)
+    const geojson = getImpactZoneGeoJSON(IMPACT_ZONES.filter(z => z.renderOnMap !== false))
 
     if (!map.getSource(SRC_ID)) {
       map.addSource(SRC_ID, { type: 'geojson', data: geojson })

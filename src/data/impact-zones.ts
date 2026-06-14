@@ -14,6 +14,7 @@ export interface ImpactZone {
   lines?:      string[]      // lignes TPG impactées
   type:        ImpactZoneType
   severity:    'HIGH' | 'MEDIUM'
+  renderOnMap?: boolean      // false = données dispo dans le menu mais pas sur la carte
   // GeoJSON Polygon coordinates [lng, lat][]
   coordinates: [number, number][]
   activeFrom:  Date
@@ -31,25 +32,25 @@ export interface ImpactZone {
 // Rue de la Servette · Rue Louis-Favre · Rue du Grand-Pré
 // Avenue Giuseppe-Motta · Place des Nations · Avenue de France · Parc Mon Repos
 const ZONE_MANIFESTATION: [number, number][] = [
-  [6.1498, 46.2055],  // Quai du Mont-Blanc / Pont du Mont-Blanc
-  [6.1548, 46.2073],  // Quai du Mont-Blanc (milieu)
-  [6.1572, 46.2098],  // Quai Wilson (sud, angle Rue des Alpes)
-  [6.1578, 46.2148],  // Quai Wilson (milieu)
-  [6.1568, 46.2188],  // Quai Wilson (nord, Pâquis)
-  [6.1542, 46.2215],  // Avenue Giuseppe-Motta × lac
-  [6.1486, 46.2236],  // Avenue Giuseppe-Motta (milieu est)
-  [6.1420, 46.2250],  // Place des Nations (est)
-  [6.1360, 46.2244],  // Avenue de France (est)
-  [6.1335, 46.2218],  // Rue de la Servette (nord)
-  [6.1325, 46.2178],  // Rue de la Servette (milieu)
-  [6.1330, 46.2148],  // Rue Louis-Favre (ouest)
-  [6.1348, 46.2112],  // Rue du Grand-Pré (milieu)
-  [6.1370, 46.2088],  // Rue du Grand-Pré (sud)
-  [6.1395, 46.2080],  // Place Lise-Girardin
-  [6.1432, 46.2082],  // Rue de Chantepoulet (milieu)
-  [6.1468, 46.2088],  // Rue A-Lévrier / F-Bonivard
-  [6.1503, 46.2094],  // Rue des Alpes (est Gare Cornavin)
-  [6.1498, 46.2055],  // Fermeture
+  [6.1505923, 46.2040486], // Point de jonction sud (Cornavin / Sécheron)
+  [6.1548, 46.2073],       // Quai du Mont-Blanc (milieu)
+  [6.1572, 46.2098],       // Quai Wilson (sud, angle Rue des Alpes)
+  [6.1578, 46.2148],       // Quai Wilson (milieu)
+  [6.1568, 46.2188],       // Quai Wilson (nord, Pâquis)
+  [6.1542, 46.2215],       // Avenue Giuseppe-Motta × lac
+  [6.1486, 46.2236],       // Avenue Giuseppe-Motta (milieu est)
+  [6.1420, 46.2250],       // Place des Nations (est)
+  [6.1360, 46.2244],       // Avenue de France (est)
+  [6.1335, 46.2218],       // Rue de la Servette (nord)
+  [6.1325, 46.2178],       // Rue de la Servette (milieu)
+  [6.1330, 46.2148],       // Rue Louis-Favre (ouest)
+  [6.1348, 46.2112],       // Rue du Grand-Pré (milieu)
+  [6.1370, 46.2088],       // Rue du Grand-Pré (sud)
+  [6.1267310, 46.2081691], // Extension ouest (Rue de la Servette / Saint-Jean)
+  [6.1327700, 46.2055601], // Descente sud-est
+  [6.1426392, 46.2055738], // Longueur est (bas)
+  [6.1434680, 46.2043145], // Angle sud
+  [6.1505923, 46.2040486], // Fermeture (jonction)
 ]
 
 // ── Zone 2 — Réseau TPG perturbé (orange) ───────────────────────────────────
@@ -104,6 +105,7 @@ export const IMPACT_ZONES: ImpactZone[] = [
   },
   {
     id:          'no-g7-tpg-disruption',
+    renderOnMap: false,
     title:       'Réseau TPG — Lignes supprimées',
     description:
       'Perturbation majeure du réseau dès 13h30 (1h30 avant le déclenchement).\n\n' +
