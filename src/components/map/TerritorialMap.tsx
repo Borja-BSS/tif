@@ -5,8 +5,8 @@ import dynamic from 'next/dynamic'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import type { FeatureCollection } from 'geojson'
+import { CarRoutingPanel } from './routing/CarRoutingPanel'
 
-const CarRoutingPanel       = dynamic(() => import('./routing/CarRoutingPanel').then(m => ({ default: m.CarRoutingPanel })), { ssr: false })
 const TransportRoutingPanel = dynamic(() => import('./routing/TransportRoutingPanel').then(m => ({ default: m.TransportRoutingPanel })), { ssr: false })
 
 type LayerId = 'mobility' | 'transport' | 'alerts' | 'territory'
