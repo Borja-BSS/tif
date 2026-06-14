@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import type mapboxgl from 'mapbox-gl'
 
 const BTN_BASE: React.CSSProperties = {
@@ -35,8 +36,10 @@ interface FloatingControlsProps {
 }
 
 export function FloatingControls({ map }: FloatingControlsProps) {
-  const [active,    setActive]    = useState(false)
-  const [following, setFollowing] = useState(false)
+  const router = useRouter()
+  const [active,       setActive]       = useState(false)
+  const [following,    setFollowing]    = useState(false)
+  const [showReportModal, setShowReportModal] = useState(false)
   const followRef  = useRef(false)
   const watchIdRef = useRef<number | null>(null)
   const flyDoneRef = useRef(false)
@@ -187,22 +190,91 @@ export function FloatingControls({ map }: FloatingControlsProps) {
 
   return (
     <>
+      {/* ── Popup signalement ───────────────────────────────────────────── */}
+      {showReportModal && (
+        <>
+          {/* Backdrop */}
+          <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.45)' }}
+            onClick={() => setShowReportModal(false)} />
+          {/* Modal */}
+          <div className="fixed z-50 rounded-3xl overflow-hidden"
+            style={{
+              right: 16, bottom: 'calc(56px + 24px + 54px)',
+              width: 'min(320px, calc(100vw - 32px))',
+              background: 'rgba(18,18,20,0.96)',
+              backdropFilter: 'blur(48px) saturate(200%)',
+              WebkitBackdropFilter: 'blur(48px) saturate(200%)',
+              border: '0.5px solid rgba(255,255,255,0.18)',
+              boxShadow: '0 16px 48px rgba(0,0,0,0.50)',
+              animation: 'fadeUp 0.22s cubic-bezier(0.34, 1.56, 0.64, 1)',
+            }}>
+            {/* Header */}
+            <div className="flex items-center gap-3 px-4 pt-4 pb-3" style={{ borderBottom: '0.5px solid rgba(255,255,255,0.08)' }}>
+              <div className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0"
+                style={{ background: 'rgba(255,59,48,0.15)', border: '1px solid rgba(255,59,48,0.35)' }}>
+                <span className="text-xl">📡</span>
+              </div>
+              <div className="flex-1">
+                <p className="text-[14px] font-bold" style={{ color: 'rgba(255,255,255,0.92)' }}>Signaler en direct</p>
+                <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.45)' }}>Remontée communautaire · G7 2026</p>
+              </div>
+              <button onClick={() => setShowReportModal(false)}
+                className="w-7 h-7 flex items-center justify-center rounded-full text-[16px] leading-none"
+                style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.50)' }}>×</button>
+            </div>
+
+            {/* Body */}
+            <div className="px-4 py-4 space-y-3">
+              <p className="text-[13px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                Vous observez quelque chose de notable — circulation, incident, manifestation, contrôle douanier ?
+              </p>
+              <p className="text-[13px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                Signalez-le en quelques secondes. Chaque signalement est <strong style={{ color: 'rgba(255,255,255,0.85)' }}>examiné avant publication</strong> sur la carte.
+              </p>
+
+              <div className="rounded-2xl px-3 py-2.5 space-y-1.5"
+                style={{ background: 'rgba(255,255,255,0.05)', border: '0.5px solid rgba(255,255,255,0.10)' }}>
+                {['🚦 Circulation & incidents','🛂 Douanes & frontières','👥 Rassemblements','🚨 Forces de l\'ordre','⚠️ Sécurité & zones à risque'].map(item => (
+                  <div key={item} className="flex items-center gap-2">
+                    <span className="text-[11px]" style={{ color: 'rgba(255,255,255,0.55)' }}>{item}</span>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                onClick={() => { setShowReportModal(false); router.push('/signaler') }}
+                className="w-full flex items-center justify-center gap-2 rounded-2xl py-3.5 font-bold text-[14px] active:scale-[0.97] transition-transform"
+                style={{ background: 'linear-gradient(135deg, #FF453A, #FF2D55)', color: '#fff', boxShadow: '0 4px 16px rgba(255,59,48,0.35)' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+                </svg>
+                Signaler un événement
+              </button>
+
+              <p className="text-[10px] text-center" style={{ color: 'rgba(255,255,255,0.22)' }}>
+                Anonyme · Aucune donnée personnelle
+              </p>
+            </div>
+          </div>
+        </>
+      )}
+
       {/* Zoom + — desktop uniquement */}
-      <div className="fixed z-20 hidden md:flex" style={{ right: 16, bottom: 'calc(56px + 24px + 156px)' }}>
+      <div className="fixed z-20 hidden md:flex" style={{ right: 16, bottom: 'calc(56px + 24px + 208px)' }}>
         <button onClick={handleZoomIn}
           style={{ ...BTN_BASE, background: 'rgba(255,255,255,0.07)', border: '0.5px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.75)', fontSize: 22, fontWeight: 300, lineHeight: 1 }}
           aria-label="Zoom avant">+</button>
       </div>
 
       {/* Zoom − — desktop uniquement */}
-      <div className="fixed z-20 hidden md:flex" style={{ right: 16, bottom: 'calc(56px + 24px + 104px)' }}>
+      <div className="fixed z-20 hidden md:flex" style={{ right: 16, bottom: 'calc(56px + 24px + 156px)' }}>
         <button onClick={handleZoomOut}
           style={{ ...BTN_BASE, background: 'rgba(255,255,255,0.07)', border: '0.5px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.75)', fontSize: 22, fontWeight: 300, lineHeight: 1 }}
           aria-label="Zoom arrière">−</button>
       </div>
 
       {/* Fit all — desktop uniquement */}
-      <div className="fixed z-20 hidden md:flex" style={{ right: 16, bottom: 'calc(56px + 24px + 52px)' }}>
+      <div className="fixed z-20 hidden md:flex" style={{ right: 16, bottom: 'calc(56px + 24px + 104px)' }}>
         <button
           onClick={handleFitAll}
           style={{ ...BTN_BASE, background: 'rgba(255,255,255,0.07)', border: '0.5px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.75)' }}
@@ -213,6 +285,23 @@ export function FloatingControls({ map }: FloatingControlsProps) {
             <polyline points="9 21 3 21 3 15"/>
             <line x1="21" y1="3" x2="14" y2="10"/>
             <line x1="3" y1="21" x2="10" y2="14"/>
+          </svg>
+        </button>
+      </div>
+
+      {/* Bouton Signaler — au-dessus du GPS */}
+      <div className="fixed z-20" style={{ right: 16, bottom: 'calc(56px + 24px + 52px)' }}>
+        <button
+          onClick={() => setShowReportModal(prev => !prev)}
+          style={{
+            ...BTN_BASE,
+            background: showReportModal ? 'rgba(255,59,48,0.22)' : 'rgba(255,59,48,0.12)',
+            border: `0.5px solid ${showReportModal ? 'rgba(255,59,48,0.70)' : 'rgba(255,59,48,0.45)'}`,
+            color: '#FF453A',
+          }}
+          aria-label="Signaler un événement">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="3 11 22 2 13 21 11 13 3 11"/>
           </svg>
         </button>
       </div>

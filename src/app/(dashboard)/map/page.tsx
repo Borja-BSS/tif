@@ -2,9 +2,9 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import { useSession }             from '@/context/AuthContext'
-import { useRouter }              from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import dynamicImport              from 'next/dynamic'
 import mapboxgl                   from 'mapbox-gl'
 import { SearchBar }              from '@/components/map/ui/SearchBar'
@@ -37,13 +37,42 @@ function toFilterState(active: FilterId): FilterState {
 }
 
 export default function MapPage() {
-  const [activeFilter, setActiveFilter] = useState<FilterId>('all')
-  const [mapRef,       setMapRef]       = useState<mapboxgl.Map | null>(null)
-  const sessionResult                   = useSession()
-  const session                         = sessionResult?.data ?? null
-  const isG7Active                      = useG7Active()
-  const router                          = useRouter()
-  const { isGuest, endGuest } = useGuest()
+  const [activeFilter, setActiveFilter]   = useState<FilterId>('all')
+  const [mapRef,       setMapRef]         = useState<mapboxgl.Map | null>(null)
+  const [showThanks,   setShowThanks]     = useState(false)
+  const sessionResult                     = useSession()
+  const session                           = sessionResult?.data ?? null
+  const isG7Active                        = useG7Active()
+  const router                            = useRouter()
+  const searchParams                      = useSearchParams()
+  const { isGuest, endGuest }             = useGuest()
+  const confettiFiredRef                  = useRef(false)
+
+  // Confetti + merci après signalement
+  useEffect(() => {
+    if (searchParams?.get('submitted') !== '1' || confettiFiredRef.current) return
+    confettiFiredRef.current = true
+    setShowThanks(true)
+    import('canvas-confetti').then(({ default: confetti }) => {
+      const launch = () => confetti({
+        particleCount: 80,
+        spread: 70,
+        origin: { y: 0.55 },
+        colors: ['#FF2D55','#FF9500','#30D158','#0A84FF','#AF52DE','#FFD60A'],
+        zIndex: 9999,
+      })
+      launch()
+      setTimeout(launch, 350)
+    })
+    const t = setTimeout(() => {
+      setShowThanks(false)
+      // retire ?submitted=1 de l'URL sans reload
+      const url = new URL(window.location.href)
+      url.searchParams.delete('submitted')
+      window.history.replaceState({}, '', url.toString())
+    }, 5500)
+    return () => clearTimeout(t)
+  }, [searchParams])
 
   useEffect(() => {
     if (sessionResult.status !== 'loading' && !session && !isGuest) router.replace('/login')
@@ -119,6 +148,30 @@ export default function MapPage() {
 
       {/* Layer 9: TPG line stop pins (activé par tif:line-select) */}
       <TpgLineStopsLayer map={mapRef} />
+
+      {/* ── Toast Merci après signalement ──────────────────────────────── */}
+      {showThanks && (
+        <div className="fixed left-1/2 z-50 -translate-x-1/2 pointer-events-none"
+          style={{ top: 'calc(52px + 56px + 16px)', animation: 'fadeUp 0.32s cubic-bezier(0.34, 1.56, 0.64, 1)' }}>
+          <div className="rounded-3xl px-5 py-4 text-center max-w-xs mx-auto"
+            style={{
+              background: 'rgba(18,18,20,0.96)',
+              backdropFilter: 'blur(40px) saturate(200%)',
+              WebkitBackdropFilter: 'blur(40px) saturate(200%)',
+              border: '0.5px solid rgba(255,255,255,0.18)',
+              boxShadow: '0 16px 48px rgba(0,0,0,0.55)',
+            }}>
+            <p className="text-3xl mb-1">🙏</p>
+            <p className="text-[16px] font-bold mb-0.5" style={{ color: 'rgba(255,255,255,0.95)' }}>Merci pour votre signalement !</p>
+            <p className="text-[12px] mb-3" style={{ color: 'rgba(255,255,255,0.50)' }}>Il sera examiné et publié si pertinent.</p>
+            <a href="/donate"
+              className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-[12px] font-semibold pointer-events-auto active:scale-95 transition-transform"
+              style={{ background: 'rgba(52,199,89,0.15)', border: '1px solid rgba(52,199,89,0.35)', color: '#30D158' }}>
+              💚 Soutenir TIF
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* Welcome modals — G7 zone info + features list (once per localStorage) */}
       <WelcomeModals />
