@@ -250,7 +250,8 @@ export default function AdminCrossingsPage() {
       {/* ── Nav ────────────────────────────────────────────────────── */}
       <nav className="flex gap-0 px-4 border-b border-white/[0.06]">
         {[
-          { label: 'Alertes',  href: '/admin/alerts'    },
+          { label: 'Alertes',       href: '/admin/alerts'       },
+          { label: 'Signalements',  href: '/admin/signalements' },
           { label: 'Sondage',  href: '/admin/survey'    },
           { label: 'Douanes',  href: '/admin/crossings' },
         ].map(tab => {
