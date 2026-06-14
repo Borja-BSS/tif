@@ -69,7 +69,14 @@ function injectPopupStyle() {
   document.head.appendChild(s)
 }
 
+const HEX_RE = /^#[0-9a-fA-F]{3,8}$/
+
+function safeColor(c: string): string {
+  return HEX_RE.test(c) ? c : '#888888'
+}
+
 function buildPopupHTML(p: { type: string; title: string; description: string; color: string; icon: string }): string {
+  const color   = safeColor(p.color)
   const descLine = p.description
     ? `<div style="font-size:12px;color:rgba(255,255,255,0.78);margin-bottom:8px">${esc(p.description)}</div>`
     : ''
@@ -77,13 +84,13 @@ function buildPopupHTML(p: { type: string; title: string; description: string; c
   return `
     <div style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;padding:12px 14px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-        <span style="width:28px;height:28px;border-radius:50%;background:${p.color}dd;
-          display:inline-flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">${p.icon}</span>
+        <span style="width:28px;height:28px;border-radius:50%;background:${color}dd;
+          display:inline-flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">${esc(p.icon)}</span>
         <span style="font-size:14px;font-weight:700;color:#fff">${esc(p.title)}</span>
       </div>
       ${descLine}
       <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;
-        background:${p.color}22;color:${p.color};border:1px solid ${p.color}44;
+        background:${color}22;color:${color};border:1px solid ${color}44;
         text-transform:uppercase;letter-spacing:0.05em">${esc(p.type || 'Alerte')}</span>
       <div style="font-size:10px;color:rgba(255,255,255,0.25);margin-top:8px">Source : Signalements TIF</div>
     </div>`
@@ -118,19 +125,20 @@ export default function CustomAlertsLayer({ map }: Props) {
       seen.add(id)
 
       if (!markersRef.current.has(id)) {
+        const safeCol = safeColor(color)
         const el = document.createElement('div')
         el.className = 'tif-ca-marker'
-        el.style.background = `${color}dd`
+        el.style.background = `${safeCol}dd`
         el.style.cursor = 'pointer'
         el.style.setProperty('--ca-shadow', '0 4px 12px rgba(0,0,0,0.4)')
-        el.style.setProperty('--ca-pulse', `${color}66`)
+        el.style.setProperty('--ca-pulse', `${safeCol}66`)
         el.textContent = icon
 
         el.addEventListener('click', (e) => {
           e.stopPropagation()
           new mapboxgl.Popup({ maxWidth: '280px', className: 'tif-popup', closeButton: true, offset: 14 })
             .setLngLat([lng, lat])
-            .setHTML(buildPopupHTML({ type, title, description, color, icon }))
+            .setHTML(buildPopupHTML({ type, title, description, color: safeColor(color), icon }))
             .addTo(map)
         })
 
