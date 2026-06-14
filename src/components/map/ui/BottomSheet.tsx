@@ -23,6 +23,12 @@ import type { ImpactZone } from '@/data/impact-zones'
 
 type DetailView = 'overview' | 'douanes' | 'transport' | 'alertes' | 'g7' | 'meteo' | 'parking' | 'journey' | 'events' | 'impact-zone'
 
+// Type partagé entre AlertesDetail et le composant parent (navigation hiérarchique)
+type AlertDetailItem = {
+  id: string; type: string; title: string; description: string; source: string
+  color: string; icon: string; lng: number; lat: number
+}
+
 const COMPACT_H = 56
 const getFullH  = () => (typeof window !== 'undefined' ? window.innerHeight - 120 : 600)
 // Spring iOS-like pour les snaps automatiques
@@ -742,7 +748,7 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
           const termA    = lineCfg?.terminusA ?? '—'
           const termB    = lineCfg?.terminusB ?? '—'
           return (
-            <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${c}30` }}>
+            <div key={selectedLine} className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${c}30`, animation: 'fadeUp 0.18s cubic-bezier(0.23, 1, 0.32, 1)' }}>
               {/* Header */}
               <div className="flex items-center justify-between px-4 pt-3 pb-2" style={{ background: `${c}12` }}>
                 <div className="flex items-center gap-2 min-w-0">
@@ -811,11 +817,13 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
 
         {/* Arrêt sélectionné — prochains départs */}
         {selectedStop && (
-          <StopDeparturesPanel
-            name={selectedStop.name}
-            line={selectedStop.line}
-            onClose={() => setSelectedStop(null)}
-          />
+          <div key={`${selectedStop.name}|${selectedStop.line}`} style={{ animation: 'fadeUp 0.18s cubic-bezier(0.23, 1, 0.32, 1)' }}>
+            <StopDeparturesPanel
+              name={selectedStop.name}
+              line={selectedStop.line}
+              onClose={() => setSelectedStop(null)}
+            />
+          </div>
         )}
         {!linesLoading && (tpgLines?.lines ?? []).length === 0 && (
           <p className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>{t.transport.noLines}</p>
@@ -886,8 +894,107 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
   )
 }
 
+// ── Fiche détail d'une alerte admin (composant autonome) ─────────────────────
+function AlertDetailView({ alert: a, map, onBack }: {
+  alert:  AlertDetailItem
+  map:    mapboxgl.Map | null
+  onBack: () => void
+}) {
+  const t = useMapT()
+  const [shareCopied, setShareCopied] = useState(false)
+
+  const flyTo = (lng: number, lat: number) => {
+    if (!map || !lng || !lat) return
+    map.flyTo({ center: [lng, lat], zoom: 14, duration: 900, essential: true })
+  }
+
+  const customAlertTypeLabel = (type: string) =>
+    type === 'barrage'      ? t.alertsSection.barrage
+    : type === 'accident'   ? t.alertsSection.accident
+    : type === 'restriction'? t.alertsSection.restriction
+    : t.alertsSection.incident
+
+  let validSource: string | null = null
+  try {
+    const u = new URL(a.source)
+    if (u.protocol === 'http:' || u.protocol === 'https:') validSource = a.source
+  } catch { /* URL invalide */ }
+
+  return (
+    <div className="space-y-3">
+      <div className="rounded-2xl p-4" style={{ background: `${a.color}12`, border: `1px solid ${a.color}35` }}>
+        <div className="flex items-start gap-3">
+          <span className="text-3xl flex-shrink-0">{a.icon}</span>
+          <div className="flex-1 min-w-0">
+            <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: a.color }}>
+              {customAlertTypeLabel(a.type)}
+            </span>
+            <h2 className="text-base font-bold leading-snug mt-0.5" style={{ color: '#fff' }}>{a.title}</h2>
+          </div>
+        </div>
+        {a.description && (
+          <p className="text-[13px] leading-relaxed mt-3" style={{ color: 'rgba(255,255,255,0.70)' }}>
+            {a.description}
+          </p>
+        )}
+      </div>
+
+      <button
+        onClick={() => { flyTo(a.lng, a.lat); onBack() }}
+        className="w-full flex items-center justify-center gap-2 rounded-2xl py-3 font-semibold text-sm active:scale-[0.97] transition-transform"
+        style={{ background: 'var(--brand)', color: '#fff' }}
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+          <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+        Voir sur la carte
+      </button>
+
+      <button
+        onClick={async () => {
+          const shareText = [a.title, a.description].filter(Boolean).join(' — ')
+          const shareUrl  = window.location.href
+          if (typeof navigator.share === 'function') {
+            try { await navigator.share({ title: a.title, text: shareText, url: shareUrl }); return } catch { /* annulé */ }
+          }
+          try {
+            await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`)
+            setShareCopied(true)
+            setTimeout(() => setShareCopied(false), 2000)
+          } catch { /* ignore */ }
+        }}
+        className="w-full flex items-center justify-center gap-2 rounded-2xl py-3 font-semibold text-sm transition-colors active:scale-[0.97] transition-transform"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', color: shareCopied ? '#30D158' : 'var(--text-primary)' }}
+      >
+        {shareCopied ? (
+          <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>Copié !</>
+        ) : (
+          <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Partager cette alerte</>
+        )}
+      </button>
+
+      {validSource && (
+        <div className="rounded-2xl p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+          <p className="text-[10px] font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-tertiary)' }}>Source officielle</p>
+          <a href={validSource} target="_blank" rel="noopener noreferrer"
+            className="flex items-center justify-between rounded-xl px-3 py-2.5 active:scale-[0.98] transition-transform"
+            style={{ background: 'var(--bg)', border: '1px solid var(--border)' }}>
+            <span className="text-[13px] font-medium truncate" style={{ color: 'var(--brand)' }}>
+              {(() => { try { return new URL(validSource).host } catch { return validSource } })()}
+            </span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2.5" strokeLinecap="round" className="flex-shrink-0 ml-2">
+              <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+            </svg>
+          </a>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Alertes — fetch direct depuis layers/alerts (HERE + OFROU + TPG + météo) ───
-function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
+function AlertesDetail({ map, onAlertSelect }: { map: mapboxgl.Map | null; onAlertSelect: (a: AlertDetailItem) => void }) {
   const t = useMapT()
   const { data: geoJson, isLoading } = useQuery<{ type: string; features: { properties: Record<string, unknown>; geometry: { coordinates: number[] } }[] }>({
     queryKey:        ['layers-alerts'],
@@ -896,11 +1003,6 @@ function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
     staleTime:       60000,
   })
   const [showBanner, setShowBanner] = useState(false)
-  const [selectedAlert, setSelectedAlert] = useState<{
-    id: string; type: string; title: string; description: string; source: string
-    color: string; icon: string; lng: number; lat: number
-  } | null>(null)
-  const [shareCopied, setShareCopied] = useState(false)
 
   const { data: customAlertsGeo } = useQuery<{ features: { properties: { id: string; type: string; title: string; description: string; source: string; color: string; icon: string }; geometry: { coordinates: [number, number] } }[] }>({
     queryKey:        ['tif-custom-alerts-panel'],
@@ -967,126 +1069,6 @@ function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
     }
   }, [isLoading, alerts.length])
 
-  // ── Fiche détail d'une alerte admin ────────────────────────────────────────
-  if (selectedAlert) {
-    const a = selectedAlert
-    let validSource: string | null = null
-    try {
-      const u = new URL(a.source)
-      if (u.protocol === 'http:' || u.protocol === 'https:') validSource = a.source
-    } catch { /* invalid URL */ }
-
-    return (
-      <div className="space-y-3">
-        {/* Retour */}
-        <button
-          onClick={() => setSelectedAlert(null)}
-          className="flex items-center gap-2 text-[12px] active:opacity-60 transition-opacity"
-          style={{ color: 'var(--text-tertiary)' }}
-        >
-          <svg width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-            <path d="M6 1L1 6l5 5"/>
-          </svg>
-          Retour aux alertes
-        </button>
-
-        {/* Carte principale */}
-        <div className="rounded-2xl p-4" style={{ background: `${a.color}12`, border: `1px solid ${a.color}35` }}>
-          <div className="flex items-start gap-3">
-            <span className="text-3xl flex-shrink-0">{a.icon}</span>
-            <div className="flex-1 min-w-0">
-              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: a.color }}>
-                {customAlertTypeLabel(a.type)}
-              </span>
-              <h2 className="text-base font-bold leading-snug mt-0.5" style={{ color: '#fff' }}>{a.title}</h2>
-            </div>
-          </div>
-          {a.description && (
-            <p className="text-[13px] leading-relaxed mt-3" style={{ color: 'rgba(255,255,255,0.70)' }}>
-              {a.description}
-            </p>
-          )}
-        </div>
-
-        {/* Voir sur la carte */}
-        <button
-          onClick={() => { flyTo(a.lng, a.lat); setSelectedAlert(null) }}
-          className="w-full flex items-center justify-center gap-2 rounded-2xl py-3 font-semibold text-sm"
-          style={{ background: 'var(--brand)', color: '#fff' }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-            <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/>
-            <circle cx="12" cy="10" r="3"/>
-          </svg>
-          Voir sur la carte
-        </button>
-
-        {/* Partager */}
-        <button
-          onClick={async () => {
-            const shareText = [a.title, a.description].filter(Boolean).join(' — ')
-            const shareUrl  = window.location.href
-            if (typeof navigator.share === 'function') {
-              try {
-                await navigator.share({ title: a.title, text: shareText, url: shareUrl })
-                return
-              } catch { /* annulé ou non supporté */ }
-            }
-            try {
-              await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`)
-              setShareCopied(true)
-              setTimeout(() => setShareCopied(false), 2000)
-            } catch { /* ignore */ }
-          }}
-          className="w-full flex items-center justify-center gap-2 rounded-2xl py-3 font-semibold text-sm transition-colors"
-          style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', color: shareCopied ? '#30D158' : 'var(--text-primary)' }}
-        >
-          {shareCopied ? (
-            <>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-              Copié !
-            </>
-          ) : (
-            <>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-              </svg>
-              Partager cette alerte
-            </>
-          )}
-        </button>
-
-        {/* Source */}
-        {validSource && (
-          <div className="rounded-2xl p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-            <p className="text-[10px] font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-tertiary)' }}>
-              Source officielle
-            </p>
-            <a
-              href={validSource}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-between rounded-xl px-3 py-2.5 active:scale-[0.98] transition-transform"
-              style={{ background: 'var(--bg)', border: '1px solid var(--border)' }}
-            >
-              <span className="text-[13px] font-medium truncate" style={{ color: 'var(--brand)' }}>
-                {(() => { try { return new URL(validSource).host } catch { return validSource } })()}
-              </span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2.5" strokeLinecap="round" className="flex-shrink-0 ml-2">
-                <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
-                <polyline points="15 3 21 3 21 9"/>
-                <line x1="10" y1="14" x2="21" y2="3"/>
-              </svg>
-            </a>
-          </div>
-        )}
-      </div>
-    )
-  }
-
   const totalActive = customAlerts.length + blockedCrossings.length + alerts.length
 
   return (
@@ -1117,7 +1099,7 @@ function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
           key={a.id}
           className="w-full flex items-center gap-3 rounded-2xl px-3 py-2.5 text-left active:scale-[0.98] transition-transform"
           style={{ background: `${a.color}15`, border: `0.5px solid ${a.color}40`, backdropFilter: 'blur(20px)' }}
-          onClick={() => setSelectedAlert(a)}
+          onClick={() => onAlertSelect(a)}
         >
           <span className="text-xl flex-shrink-0">{a.icon}</span>
           <div className="flex-1 min-w-0">
@@ -2277,6 +2259,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
   const [selectedLiveWaitMin,   setSelectedLiveWaitMin]   = useState<number | null>(null)
   const [selectedEvent,       setSelectedEvent]       = useState<string | null>(null)
   const [selectedImpactZone, setSelectedImpactZone] = useState<ImpactZone | null>(null)
+  const [selectedAlertItem,  setSelectedAlertItem]  = useState<AlertDetailItem | null>(null)
 
   // ── Refs drag ──────────────────────────────────────────────────────────────
   const heightRef    = useRef(COMPACT_H)
@@ -2540,6 +2523,9 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
     if (selectedCrossing) {
       setSelectedCrossing(null)
       animateTo(getFullH(), true)
+    } else if (selectedAlertItem) {
+      setSelectedAlertItem(null)
+      animateTo(getFullH(), true)
     } else if (selectedEvent) {
       setSelectedEvent(null)
       animateTo(getFullH(), true)
@@ -2551,7 +2537,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
       setDetailView('overview')
       animateTo(getFullH(), true)
     }
-  }, [selectedCrossing, selectedEvent, selectedImpactZone, animateTo])
+  }, [selectedCrossing, selectedAlertItem, selectedEvent, selectedImpactZone, animateTo])
 
   // Compact headline
   const alertCount  = data?.alerts.length ?? 0
@@ -2566,7 +2552,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
     : activeFilter === 'events'   ? t.eventsSection.filterLabel
     : t.compact.default
 
-  const showBack = detailView !== 'overview' || selectedCrossing !== null || selectedEvent !== null || selectedImpactZone !== null
+  const showBack = detailView !== 'overview' || selectedCrossing !== null || selectedAlertItem !== null || selectedEvent !== null || selectedImpactZone !== null
 
   return (
     <>
@@ -2619,7 +2605,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
 
       {/* Expanded content — always rendered, height+overflow-hidden masque quand compact */}
       <div ref={contentRef} className="flex-1 overflow-y-auto px-4 pb-6" style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
-        <div key={`${detailView}|${selectedCrossing?.id ?? ''}|${selectedEvent ?? ''}|${selectedImpactZone?.id ?? ''}`}
+        <div key={`${detailView}|${selectedCrossing?.id ?? ''}|${selectedAlertItem?.id ?? ''}|${selectedEvent ?? ''}|${selectedImpactZone?.id ?? ''}`}
              style={{ animation: 'fadeUp 0.18s cubic-bezier(0.23, 1, 0.32, 1)' }}>
 
           {/* Bouton retour */}
@@ -2630,7 +2616,11 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
               <svg width="8" height="13" viewBox="0 0 8 13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <path d="M7 1L1 6.5 7 12"/>
               </svg>
-              {selectedCrossing ? (detailView === 'douanes' ? t.back.allBorders : t.back.back) : selectedEvent ? t.eventsSection.backToList : selectedImpactZone ? 'Retour' : t.back.back}
+              {selectedAlertItem ? 'Retour aux alertes'
+                : selectedCrossing ? (detailView === 'douanes' ? t.back.allBorders : t.back.back)
+                : selectedEvent ? t.eventsSection.backToList
+                : selectedImpactZone ? 'Retour'
+                : t.back.back}
             </button>
           )}
 
@@ -2646,6 +2636,8 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
               liveStatus={selectedLiveStatus}
               liveWaitMinutes={selectedLiveWaitMin}
             />
+          ) : selectedAlertItem ? (
+            <AlertDetailView alert={selectedAlertItem} map={map} onBack={() => setSelectedAlertItem(null)} />
           ) : selectedImpactZone ? (
             <ImpactZoneDetail zone={selectedImpactZone} map={map} onClose={() => { setSelectedImpactZone(null); setDetailView('overview') }} />
           ) : selectedEvent ? (
@@ -2654,7 +2646,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
             : detailView === 'overview'   ? <ToutOverview data={data} onSelect={openDetail} />
             : detailView === 'douanes'    ? <DouanesDetail onSelect={openCrossing} map={map} />
             : detailView === 'transport'  ? <TransportDetail onExpand={expandToFull} />
-            : detailView === 'alertes'    ? <AlertesDetail map={map} />
+            : detailView === 'alertes'    ? <AlertesDetail map={map} onAlertSelect={setSelectedAlertItem} />
             : detailView === 'meteo'      ? <MeteoDetail />
             : detailView === 'parking'    ? <ParkingDetail map={map} />
             : detailView === 'journey'    ? <MonTrajetDetail />
