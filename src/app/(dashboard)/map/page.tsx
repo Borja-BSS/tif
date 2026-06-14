@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
+import { useState, useCallback, useMemo, useEffect, useRef, Suspense } from 'react'
 import { useSession }             from '@/context/AuthContext'
 import { useRouter, useSearchParams } from 'next/navigation'
 import dynamicImport              from 'next/dynamic'
@@ -36,22 +36,13 @@ function toFilterState(active: FilterId): FilterState {
   }
 }
 
-export default function MapPage() {
-  const [activeFilter, setActiveFilter]   = useState<FilterId>('all')
-  const [mapRef,       setMapRef]         = useState<mapboxgl.Map | null>(null)
-  const [showThanks,   setShowThanks]     = useState(false)
-  const sessionResult                     = useSession()
-  const session                           = sessionResult?.data ?? null
-  const isG7Active                        = useG7Active()
-  const router                            = useRouter()
-  const searchParams                      = useSearchParams()
-  const { isGuest, endGuest }             = useGuest()
-  const confettiFiredRef                  = useRef(false)
+function SubmittedConfetti({ setShowThanks }: { setShowThanks: (v: boolean) => void }) {
+  const searchParams = useSearchParams()
+  const firedRef     = useRef(false)
 
-  // Confetti + merci après signalement
   useEffect(() => {
-    if (searchParams?.get('submitted') !== '1' || confettiFiredRef.current) return
-    confettiFiredRef.current = true
+    if (searchParams?.get('submitted') !== '1' || firedRef.current) return
+    firedRef.current = true
     setShowThanks(true)
     import('canvas-confetti').then(({ default: confetti }) => {
       const launch = () => confetti({
@@ -66,13 +57,25 @@ export default function MapPage() {
     })
     const t = setTimeout(() => {
       setShowThanks(false)
-      // retire ?submitted=1 de l'URL sans reload
       const url = new URL(window.location.href)
       url.searchParams.delete('submitted')
       window.history.replaceState({}, '', url.toString())
     }, 5500)
     return () => clearTimeout(t)
-  }, [searchParams])
+  }, [searchParams, setShowThanks])
+
+  return null
+}
+
+export default function MapPage() {
+  const [activeFilter, setActiveFilter]   = useState<FilterId>('all')
+  const [mapRef,       setMapRef]         = useState<mapboxgl.Map | null>(null)
+  const [showThanks,   setShowThanks]     = useState(false)
+  const sessionResult                     = useSession()
+  const session                           = sessionResult?.data ?? null
+  const isG7Active                        = useG7Active()
+  const router                            = useRouter()
+  const { isGuest, endGuest }             = useGuest()
 
   useEffect(() => {
     if (sessionResult.status !== 'loading' && !session && !isGuest) router.replace('/login')
@@ -148,6 +151,11 @@ export default function MapPage() {
 
       {/* Layer 9: TPG line stop pins (activé par tif:line-select) */}
       <TpgLineStopsLayer map={mapRef} />
+
+      {/* ── Confetti + merci après signalement ─────────────────────────── */}
+      <Suspense fallback={null}>
+        <SubmittedConfetti setShowThanks={setShowThanks} />
+      </Suspense>
 
       {/* ── Toast Merci après signalement ──────────────────────────────── */}
       {showThanks && (
