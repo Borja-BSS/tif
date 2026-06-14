@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { randomUUID } from 'crypto'
 import { redis } from '@/lib/redis'
 
 export const dynamic = 'force-dynamic'
@@ -19,7 +20,7 @@ export async function POST(req: NextRequest) {
 
   const bytes  = await file.arrayBuffer()
   const base64 = Buffer.from(bytes).toString('base64')
-  const id     = `${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
+  const id     = randomUUID()
 
   await redis.set(`tif:media:${id}`, { base64, type: file.type }, { ex: TTL_SECONDS })
 
