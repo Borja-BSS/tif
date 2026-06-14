@@ -1087,13 +1087,123 @@ function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
     )
   }
 
-  return (
-    <div className="space-y-2">
-      {/* Bulletins G7 planifiés — route + TPG */}
-      <G7BulletinsPanel categories={['route']} title={t.alertsSection.g7RouteTpg} />
+  const totalActive = customAlerts.length + blockedCrossings.length + alerts.length
 
-      {/* ── Zones d'impact NO-G7 ─────────────────────────────────────── */}
-      <div className="space-y-2 mt-1">
+  return (
+    <div className="space-y-3">
+
+      {/* ══ ALERTES ACTIVES ═══════════════════════════════════════════════ */}
+      <div className="flex items-center gap-2 mb-1">
+        <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 animate-pulse" style={{ background: '#FF453A' }} />
+        <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: '#FF453A' }}>
+          Alertes actives
+        </p>
+        {totalActive > 0 && (
+          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+            style={{ background: 'rgba(255,69,58,0.18)', color: '#FF453A' }}>
+            {totalActive}
+          </span>
+        )}
+        {isLoading && (
+          <div className="flex gap-1 ml-1">
+            {[0,1,2].map(i => <span key={i} className="w-1 h-1 rounded-full bg-blue-500 animate-pulse" style={{ animationDelay: `${i*150}ms` }} />)}
+          </div>
+        )}
+      </div>
+
+      {/* ── Alertes admin (opérateur) ─────────────────────────────────── */}
+      {customAlerts.map(a => (
+        <button
+          key={a.id}
+          className="w-full flex items-center gap-3 rounded-2xl px-3 py-2.5 text-left active:scale-[0.98] transition-transform"
+          style={{ background: `${a.color}15`, border: `0.5px solid ${a.color}40`, backdropFilter: 'blur(20px)' }}
+          onClick={() => setSelectedAlert(a)}
+        >
+          <span className="text-xl flex-shrink-0">{a.icon}</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-[13px] font-semibold truncate" style={{ color: '#fff' }}>{a.title}</p>
+            {a.description && (
+              <p className="text-[11px] truncate mt-0.5" style={{ color: 'rgba(255,255,255,0.55)' }}>{a.description}</p>
+            )}
+          </div>
+          <svg width="6" height="10" viewBox="0 0 6 10" fill="none" stroke={a.color} strokeWidth="1.5" strokeLinecap="round" className="flex-shrink-0 opacity-60">
+            <path d="M1 1l4 4-4 4"/>
+          </svg>
+        </button>
+      ))}
+
+      {/* ── Passages fermés G7 ────────────────────────────────────────── */}
+      {blockedCrossings.map(c => (
+        <button
+          key={c.id}
+          className="w-full flex items-center gap-3 rounded-2xl px-3 py-2 text-left active:scale-[0.98] transition-transform"
+          style={{ background: 'rgba(255,59,48,0.10)', border: '0.5px solid rgba(255,59,48,0.35)', backdropFilter: 'blur(20px)' }}
+          onClick={() => c.lng != null && c.lat != null && flyTo(c.lng!, c.lat!)}
+        >
+          <span className="text-base flex-shrink-0">🚫</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-[13px] font-semibold truncate" style={{ color: 'rgba(255,255,255,0.9)' }}>{c.name}</p>
+            {c.nearestOpen && (
+              <p className="text-[11px] truncate mt-0.5" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                {t.alertsSection.nearestOpen}: {c.nearestOpen}
+              </p>
+            )}
+          </div>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="flex-shrink-0">
+            <path d="M5 3l4 4-4 4" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+      ))}
+
+      {/* ── Incidents temps réel (HERE / OFROU) ──────────────────────── */}
+      {showBanner && (
+        <div className="flex items-center gap-3 rounded-2xl px-4 py-3"
+          style={{ background: 'rgba(52,199,89,0.12)', border: '0.5px solid rgba(52,199,89,0.40)', backdropFilter: 'blur(20px)', animation: 'slideDown 0.28s ease forwards' }}>
+          <span className="text-xl flex-shrink-0">✅</span>
+          <div>
+            <p className="text-sm font-semibold" style={{ color: '#34C759' }}>{t.alertsSection.noAlertTitle}</p>
+            <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{t.alertsSection.noAlertSub}</p>
+          </div>
+        </div>
+      )}
+      {!isLoading && alerts.length === 0 && !showBanner && customAlerts.length === 0 && blockedCrossings.length === 0 && (
+        <div className="rounded-2xl p-6 text-center" style={{ background: 'var(--bg-card)' }}>
+          <p className="text-2xl mb-2">✅</p>
+          <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{t.alertsSection.noIncidentTitle}</p>
+          <p className="text-[12px] mt-1" style={{ color: 'var(--text-secondary)' }}>{t.alertsSection.noIncidentSub}</p>
+        </div>
+      )}
+      {isLoading && (
+        <div className="flex items-center justify-center py-6 gap-2">
+          {[0,1,2].map(i => <span key={i} className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" style={{ animationDelay: `${i * 150}ms` }} />)}
+        </div>
+      )}
+      {alerts.map(a => (
+        <button key={a.id}
+          onClick={() => flyTo(a.lng, a.lat)}
+          className="w-full flex items-start gap-3 rounded-2xl p-3 text-left active:scale-[0.98] transition-transform"
+          style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+          <span className="text-xl flex-shrink-0 mt-0.5">{a.icon}</span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[11px] font-bold mb-0.5" style={{ color: 'var(--text-tertiary)' }}>{typeLabel(a.type)}</p>
+            <p className="text-sm leading-snug" style={{ color: 'var(--text-primary)' }}>{a.title}</p>
+          </div>
+          {a.lng && (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" strokeWidth="2" strokeLinecap="round" className="flex-shrink-0 mt-1">
+              <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+          )}
+        </button>
+      ))}
+
+      {/* ══ BULLETINS G7 ══════════════════════════════════════════════════ */}
+      <div className="pt-1">
+        <G7BulletinsPanel categories={['route']} title={t.alertsSection.g7RouteTpg} />
+      </div>
+
+      {/* ══ ZONES D'IMPACT ════════════════════════════════════════════════ */}
+      <div className="space-y-2 pt-1">
         <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>
           ⚠️ Zones d&apos;impact — NO-G7 · 14.06.2026
         </p>
@@ -1176,136 +1286,8 @@ function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
         })}
       </div>
 
-      {/* ── Alertes admin actives ─────────────────────────────────────── */}
-      {customAlerts.length > 0 && (
-        <>
-          <p className="text-[10px] font-semibold uppercase tracking-wider mt-4 mb-2" style={{ color: 'var(--text-tertiary)' }}>
-            {t.alertsSection.adminAlertsTitle}
-          </p>
-          <div className="space-y-2">
-            {customAlerts.map(a => (
-              <button
-                key={a.id}
-                className="w-full flex items-center gap-3 rounded-2xl px-3 py-2.5 text-left active:scale-[0.98] transition-transform"
-                style={{
-                  background:     `${a.color}15`,
-                  border:         `0.5px solid ${a.color}40`,
-                  backdropFilter: 'blur(20px)',
-                }}
-                onClick={() => setSelectedAlert(a)}
-              >
-                <span className="text-xl flex-shrink-0">{a.icon}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold truncate" style={{ color: '#fff' }}>{a.title}</p>
-                  {a.description && (
-                    <p className="text-[11px] truncate mt-0.5" style={{ color: 'rgba(255,255,255,0.55)' }}>{a.description}</p>
-                  )}
-                </div>
-                <svg width="6" height="10" viewBox="0 0 6 10" fill="none" stroke={a.color} strokeWidth="1.5" strokeLinecap="round" className="flex-shrink-0 opacity-60">
-                  <path d="M1 1l4 4-4 4"/>
-                </svg>
-              </button>
-            ))}
-          </div>
-        </>
-      )}
-
-      {/* ── Passages fermés G7 ───────────────────────────────────────── */}
-      {blockedCrossings.length > 0 && (
-        <>
-          <p className="text-[10px] font-semibold uppercase tracking-wider mt-4 mb-2" style={{ color: 'var(--text-tertiary)' }}>
-            {t.alertsSection.closedCrossingsTitle}
-          </p>
-          <div className="space-y-1.5">
-            {blockedCrossings.map(c => (
-              <button
-                key={c.id}
-                className="w-full flex items-center gap-3 rounded-2xl px-3 py-2 text-left"
-                style={{
-                  background:     'rgba(255,59,48,0.10)',
-                  border:         '0.5px solid rgba(255,59,48,0.35)',
-                  backdropFilter: 'blur(20px)',
-                }}
-                onClick={() => c.lng != null && c.lat != null && flyTo(c.lng!, c.lat!)}
-              >
-                <span className="text-base flex-shrink-0">🚫</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold truncate" style={{ color: 'rgba(255,255,255,0.9)' }}>{c.name}</p>
-                  {c.nearestOpen && (
-                    <p className="text-[11px] truncate mt-0.5" style={{ color: 'rgba(255,255,255,0.45)' }}>
-                      {t.alertsSection.nearestOpen}: {c.nearestOpen}
-                    </p>
-                  )}
-                </div>
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="flex-shrink-0">
-                  <path d="M5 3l4 4-4 4" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-            ))}
-          </div>
-        </>
-      )}
-
-      <p className="text-[10px] font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-tertiary)', marginTop: 16 }}>
-        {t.alertsSection.incidents}
-      </p>
-
-      {/* Banner éphémère "aucune alerte" — disparaît après 4.5s */}
-      {showBanner && (
-        <div className="flex items-center gap-3 rounded-2xl px-4 py-3 mb-1"
-          style={{
-            background:   'rgba(52,199,89,0.12)',
-            border:       '0.5px solid rgba(52,199,89,0.40)',
-            backdropFilter: 'blur(20px)',
-            animation:    'slideDown 0.28s ease forwards',
-          }}>
-          <span className="text-xl flex-shrink-0">✅</span>
-          <div>
-            <p className="text-sm font-semibold" style={{ color: '#34C759' }}>{t.alertsSection.noAlertTitle}</p>
-            <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{t.alertsSection.noAlertSub}</p>
-          </div>
-        </div>
-      )}
-
-      {isLoading && (
-        <div className="flex items-center justify-center py-8 gap-2">
-          {[0,1,2].map(i => (
-            <span key={i} className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" style={{ animationDelay: `${i * 150}ms` }} />
-          ))}
-        </div>
-      )}
-
-      {!isLoading && alerts.length === 0 && !showBanner && (
-        <div className="rounded-2xl p-6 text-center" style={{ background: 'var(--bg-card)' }}>
-          <p className="text-2xl mb-2">✅</p>
-          <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{t.alertsSection.noIncidentTitle}</p>
-          <p className="text-[12px] mt-1" style={{ color: 'var(--text-secondary)' }}>{t.alertsSection.noIncidentSub}</p>
-        </div>
-      )}
-
-      {alerts.map(a => (
-        <button key={a.id}
-          onClick={() => flyTo(a.lng, a.lat)}
-          className="w-full flex items-start gap-3 rounded-2xl p-3 text-left active:scale-[0.98] transition-transform"
-          style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-          <span className="text-xl flex-shrink-0 mt-0.5">{a.icon}</span>
-          <div className="min-w-0 flex-1">
-            <p className="text-[11px] font-bold mb-0.5" style={{ color: 'var(--text-tertiary)' }}>
-              {typeLabel(a.type)}
-            </p>
-            <p className="text-sm leading-snug" style={{ color: 'var(--text-primary)' }}>{a.title}</p>
-          </div>
-          {a.lng && (
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" strokeWidth="2" strokeLinecap="round" className="flex-shrink-0 mt-1">
-              <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/>
-              <circle cx="12" cy="10" r="3"/>
-            </svg>
-          )}
-        </button>
-      ))}
-
-      {/* Sources */}
-      <div className="mt-3 space-y-2">
+      {/* ══ SOURCES ═══════════════════════════════════════════════════════ */}
+      <div className="pt-1 space-y-2">
         <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>
           {t.alertsSection.sources}
         </p>
