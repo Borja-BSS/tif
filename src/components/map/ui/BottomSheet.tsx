@@ -1016,10 +1016,19 @@ function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
   const fmtTime = (d: Date) =>
     d.toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Zurich' })
 
+  const fmtPeriod = (from: Date, to: Date) => {
+    const diffMs = to.getTime() - from.getTime()
+    if (diffMs >= 86400000) {
+      const opts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', timeZone: 'Europe/Zurich' }
+      return `${from.toLocaleDateString('fr-CH', opts)} – ${to.toLocaleDateString('fr-CH', opts)}`
+    }
+    return `${fmtTime(from)}–${fmtTime(to)}`
+  }
+
   return (
     <div className="space-y-2">
       {/* Bulletins G7 planifiés — route + TPG */}
-      <G7BulletinsPanel categories={['route', 'tpg']} title={t.alertsSection.g7RouteTpg} />
+      <G7BulletinsPanel categories={['route']} title={t.alertsSection.g7RouteTpg} />
 
       {/* ── Zones d'impact NO-G7 ─────────────────────────────────────── */}
       <div className="space-y-2 mt-1">
@@ -1027,25 +1036,32 @@ function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
           ⚠️ Zones d&apos;impact — NO-G7 · 14.06.2026
         </p>
         {IMPACT_ZONES.map(zone => {
-          const isDemo = zone.type === 'DEMONSTRATION'
-          const color  = zone.strokeColor
+          const color = zone.strokeColor
+          const zoneIcon = zone.type === 'DEMONSTRATION' ? '🔴'
+            : zone.type === 'TRANSPORT_DISRUPTION' ? '🟠'
+            : zone.type === 'ROAD_CLOSURE' ? '🛑'
+            : '⚠️'
+          const zoneLabel = zone.type === 'DEMONSTRATION' ? 'Manifestation · Périmètre'
+            : zone.type === 'TRANSPORT_DISRUPTION' ? 'Réseau TPG · Perturbations G7'
+            : zone.type === 'ROAD_CLOSURE' ? 'A1 — Fermeture totale'
+            : zone.type
           return (
             <div key={zone.id} className="rounded-2xl p-4 space-y-3"
               style={{ background: `${color}12`, border: `1px solid ${color}35` }}>
               {/* Header */}
               <div className="flex items-start gap-3">
-                <span className="text-2xl flex-shrink-0">{isDemo ? '🔴' : '🟠'}</span>
+                <span className="text-2xl flex-shrink-0">{zoneIcon}</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color }}>
-                    {isDemo ? 'Manifestation · Périmètre' : 'Réseau TPG · Lignes supprimées'}
+                    {zoneLabel}
                   </p>
                   <p className="text-sm font-bold leading-snug mt-0.5" style={{ color: 'var(--text-primary)' }}>
                     {zone.title}
                   </p>
                 </div>
-                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full flex-shrink-0"
-                  style={{ background: `${color}20`, color }}>
-                  {fmtTime(zone.activeFrom)}–{fmtTime(zone.activeTo)}
+                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 text-center"
+                  style={{ background: `${color}20`, color, minWidth: 60 }}>
+                  {fmtPeriod(zone.activeFrom, zone.activeTo)}
                 </span>
               </div>
 
@@ -1067,11 +1083,23 @@ function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
                 {zone.description.split('\n').map((line, i) => {
                   if (!line.trim()) return null
                   const isBullet = line.startsWith('*')
+                  const isHeader = !isBullet && /[A-ZÉÈÊÀÙÂÎÛÔ]{3,}/.test(line)
+                  if (isBullet) return (
+                    <p key={i} className="pl-3 text-[12px]"
+                      style={{ color: 'rgba(255,255,255,0.55)' }}>
+                      {line.replace(/^\*\s*/, '· ')}
+                    </p>
+                  )
+                  if (isHeader) return (
+                    <p key={i} className="text-[10px] font-bold uppercase tracking-wider pt-1.5"
+                      style={{ color: `${color}CC` }}>
+                      {line}
+                    </p>
+                  )
                   return (
-                    <p key={i}
-                      className={isBullet ? 'pl-3 text-[12px]' : 'text-[12px] font-semibold'}
-                      style={{ color: isBullet ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.80)' }}>
-                      {isBullet ? line.replace(/^\*\s*/, '· ') : line}
+                    <p key={i} className="text-[12px] font-semibold"
+                      style={{ color: 'rgba(255,255,255,0.80)' }}>
+                      {line}
                     </p>
                   )
                 })}

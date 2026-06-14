@@ -100,26 +100,39 @@ export const IMPACT_ZONES: ImpactZone[] = [
   {
     id:          'no-g7-tpg-disruption',
     renderOnMap: false,
-    title:       'Réseau TPG — Lignes supprimées',
+    title:       'Réseau TPG — Perturbations G7 · 11–17 juin',
     description:
-      'Perturbation majeure du réseau dès 13h30 (1h30 avant le déclenchement).\n\n' +
-      'Lignes SUPPRIMÉES :\n' +
+      'En lien avec le Sommet du G7 Évian 2026 (13–15 juin) et la manifestation NO-G7 du 14 juin au Parc Mon Repos.\n' +
+      '↩ Retour à la normale : à partir du 18 juin 2026.\n\n' +
+      'LIGNES SUPPRIMÉES (TRANSFRONTALIÈRES) · Dès le 11 juin\n' +
+      '* Ligne 64 — service interrompu jusqu\'au 17 juin inclus\n' +
+      '* Ligne 69 — service interrompu jusqu\'au 17 juin inclus\n\n' +
+      'LIGNES À PARCOURS ADAPTÉ · Dès le 11 juin\n' +
+      '* 38, 40, 52, 78, 82, 83, M — certains arrêts non desservis temporairement\n' +
+      '* tpgFlex — aucun arrêt sur le territoire français\n\n' +
+      'HORAIRE VACANCES · 15–17 juin\n' +
+      '* Horaire vacances appliqué (sauf scolaires 60, 61, 80)\n' +
+      '* 14 juin dès 5h00 : aucun tram 17 ; tram 12 limité Bachet-de-Pesay ↔ Plainpalais\n\n' +
+      'SUPPRESSIONS TOTALES · Dimanche 14 juin · 13h30–23h30\n' +
       '* Trams : 12 · 14 · 15 · 18 (partiel)\n' +
-      '* Bus/Trolleybus : 1 · 2 · 3 · 6 · 7 · 10 · 17 · 19 · 25 · 91 · 92\n\n' +
-      'Lignes avec rebroussement ou modification de terminus :\n' +
-      '* 5 · 8 · 9 · 11 · 20 · 22 · 33 · 51 · 60 · 80 · A · E · G\n\n' +
-      'Prévoyez un itinéraire alternatif depuis/vers le centre-ville.',
-    lines:       ['1','2','3','6','7','10','12','17','19','25','91','92'],
+      '* Bus/Trolleybus : 1 · 2 · 3 · 6 · 7 · 10 · 17 · 19 · 25 · 91 · 92\n' +
+      '* Rebroussements / terminus modifiés : 5 · 8 · 9 · 11 · 20 · 22 · 33 · 51 · 60 · 80 · A · E · G\n\n' +
+      'AGENCES\n' +
+      '* Cornavin & Rive : fermées dès le 12 juin (réouverture 19 et 22 juin)\n' +
+      '* Lancy-Pont-Rouge : ouverte normalement\n\n' +
+      'Ligne info gratuite : 0800 858 900\n' +
+      'Aérobus : service normal prévu (anticiper délais sécurité aéroport)',
+    lines:       ['64','69','38','40','52','78','82','83','M','12','14','15','18','1','2','3','6','7','10','17','19','25','91','92'],
     type:        'TRANSPORT_DISRUPTION',
     severity:    'HIGH',
     coordinates: ZONE_TPG,
-    activeFrom:  new Date('2026-06-14T13:30:00+02:00'),
-    activeTo:    new Date('2026-06-14T23:30:00+02:00'),
+    activeFrom:  new Date('2026-06-11T00:00:00+02:00'),
+    activeTo:    new Date('2026-06-17T23:59:59+02:00'),
     fillColor:   '#FF9F0A',
     fillOpacity: 0.09,
     strokeColor: '#FF9F0A',
-    source:      'TPG GestE',
-    sourceRef:   'NO-G7 14.06.26',
+    source:      'Transports publics genevois (tpg)',
+    sourceRef:   'Communiqué du 10.06.2026',
   },
   {
     id:           'a1-closure',
