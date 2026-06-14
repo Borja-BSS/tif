@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import mapboxgl from 'mapbox-gl'
 
@@ -13,20 +13,22 @@ interface AlertFeature {
   }
 }
 
-interface SelectedAlert {
-  id: string; title: string; description: string; color: string; icon: string; type: string
-}
-
 interface Props { map: mapboxgl.Map | null }
 
 const CIRCLE_PREFIX = 'tif-custom-circle-'
+
+function esc(s: string): string {
+  return s.replace(/[&<>"']/g, c => (
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' } as Record<string, string>)[c]
+  ))
+}
 
 function injectStyles() {
   if (document.getElementById('tif-custom-alert-styles')) return
   const s = document.createElement('style')
   s.id = 'tif-custom-alert-styles'
   s.textContent = `
-    @keyframes custom-alert-pulse {
+    @keyframes tif-ca-pulse {
       0%   { box-shadow: var(--ca-shadow), 0 0 0 0 var(--ca-pulse); }
       70%  { box-shadow: var(--ca-shadow), 0 0 0 10px transparent; }
       100% { box-shadow: var(--ca-shadow), 0 0 0 0 transparent; }
@@ -35,17 +37,61 @@ function injectStyles() {
       width: 36px; height: 36px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       font-size: 18px;
-      animation: custom-alert-pulse 2.2s ease-out infinite;
+      animation: tif-ca-pulse 2.2s ease-out infinite;
       border: 2px solid rgba(255,255,255,0.3);
     }
   `
   document.head.appendChild(s)
 }
 
+// Réutilise le même style que ParkingLayer / G7ClosuresLayer
+function injectPopupStyle() {
+  if (document.getElementById('tif-popup-style')) return
+  const s = document.createElement('style')
+  s.id = 'tif-popup-style'
+  s.textContent = `
+    .tif-popup .mapboxgl-popup-content {
+      background: rgba(12,12,18,0.96);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      padding: 0;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+      overflow: hidden;
+    }
+    .tif-popup .mapboxgl-popup-tip { border-top-color: rgba(12,12,18,0.96); }
+    .tif-popup .mapboxgl-popup-close-button {
+      color: rgba(255,255,255,0.4); font-size:18px;
+      padding: 6px 10px; right: 2px; top: 2px;
+    }
+    .tif-popup .mapboxgl-popup-close-button:hover { color:#fff; background:none; }
+  `
+  document.head.appendChild(s)
+}
+
+function buildPopupHTML(p: { type: string; title: string; description: string; color: string; icon: string }): string {
+  const descLine = p.description
+    ? `<div style="font-size:12px;color:rgba(255,255,255,0.78);margin-bottom:8px">${esc(p.description)}</div>`
+    : ''
+
+  return `
+    <div style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;padding:12px 14px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <span style="width:28px;height:28px;border-radius:50%;background:${p.color}dd;
+          display:inline-flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">${p.icon}</span>
+        <span style="font-size:14px;font-weight:700;color:#fff">${esc(p.title)}</span>
+      </div>
+      ${descLine}
+      <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;
+        background:${p.color}22;color:${p.color};border:1px solid ${p.color}44;
+        text-transform:uppercase;letter-spacing:0.05em">${esc(p.type || 'Alerte')}</span>
+      <div style="font-size:10px;color:rgba(255,255,255,0.25);margin-top:8px">Source : Signalements TIF</div>
+    </div>`
+}
+
 export default function CustomAlertsLayer({ map }: Props) {
   const markersRef = useRef<Map<string, mapboxgl.Marker>>(new Map())
   const circlesRef = useRef<Set<string>>(new Set())
-  const [selected, setSelected] = useState<SelectedAlert | null>(null)
 
   const { data } = useQuery<{ features: AlertFeature[] }>({
     queryKey:        ['tif-custom-alerts'],
@@ -57,6 +103,7 @@ export default function CustomAlertsLayer({ map }: Props) {
   useEffect(() => {
     if (!map) return
     injectStyles()
+    injectPopupStyle()
   }, [map])
 
   useEffect(() => {
@@ -75,13 +122,16 @@ export default function CustomAlertsLayer({ map }: Props) {
         el.className = 'tif-ca-marker'
         el.style.background = `${color}dd`
         el.style.cursor = 'pointer'
-        el.style.setProperty('--ca-shadow', `0 4px 12px rgba(0,0,0,0.4)`)
+        el.style.setProperty('--ca-shadow', '0 4px 12px rgba(0,0,0,0.4)')
         el.style.setProperty('--ca-pulse', `${color}66`)
         el.textContent = icon
 
         el.addEventListener('click', (e) => {
           e.stopPropagation()
-          setSelected({ id, type, title, description, color, icon })
+          new mapboxgl.Popup({ maxWidth: '280px', className: 'tif-popup', closeButton: true, offset: 14 })
+            .setLngLat([lng, lat])
+            .setHTML(buildPopupHTML({ type, title, description, color, icon }))
+            .addTo(map)
         })
 
         const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
@@ -146,95 +196,5 @@ export default function CustomAlertsLayer({ map }: Props) {
     }
   }, [map])
 
-  // Ferme la carte si clic en dehors
-  useEffect(() => {
-    if (!selected) return
-    const close = () => setSelected(null)
-    map?.on('click', close)
-    return () => { map?.off('click', close) }
-  }, [selected, map])
-
-  if (!selected) return null
-
-  return (
-    <div
-      style={{
-        position:        'fixed',
-        bottom:          '80px',
-        left:            '50%',
-        transform:       'translateX(-50%)',
-        zIndex:          45,
-        width:           'calc(100% - 32px)',
-        maxWidth:        '360px',
-        background:      'rgba(12,12,18,0.96)',
-        border:          `1px solid ${selected.color}44`,
-        borderRadius:    '20px',
-        overflow:        'hidden',
-        backdropFilter:  'blur(24px)',
-        boxShadow:       `0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px ${selected.color}22`,
-        animation:       'fadeUp 0.18s cubic-bezier(0.23,1,0.32,1)',
-      }}
-    >
-      {/* Header */}
-      <div style={{
-        display:        'flex',
-        alignItems:     'center',
-        gap:            '10px',
-        padding:        '12px 14px',
-        background:     `${selected.color}12`,
-        borderBottom:   '1px solid rgba(255,255,255,0.07)',
-      }}>
-        <span style={{ fontSize: '22px', flexShrink: 0 }}>{selected.icon}</span>
-        <span style={{ flex: 1, fontSize: '14px', fontWeight: 700, color: '#fff', lineHeight: 1.3 }}>
-          {selected.title}
-        </span>
-        <button
-          onClick={() => setSelected(null)}
-          style={{
-            flexShrink:   0,
-            width:        '28px',
-            height:       '28px',
-            borderRadius: '50%',
-            border:       'none',
-            background:   'rgba(255,255,255,0.08)',
-            color:        'rgba(255,255,255,0.5)',
-            fontSize:     '16px',
-            cursor:       'pointer',
-            display:      'flex',
-            alignItems:   'center',
-            justifyContent: 'center',
-            lineHeight:   1,
-          }}
-        >
-          ×
-        </button>
-      </div>
-
-      {/* Body */}
-      {selected.description && (
-        <div style={{ padding: '10px 14px' }}>
-          <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.78)', lineHeight: 1.5, margin: 0 }}>
-            {selected.description}
-          </p>
-        </div>
-      )}
-
-      {/* Badge type */}
-      <div style={{ padding: '8px 14px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <span style={{
-          fontSize:     '10px',
-          fontWeight:   600,
-          padding:      '2px 8px',
-          borderRadius: '6px',
-          background:   `${selected.color}22`,
-          color:        selected.color,
-          border:       `1px solid ${selected.color}44`,
-          textTransform: 'uppercase',
-          letterSpacing: '0.05em',
-        }}>
-          {selected.type || 'Alerte'}
-        </span>
-      </div>
-    </div>
-  )
+  return null
 }
