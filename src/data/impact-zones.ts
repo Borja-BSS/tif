@@ -43,6 +43,7 @@ const ZONE_MANIFESTATION: [number, number][] = [
   [6.1360, 46.2244],       // Avenue de France (est)
   [6.1335, 46.2218],       // Rue de la Servette (nord)
   [6.1327630, 46.2178423], // Rue de la Servette (point précis)
+  [6.1271830, 46.2111268], // Rue Hoffmann
   [6.1267310, 46.2081691], // Extension ouest (Rue de la Servette / Saint-Jean)
   [6.1327700, 46.2055601], // Descente sud-est
   [6.1426392, 46.2055738], // Longueur est (bas)
