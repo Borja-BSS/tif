@@ -30,31 +30,37 @@ function esc(s: string) {
 }
 
 function buildPopupHTML(s: PublicSignalement): string {
-  const cat      = SIGNAL_CATEGORIES.find(c => c.id === s.category)
-  const pri      = PRIORITY_LEVELS?.find((p: { id: string }) => p.id === s.priority)
-  const color    = PRIORITY_COLOR[s.priority] ?? '#8E8E93'
-  const timeAgo  = (() => {
-    const diff = (Date.now() - new Date(s.createdAt).getTime()) / 1000
-    if (diff < 60)    return `il y a ${Math.round(diff)}s`
-    if (diff < 3600)  return `il y a ${Math.round(diff / 60)}min`
-    if (diff < 86400) return `il y a ${Math.round(diff / 3600)}h`
-    return new Date(s.createdAt).toLocaleDateString('fr-CH')
-  })()
+  const cat   = SIGNAL_CATEGORIES.find(c => c.id === s.category)
+  const color = PRIORITY_COLOR[s.priority] ?? '#8E8E93'
+  const diff  = (Date.now() - new Date(s.createdAt).getTime()) / 1000
+  const ago   = diff < 60 ? `il y a ${Math.round(diff)}s`
+              : diff < 3600 ? `il y a ${Math.round(diff / 60)}min`
+              : diff < 86400 ? `il y a ${Math.round(diff / 3600)}h`
+              : new Date(s.createdAt).toLocaleDateString('fr-CH')
+
+  const priLabels: Record<string, string> = {
+    info: 'Info', vigilance: 'Vigilance', perturbation: 'Perturbation',
+    important: 'Important', urgent: 'Urgent', critique: 'Critique',
+  }
 
   return `
-    <div style="padding:2px 0">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
-        <span style="font-size:16px">${esc(cat?.icon ?? '📍')}</span>
-        <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:${esc(cat?.color ?? '#fff')}">${esc(cat?.label ?? s.category)}</span>
+    <div style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;padding:12px 14px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <span style="width:28px;height:28px;border-radius:50%;background:${esc(color)}22;border:1.5px solid ${esc(color)}66;
+          display:inline-flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">${esc(cat?.icon ?? '📍')}</span>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#fff;line-height:1.2">${esc(cat?.label ?? s.category)}</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.45)">${esc(s.subcategory)}</div>
+        </div>
       </div>
-      <p style="font-size:12px;color:rgba(255,255,255,.55);margin:0 0 6px">${esc(s.subcategory)}</p>
-      <p style="font-size:13px;color:rgba(255,255,255,.88);line-height:1.45;margin:0 0 8px">${esc(s.description)}</p>
+      <div style="font-size:12px;color:rgba(255,255,255,0.78);margin-bottom:8px;line-height:1.45">${esc(s.description)}</div>
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-        <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:${esc(color)}20;color:${esc(color)};border:1px solid ${esc(color)}40">
-          ${pri ? esc(String((pri as { icon?: string }).icon ?? '')) + ' ' : ''}${esc(pri ? String((pri as { label?: string }).label ?? s.priority) : s.priority)}
-        </span>
-        <span style="font-size:10px;color:rgba(255,255,255,.35)">${esc(timeAgo)}</span>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;
+          background:${esc(color)}22;color:${esc(color)};border:1px solid ${esc(color)}44;
+          text-transform:uppercase;letter-spacing:0.05em">${esc(priLabels[s.priority] ?? s.priority)}</span>
+        <span style="font-size:10px;color:rgba(255,255,255,0.25)">${esc(ago)}</span>
       </div>
+      <div style="font-size:10px;color:rgba(255,255,255,0.2);margin-top:8px">Signalement utilisateur · TIF</div>
     </div>
   `
 }
@@ -66,21 +72,20 @@ function injectStyle() {
   style.id = 'tif-popup-style'
   style.textContent = `
     .tif-popup .mapboxgl-popup-content {
-      background: rgba(18,18,24,0.97) !important;
-      border: 0.5px solid rgba(255,255,255,0.14) !important;
-      border-radius: 14px !important;
-      padding: 12px 14px !important;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.6) !important;
-      backdrop-filter: blur(24px);
+      background: rgba(12,12,18,0.96);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      padding: 0;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+      overflow: hidden;
     }
-    .tif-popup .mapboxgl-popup-tip { display:none !important; }
+    .tif-popup .mapboxgl-popup-tip { border-top-color: rgba(12,12,18,0.96); }
     .tif-popup .mapboxgl-popup-close-button {
-      color: rgba(255,255,255,0.4) !important;
-      font-size: 18px !important;
-      top: 6px !important;
-      right: 8px !important;
-      background: none !important;
+      color: rgba(255,255,255,0.4); font-size:18px;
+      padding: 6px 10px; right: 2px; top: 2px;
     }
+    .tif-popup .mapboxgl-popup-close-button:hover { color:#fff; background:none; }
   `
   document.head.appendChild(style)
 }
