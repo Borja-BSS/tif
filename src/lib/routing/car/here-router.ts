@@ -115,6 +115,7 @@ const ALL_CROSSINGS_COORDS = [
 ]
 
 const BLOCKED_CROSSINGS = ALL_CROSSINGS_COORDS.filter(c => !G7_OPEN_IDS.has(c.id))
+const OPEN_CROSSINGS    = ALL_CROSSINGS_COORDS.filter(c =>  G7_OPEN_IDS.has(c.id))
 
 // ── Geometry utilities ────────────────────────────────────────────────────────
 
@@ -183,10 +184,34 @@ function findBlockedCrossing(
 ): (typeof BLOCKED_CROSSINGS)[0] | null {
   for (const pt of geometry) {
     for (const c of blocked) {
-      if (haversine({ lat: pt[1], lng: pt[0] }, c) < 350) return c
+      if (haversine({ lat: pt[1], lng: pt[0] }, c) < 700) return c
     }
   }
   return null
+}
+
+// Returns true if the route passes within 800m of any border crossing (open or closed).
+function passesNearAnyCrossing(geometry: [number, number][]): boolean {
+  for (const pt of geometry) {
+    for (const c of ALL_CROSSINGS_COORDS) {
+      if (haversine({ lat: pt[1], lng: pt[0] }, c) < 800) return true
+    }
+  }
+  return false
+}
+
+// Returns the N open crossings that add the least detour for a given journey.
+function bestOpenCrossings(
+  from: { lat: number; lng: number },
+  to:   { lat: number; lng: number },
+  n:    number,
+): typeof OPEN_CROSSINGS {
+  const direct = haversine(from, to)
+  return [...OPEN_CROSSINGS]
+    .map(c => ({ c, extra: haversine(from, c) + haversine(c, to) - direct }))
+    .sort((a, b) => a.extra - b.extra)
+    .slice(0, n)
+    .map(x => x.c)
 }
 
 function routePassesThroughManifestationZone(geometry: [number, number][]): boolean {
@@ -283,6 +308,32 @@ function fallback(req: CarRouteRequest, a1Closed: boolean): CarRoute[] {
   }]
 }
 
+// ── Build a CarRoute from a MapboxRoute ───────────────────────────────────────
+function toCarRoute(
+  r:            MapboxRoute,
+  id:           string,
+  alternative:  boolean,
+  g7:           boolean,
+  a1Closed:     boolean,
+  manifestation: boolean,
+  extraWarning?: string,
+): CarRoute {
+  const geometry = r.geometry.coordinates as [number, number][]
+  const { warnings, blockedCrossing } = buildWarnings(geometry, g7, a1Closed, manifestation)
+  if (extraWarning && !warnings.includes(extraWarning)) warnings.unshift(extraWarning)
+  return {
+    id,
+    summary: {
+      duration:          Math.round(r.duration),
+      durationInTraffic: Math.round(r.duration),
+      distance:          Math.round(r.distance),
+      arrivalTime:       new Date(Date.now() + r.duration * 1000).toISOString(),
+    },
+    steps: [], geometry, trafficDelay: 0,
+    alternative, warnings, blockedCrossing,
+  }
+}
+
 // ── Main export ────────────────────────────────────────────────────────────────
 export async function calculateCarRoute(req: CarRouteRequest): Promise<CarRoute[]> {
   const now          = new Date()
@@ -293,89 +344,91 @@ export async function calculateCarRoute(req: CarRouteRequest): Promise<CarRoute[
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
   if (!token) return fallback(req, a1Closed)
 
-  // ── Step 1: primary call — Mapbox returns up to 3 real alternatives ──────────
+  // ── Step 1: primary call ──────────────────────────────────────────────────────
   const primary = await fetchMapboxRoutes(req.from, req.to, token, a1Closed, [])
   if (!primary.length) return fallback(req, a1Closed)
 
-  const results: CarRoute[] = []
+  const candidates = primary.map((r, idx) =>
+    toCarRoute(r, `route-${idx}`, idx > 0, g7, a1Closed, manifestation),
+  )
 
-  for (const [idx, r] of primary.entries()) {
-    const geometry            = r.geometry.coordinates as [number, number][]
-    const { warnings, blockedCrossing } = buildWarnings(geometry, g7, a1Closed, manifestation)
-    const label               = idx === 1 ? 'Via centre-ville' : idx === 2 ? 'Évite les zones G7' : null
-    if (label && !warnings.includes(label)) warnings.unshift(label)
+  // Is this a cross-border journey? (primary route passes near any crossing)
+  const isCrossBorder = g7 && passesNearAnyCrossing(candidates[0].geometry)
 
-    results.push({
-      id: `route-${idx}`,
-      summary: {
-        duration:          Math.round(r.duration),
-        durationInTraffic: Math.round(r.duration),
-        distance:          Math.round(r.distance),
-        arrivalTime:       new Date(Date.now() + r.duration * 1000).toISOString(),
-      },
-      steps: [], geometry, trafficDelay: 0,
-      alternative: idx > 0, warnings, blockedCrossing,
-    })
+  // ── Step 2a: cross-border — route via open crossings ─────────────────────────
+  if (isCrossBorder) {
+    // Only keep primary routes that pass through OPEN crossings (or no crossing at all)
+    const valid: CarRoute[] = candidates.filter(r => !r.blockedCrossing)
+
+    // Supplement with explicit routes via the best open crossings
+    const targets = bestOpenCrossings(req.from, req.to, 5)
+    for (const crossing of targets) {
+      if (valid.length >= 3) break
+
+      // Skip if we already cover this crossing
+      const alreadyCovered = valid.some(r =>
+        r.geometry.some(pt => haversine({ lat: pt[1], lng: pt[0] }, crossing) < 800),
+      )
+      if (alreadyCovered) continue
+
+      const viaData = await fetchMapboxRoutes(req.from, req.to, token, a1Closed, [
+        { lat: crossing.lat, lng: crossing.lng },
+      ])
+      if (!viaData.length) continue
+
+      const candidate = toCarRoute(
+        viaData[0], `route-via-${crossing.id}`, true, g7, a1Closed, manifestation,
+        crossing.id === 'bardonnex' ? 'Via Bardonnex' :
+        crossing.id === 'meyrin'    ? 'Via Meyrin' :
+        crossing.id === 'ferney-voltaire' ? 'Via Ferney-Voltaire' :
+        crossing.id === 'thonex-vallard'  ? 'Via Thônex-Vallard'  :
+        crossing.id === 'moillesulaz'     ? 'Via Moillesulaz'     :
+        `Via ${crossing.id}`,
+      )
+
+      if (candidate.blockedCrossing) continue  // Still blocked — skip
+      if (valid.some(v => geometrySimilar(candidate.geometry, v.geometry))) continue
+
+      valid.push(candidate)
+    }
+
+    if (valid.length === 0) return fallback(req, a1Closed)
+
+    return valid.map((r, i) => ({ ...r, alternative: i > 0 }))
   }
 
-  // ── Step 2: generate missing alternatives via perpendicular waypoints ─────────
-  if (results.length < 2) {
+  // ── Step 2b: domestic — perpendicular alternatives ───────────────────────────
+  const valid: CarRoute[] = candidates.filter(r => !r.blockedCrossing)
+
+  if (valid.length < 2) {
     const wp      = perpendicularWaypoint(req.from, req.to, 1)
     const altData = await fetchMapboxRoutes(req.from, req.to, token, a1Closed, [wp])
     if (altData.length) {
-      const geo = altData[0].geometry.coordinates as [number, number][]
-      if (!geometrySimilar(geo, results[0].geometry)) {
-        const { warnings, blockedCrossing } = buildWarnings(geo, g7, a1Closed, manifestation)
-        warnings.unshift('Via centre-ville')
-        results.push({
-          id: 'route-alt-1',
-          summary: {
-            duration:          Math.round(altData[0].duration),
-            durationInTraffic: Math.round(altData[0].duration),
-            distance:          Math.round(altData[0].distance),
-            arrivalTime:       new Date(Date.now() + altData[0].duration * 1000).toISOString(),
-          },
-          steps: [], geometry: geo, trafficDelay: 0,
-          alternative: true, warnings, blockedCrossing,
-        })
+      const candidate = toCarRoute(
+        altData[0], 'route-alt-1', true, g7, a1Closed, manifestation, 'Via centre-ville',
+      )
+      if (!candidate.blockedCrossing && !geometrySimilar(candidate.geometry, valid[0].geometry)) {
+        valid.push(candidate)
       }
     }
   }
 
-  if (results.length < 3) {
+  if (valid.length < 3) {
     const wp      = perpendicularWaypoint(req.from, req.to, -1)
     const altData = await fetchMapboxRoutes(req.from, req.to, token, a1Closed, [wp])
     if (altData.length) {
-      const geo = altData[0].geometry.coordinates as [number, number][]
-      const alreadySeen = results.some(r => geometrySimilar(geo, r.geometry))
-      if (!alreadySeen) {
-        const { warnings, blockedCrossing } = buildWarnings(geo, g7, a1Closed, manifestation)
-        warnings.unshift('Évite les zones G7')
-        results.push({
-          id: 'route-safe',
-          summary: {
-            duration:          Math.round(altData[0].duration),
-            durationInTraffic: Math.round(altData[0].duration),
-            distance:          Math.round(altData[0].distance),
-            arrivalTime:       new Date(Date.now() + altData[0].duration * 1000).toISOString(),
-          },
-          steps: [], geometry: geo, trafficDelay: 0,
-          alternative: true, warnings, blockedCrossing,
-        })
+      const candidate = toCarRoute(
+        altData[0], 'route-safe', true, g7, a1Closed, manifestation, 'Évite les zones G7',
+      )
+      if (!candidate.blockedCrossing && !valid.some(v => geometrySimilar(candidate.geometry, v.geometry))) {
+        valid.push(candidate)
       }
     }
   }
 
-  // ── Step 3: filter routes via blocked crossings ───────────────────────────────
-  const valid = results.filter(r => !r.blockedCrossing)
-  if (valid.length === 0) {
-    return results.map(r => ({
-      ...r,
-      warnings: ['🚫 Aucun itinéraire libre — toutes les douanes sur ce trajet sont fermées', ...r.warnings],
-    }))
-  }
+  if (valid.length === 0) return fallback(req, a1Closed)
 
-  return valid
+  return valid.map((r, i) => ({ ...r, alternative: i > 0 }))
 }
 
 export async function getActiveIncidentAreas(): Promise<string[]> {
