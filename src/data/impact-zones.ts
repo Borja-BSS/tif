@@ -63,7 +63,12 @@ const ZONE_TPG: [number, number][] = [
 const ZONE_A1: [number, number][] = [
   [6.0959020, 46.1468117], // Début — Bardonnex (frontière CH/FR)
   [6.1010086, 46.1625812], // A1 via Saint-Julien-en-Genevois
-  [6.0828893, 46.1841458], // A1 virage ouest (secteur Plan-les-Ouates)
+  [6.0828893, 46.1841458], // A1 virage ouest (Plan-les-Ouates)
+  [6.0781994, 46.1941265], // A1 nord (Lancy / Bachet-de-Pesay)
+  [6.0773713, 46.2005765], // A1 nord
+  [6.0753506, 46.2045619], // A1 nord
+  [6.0777679, 46.2090570], // A1 virage est (Vernier)
+  [6.0959587, 46.2155479], // A1 est (Meyrin / Aéroport)
   [6.1001037, 46.2189987], // Fin — Genève-Aéroport / Meyrin
 ]
 
