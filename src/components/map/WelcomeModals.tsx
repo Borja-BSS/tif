@@ -4,7 +4,9 @@ import { useState, useEffect } from 'react'
 import { useMapT } from '@/i18n/map'
 import { OnboardingTour, fireConfetti } from './OnboardingTour'
 
-const UPDATE_KEY = 'tif:update:v4'
+const UPDATE_KEY   = 'tif:update:v4'
+const G7_KEY       = 'tif:g7:v1'
+const FEATURES_KEY = 'tif:features:v1'
 
 const LG_MODAL: React.CSSProperties = {
   background:           'rgba(18,18,24,0.96)',
@@ -21,10 +23,18 @@ export function WelcomeModals() {
   const [tourActive, setTourActive] = useState(false)
   const t = useMapT()
 
-  // Update popup is always first — start there if not yet seen, else go straight to G7
+  // Determine which step to show — each popup is shown only once (guarded by localStorage)
   useEffect(() => {
-    const updateSeen = localStorage.getItem(UPDATE_KEY)
-    setStep(updateSeen ? 'g7' : 'update')
+    const updateSeen   = localStorage.getItem(UPDATE_KEY)
+    const g7Seen       = localStorage.getItem(G7_KEY)
+    const surveyDone   = localStorage.getItem('tif_survey_v1')
+    const featuresSeen = localStorage.getItem(FEATURES_KEY)
+
+    if (!updateSeen)        setStep('update')
+    else if (!g7Seen)       setStep('g7')
+    else if (!surveyDone)   setStep('survey')
+    else if (!featuresSeen) setStep('features')
+    else                    setStep(null)
   }, [])
 
   // Confetti when the Update popup appears
@@ -33,11 +43,13 @@ export function WelcomeModals() {
   }, [step])
 
   const goAfterG7 = () => {
+    localStorage.setItem(G7_KEY, '1')
     const surveyDone = localStorage.getItem('tif_survey_v1')
     setStep(surveyDone ? 'features' : 'survey')
   }
 
   const goAfterFeatures = () => {
+    localStorage.setItem(FEATURES_KEY, '1')
     setStep(null)
   }
 
@@ -49,6 +61,8 @@ export function WelcomeModals() {
 
   const handleDiscover = () => {
     localStorage.setItem(UPDATE_KEY, '1')
+    localStorage.setItem(G7_KEY, '1')
+    localStorage.setItem(FEATURES_KEY, '1')
     setStep(null)
     setTourActive(true)
   }
