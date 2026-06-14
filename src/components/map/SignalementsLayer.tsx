@@ -141,11 +141,16 @@ export default function SignalementsLayer({ map }: { map: mapboxgl.Map | null })
     }
 
     fetchAndRender()
-    const interval = setInterval(fetchAndRender, 60_000)
+    const interval = setInterval(fetchAndRender, 15_000)
+
+    // Refresh immédiat quand l'admin valide un signalement (même navigateur, autre onglet)
+    const channel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('tif:signalements') : null
+    if (channel) channel.onmessage = () => fetchAndRender()
 
     return () => {
       cancelled = true
       clearInterval(interval)
+      channel?.close()
       markersRef.current.forEach(m => m.remove())
       markersRef.current = []
     }

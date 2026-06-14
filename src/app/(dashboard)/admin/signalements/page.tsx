@@ -282,6 +282,10 @@ export default function SignalementsAdmin() {
     })
     setActing(null)
     load()
+    // Notifie SignalementsLayer dans les autres onglets pour refresh immédiat
+    if (status === 'approved') {
+      try { new BroadcastChannel('tif:signalements').postMessage({ approved: id }) } catch {}
+    }
   }
 
   const del = async (id: string) => {
