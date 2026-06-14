@@ -1,5 +1,7 @@
 // Car routing via OSRM (Open Source Routing Machine / OpenStreetMap)
 // https://project-osrm.org
+import { IMPACT_ZONES } from '@/data/impact-zones'
+
 const OSRM_BASE = 'https://router.project-osrm.org/route/v1/driving'
 
 export interface CarRouteRequest {
@@ -29,11 +31,19 @@ export interface CarRoute {
   trafficDelay: number
   alternative:  boolean
   warnings:     string[]
-  blockedCrossing?: string   // id de la douane si route impossible
+  blockedCrossing?: string
 }
 
-// ── G7 date helpers ────────────────────────────────────────────────────────────
-function isNOG7Day(now = new Date()): boolean {
+// ── G7 / A1 date helpers ──────────────────────────────────────────────────────
+
+// A1 fermée du 14 au 17 juin inclus (minuit CH)
+function isA1ClosurePeriod(now = new Date()): boolean {
+  const d = now.toLocaleDateString('fr-CH', { timeZone: 'Europe/Zurich' })
+  return ['14.06.2026','15.06.2026','16.06.2026','17.06.2026'].includes(d)
+}
+
+// Manifestation NO-G7 : uniquement le 14 juin
+function isManifestationDay(now = new Date()): boolean {
   return now.toLocaleDateString('fr-CH', { timeZone: 'Europe/Zurich' }) === '14.06.2026'
 }
 
@@ -42,14 +52,12 @@ function isG7Period(now = new Date()): boolean {
 }
 
 // ── Douanes ouvertes pendant G7 ───────────────────────────────────────────────
-// Source : computeInstantStatus / G7_OPEN dans border-crossings-client.ts
 const G7_OPEN_IDS = new Set([
   'bardonnex','thonex-vallard','moillesulaz','meyrin','ferney-voltaire',
   'perly','anieres','divonne','leaz','la-cure','vallorbe',
   'bois-d-amont','les-hopitaux-neufs','saint-Laurent','douvaine','thonon',
 ])
 
-// Toutes les douanes avec coordonnées — pour détection géométrique
 const ALL_CROSSINGS_COORDS = [
   { id: 'bardonnex',          lat: 46.14952,    lng: 6.09693   },
   { id: 'thonex-vallard',     lat: 46.18811,    lng: 6.20277   },
@@ -96,11 +104,24 @@ const ALL_CROSSINGS_COORDS = [
   { id: 'thonon',             lat: 46.37609,    lng: 6.47516   },
 ]
 
-// Douanes BLOQUÉES pendant G7 (toutes sauf G7_OPEN)
 const BLOCKED_CROSSINGS = ALL_CROSSINGS_COORDS.filter(c => !G7_OPEN_IDS.has(c.id))
 
-// ── Détection si une route passe par une douane bloquée ──────────────────────
-// Seuil 350m : assez fin pour ne pas générer de faux positifs sur les routes proches
+// ── Point-dans-polygone (ray casting) ────────────────────────────────────────
+// Coordonnées en [lng, lat] — cohérent avec GeoJSON et OSRM
+function pointInPolygon(pt: [number, number], poly: [number, number][]): boolean {
+  const [x, y] = pt
+  let inside = false
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, yi] = poly[i]
+    const [xj, yj] = poly[j]
+    if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) {
+      inside = !inside
+    }
+  }
+  return inside
+}
+
+// ── Vérification douane bloquée ───────────────────────────────────────────────
 function findBlockedCrossing(
   geometry: [number, number][],
   blocked:  typeof BLOCKED_CROSSINGS,
@@ -113,11 +134,23 @@ function findBlockedCrossing(
   return null
 }
 
+// ── Vérification zone manifestation ──────────────────────────────────────────
+function routePassesThroughManifestationZone(geometry: [number, number][]): boolean {
+  const zone = IMPACT_ZONES.find(z => z.id === 'no-g7-manifestation')
+  if (!zone) return false
+  // Vérifie 1 point sur 5 pour des performances (zone large, précision suffisante)
+  for (let i = 0; i < geometry.length; i += 5) {
+    if (pointInPolygon(geometry[i], zone.coordinates)) return true
+  }
+  return false
+}
+
 // ── Calcul du trajet ──────────────────────────────────────────────────────────
 export async function calculateCarRoute(req: CarRouteRequest): Promise<CarRoute[]> {
-  const now  = new Date()
-  const nog7 = isNOG7Day(now)
-  const g7   = isG7Period(now)
+  const now          = new Date()
+  const a1Closed     = isA1ClosurePeriod(now)
+  const manifestation = isManifestationDay(now)
+  const g7           = isG7Period(now)
 
   const coords = `${req.from.lng},${req.from.lat};${req.to.lng},${req.to.lat}`
   const url    = new URL(`${OSRM_BASE}/${coords}`)
@@ -126,14 +159,14 @@ export async function calculateCarRoute(req: CarRouteRequest): Promise<CarRoute[
   url.searchParams.set('steps',        'false')
   url.searchParams.set('alternatives', 'true')
 
-  // Le 14.06 : exclure les autoroutes → évite la A1 en première intention
-  if (nog7) url.searchParams.set('exclude', 'motorway')
+  // 14–17 juin : exclure autoroutes → évite la A1 dès le calcul
+  if (a1Closed) url.searchParams.set('exclude', 'motorway')
 
   const res = await fetch(url.toString(), { signal: AbortSignal.timeout(10000) })
-  if (!res.ok) return fallback(req, nog7)
+  if (!res.ok) return fallback(req, a1Closed)
 
   const data = await res.json() as OsrmResponse
-  if (data.code !== 'Ok' || !data.routes?.length) return fallback(req, nog7)
+  if (data.code !== 'Ok' || !data.routes?.length) return fallback(req, a1Closed)
 
   const routes: CarRoute[] = data.routes.map((route, idx) => {
     const duration = Math.round(route.duration)
@@ -143,15 +176,21 @@ export async function calculateCarRoute(req: CarRouteRequest): Promise<CarRoute[
     let blockedCrossing: string | undefined
 
     if (g7) {
-      // Contrôle géométrique : la route passe-t-elle par une douane fermée ?
+      // Douane bloquée sur le tracé ?
       const blocked = findBlockedCrossing(geometry, BLOCKED_CROSSINGS)
       if (blocked) {
         blockedCrossing = blocked.id
         warnings.push(`🚫 Route via "${blocked.id}" — douane fermée 12–18 juin`)
       }
-      if (nog7) {
-        warnings.push('⛔ A1 fermée — Itinéraire sans autoroute')
-      }
+    }
+
+    if (a1Closed) {
+      warnings.push('⛔ A1 fermée 14–17 juin — Itinéraire sans autoroute')
+    }
+
+    // Zone manifestation (14 juin uniquement)
+    if (manifestation && routePassesThroughManifestationZone(geometry)) {
+      warnings.push('⚠️ Itinéraire traverse la zone de manifestation NO-G7 — perturbations importantes attendues')
     }
 
     return {
@@ -165,15 +204,13 @@ export async function calculateCarRoute(req: CarRouteRequest): Promise<CarRoute[
     }
   })
 
-  // Filtrer les routes impossibles (douane bloquée)
+  // Filtrer les routes passant par une douane fermée
   const validRoutes = routes.filter(r => !r.blockedCrossing)
 
-  // Si toutes les routes passent par des douanes fermées, retourner les routes
-  // avec avertissement fort (plutôt que rien du tout)
   if (validRoutes.length === 0) {
     return routes.map(r => ({
       ...r,
-      warnings: ['🚫 Aucun itinéraire libre disponible — toutes les douanes sur ce trajet sont fermées', ...r.warnings],
+      warnings: ['🚫 Aucun itinéraire libre — toutes les douanes sur ce trajet sont fermées', ...r.warnings],
     }))
   }
 
@@ -185,7 +222,7 @@ export async function getActiveIncidentAreas(): Promise<string[]> {
 }
 
 // ── Fallback ligne droite si OSRM down ────────────────────────────────────────
-function fallback(req: CarRouteRequest, nog7: boolean): CarRoute[] {
+function fallback(req: CarRouteRequest, a1Closed: boolean): CarRoute[] {
   const dist = haversine(req.from, req.to)
   const dur  = Math.round((dist / 1000 / 40) * 3600)
   return [{
@@ -198,7 +235,7 @@ function fallback(req: CarRouteRequest, nog7: boolean): CarRoute[] {
     geometry: [[req.from.lng, req.from.lat], [req.to.lng, req.to.lat]],
     trafficDelay: 0, alternative: false,
     warnings: [
-      ...(nog7 ? ['⛔ A1 fermée — Vérifiez votre itinéraire'] : []),
+      ...(a1Closed ? ['⛔ A1 fermée 14–17 juin — Vérifiez votre itinéraire'] : []),
       'Service de routage temporairement indisponible',
     ],
   }]

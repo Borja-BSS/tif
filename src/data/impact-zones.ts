@@ -120,7 +120,7 @@ export const IMPACT_ZONES: ImpactZone[] = [
     id:           'a1-closure',
     title:        'A1 fermée — Bardonnex → Genève',
     description:
-      'Fermeture totale de l\'autoroute A1 dans le cadre du G7 Évian 2026.\n\n' +
+      'Fermeture totale de l\'autoroute A1 du 14 au 17 juin 2026 (G7 Évian 2026).\n\n' +
       '⛔ DOUBANE DE BARDONNEX FERMÉE\n\n' +
       'Itinéraires alternatifs :\n' +
       '* Via Ferney-Voltaire (D1005)\n' +
@@ -132,7 +132,7 @@ export const IMPACT_ZONES: ImpactZone[] = [
     geometryType: 'LineString',
     coordinates:  ZONE_A1,
     activeFrom:   new Date('2026-06-14T00:00:00+02:00'),
-    activeTo:     new Date('2026-06-14T23:59:59+02:00'),
+    activeTo:     new Date('2026-06-17T23:59:59+02:00'),
     fillColor:    '#FF453A',
     fillOpacity:  0,
     strokeColor:  '#FF453A',

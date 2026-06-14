@@ -562,7 +562,8 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
     travaux: '🚧', deviation: '🔀', suppression: '🚫', retard: '⏱️', perturbation: '⚠️',
   }
 
-  const isNOG7Day = new Date().toLocaleDateString('fr-CH', { timeZone: 'Europe/Zurich' }) === '14.06.2026'
+  const d = new Date().toLocaleDateString('fr-CH', { timeZone: 'Europe/Zurich' })
+  const isNOG7Day = ['14.06.2026','15.06.2026','16.06.2026','17.06.2026'].includes(d)
 
   return (
     <div className="space-y-3">
@@ -573,7 +574,7 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
             <span className="text-2xl flex-shrink-0">🛑</span>
             <div className="flex-1">
               <p className="text-[11px] font-bold uppercase tracking-wider mb-1" style={{ color: '#FF453A' }}>
-                ⛔ A1 FERMÉE — 14.06.2026
+                ⛔ A1 FERMÉE — 14 AU 17 JUIN 2026
               </p>
               <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
                 Autoroute A1 bloquée jusqu&apos;à Bardonnex

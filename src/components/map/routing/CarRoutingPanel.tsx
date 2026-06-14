@@ -115,15 +115,16 @@ export function getRouteType(route: CarRoute): 'fastest' | 'alternative' | 'safe
   return 'fastest'
 }
 
-function isNOG7Day(): boolean {
-  return new Date().toLocaleDateString('fr-CH', { timeZone: 'Europe/Zurich' }) === '14.06.2026'
+function isA1ClosurePeriod(): boolean {
+  const d = new Date().toLocaleDateString('fr-CH', { timeZone: 'Europe/Zurich' })
+  return ['14.06.2026','15.06.2026','16.06.2026','17.06.2026'].includes(d)
 }
 
 export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
   const t = useMapT()
   const tRef = useRef(t)
   tRef.current = t
-  const nog7 = isNOG7Day()
+  const nog7 = isA1ClosurePeriod()
 
   const [origin,      setOrigin]      = useState<SearchResult | null>(null)
   const [destination, setDestination] = useState<SearchResult | null>(null)
@@ -401,7 +402,7 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
             style={{ background: 'rgba(255,69,58,0.14)', border: '1px solid rgba(255,69,58,0.40)' }}>
             <span className="text-base flex-shrink-0">⛔</span>
             <div>
-              <p className="text-[12px] font-bold" style={{ color: '#FF453A' }}>A1 fermée — Bardonnex bloqué</p>
+              <p className="text-[12px] font-bold" style={{ color: '#FF453A' }}>A1 fermée 14–17 juin — Bardonnex bloqué</p>
               <p className="text-[11px] mt-0.5" style={{ color: 'rgba(255,255,255,0.55)' }}>
                 Itinéraires calculés sans autoroute. Douane de Bardonnex inaccessible.
               </p>
@@ -509,7 +510,7 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
                 style={{ background: 'rgba(255,69,58,0.14)', border: '1px solid rgba(255,69,58,0.40)' }}>
                 <span className="text-base flex-shrink-0">⛔</span>
                 <div>
-                  <p className="text-[12px] font-bold" style={{ color: '#FF453A' }}>A1 fermée — Bardonnex bloqué</p>
+                  <p className="text-[12px] font-bold" style={{ color: '#FF453A' }}>A1 fermée 14–17 juin — Bardonnex bloqué</p>
                   <p className="text-[11px] mt-0.5" style={{ color: 'rgba(255,255,255,0.55)' }}>
                     Itinéraires calculés sans autoroute. Douane de Bardonnex inaccessible.
                   </p>
