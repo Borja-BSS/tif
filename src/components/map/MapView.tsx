@@ -25,7 +25,8 @@ const ParkingLayer         = dynamic(() => import('./ParkingLayer'),         { s
 const EventsLayer          = dynamic(() => import('./EventsLayer'),          { ssr: false })
 const G7ClosuresLayer      = dynamic(() => import('./G7ClosuresLayer'),      { ssr: false })
 const CustomAlertsLayer    = dynamic(() => import('./CustomAlertsLayer'),    { ssr: false })
-const ImpactZonesLayer    = dynamic(() => import('./ImpactZonesLayer'),     { ssr: false })
+const ImpactZonesLayer     = dynamic(() => import('./ImpactZonesLayer'),     { ssr: false })
+const SignalementsLayer    = dynamic(() => import('./SignalementsLayer'),    { ssr: false })
 
 const DEFAULT_FILTERS: FilterState = {
   heatmap:   true,
@@ -95,6 +96,7 @@ export default function MapView({ filters: externalFilters, activeFilter = 'all'
           <RealtimeLayer  map={map} visible={filters.heatmap} showTransport={filters.transport} />
           <AlertLayer         map={map} visible={filters.alerts} />
           <CustomAlertsLayer  map={filters.alerts ? map : null} />
+          <SignalementsLayer  map={map} />
           <HereIncidentsLayer map={filters.alerts && !filters.transport ? map : null} />
           <ParkingLayer       map={filters.parking ? map : null} />
           <EventsLayer        map={activeFilter === 'events' ? map : null} />

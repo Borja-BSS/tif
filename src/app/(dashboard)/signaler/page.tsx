@@ -4,6 +4,8 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { firebaseStorage } from '@/lib/firebase'
 import { SIGNAL_CATEGORIES, PRIORITY_LEVELS } from '@/data/signalement-categories'
 
 const LG: React.CSSProperties = {
@@ -63,12 +65,20 @@ export default function SignalerPage() {
     setSubmitting(true)
     setError('')
     try {
+      // Upload media files to Firebase Storage, get real download URLs
+      const mediaUrls = await Promise.all(
+        mediaFiles.map(async (file) => {
+          const fileRef = storageRef(firebaseStorage, `signalements/${Date.now()}_${Math.random().toString(36).slice(2)}_${file.name}`)
+          await uploadBytes(fileRef, file)
+          return getDownloadURL(fileRef)
+        })
+      )
       const body = {
         category, subcategory, priority, description,
         address:   address.trim() || undefined,
         lat:       lat ?? undefined,
         lng:       lng ?? undefined,
-        mediaUrls: mediaFiles.map(f => f.name),
+        mediaUrls,
       }
       const res = await fetch('/api/v1/signalements', {
         method:  'POST',

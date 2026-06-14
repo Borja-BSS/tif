@@ -1,5 +1,6 @@
 import { initializeApp, getApps } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
+import { getStorage } from 'firebase/storage'
 
 const firebaseConfig = {
   apiKey:            'AIzaSyDhuxQLCNDRNz9L7hVCFnQYjpiUZTitzLM',
@@ -13,5 +14,6 @@ const firebaseConfig = {
 
 // Évite la double initialisation en mode dev (HMR Next.js)
 const app  = getApps().length ? getApps()[0] : initializeApp(firebaseConfig)
-export const firebaseAuth = getAuth(app)
+export const firebaseAuth    = getAuth(app)
+export const firebaseStorage = getStorage(app)
 export default app
