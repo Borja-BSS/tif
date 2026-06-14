@@ -4,6 +4,7 @@ import { redis, ratelimit } from '@/lib/redis'
 import { getFirebaseUserFromRequest } from '@/lib/auth-firebase'
 import { REDIS_KEY_SIGNALEMENTS } from '@/data/signalement-categories'
 import type { Signalement } from '@/data/signalement-categories'
+import { sendSignalementNotification } from '@/lib/email'
 
 export const dynamic = 'force-dynamic'
 
@@ -56,8 +57,22 @@ export async function POST(req: NextRequest) {
   }
 
   const all = await load()
-  all.unshift(item) // plus récents en premier
+  all.unshift(item)
   await save(all)
+
+  // Notification email — fire-and-forget, ne bloque pas la réponse
+  sendSignalementNotification({
+    id:          item.id,
+    category:    item.category,
+    subcategory: item.subcategory,
+    priority:    item.priority,
+    description: item.description,
+    address:     item.address,
+    lat:         item.lat,
+    lng:         item.lng,
+    mediaCount:  item.mediaUrls?.length ?? 0,
+    createdAt:   item.createdAt,
+  }).catch(err => console.error('[signalement] email notif failed:', err))
 
   return NextResponse.json({ id: item.id }, { status: 201 })
 }

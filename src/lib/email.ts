@@ -246,6 +246,115 @@ export async function sendJourneyConfirmation(payload: JourneyConfirmationPayloa
   })
 }
 
+// ── Signalement notification ──────────────────────────────────────────────────
+
+export interface SignalementNotifPayload {
+  id:          string
+  category:    string
+  subcategory: string
+  priority:    string
+  description: string
+  address?:    string
+  lat?:        number
+  lng?:        number
+  mediaCount:  number
+  createdAt:   string
+}
+
+const PRIORITY_COLOR_HEX: Record<string, string> = {
+  info:         '#8E8E93',
+  vigilance:    '#30D158',
+  perturbation: '#FF9500',
+  important:    '#FF9F0A',
+  urgent:       '#FF3B30',
+  critique:     '#FF2D55',
+}
+
+const PRIORITY_LABEL: Record<string, string> = {
+  info:         'Info',
+  vigilance:    'Vigilance',
+  perturbation: 'Perturbation',
+  important:    'Important',
+  urgent:       'Urgent',
+  critique:     'Critique',
+}
+
+export async function sendSignalementNotification(payload: SignalementNotifPayload): Promise<void> {
+  const { id, category, subcategory, priority, description, address, lat, lng, mediaCount, createdAt } = payload
+  const to = (process.env.ADMIN_NOTIFICATION_EMAILS ?? 'aruncalstas@gmail.com,lostropicosbox@gmail.com')
+    .split(',').map(s => s.trim()).join(', ')
+
+  const priColor = PRIORITY_COLOR_HEX[priority] ?? '#8E8E93'
+  const priLabel = PRIORITY_LABEL[priority]     ?? priority
+  const date = new Date(createdAt).toLocaleString('fr-CH', {
+    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
+  })
+
+  const locationLine = lat != null && lng != null
+    ? `GPS ${lat.toFixed(5)}, ${lng.toFixed(5)} — <a href="https://maps.google.com/?q=${lat},${lng}" style="color:#0A84FF;">Maps →</a>`
+    : address ? esc(address) : '—'
+
+  const mediaLine = mediaCount > 0
+    ? `<span style="color:#0A84FF;font-weight:600;">📎 ${mediaCount} pièce${mediaCount > 1 ? 's' : ''} jointe${mediaCount > 1 ? 's' : ''}</span>`
+    : '<span style="color:rgba(255,255,255,0.3);">Aucun média</span>'
+
+  const html = `<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#0a0a0f;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+<div style="max-width:560px;margin:0 auto;padding:32px 16px;">
+  <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:28px 24px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+      <div style="width:40px;height:40px;border-radius:10px;background:#FF3B30;display:flex;align-items:center;justify-content:center;font-size:20px;">📡</div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.08em;">TIF Admin · G7 Grand Genève</div>
+        <div style="font-size:15px;font-weight:700;color:#fff;margin-top:2px;">Nouveau signalement</div>
+      </div>
+    </div>
+    <div style="display:inline-block;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:700;margin-bottom:18px;background:${priColor}18;color:${priColor};border:1px solid ${priColor}35;">
+      ${esc(priLabel)}
+    </div>
+    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:0 16px;margin-bottom:20px;">
+      <div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;gap:12px;">
+        <div style="width:110px;flex-shrink:0;font-size:11px;font-weight:600;color:rgba(255,255,255,0.35);padding-top:2px;text-transform:uppercase;letter-spacing:.05em;">Catégorie</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.85);">${esc(category)} · ${esc(subcategory)}</div>
+      </div>
+      <div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;gap:12px;">
+        <div style="width:110px;flex-shrink:0;font-size:11px;font-weight:600;color:rgba(255,255,255,0.35);padding-top:2px;text-transform:uppercase;letter-spacing:.05em;">Description</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.85);line-height:1.5;">${esc(description)}</div>
+      </div>
+      <div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;gap:12px;">
+        <div style="width:110px;flex-shrink:0;font-size:11px;font-weight:600;color:rgba(255,255,255,0.35);padding-top:2px;text-transform:uppercase;letter-spacing:.05em;">Localisation</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.75);">${locationLine}</div>
+      </div>
+      <div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;gap:12px;">
+        <div style="width:110px;flex-shrink:0;font-size:11px;font-weight:600;color:rgba(255,255,255,0.35);padding-top:2px;text-transform:uppercase;letter-spacing:.05em;">Médias</div>
+        <div style="font-size:13px;">${mediaLine}</div>
+      </div>
+      <div style="padding:10px 0;display:flex;gap:12px;">
+        <div style="width:110px;flex-shrink:0;font-size:11px;font-weight:600;color:rgba(255,255,255,0.35);padding-top:2px;text-transform:uppercase;letter-spacing:.05em;">Reçu le</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.6);">${esc(date)}</div>
+      </div>
+    </div>
+    <a href="https://tif.borja-swiss-solutions.ch/admin/signalements" style="display:inline-block;padding:13px 28px;background:#0A84FF;color:#fff;text-decoration:none;border-radius:14px;font-size:14px;font-weight:700;">
+      Voir &amp; traiter dans l'admin →
+    </a>
+    <div style="margin-top:28px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.07);font-size:11px;color:rgba(255,255,255,0.3);line-height:1.6;">
+      TIF · Application de mobilité G7 Grand Genève 2026 · ID: ${esc(id)}
+    </div>
+  </div>
+</div>
+</body>
+</html>`
+
+  await getTransport().sendMail({
+    from:    `"TIF Admin" <${process.env.SMTP_USER ?? 'contact@borja-swiss-solutions.ch'}>`,
+    to,
+    subject: `📡 Nouveau signalement — ${esc(priLabel)} · ${esc(category)}`,
+    html,
+  })
+}
+
 // ── Contact form ──────────────────────────────────────────────────────────────
 
 export interface ContactFormPayload {
