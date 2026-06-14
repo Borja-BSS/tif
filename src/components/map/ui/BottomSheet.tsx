@@ -18,6 +18,7 @@ import type { MapT } from '@/i18n/map'
 import { events, CATEGORY_LABELS, CATEGORY_ICONS } from '@/data/events'
 import type { EventItem } from '@/data/types'
 import { getAlertsForDay } from '@/data/g7-alerts'
+import { IMPACT_ZONES } from '@/data/impact-zones'
 import type { ImpactZone } from '@/data/impact-zones'
 
 type DetailView = 'overview' | 'douanes' | 'transport' | 'alertes' | 'g7' | 'meteo' | 'parking' | 'journey' | 'events' | 'impact-zone'
@@ -983,10 +984,78 @@ function AlertesDetail({ map }: { map: mapboxgl.Map | null }) {
     )
   }
 
+  const fmtTime = (d: Date) =>
+    d.toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Zurich' })
+
   return (
     <div className="space-y-2">
       {/* Bulletins G7 planifiés — route + TPG */}
       <G7BulletinsPanel categories={['route', 'tpg']} title={t.alertsSection.g7RouteTpg} />
+
+      {/* ── Zones d'impact NO-G7 ─────────────────────────────────────── */}
+      <div className="space-y-2 mt-1">
+        <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>
+          ⚠️ Zones d&apos;impact — NO-G7 · 14.06.2026
+        </p>
+        {IMPACT_ZONES.map(zone => {
+          const isDemo = zone.type === 'DEMONSTRATION'
+          const color  = zone.strokeColor
+          return (
+            <div key={zone.id} className="rounded-2xl p-4 space-y-3"
+              style={{ background: `${color}12`, border: `1px solid ${color}35` }}>
+              {/* Header */}
+              <div className="flex items-start gap-3">
+                <span className="text-2xl flex-shrink-0">{isDemo ? '🔴' : '🟠'}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color }}>
+                    {isDemo ? 'Manifestation · Périmètre' : 'Réseau TPG · Lignes supprimées'}
+                  </p>
+                  <p className="text-sm font-bold leading-snug mt-0.5" style={{ color: 'var(--text-primary)' }}>
+                    {zone.title}
+                  </p>
+                </div>
+                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full flex-shrink-0"
+                  style={{ background: `${color}20`, color }}>
+                  {fmtTime(zone.activeFrom)}–{fmtTime(zone.activeTo)}
+                </span>
+              </div>
+
+              {/* Lignes */}
+              {zone.lines && zone.lines.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {zone.lines.map(l => (
+                    <span key={l}
+                      className="text-[11px] font-bold px-2 py-0.5 rounded-lg"
+                      style={{ background: `${color}22`, color, border: `1px solid ${color}40` }}>
+                      {l}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Description */}
+              <div className="space-y-1">
+                {zone.description.split('\n').map((line, i) => {
+                  if (!line.trim()) return null
+                  const isBullet = line.startsWith('*')
+                  return (
+                    <p key={i}
+                      className={isBullet ? 'pl-3 text-[12px]' : 'text-[12px] font-semibold'}
+                      style={{ color: isBullet ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.80)' }}>
+                      {isBullet ? line.replace(/^\*\s*/, '· ') : line}
+                    </p>
+                  )
+                })}
+              </div>
+
+              {/* Source */}
+              <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.30)' }}>
+                {zone.source} · {zone.sourceRef}
+              </p>
+            </div>
+          )
+        })}
+      </div>
 
       {/* ── Alertes admin actives ─────────────────────────────────────── */}
       {customAlerts.length > 0 && (
