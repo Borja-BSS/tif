@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useMapT } from '@/i18n/map'
 import { OnboardingTour, fireConfetti } from './OnboardingTour'
 
+const CRISIS_KEY   = 'tif:alert:crisis:v1'
 const UPDATE_KEY   = 'tif:update:v4'
 const G7_KEY       = 'tif:g7:v2'
 const FEATURES_KEY = 'tif:features:v2'
@@ -16,7 +17,7 @@ const LG_MODAL: React.CSSProperties = {
   boxShadow:            'inset 0 0.5px 0 rgba(255,255,255,0.22), 0 24px 80px rgba(0,0,0,0.65)',
 }
 
-type Step = 'g7' | 'survey' | 'features' | 'update' | null
+type Step = 'crisis' | 'g7' | 'survey' | 'features' | 'update' | null
 
 export function WelcomeModals() {
   const [step,       setStep]       = useState<Step>(null)
@@ -32,12 +33,14 @@ export function WelcomeModals() {
       return
     }
 
+    const crisisSeen   = localStorage.getItem(CRISIS_KEY)
     const updateSeen   = localStorage.getItem(UPDATE_KEY)
     const g7Seen       = localStorage.getItem(G7_KEY)
     const surveyDone   = localStorage.getItem('tif_survey_v1')
     const featuresSeen = localStorage.getItem(FEATURES_KEY)
 
-    if (!updateSeen)        setStep('update')
+    if (!crisisSeen)        setStep('crisis')
+    else if (!updateSeen)   setStep('update')
     else if (!g7Seen)       setStep('g7')
     else if (!surveyDone)   setStep('survey')
     else if (!featuresSeen) setStep('features')
@@ -83,7 +86,9 @@ export function WelcomeModals() {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
       <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.72)' }} />
-      {step === 'g7'
+      {step === 'crisis'
+        ? <CrisisModal onDismiss={() => { localStorage.setItem(CRISIS_KEY, '1'); setStep('update') }} />
+        : step === 'g7'
         ? <G7Modal       w={t.welcome} onNext={goAfterG7} />
         : step === 'survey'
         ? <SurveyModal   w={t.welcome} onNext={() => setStep('features')} />
@@ -281,6 +286,81 @@ function FeaturesModal({ w, onDismiss }: { w: WelcomeT; onDismiss: () => void })
       >
         {w.featBtn}
       </button>
+    </div>
+  )
+}
+
+// ── CRISIS — Alerte zone critique G7 (one-time, key: tif:alert:crisis:v1) ─────
+
+function CrisisModal({ onDismiss }: { onDismiss: () => void }) {
+  const handleSignal = () => {
+    localStorage.setItem(CRISIS_KEY, '1')
+    sessionStorage.setItem('tif:from-signaler', '1')
+    window.location.href = '/signaler'
+  }
+
+  const handleShare = async () => {
+    const url  = 'https://tif.borja-swiss-solutions.ch/map'
+    const text = '⚠️ Zone critique à Genève — Suis la situation en direct sur TIF :'
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try { await navigator.share({ title: 'TIF — Alerte Genève', text, url }) } catch {}
+    } else {
+      window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`, '_blank')
+    }
+  }
+
+  return (
+    <div className="relative z-10 w-full max-w-sm rounded-3xl p-6" style={LG_MODAL}>
+      <button
+        onClick={onDismiss}
+        className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full transition-opacity active:opacity-60"
+        style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.45)' }}
+        aria-label="Fermer"
+      >
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <path d="M1 1l8 8M9 1l-8 8"/>
+        </svg>
+      </button>
+
+      <div className="text-center mb-5">
+        <div className="text-5xl mb-3">⚠️</div>
+        <h2 className="text-[18px] font-bold text-white mb-2 leading-snug">
+          Zone critique en ce moment
+        </h2>
+        <p className="text-[13px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>
+          Manifestation NO-G7 · TPG fortement perturbé · Contrôles frontière renforcés
+        </p>
+      </div>
+
+      <div className="rounded-2xl p-4 mb-5 space-y-2.5"
+        style={{ background: 'rgba(255,69,58,0.08)', border: '1px solid rgba(255,69,58,0.28)' }}>
+        <p className="text-[13px] font-semibold text-white">
+          📡 Partagez vos infos en direct
+        </p>
+        <p className="text-[12px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.55)' }}>
+          Vous êtes sur le terrain ? Signalez un incident, un embouteillage ou une fermeture de route. Votre signal aide tous les utilisateurs TIF en temps réel.
+        </p>
+        <p className="text-[12px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.55)' }}>
+          Partagez aussi l&apos;application avec vos proches pour qu&apos;ils puissent suivre la situation et se déplacer en sécurité.
+        </p>
+      </div>
+
+      <div className="flex gap-3">
+        <button
+          onClick={handleSignal}
+          className="flex-1 py-3.5 rounded-2xl text-[14px] font-bold text-white transition-opacity active:opacity-80"
+          style={{ background: '#FF453A' }}
+        >
+          📍 Signaler
+        </button>
+        <button
+          onClick={handleShare}
+          className="flex-1 py-3.5 rounded-2xl text-[14px] font-bold text-white transition-opacity active:opacity-80"
+          style={{ background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.18)' }}
+        >
+          🔗 Partager
+        </button>
+      </div>
     </div>
   )
 }
