@@ -7,7 +7,7 @@ import type { Signalement } from '@/data/signalement-categories'
 
 export const dynamic = 'force-dynamic'
 
-const ADMIN_EMAILS = (process.env.ADMIN_EMAILS ?? 'lostropicosbox@gmail.com')
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS ?? 'lostropicosbox@gmail.com,aruncalstas@gmail.com')
   .split(',').map(s => s.trim().toLowerCase())
 
 async function isAdmin(req: NextRequest): Promise<boolean> {

@@ -5,7 +5,7 @@ import { getOverrides, setOverride, clearOverride } from '@/lib/territory/crossi
 
 export const dynamic = 'force-dynamic'
 
-const ADMIN_EMAILS = (process.env.ADMIN_EMAILS ?? 'lostropicosbox@gmail.com')
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS ?? 'lostropicosbox@gmail.com,aruncalstas@gmail.com')
   .split(',').map(s => s.trim().toLowerCase())
 
 async function verifyAdmin(req: NextRequest): Promise<string | null> {

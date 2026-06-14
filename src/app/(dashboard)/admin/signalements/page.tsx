@@ -9,7 +9,7 @@ import { firebaseAuth } from '@/lib/firebase'
 import { SIGNAL_CATEGORIES, PRIORITY_LEVELS } from '@/data/signalement-categories'
 import type { Signalement } from '@/data/signalement-categories'
 
-const ADMIN_EMAILS = ['lostropicosbox@gmail.com']
+const ADMIN_EMAILS = ['lostropicosbox@gmail.com', 'aruncalstas@gmail.com']
 
 const PRIORITY_COLOR: Record<string, string> = {
   info:         '#8E8E93',
