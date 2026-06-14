@@ -30,19 +30,24 @@ const SHEET_HEIGHTS: Record<SheetState, string> = {
   full: '92vh',
 }
 
-// Server already returns real alternative geometries — no client-side fabrication needed.
+// Sort by fastest first, keep real geometries as-is.
 function enrichRoutes(routes: CarRoute[]): CarRoute[] {
-  return routes
+  return [...routes].sort((a, b) => a.summary.duration - b.summary.duration)
 }
 
 // ── Route reason explanation ───────────────────────────────────────────────────
 function getRouteReason(route: CarRoute, index: number, allRoutes: CarRoute[], t: MapT): string[] {
   const reasons: string[] = []
+  const openCrossing = route.warnings.find(w => w.startsWith('Via ') && w !== 'Via centre-ville')
 
   if (index === 0) {
     reasons.push(t.car.fastest)
     if (route.trafficDelay === 0) reasons.push(t.car.fluidTraffic)
     if (!route.warnings.length) reasons.push(t.car.noRestriction)
+  } else if (openCrossing) {
+    // via explicit open crossing — show time delta vs fastest
+    const slower = route.summary.duration - allRoutes[0].summary.duration
+    if (slower > 0) reasons.push(`+${Math.ceil(slower / 60)} min vs itinéraire le plus rapide`)
   } else if (route.warnings.includes('Via centre-ville')) {
     reasons.push(t.car.viaCentre)
     reasons.push(t.car.distReduced)
@@ -410,9 +415,9 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
             style={{ background: 'rgba(255,69,58,0.14)', border: '1px solid rgba(255,69,58,0.40)' }}>
             <span className="text-base flex-shrink-0">⛔</span>
             <div>
-              <p className="text-[12px] font-bold" style={{ color: '#FF453A' }}>A1 fermée 14–17 juin — Bardonnex bloqué</p>
+              <p className="text-[12px] font-bold" style={{ color: '#FF453A' }}>A1 fermée 14–17 juin</p>
               <p className="text-[11px] mt-0.5" style={{ color: 'rgba(255,255,255,0.55)' }}>
-                Itinéraires calculés sans autoroute. Douane de Bardonnex inaccessible.
+                Itinéraires calculés sans autoroute. Prévoir des délais supplémentaires.
               </p>
             </div>
           </div>
@@ -518,9 +523,9 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
                 style={{ background: 'rgba(255,69,58,0.14)', border: '1px solid rgba(255,69,58,0.40)' }}>
                 <span className="text-base flex-shrink-0">⛔</span>
                 <div>
-                  <p className="text-[12px] font-bold" style={{ color: '#FF453A' }}>A1 fermée 14–17 juin — Bardonnex bloqué</p>
+                  <p className="text-[12px] font-bold" style={{ color: '#FF453A' }}>A1 fermée 14–17 juin</p>
                   <p className="text-[11px] mt-0.5" style={{ color: 'rgba(255,255,255,0.55)' }}>
-                    Itinéraires calculés sans autoroute. Douane de Bardonnex inaccessible.
+                    Itinéraires calculés sans autoroute. Prévoir des délais supplémentaires.
                   </p>
                 </div>
               </div>
