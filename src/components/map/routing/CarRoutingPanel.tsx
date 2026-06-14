@@ -30,60 +30,9 @@ const SHEET_HEIGHTS: Record<SheetState, string> = {
   full: '92vh',
 }
 
-// ── Route enrichment: guarantee 3 options ─────────────────────────────────────
+// Server already returns real alternative geometries — no client-side fabrication needed.
 function enrichRoutes(routes: CarRoute[]): CarRoute[] {
-  const base = routes[0]
-  if (!base) return routes
-
-  const enriched = [...routes]
-
-  if (enriched.length === 1) {
-    // Alternative "via centre-ville" (+15% durée, -10% distance)
-    enriched.push({
-      ...base,
-      id: 'route-alt-1',
-      summary: {
-        ...base.summary,
-        duration:          Math.round(base.summary.duration * 1.15),
-        durationInTraffic: Math.round(base.summary.durationInTraffic * 1.15),
-        distance:          Math.round(base.summary.distance * 0.9),
-        arrivalTime:       new Date(Date.now() + base.summary.duration * 1150).toISOString(),
-      },
-      alternative: true,
-      warnings:    ['Via centre-ville'],
-    })
-    // Alternative "G7 safe" (+25% durée, évite zones G7)
-    enriched.push({
-      ...base,
-      id: 'route-safe',
-      summary: {
-        ...base.summary,
-        duration:          Math.round(base.summary.duration * 1.25),
-        durationInTraffic: Math.round(base.summary.durationInTraffic * 1.25),
-        distance:          Math.round(base.summary.distance * 1.1),
-        arrivalTime:       new Date(Date.now() + base.summary.duration * 1250).toISOString(),
-      },
-      alternative: true,
-      warnings:    ['Évite les zones G7'],
-    })
-  } else if (enriched.length === 2) {
-    // Only one alternative — add G7 safe
-    enriched.push({
-      ...base,
-      id: 'route-safe',
-      summary: {
-        ...base.summary,
-        duration:          Math.round(base.summary.duration * 1.25),
-        durationInTraffic: Math.round(base.summary.durationInTraffic * 1.25),
-        distance:          Math.round(base.summary.distance * 1.1),
-        arrivalTime:       new Date(Date.now() + base.summary.duration * 1250).toISOString(),
-      },
-      alternative: true,
-      warnings:    ['Évite les zones G7'],
-    })
-  }
-
-  return enriched
+  return routes
 }
 
 // ── Route reason explanation ───────────────────────────────────────────────────

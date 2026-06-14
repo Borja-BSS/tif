@@ -1,8 +1,8 @@
-// Car routing via OSRM (Open Source Routing Machine / OpenStreetMap)
-// https://project-osrm.org
+// Car routing via Mapbox Directions API
+// https://docs.mapbox.com/api/navigation/directions/
 import { IMPACT_ZONES } from '@/data/impact-zones'
 
-const OSRM_BASE = 'https://router.project-osrm.org/route/v1/driving'
+const MAPBOX_BASE = 'https://api.mapbox.com/directions/v5/mapbox/driving'
 
 export interface CarRouteRequest {
   from: { lat: number; lng: number }
@@ -34,15 +34,25 @@ export interface CarRoute {
   blockedCrossing?: string
 }
 
+interface MapboxRoute {
+  duration: number
+  distance: number
+  geometry: { type: 'LineString'; coordinates: number[][] }
+  legs:     unknown[]
+}
+
+interface MapboxResponse {
+  code:    string
+  routes?: MapboxRoute[]
+}
+
 // ── G7 / A1 date helpers ──────────────────────────────────────────────────────
 
-// A1 fermée du 14 au 17 juin inclus (minuit CH)
 function isA1ClosurePeriod(now = new Date()): boolean {
   const d = now.toLocaleDateString('fr-CH', { timeZone: 'Europe/Zurich' })
   return ['14.06.2026','15.06.2026','16.06.2026','17.06.2026'].includes(d)
 }
 
-// Manifestation NO-G7 : uniquement le 14 juin
 function isManifestationDay(now = new Date()): boolean {
   return now.toLocaleDateString('fr-CH', { timeZone: 'Europe/Zurich' }) === '14.06.2026'
 }
@@ -106,8 +116,52 @@ const ALL_CROSSINGS_COORDS = [
 
 const BLOCKED_CROSSINGS = ALL_CROSSINGS_COORDS.filter(c => !G7_OPEN_IDS.has(c.id))
 
-// ── Point-dans-polygone (ray casting) ────────────────────────────────────────
-// Coordonnées en [lng, lat] — cohérent avec GeoJSON et OSRM
+// ── Geometry utilities ────────────────────────────────────────────────────────
+
+function haversine(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
+  const R    = 6371000
+  const dLat = (b.lat - a.lat) * Math.PI / 180
+  const dLng = (b.lng - a.lng) * Math.PI / 180
+  const x    = Math.sin(dLat / 2) ** 2
+    + Math.cos(a.lat * Math.PI / 180) * Math.cos(b.lat * Math.PI / 180) * Math.sin(dLng / 2) ** 2
+  return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x))
+}
+
+// Returns a waypoint perpendicular to the from→to midpoint.
+// side=1 shifts left, side=-1 shifts right (relative to travel direction).
+function perpendicularWaypoint(
+  from: { lat: number; lng: number },
+  to:   { lat: number; lng: number },
+  side: 1 | -1,
+): { lat: number; lng: number } {
+  const dist        = haversine(from, to)
+  const offsetM     = Math.min(Math.max(dist * 0.18, 1200), 6000) * side
+
+  const midLat      = (from.lat + to.lat) / 2
+  const midLng      = (from.lng + to.lng) / 2
+  const cosLat      = Math.cos(midLat * Math.PI / 180)
+
+  // Direction vector in degrees, latitude-corrected
+  const dLat        = to.lat - from.lat
+  const dLng        = (to.lng - from.lng) * cosLat
+  const len         = Math.sqrt(dLat * dLat + dLng * dLng) || 1
+
+  // Perpendicular (rotate 90°)
+  const perpLat     = (-dLng / len) * (offsetM / 111320)
+  const perpLng     = ( dLat / len) * (offsetM / 111320) / cosLat
+
+  return { lat: midLat + perpLat, lng: midLng + perpLng }
+}
+
+// Returns true if two geometries share roughly the same midpoint (< ~200 m apart).
+function geometrySimilar(a: [number, number][], b: [number, number][]): boolean {
+  const aMid = a[Math.floor(a.length / 2)]
+  const bMid = b[Math.floor(b.length / 2)]
+  if (!aMid || !bMid) return true
+  return haversine({ lat: aMid[1], lng: aMid[0] }, { lat: bMid[1], lng: bMid[0] }) < 250
+}
+
+// ── Point-in-polygon (ray casting) ───────────────────────────────────────────
 function pointInPolygon(pt: [number, number], poly: [number, number][]): boolean {
   const [x, y] = pt
   let inside = false
@@ -121,7 +175,8 @@ function pointInPolygon(pt: [number, number], poly: [number, number][]): boolean
   return inside
 }
 
-// ── Vérification douane bloquée ───────────────────────────────────────────────
+// ── Constraint checks ─────────────────────────────────────────────────────────
+
 function findBlockedCrossing(
   geometry: [number, number][],
   blocked:  typeof BLOCKED_CROSSINGS,
@@ -134,94 +189,81 @@ function findBlockedCrossing(
   return null
 }
 
-// ── Vérification zone manifestation ──────────────────────────────────────────
 function routePassesThroughManifestationZone(geometry: [number, number][]): boolean {
   const zone = IMPACT_ZONES.find(z => z.id === 'no-g7-manifestation')
   if (!zone) return false
-  // Vérifie 1 point sur 5 pour des performances (zone large, précision suffisante)
   for (let i = 0; i < geometry.length; i += 5) {
     if (pointInPolygon(geometry[i], zone.coordinates)) return true
   }
   return false
 }
 
-// ── Calcul du trajet ──────────────────────────────────────────────────────────
-export async function calculateCarRoute(req: CarRouteRequest): Promise<CarRoute[]> {
-  const now          = new Date()
-  const a1Closed     = isA1ClosurePeriod(now)
-  const manifestation = isManifestationDay(now)
-  const g7           = isG7Period(now)
+function buildWarnings(
+  geometry:     [number, number][],
+  g7:           boolean,
+  a1Closed:     boolean,
+  manifestation: boolean,
+): { warnings: string[]; blockedCrossing?: string } {
+  const warnings: string[] = []
+  let blockedCrossing: string | undefined
 
-  const coords = `${req.from.lng},${req.from.lat};${req.to.lng},${req.to.lat}`
-  const url    = new URL(`${OSRM_BASE}/${coords}`)
-  url.searchParams.set('overview',     'full')
-  url.searchParams.set('geometries',   'geojson')
-  url.searchParams.set('steps',        'false')
-  url.searchParams.set('alternatives', 'true')
-
-  // 14–17 juin : exclure autoroutes → évite la A1 dès le calcul
-  if (a1Closed) url.searchParams.set('exclude', 'motorway')
-
-  const res = await fetch(url.toString(), { signal: AbortSignal.timeout(10000) })
-  if (!res.ok) return fallback(req, a1Closed)
-
-  const data = await res.json() as OsrmResponse
-  if (data.code !== 'Ok' || !data.routes?.length) return fallback(req, a1Closed)
-
-  const routes: CarRoute[] = data.routes.map((route, idx) => {
-    const duration = Math.round(route.duration)
-    const distance = Math.round(route.distance)
-    const geometry = route.geometry.coordinates as [number, number][]
-    const warnings: string[] = []
-    let blockedCrossing: string | undefined
-
-    if (g7) {
-      // Douane bloquée sur le tracé ?
-      const blocked = findBlockedCrossing(geometry, BLOCKED_CROSSINGS)
-      if (blocked) {
-        blockedCrossing = blocked.id
-        warnings.push(`🚫 Route via "${blocked.id}" — douane fermée 12–18 juin`)
-      }
+  if (g7) {
+    const blocked = findBlockedCrossing(geometry, BLOCKED_CROSSINGS)
+    if (blocked) {
+      blockedCrossing = blocked.id
+      warnings.push(`🚫 Route via "${blocked.id}" — douane fermée 12–18 juin`)
     }
-
-    if (a1Closed) {
-      warnings.push('⛔ A1 fermée 14–17 juin — Itinéraire sans autoroute')
-    }
-
-    // Zone manifestation (14 juin uniquement)
-    if (manifestation && routePassesThroughManifestationZone(geometry)) {
-      warnings.push('⚠️ Itinéraire traverse la zone de manifestation NO-G7 — perturbations importantes attendues')
-    }
-
-    return {
-      id: `route-${idx}`,
-      summary: {
-        duration, durationInTraffic: duration, distance,
-        arrivalTime: new Date(Date.now() + duration * 1000).toISOString(),
-      },
-      steps: [], geometry, trafficDelay: 0,
-      alternative: idx > 0, warnings, blockedCrossing,
-    }
-  })
-
-  // Filtrer les routes passant par une douane fermée
-  const validRoutes = routes.filter(r => !r.blockedCrossing)
-
-  if (validRoutes.length === 0) {
-    return routes.map(r => ({
-      ...r,
-      warnings: ['🚫 Aucun itinéraire libre — toutes les douanes sur ce trajet sont fermées', ...r.warnings],
-    }))
   }
 
-  return validRoutes
+  if (a1Closed) {
+    warnings.push('⛔ A1 fermée 14–17 juin — Itinéraire sans autoroute')
+  }
+
+  if (manifestation && routePassesThroughManifestationZone(geometry)) {
+    warnings.push('⚠️ Traverse la zone de manifestation NO-G7 — perturbations importantes attendues')
+  }
+
+  return { warnings, blockedCrossing }
 }
 
-export async function getActiveIncidentAreas(): Promise<string[]> {
-  return isG7Period() ? ['g7-active'] : []
+// ── Mapbox Directions API call ────────────────────────────────────────────────
+
+async function fetchMapboxRoutes(
+  from:      { lat: number; lng: number },
+  to:        { lat: number; lng: number },
+  token:     string,
+  a1Closed:  boolean,
+  waypoints: { lat: number; lng: number }[],
+): Promise<MapboxRoute[]> {
+  const points = [
+    `${from.lng},${from.lat}`,
+    ...waypoints.map(w => `${w.lng},${w.lat}`),
+    `${to.lng},${to.lat}`,
+  ]
+
+  const url = new URL(`${MAPBOX_BASE}/${points.join(';')}`)
+  url.searchParams.set('alternatives', waypoints.length === 0 ? 'true' : 'false')
+  url.searchParams.set('geometries',   'geojson')
+  url.searchParams.set('overview',     'full')
+  url.searchParams.set('steps',        'false')
+  url.searchParams.set('access_token', token)
+  if (a1Closed) url.searchParams.set('exclude', 'motorway')
+
+  try {
+    const res = await fetch(url.toString(), {
+      signal: AbortSignal.timeout(10000),
+      headers: { 'User-Agent': 'TIF-G7-App/1.0' },
+    })
+    if (!res.ok) return []
+    const data = await res.json() as MapboxResponse
+    if (data.code !== 'Ok' || !data.routes?.length) return []
+    return data.routes
+  } catch {
+    return []
+  }
 }
 
-// ── Fallback ligne droite si OSRM down ────────────────────────────────────────
+// ── Fallback: straight line when all APIs fail ────────────────────────────────
 function fallback(req: CarRouteRequest, a1Closed: boolean): CarRoute[] {
   const dist = haversine(req.from, req.to)
   const dur  = Math.round((dist / 1000 / 40) * 3600)
@@ -241,16 +283,101 @@ function fallback(req: CarRouteRequest, a1Closed: boolean): CarRoute[] {
   }]
 }
 
-function haversine(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
-  const R    = 6371000
-  const dLat = (b.lat - a.lat) * Math.PI / 180
-  const dLng = (b.lng - a.lng) * Math.PI / 180
-  const x    = Math.sin(dLat / 2) ** 2
-    + Math.cos(a.lat * Math.PI / 180) * Math.cos(b.lat * Math.PI / 180) * Math.sin(dLng / 2) ** 2
-  return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x))
+// ── Main export ────────────────────────────────────────────────────────────────
+export async function calculateCarRoute(req: CarRouteRequest): Promise<CarRoute[]> {
+  const now          = new Date()
+  const a1Closed     = isA1ClosurePeriod(now)
+  const manifestation = isManifestationDay(now)
+  const g7           = isG7Period(now)
+
+  const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
+  if (!token) return fallback(req, a1Closed)
+
+  // ── Step 1: primary call — Mapbox returns up to 3 real alternatives ──────────
+  const primary = await fetchMapboxRoutes(req.from, req.to, token, a1Closed, [])
+  if (!primary.length) return fallback(req, a1Closed)
+
+  const results: CarRoute[] = []
+
+  for (const [idx, r] of primary.entries()) {
+    const geometry            = r.geometry.coordinates as [number, number][]
+    const { warnings, blockedCrossing } = buildWarnings(geometry, g7, a1Closed, manifestation)
+    const label               = idx === 1 ? 'Via centre-ville' : idx === 2 ? 'Évite les zones G7' : null
+    if (label && !warnings.includes(label)) warnings.unshift(label)
+
+    results.push({
+      id: `route-${idx}`,
+      summary: {
+        duration:          Math.round(r.duration),
+        durationInTraffic: Math.round(r.duration),
+        distance:          Math.round(r.distance),
+        arrivalTime:       new Date(Date.now() + r.duration * 1000).toISOString(),
+      },
+      steps: [], geometry, trafficDelay: 0,
+      alternative: idx > 0, warnings, blockedCrossing,
+    })
+  }
+
+  // ── Step 2: generate missing alternatives via perpendicular waypoints ─────────
+  if (results.length < 2) {
+    const wp      = perpendicularWaypoint(req.from, req.to, 1)
+    const altData = await fetchMapboxRoutes(req.from, req.to, token, a1Closed, [wp])
+    if (altData.length) {
+      const geo = altData[0].geometry.coordinates as [number, number][]
+      if (!geometrySimilar(geo, results[0].geometry)) {
+        const { warnings, blockedCrossing } = buildWarnings(geo, g7, a1Closed, manifestation)
+        warnings.unshift('Via centre-ville')
+        results.push({
+          id: 'route-alt-1',
+          summary: {
+            duration:          Math.round(altData[0].duration),
+            durationInTraffic: Math.round(altData[0].duration),
+            distance:          Math.round(altData[0].distance),
+            arrivalTime:       new Date(Date.now() + altData[0].duration * 1000).toISOString(),
+          },
+          steps: [], geometry: geo, trafficDelay: 0,
+          alternative: true, warnings, blockedCrossing,
+        })
+      }
+    }
+  }
+
+  if (results.length < 3) {
+    const wp      = perpendicularWaypoint(req.from, req.to, -1)
+    const altData = await fetchMapboxRoutes(req.from, req.to, token, a1Closed, [wp])
+    if (altData.length) {
+      const geo = altData[0].geometry.coordinates as [number, number][]
+      const alreadySeen = results.some(r => geometrySimilar(geo, r.geometry))
+      if (!alreadySeen) {
+        const { warnings, blockedCrossing } = buildWarnings(geo, g7, a1Closed, manifestation)
+        warnings.unshift('Évite les zones G7')
+        results.push({
+          id: 'route-safe',
+          summary: {
+            duration:          Math.round(altData[0].duration),
+            durationInTraffic: Math.round(altData[0].duration),
+            distance:          Math.round(altData[0].distance),
+            arrivalTime:       new Date(Date.now() + altData[0].duration * 1000).toISOString(),
+          },
+          steps: [], geometry: geo, trafficDelay: 0,
+          alternative: true, warnings, blockedCrossing,
+        })
+      }
+    }
+  }
+
+  // ── Step 3: filter routes via blocked crossings ───────────────────────────────
+  const valid = results.filter(r => !r.blockedCrossing)
+  if (valid.length === 0) {
+    return results.map(r => ({
+      ...r,
+      warnings: ['🚫 Aucun itinéraire libre — toutes les douanes sur ce trajet sont fermées', ...r.warnings],
+    }))
+  }
+
+  return valid
 }
 
-interface OsrmResponse {
-  code:    string
-  routes?: { duration: number; distance: number; geometry: { type: 'LineString'; coordinates: number[][] }; legs: unknown[] }[]
+export async function getActiveIncidentAreas(): Promise<string[]> {
+  return isG7Period() ? ['g7-active'] : []
 }
