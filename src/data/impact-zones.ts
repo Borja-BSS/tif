@@ -42,10 +42,7 @@ const ZONE_MANIFESTATION: [number, number][] = [
   [6.1420, 46.2250],       // Place des Nations (est)
   [6.1360, 46.2244],       // Avenue de France (est)
   [6.1335, 46.2218],       // Rue de la Servette (nord)
-  [6.1325, 46.2178],       // Rue de la Servette (milieu)
-  [6.1330, 46.2148],       // Rue Louis-Favre (ouest)
-  [6.1348, 46.2112],       // Rue du Grand-Pré (milieu)
-  [6.1370, 46.2088],       // Rue du Grand-Pré (sud)
+  [6.1327630, 46.2178423], // Rue de la Servette (point précis)
   [6.1267310, 46.2081691], // Extension ouest (Rue de la Servette / Saint-Jean)
   [6.1327700, 46.2055601], // Descente sud-est
   [6.1426392, 46.2055738], // Longueur est (bas)
