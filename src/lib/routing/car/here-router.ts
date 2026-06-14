@@ -179,12 +179,19 @@ function pointInPolygon(pt: [number, number], poly: [number, number][]): boolean
 // ── Constraint checks ─────────────────────────────────────────────────────────
 
 function findBlockedCrossing(
-  geometry: [number, number][],
-  blocked:  typeof BLOCKED_CROSSINGS,
+  geometry:        [number, number][],
+  blocked:         typeof BLOCKED_CROSSINGS,
+  excludeNearOpen?: { lat: number; lng: number },  // open crossing we're routing via
 ): (typeof BLOCKED_CROSSINGS)[0] | null {
+  // When routing via a known open crossing, ignore blocked crossings within 1 km of it
+  // (some open/closed crossings share the same physical location with different names)
+  const effectiveBlocked = excludeNearOpen
+    ? blocked.filter(c => haversine(c, excludeNearOpen) >= 1000)
+    : blocked
+
   for (const pt of geometry) {
-    for (const c of blocked) {
-      if (haversine({ lat: pt[1], lng: pt[0] }, c) < 700) return c
+    for (const c of effectiveBlocked) {
+      if (haversine({ lat: pt[1], lng: pt[0] }, c) < 500) return c
     }
   }
   return null
@@ -224,16 +231,17 @@ function routePassesThroughManifestationZone(geometry: [number, number][]): bool
 }
 
 function buildWarnings(
-  geometry:     [number, number][],
-  g7:           boolean,
-  a1Closed:     boolean,
-  manifestation: boolean,
+  geometry:        [number, number][],
+  g7:              boolean,
+  a1Closed:        boolean,
+  manifestation:   boolean,
+  excludeNearOpen?: { lat: number; lng: number },
 ): { warnings: string[]; blockedCrossing?: string } {
   const warnings: string[] = []
   let blockedCrossing: string | undefined
 
   if (g7) {
-    const blocked = findBlockedCrossing(geometry, BLOCKED_CROSSINGS)
+    const blocked = findBlockedCrossing(geometry, BLOCKED_CROSSINGS, excludeNearOpen)
     if (blocked) {
       blockedCrossing = blocked.id
       warnings.push(`🚫 Route via "${blocked.id}" — douane fermée 12–18 juin`)
@@ -310,16 +318,17 @@ function fallback(req: CarRouteRequest, a1Closed: boolean): CarRoute[] {
 
 // ── Build a CarRoute from a MapboxRoute ───────────────────────────────────────
 function toCarRoute(
-  r:            MapboxRoute,
-  id:           string,
-  alternative:  boolean,
-  g7:           boolean,
-  a1Closed:     boolean,
-  manifestation: boolean,
-  extraWarning?: string,
+  r:               MapboxRoute,
+  id:              string,
+  alternative:     boolean,
+  g7:              boolean,
+  a1Closed:        boolean,
+  manifestation:   boolean,
+  extraWarning?:   string,
+  excludeNearOpen?: { lat: number; lng: number },
 ): CarRoute {
   const geometry = r.geometry.coordinates as [number, number][]
-  const { warnings, blockedCrossing } = buildWarnings(geometry, g7, a1Closed, manifestation)
+  const { warnings, blockedCrossing } = buildWarnings(geometry, g7, a1Closed, manifestation, excludeNearOpen)
   if (extraWarning && !warnings.includes(extraWarning)) warnings.unshift(extraWarning)
   return {
     id,
@@ -376,17 +385,20 @@ export async function calculateCarRoute(req: CarRouteRequest): Promise<CarRoute[
       ])
       if (!viaData.length) continue
 
+      const label = crossing.id === 'bardonnex'       ? 'Via Bardonnex'       :
+                   crossing.id === 'meyrin'           ? 'Via Meyrin'           :
+                   crossing.id === 'ferney-voltaire'  ? 'Via Ferney-Voltaire'  :
+                   crossing.id === 'thonex-vallard'   ? 'Via Thônex-Vallard'   :
+                   crossing.id === 'moillesulaz'      ? 'Via Moillesulaz'      :
+                   `Via ${crossing.id}`
+
       const candidate = toCarRoute(
         viaData[0], `route-via-${crossing.id}`, true, g7, a1Closed, manifestation,
-        crossing.id === 'bardonnex' ? 'Via Bardonnex' :
-        crossing.id === 'meyrin'    ? 'Via Meyrin' :
-        crossing.id === 'ferney-voltaire' ? 'Via Ferney-Voltaire' :
-        crossing.id === 'thonex-vallard'  ? 'Via Thônex-Vallard'  :
-        crossing.id === 'moillesulaz'     ? 'Via Moillesulaz'     :
-        `Via ${crossing.id}`,
+        label,
+        { lat: crossing.lat, lng: crossing.lng },  // exclude nearby blocked crossings
       )
 
-      if (candidate.blockedCrossing) continue  // Still blocked — skip
+      if (candidate.blockedCrossing) continue  // Still blocked by a DIFFERENT crossing elsewhere
       if (valid.some(v => geometrySimilar(candidate.geometry, v.geometry))) continue
 
       valid.push(candidate)
