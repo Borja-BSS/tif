@@ -115,10 +115,15 @@ export function getRouteType(route: CarRoute): 'fastest' | 'alternative' | 'safe
   return 'fastest'
 }
 
+function isNOG7Day(): boolean {
+  return new Date().toLocaleDateString('fr-CH', { timeZone: 'Europe/Zurich' }) === '14.06.2026'
+}
+
 export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
   const t = useMapT()
   const tRef = useRef(t)
   tRef.current = t
+  const nog7 = isNOG7Day()
 
   const [origin,      setOrigin]      = useState<SearchResult | null>(null)
   const [destination, setDestination] = useState<SearchResult | null>(null)
@@ -390,6 +395,20 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
           )}
         </div>
 
+        {/* Bannière A1 fermée — 14.06.2026 uniquement */}
+        {nog7 && (
+          <div className="mx-3 mt-3 rounded-xl px-3 py-2.5 flex items-start gap-2"
+            style={{ background: 'rgba(255,69,58,0.14)', border: '1px solid rgba(255,69,58,0.40)' }}>
+            <span className="text-base flex-shrink-0">⛔</span>
+            <div>
+              <p className="text-[12px] font-bold" style={{ color: '#FF453A' }}>A1 fermée — Bardonnex bloqué</p>
+              <p className="text-[11px] mt-0.5" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                Itinéraires calculés sans autoroute. Douane de Bardonnex inaccessible.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Origin + Destination fields */}
         <div className="px-3 pt-3 pb-2 space-y-2">
           <SearchBox
@@ -484,6 +503,20 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
             className="overflow-y-auto"
             style={{ maxHeight: 'calc(88vh - 90px)' }}
           >
+            {/* Bannière A1 — mobile */}
+            {nog7 && (
+              <div className="mx-3 mt-3 rounded-xl px-3 py-2.5 flex items-start gap-2"
+                style={{ background: 'rgba(255,69,58,0.14)', border: '1px solid rgba(255,69,58,0.40)' }}>
+                <span className="text-base flex-shrink-0">⛔</span>
+                <div>
+                  <p className="text-[12px] font-bold" style={{ color: '#FF453A' }}>A1 fermée — Bardonnex bloqué</p>
+                  <p className="text-[11px] mt-0.5" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                    Itinéraires calculés sans autoroute. Douane de Bardonnex inaccessible.
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Origin + Destination fields */}
             <div className="px-3 pt-3 pb-2 space-y-2">
               <SearchBox

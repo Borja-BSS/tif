@@ -562,8 +562,36 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
     travaux: '🚧', deviation: '🔀', suppression: '🚫', retard: '⏱️', perturbation: '⚠️',
   }
 
+  const isNOG7Day = new Date().toLocaleDateString('fr-CH', { timeZone: 'Europe/Zurich' }) === '14.06.2026'
+
   return (
     <div className="space-y-3">
+      {/* ── Bannière A1 fermée ────────────────────────────────────────── */}
+      {isNOG7Day && (
+        <div className="rounded-2xl p-4" style={{ background: 'rgba(255,69,58,0.12)', border: '1px solid rgba(255,69,58,0.40)' }}>
+          <div className="flex items-start gap-3">
+            <span className="text-2xl flex-shrink-0">🛑</span>
+            <div className="flex-1">
+              <p className="text-[11px] font-bold uppercase tracking-wider mb-1" style={{ color: '#FF453A' }}>
+                ⛔ A1 FERMÉE — 14.06.2026
+              </p>
+              <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                Autoroute A1 bloquée jusqu&apos;à Bardonnex
+              </p>
+              <p className="text-[12px] mt-1.5" style={{ color: 'rgba(255,255,255,0.60)' }}>
+                Douane de Bardonnex inaccessible · Évitez la A1 dans les deux sens
+              </p>
+              <div className="mt-2.5 space-y-1">
+                <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.70)' }}>Alternatives :</p>
+                <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.50)' }}>✓ Ferney-Voltaire (D1005)</p>
+                <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.50)' }}>✓ Thônex-Vallard (N201)</p>
+                <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.50)' }}>✓ Moillesulaz (N205)</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>
         {t.transport.networkStatus}
       </p>

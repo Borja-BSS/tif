@@ -3,6 +3,9 @@
 // https://project-osrm.org
 const OSRM_BASE = 'https://router.project-osrm.org/route/v1/driving'
 
+// Bardonnex crossing center — used for proximity detection
+const BARDONNEX = { lat: 46.1618, lng: 6.0972 }
+
 export interface CarRouteRequest {
   from: { lat: number; lng: number }
   to:   { lat: number; lng: number }
@@ -32,7 +35,30 @@ export interface CarRoute {
   warnings:     string[]
 }
 
+// ── G7 date helpers ────────────────────────────────────────────────────────────
+function isNOG7Day(now = new Date()): boolean {
+  const d = new Date(now).toLocaleDateString('fr-CH', { timeZone: 'Europe/Zurich' })
+  return d === '14.06.2026'
+}
+
+function isG7Period(now = new Date()): boolean {
+  return now >= new Date('2026-06-12T00:00:00Z') && now <= new Date('2026-06-18T23:59:59Z')
+}
+
+// Détection approximative si la destination est côté France (Bardonnex area)
+function passesProbablyViaBardonnex(from: { lat: number; lng: number }, to: { lat: number; lng: number }): boolean {
+  // Si l'une des extrémités est dans la zone franco-genevoise au sud
+  const inZone = (p: { lat: number; lng: number }) =>
+    p.lat < 46.18 && p.lat > 45.90 && p.lng > 5.90 && p.lng < 6.15
+  return inZone(from) || inZone(to)
+}
+
 export async function calculateCarRoute(req: CarRouteRequest): Promise<CarRoute[]> {
+  const now     = new Date()
+  const nog7    = isNOG7Day(now)
+  const g7      = isG7Period(now)
+  const bardonnexRisk = passesProbablyViaBardonnex(req.from, req.to)
+
   // OSRM: coords are lng,lat
   const coords = `${req.from.lng},${req.from.lat};${req.to.lng},${req.to.lat}`
   const url     = new URL(`${OSRM_BASE}/${coords}`)
@@ -40,6 +66,11 @@ export async function calculateCarRoute(req: CarRouteRequest): Promise<CarRoute[
   url.searchParams.set('geometries',   'geojson')
   url.searchParams.set('steps',        'false')
   url.searchParams.set('alternatives', 'true')
+
+  // Le 14.06 : exclure les autoroutes → évite la A1 et Bardonnex
+  if (nog7) {
+    url.searchParams.set('exclude', 'motorway')
+  }
 
   const res = await fetch(url.toString(), { signal: AbortSignal.timeout(10000) })
   if (!res.ok) return fallback(req)
@@ -50,11 +81,20 @@ export async function calculateCarRoute(req: CarRouteRequest): Promise<CarRoute[
   return data.routes.map((route, idx) => {
     const duration = Math.round(route.duration)
     const distance = Math.round(route.distance)
+
+    const warnings: string[] = []
+    if (nog7) {
+      warnings.push('⛔ A1 fermée — Itinéraire via routes alternatives')
+      if (bardonnexRisk) warnings.push('🚫 Douane de Bardonnex fermée')
+    } else if (g7 && bardonnexRisk) {
+      warnings.push('⚠️ Contrôles renforcés — Prévoir +30 min')
+    }
+
     return {
       id:      `route-${idx}`,
       summary: {
         duration,
-        durationInTraffic: duration,  // OSRM ne donne pas le trafic live
+        durationInTraffic: duration,
         distance,
         arrivalTime: new Date(Date.now() + duration * 1000).toISOString(),
       },
@@ -62,20 +102,25 @@ export async function calculateCarRoute(req: CarRouteRequest): Promise<CarRoute[
       geometry:     route.geometry.coordinates as [number, number][],
       trafficDelay: 0,
       alternative:  idx > 0,
-      warnings:     [],
+      warnings,
     }
   })
 }
 
-// Gardé pour les routes qui évitent des zones — sans impact visuel
 export async function getActiveIncidentAreas(): Promise<string[]> {
-  return []
+  const now = new Date()
+  if (!isNOG7Day(now)) return []
+  // Retourne les zones bloquées comme identifiants pour le frontend
+  return ['a1-bardonnex', 'no-g7-perimeter']
 }
 
 // ── Fallback ligne droite si OSRM down ───────────────────────────────────────
 function fallback(req: CarRouteRequest): CarRoute[] {
   const dist = haversine(req.from, req.to)
-  const dur  = Math.round((dist / 1000 / 40) * 3600)  // estimation 40 km/h
+  const dur  = Math.round((dist / 1000 / 40) * 3600)
+  const warnings: string[] = isNOG7Day()
+    ? ['⛔ A1 fermée — Vérifiez votre itinéraire manuellement', 'Service de routage temporairement indisponible']
+    : ['Service de routage temporairement indisponible']
   return [{
     id:      'fallback-0',
     summary: {
@@ -86,7 +131,7 @@ function fallback(req: CarRouteRequest): CarRoute[] {
     geometry:     [[req.from.lng, req.from.lat], [req.to.lng, req.to.lat]],
     trafficDelay: 0,
     alternative:  false,
-    warnings:     ['Service de routage temporairement indisponible'],
+    warnings,
   }]
 }
 

@@ -1,4 +1,4 @@
-// Impact zones — polygones statiques basés sur documents officiels TPG GestE
+// Impact zones — polygones et fermetures statiques basés sur documents officiels
 // Source : NO-G7 14.06.26 (exporté GestE 13.06.2026 21:28)
 
 export type ImpactZoneType =
@@ -8,72 +8,63 @@ export type ImpactZoneType =
   | 'ROAD_CLOSURE'
 
 export interface ImpactZone {
-  id:          string
-  title:       string
-  description: string
-  lines?:      string[]      // lignes TPG impactées
-  type:        ImpactZoneType
-  severity:    'HIGH' | 'MEDIUM'
-  renderOnMap?: boolean      // false = données dispo dans le menu mais pas sur la carte
-  // GeoJSON Polygon coordinates [lng, lat][]
-  coordinates: [number, number][]
-  activeFrom:  Date
-  activeTo:    Date
-  fillColor:   string
-  fillOpacity: number
-  strokeColor: string
-  source:      string
-  sourceRef:   string
+  id:            string
+  title:         string
+  description:   string
+  lines?:        string[]
+  type:          ImpactZoneType
+  severity:      'HIGH' | 'MEDIUM'
+  renderOnMap?:  boolean           // false = données dispo dans le menu mais pas sur la carte
+  geometryType?: 'Polygon' | 'LineString'  // défaut Polygon
+  coordinates:   [number, number][]
+  activeFrom:    Date
+  activeTo:      Date
+  fillColor:     string
+  fillOpacity:   number
+  strokeColor:   string
+  source:        string
+  sourceRef:     string
 }
 
 // ── Zone 1 — Périmètre manifestation NO-G7 (rouge) ──────────────────────────
-// Tracé officiel TPG page 1 : Quai Wilson · Quai du Mont-Blanc · Rue des Alpes
-// Rue A-Lévrier/F-Bonivard · Rue de Chantepoulet · Place Lise-Girardin
-// Rue de la Servette · Rue Louis-Favre · Rue du Grand-Pré
-// Avenue Giuseppe-Motta · Place des Nations · Avenue de France · Parc Mon Repos
 const ZONE_MANIFESTATION: [number, number][] = [
   [6.1505923, 46.2040486], // Point de jonction sud (Cornavin / Sécheron)
-  [6.1548, 46.2073],       // Quai du Mont-Blanc (milieu)
-  [6.1572, 46.2098],       // Quai Wilson (sud, angle Rue des Alpes)
-  [6.1578, 46.2148],       // Quai Wilson (milieu)
-  [6.1568, 46.2188],       // Quai Wilson (nord, Pâquis)
-  [6.1542, 46.2215],       // Avenue Giuseppe-Motta × lac
-  [6.1486, 46.2236],       // Avenue Giuseppe-Motta (milieu est)
-  [6.1420, 46.2250],       // Place des Nations (est)
-  [6.1360, 46.2244],       // Avenue de France (est)
-  [6.1335, 46.2218],       // Rue de la Servette (nord)
+  [6.1548,    46.2073],    // Quai du Mont-Blanc (milieu)
+  [6.1572,    46.2098],    // Quai Wilson (sud, angle Rue des Alpes)
+  [6.1578,    46.2148],    // Quai Wilson (milieu)
+  [6.1568,    46.2188],    // Quai Wilson (nord, Pâquis)
+  [6.1542,    46.2215],    // Avenue Giuseppe-Motta × lac
+  [6.1486,    46.2236],    // Avenue Giuseppe-Motta (milieu est)
+  [6.1420,    46.2250],    // Place des Nations (est)
+  [6.1360,    46.2244],    // Avenue de France (est)
+  [6.1335,    46.2218],    // Rue de la Servette (nord)
   [6.1327630, 46.2178423], // Rue de la Servette (point précis)
   [6.1271830, 46.2111268], // Rue Hoffmann
-  [6.1267310, 46.2081691], // Extension ouest (Rue de la Servette / Saint-Jean)
+  [6.1267310, 46.2081691], // Extension ouest (Saint-Jean)
   [6.1327700, 46.2055601], // Descente sud-est
   [6.1426392, 46.2055738], // Longueur est (bas)
   [6.1434680, 46.2043145], // Angle sud
   [6.1505923, 46.2040486], // Fermeture (jonction)
 ]
 
-// ── Zone 2 — Réseau TPG perturbé (orange) ───────────────────────────────────
-// Zone d'impact élargie visible carte page 2 — lignes supprimées ou déviées
-// Couvre de Cornavin / Centre-Ville vers le lac (rive droite)
-// Dépôt Jonction pour les trolleybus (toutes les lignes rentrées)
+// ── Zone 2 — Réseau TPG perturbé (orange, carte masquée) ────────────────────
 const ZONE_TPG: [number, number][] = [
-  [6.1498, 46.2055],  // Pont du Mont-Blanc (SE lac)
-  [6.1548, 46.2073],  // Quai du Mont-Blanc
-  [6.1572, 46.2098],  // Quai Wilson (sud)
-  [6.1578, 46.2148],  // Quai Wilson (milieu)
-  [6.1568, 46.2188],  // Quai Wilson (nord)
-  [6.1542, 46.2215],  // Avenue Giuseppe-Motta × lac
-  [6.1486, 46.2236],  // Avenue Giuseppe-Motta (est)
-  [6.1420, 46.2250],  // Place des Nations (est)
-  [6.1360, 46.2244],  // Avenue de France
-  [6.1248, 46.2232],  // Route de Meyrin / Petit-Saconnex (extension nord-ouest)
-  [6.1105, 46.2185],  // Route de Vernier
-  [6.1062, 46.2130],  // Vernier / Entrée dépôt trolleybus Jonction
-  [6.1080, 46.2040],  // Jonction (Route des Acacias)
-  [6.1118, 46.1980],  // Carouge nord-ouest (Bd du Pont-d'Arve)
-  [6.1225, 46.1930],  // Carouge-Tours
-  [6.1350, 46.1935],  // Carouge est
-  [6.1435, 46.1970],  // Rive / Quai des Bergues (rive gauche)
-  [6.1498, 46.2055],  // Fermeture
+  [6.1498, 46.2055], [6.1548, 46.2073], [6.1572, 46.2098],
+  [6.1578, 46.2148], [6.1568, 46.2188], [6.1542, 46.2215],
+  [6.1486, 46.2236], [6.1420, 46.2250], [6.1360, 46.2244],
+  [6.1248, 46.2232], [6.1105, 46.2185], [6.1062, 46.2130],
+  [6.1080, 46.2040], [6.1118, 46.1980], [6.1225, 46.1930],
+  [6.1350, 46.1935], [6.1435, 46.1970], [6.1498, 46.2055],
+]
+
+// ── Zone 3 — A1 fermée (Bardonnex → Genève) ─────────────────────────────────
+// Fermeture totale de l'autoroute A1 le 14.06.2026 en contexte NO-G7
+// Points relevés sur tracé exact de l'autoroute (sud → nord)
+const ZONE_A1: [number, number][] = [
+  [6.0959020, 46.1468117], // Début — Bardonnex (frontière CH/FR)
+  [6.1010086, 46.1625812], // A1 via Saint-Julien-en-Genevois
+  [6.0828893, 46.1841458], // A1 virage ouest (secteur Plan-les-Ouates)
+  [6.1001037, 46.2189987], // Fin — Genève-Aéroport / Meyrin
 ]
 
 export const IMPACT_ZONES: ImpactZone[] = [
@@ -125,6 +116,29 @@ export const IMPACT_ZONES: ImpactZone[] = [
     source:      'TPG GestE',
     sourceRef:   'NO-G7 14.06.26',
   },
+  {
+    id:           'a1-closure',
+    title:        'A1 fermée — Bardonnex → Genève',
+    description:
+      'Fermeture totale de l\'autoroute A1 dans le cadre du G7 Évian 2026.\n\n' +
+      '⛔ DOUBANE DE BARDONNEX FERMÉE\n\n' +
+      'Itinéraires alternatifs :\n' +
+      '* Via Ferney-Voltaire (D1005)\n' +
+      '* Via Thônex-Vallard (N201)\n' +
+      '* Via Moillesulaz (N205)\n\n' +
+      'Évitez absolument la A1 et le poste de Bardonnex.',
+    type:         'ROAD_CLOSURE',
+    severity:     'HIGH',
+    geometryType: 'LineString',
+    coordinates:  ZONE_A1,
+    activeFrom:   new Date('2026-06-14T00:00:00+02:00'),
+    activeTo:     new Date('2026-06-14T23:59:59+02:00'),
+    fillColor:    '#FF453A',
+    fillOpacity:  0,
+    strokeColor:  '#FF453A',
+    source:       'OFROU / Confédération suisse',
+    sourceRef:    'G7 Évian 2026',
+  },
 ]
 
 export function getActiveImpactZones(now = new Date()): ImpactZone[] {
@@ -134,26 +148,32 @@ export function getActiveImpactZones(now = new Date()): ImpactZone[] {
 export function getImpactZoneGeoJSON(zones: ImpactZone[]) {
   return {
     type: 'FeatureCollection' as const,
-    features: zones.map(z => ({
+    features: zones.filter(z => z.geometryType !== 'LineString').map(z => ({
       type:       'Feature' as const,
       properties: {
-        id:          z.id,
-        title:       z.title,
-        description: z.description,
-        lines:       z.lines ?? [],
-        type:        z.type,
-        fillColor:   z.fillColor,
-        fillOpacity: z.fillOpacity,
-        strokeColor: z.strokeColor,
-        source:      z.source,
-        sourceRef:   z.sourceRef,
-        activeFrom:  z.activeFrom.toISOString(),
-        activeTo:    z.activeTo.toISOString(),
+        id: z.id, title: z.title, description: z.description,
+        lines: z.lines ?? [], type: z.type,
+        fillColor: z.fillColor, fillOpacity: z.fillOpacity, strokeColor: z.strokeColor,
+        source: z.source, sourceRef: z.sourceRef,
+        activeFrom: z.activeFrom.toISOString(), activeTo: z.activeTo.toISOString(),
       },
-      geometry: {
-        type:        'Polygon' as const,
-        coordinates: [z.coordinates],
+      geometry: { type: 'Polygon' as const, coordinates: [z.coordinates] },
+    })),
+  }
+}
+
+export function getImpactRoadGeoJSON(zones: ImpactZone[]) {
+  return {
+    type: 'FeatureCollection' as const,
+    features: zones.filter(z => z.geometryType === 'LineString').map(z => ({
+      type:       'Feature' as const,
+      properties: {
+        id: z.id, title: z.title, description: z.description,
+        type: z.type, strokeColor: z.strokeColor,
+        source: z.source, sourceRef: z.sourceRef,
+        activeFrom: z.activeFrom.toISOString(), activeTo: z.activeTo.toISOString(),
       },
+      geometry: { type: 'LineString' as const, coordinates: z.coordinates },
     })),
   }
 }
