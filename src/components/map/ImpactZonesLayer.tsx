@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import mapboxgl from 'mapbox-gl'
 import type { FilterId } from './ui/QuickFilters'
 import { IMPACT_ZONES, getImpactZoneGeoJSON } from '@/data/impact-zones'
@@ -15,52 +15,71 @@ const SRC_ID    = 'tif-impact-zones'
 const FILL_ID   = 'tif-impact-zones-fill'
 const STROKE_ID = 'tif-impact-zones-stroke'
 
-// Filtres Mapbox par type de zone
-const DEMO_FILTER  = ['==', ['get', 'type'], 'DEMONSTRATION'] as mapboxgl.Expression
-const TPG_FILTER   = ['==', ['get', 'type'], 'TRANSPORT_DISRUPTION'] as mapboxgl.Expression
-const ALL_FILTER   = ['any', DEMO_FILTER, TPG_FILTER] as mapboxgl.Expression
+function filterExprFor(filter: FilterId): mapboxgl.FilterSpecification | null {
+  if (filter === 'alerts')  return ['==', ['get', 'type'], 'DEMONSTRATION']
+  if (filter === 'transit') return ['==', ['get', 'type'], 'TRANSPORT_DISRUPTION']
+  if (filter === 'all' || filter === 'g7') return ['any',
+    ['==', ['get', 'type'], 'DEMONSTRATION'],
+    ['==', ['get', 'type'], 'TRANSPORT_DISRUPTION'],
+  ]
+  return null
+}
 
 export default function ImpactZonesLayer({ map, activeFilter }: Props) {
-  const initRef = useRef(false)
+  const [ready, setReady] = useState(false)   // useState → re-render déclenché après init
   const rafRef  = useRef<number>(0)
+  const filterRef = useRef(activeFilter)
+  filterRef.current = activeFilter
 
-  // Détermine quelles zones afficher selon le filtre actif
-  const getFilterExpr = useCallback((filter: FilterId): mapboxgl.Expression | undefined => {
-    if (filter === 'alerts')  return ['any', DEMO_FILTER]
-    if (filter === 'transit') return ['any', TPG_FILTER]
-    if (filter === 'all')     return ALL_FILTER
-    if (filter === 'g7')      return ALL_FILTER
-    return undefined
-  }, [])
-
-  // Animation pulsante sur le stroke via RAF
+  // ── Pulse du contour ────────────────────────────────────────────────────────
   const startPulse = useCallback(() => {
     if (!map) return
+    cancelAnimationFrame(rafRef.current)
     let tick = 0
-
-    const animate = () => {
+    const loop = () => {
       tick++
-      // Sinusoïde lente : période ~2.4s (144 frames à 60fps)
       const alpha = 0.45 + 0.40 * Math.sin((tick / 72) * Math.PI)
-      try {
-        if (map.getLayer(STROKE_ID)) {
-          map.setPaintProperty(STROKE_ID, 'line-opacity', alpha)
-        }
-      } catch { /* layer retiré */ }
-      rafRef.current = requestAnimationFrame(animate)
+      try { if (map.getLayer(STROKE_ID)) map.setPaintProperty(STROKE_ID, 'line-opacity', alpha) }
+      catch { /* layer absent */ }
+      rafRef.current = requestAnimationFrame(loop)
     }
-    rafRef.current = requestAnimationFrame(animate)
+    rafRef.current = requestAnimationFrame(loop)
   }, [map])
 
-  const stopPulse = useCallback(() => {
-    cancelAnimationFrame(rafRef.current)
-  }, [])
+  const stopPulse = useCallback(() => cancelAnimationFrame(rafRef.current), [])
 
-  // Init layers Mapbox
+  // ── Applique visibilité + filtre (appelée après init ET à chaque filtre) ───
+  const applyFilter = useCallback((filter: FilterId) => {
+    if (!map) return
+    const expr = filterExprFor(filter)
+
+    if (!expr) {
+      try {
+        if (map.getLayer(FILL_ID))   map.setLayoutProperty(FILL_ID,   'visibility', 'none')
+        if (map.getLayer(STROKE_ID)) map.setLayoutProperty(STROKE_ID, 'visibility', 'none')
+      } catch { /* silencieux */ }
+      stopPulse()
+      return
+    }
+
+    try {
+      if (map.getLayer(FILL_ID)) {
+        map.setFilter(FILL_ID,   expr)
+        map.setFilter(STROKE_ID, expr)
+        map.setLayoutProperty(FILL_ID,   'visibility', 'visible')
+        map.setLayoutProperty(STROKE_ID, 'visibility', 'visible')
+      }
+    } catch { /* silencieux */ }
+
+    stopPulse()
+    startPulse()
+  }, [map, stopPulse, startPulse])
+
+  // ── Init des layers (une seule fois) ────────────────────────────────────────
   const initLayers = useCallback(() => {
-    if (!map || initRef.current) return
+    if (!map) return
+    if (map.getSource(SRC_ID)) return   // déjà initialisé (idle peut se déclencher après style.load)
 
-    // Données — toutes les zones (filtrées côté Mapbox via expressions)
     const geojson = getImpactZoneGeoJSON(IMPACT_ZONES)
 
     if (!map.getSource(SRC_ID)) {
@@ -88,84 +107,48 @@ export default function ImpactZonesLayer({ map, activeFilter }: Props) {
         layout: { visibility: 'none' },
         paint: {
           'line-color':     ['get', 'strokeColor'],
-          'line-width':     2,
-          'line-opacity':   0.85,
+          'line-width':     2.5,
+          'line-opacity':   0.9,
           'line-dasharray': [5, 3],
         },
       })
     }
 
-    // Clic sur la zone → dispatch event vers BottomSheet
     map.on('click', FILL_ID, (e) => {
       if (!e.features?.length) return
       const props = e.features[0].properties as Record<string, unknown>
-
-      // Retrouver la zone complète depuis les données statiques
-      const zone = IMPACT_ZONES.find(z => z.id === props.id)
+      const zone  = IMPACT_ZONES.find(z => z.id === props['id'])
       if (!zone) return
-
       window.dispatchEvent(new CustomEvent<ImpactZone>('tif:impact-zone-click', { detail: zone }))
     })
-
     map.on('mouseenter', FILL_ID, () => { map.getCanvas().style.cursor = 'pointer' })
     map.on('mouseleave', FILL_ID, () => { map.getCanvas().style.cursor = '' })
 
-    initRef.current = true
-  }, [map])
+    // Applique immédiatement le filtre courant
+    applyFilter(filterRef.current)
 
-  // Init au chargement de la carte
+    // Déclenche un re-render → activeFilter useEffect peut s'exécuter
+    setReady(true)
+  }, [map, applyFilter])
+
+  // ── Monte les layers dès que la carte est prête ──────────────────────────
   useEffect(() => {
     if (!map) return
-
     if (map.isStyleLoaded()) {
       initLayers()
     } else {
       map.once('style.load', initLayers)
+      map.once('idle',       initLayers)
     }
-    map.once('idle', () => { if (!initRef.current) initLayers() })
   }, [map, initLayers])
 
-  // Réactivité au filtre — affiche/masque + filtre Mapbox
+  // ── Réagit aux changements de filtre (après init) ───────────────────────
   useEffect(() => {
-    if (!map || !initRef.current) return
+    if (!ready || !map) return
+    applyFilter(activeFilter)
+  }, [ready, map, activeFilter, applyFilter])
 
-    const filterExpr = getFilterExpr(activeFilter)
-    const isVisible  = !!filterExpr
-
-    // Récupère les zones actuellement actives (heure courante)
-    const now = new Date()
-    const activeZones = IMPACT_ZONES.filter(z => now >= z.activeFrom && now <= z.activeTo)
-
-    if (!isVisible || activeZones.length === 0) {
-      try {
-        if (map.getLayer(FILL_ID))   map.setLayoutProperty(FILL_ID,   'visibility', 'none')
-        if (map.getLayer(STROKE_ID)) map.setLayoutProperty(STROKE_ID, 'visibility', 'none')
-      } catch { /* silencieux */ }
-      stopPulse()
-      return
-    }
-
-    // Mise à jour des données (zones actives uniquement)
-    const src = map.getSource(SRC_ID) as mapboxgl.GeoJSONSource | undefined
-    if (src) {
-      src.setData(getImpactZoneGeoJSON(activeZones))
-    }
-
-    // Application du filtre Mapbox selon le filtre sélectionné
-    try {
-      if (map.getLayer(FILL_ID)) {
-        map.setFilter(FILL_ID,   filterExpr as mapboxgl.FilterSpecification)
-        map.setFilter(STROKE_ID, filterExpr as mapboxgl.FilterSpecification)
-        map.setLayoutProperty(FILL_ID,   'visibility', 'visible')
-        map.setLayoutProperty(STROKE_ID, 'visibility', 'visible')
-      }
-    } catch { /* silencieux */ }
-
-    stopPulse()
-    startPulse()
-  }, [map, activeFilter, getFilterExpr, startPulse, stopPulse])
-
-  // Nettoyage
+  // ── Nettoyage ───────────────────────────────────────────────────────────
   useEffect(() => {
     return () => {
       stopPulse()
