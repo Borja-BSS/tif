@@ -18,8 +18,9 @@ import type { MapT } from '@/i18n/map'
 import { events, CATEGORY_LABELS, CATEGORY_ICONS } from '@/data/events'
 import type { EventItem } from '@/data/types'
 import { getAlertsForDay } from '@/data/g7-alerts'
+import type { ImpactZone } from '@/data/impact-zones'
 
-type DetailView = 'overview' | 'douanes' | 'transport' | 'alertes' | 'g7' | 'meteo' | 'parking' | 'journey' | 'events'
+type DetailView = 'overview' | 'douanes' | 'transport' | 'alertes' | 'g7' | 'meteo' | 'parking' | 'journey' | 'events' | 'impact-zone'
 
 const COMPACT_H = 56
 const getFullH  = () => (typeof window !== 'undefined' ? window.innerHeight - 120 : 600)
@@ -1998,6 +1999,101 @@ function EventsPanel({ onSelect }: { onSelect: (slug: string) => void }) {
   )
 }
 
+// ── Zone d'impact — fiche détail ─────────────────────────────────────────────
+function ImpactZoneDetail({ zone, map, onClose }: { zone: ImpactZone; map: mapboxgl.Map | null; onClose: () => void }) {
+  const typeLabel: Record<string, string> = {
+    DEMONSTRATION:        '⚠️ Manifestation',
+    SECURITY_PERIMETER:   '🔒 Périmètre sécurité',
+    TRANSPORT_DISRUPTION: '🚌 Réseau TPG perturbé',
+    ROAD_CLOSURE:         '🚧 Route fermée',
+  }
+  const typeColor: Record<string, string> = {
+    DEMONSTRATION:        '#FF453A',
+    SECURITY_PERIMETER:   '#FF453A',
+    TRANSPORT_DISRUPTION: '#FF9F0A',
+    ROAD_CLOSURE:         '#636366',
+  }
+
+  const color   = typeColor[zone.type]   ?? '#FF9F0A'
+  const label   = typeLabel[zone.type]   ?? zone.type
+
+  const fmt = (d: Date) => d.toLocaleTimeString('fr-CH', {
+    hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Zurich',
+  })
+
+  // Centre approximatif du polygone pour le fly-to
+  const flyToZone = () => {
+    if (!map || !zone.coordinates.length) return
+    const lngs = zone.coordinates.map(c => c[0])
+    const lats = zone.coordinates.map(c => c[1])
+    const lng  = (Math.min(...lngs) + Math.max(...lngs)) / 2
+    const lat  = (Math.min(...lats) + Math.max(...lats)) / 2
+    map.flyTo({ center: [lng, lat], zoom: 14, duration: 900, essential: true })
+    onClose()
+  }
+
+  const lines: string[] = zone.lines ?? []
+
+  return (
+    <div className="space-y-3">
+      {/* Badge type + titre */}
+      <div className="rounded-2xl p-4" style={{ background: `${color}12`, border: `1px solid ${color}30` }}>
+        <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color }}>
+          {label}
+        </span>
+        <h2 className="text-[15px] font-bold leading-snug mt-1.5" style={{ color: 'rgba(255,255,255,0.92)' }}>
+          {zone.title}
+        </h2>
+        <p className="text-[11px] mt-2 tabular-nums" style={{ color: 'rgba(255,255,255,0.45)' }}>
+          {fmt(zone.activeFrom)} – {fmt(zone.activeTo)}
+        </p>
+      </div>
+
+      {/* Description */}
+      <div className="rounded-2xl p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+        <p className="text-[13px] leading-relaxed whitespace-pre-line" style={{ color: 'rgba(255,255,255,0.72)' }}>
+          {zone.description}
+        </p>
+      </div>
+
+      {/* Lignes impactées — badges */}
+      {lines.length > 0 && (
+        <div className="rounded-2xl p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+          <p className="text-[10px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--text-tertiary)' }}>
+            Lignes supprimées
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {lines.map(l => (
+              <span key={l}
+                className="text-[12px] font-bold px-2.5 py-1 rounded-full"
+                style={{ background: `${color}18`, color, border: `1px solid ${color}35` }}>
+                {l}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Voir sur la carte */}
+      <button onClick={flyToZone}
+        className="w-full flex items-center justify-center gap-2 rounded-2xl py-3 font-semibold text-sm"
+        style={{ background: 'var(--brand)', color: '#fff' }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+          <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+        </svg>
+        Voir la zone sur la carte
+      </button>
+
+      {/* Source */}
+      <div className="rounded-2xl px-4 py-3" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+        <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.38)' }}>
+          Source : {zone.source} · {zone.sourceRef}
+        </p>
+      </div>
+    </div>
+  )
+}
+
 // ── Composant principal ───────────────────────────────────────────────────────
 export function BottomSheet({ session: _session, activeFilter, map, onFilterChange }: BottomSheetProps) {
   const t = useMapT()
@@ -2010,6 +2106,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
   const [selectedLiveStatus,    setSelectedLiveStatus]    = useState<string | null>(null)
   const [selectedLiveWaitMin,   setSelectedLiveWaitMin]   = useState<number | null>(null)
   const [selectedEvent,       setSelectedEvent]       = useState<string | null>(null)
+  const [selectedImpactZone, setSelectedImpactZone] = useState<ImpactZone | null>(null)
 
   // ── Refs drag ──────────────────────────────────────────────────────────────
   const heightRef    = useRef(COMPACT_H)
@@ -2243,6 +2340,21 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
     return () => window.removeEventListener('tif:event-click', handler)
   }, [animateTo])
 
+  // Écoute les clics sur les zones d'impact (polygones NO-G7)
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const zone = (e as CustomEvent<ImpactZone>).detail
+      if (!zone) return
+      setSelectedImpactZone(zone)
+      setDetailView('impact-zone')
+      setSelectedCrossing(null)
+      setSelectedEvent(null)
+      animateTo(getFullH(), true)
+    }
+    window.addEventListener('tif:impact-zone-click', handler)
+    return () => window.removeEventListener('tif:impact-zone-click', handler)
+  }, [animateTo])
+
   const locateCrossing = useCallback((c: CrossingStatic) => {
     if (!map) return
     map.flyTo({ center: [c.lng, c.lat], zoom: 15, duration: 900, essential: true })
@@ -2261,11 +2373,15 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
     } else if (selectedEvent) {
       setSelectedEvent(null)
       animateTo(getFullH(), true)
+    } else if (selectedImpactZone) {
+      setSelectedImpactZone(null)
+      setDetailView('overview')
+      animateTo(getFullH(), true)
     } else {
       setDetailView('overview')
       animateTo(getFullH(), true)
     }
-  }, [selectedCrossing, selectedEvent, animateTo])
+  }, [selectedCrossing, selectedEvent, selectedImpactZone, animateTo])
 
   // Compact headline
   const alertCount  = data?.alerts.length ?? 0
@@ -2280,7 +2396,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
     : activeFilter === 'events'   ? t.eventsSection.filterLabel
     : t.compact.default
 
-  const showBack = detailView !== 'overview' || selectedCrossing !== null || selectedEvent !== null
+  const showBack = detailView !== 'overview' || selectedCrossing !== null || selectedEvent !== null || selectedImpactZone !== null
 
   return (
     <>
@@ -2288,7 +2404,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
       <div
         className="fixed inset-0 z-20"
         style={{ background: 'transparent' }}
-        onClick={() => { animateTo(COMPACT_H, true); setDetailView('overview'); setSelectedCrossing(null); setSelectedEvent(null) }}
+        onClick={() => { animateTo(COMPACT_H, true); setDetailView('overview'); setSelectedCrossing(null); setSelectedEvent(null); setSelectedImpactZone(null) }}
       />
     )}
     <div
@@ -2311,7 +2427,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
           className="flex justify-center pt-2.5 pb-1 w-full"
           onClick={() => {
             if (!isOpen) animateTo(getFullH(), true)
-            else { animateTo(COMPACT_H, true); setDetailView('overview'); setSelectedCrossing(null); setSelectedEvent(null) }
+            else { animateTo(COMPACT_H, true); setDetailView('overview'); setSelectedCrossing(null); setSelectedEvent(null); setSelectedImpactZone(null) }
           }}
           aria-label="Ouvrir/fermer">
           <div className="w-9 h-1 rounded-full" style={{ background: 'var(--border)' }} />
@@ -2333,7 +2449,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
 
       {/* Expanded content — always rendered, height+overflow-hidden masque quand compact */}
       <div ref={contentRef} className="flex-1 overflow-y-auto px-4 pb-6" style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
-        <div key={`${detailView}|${selectedCrossing?.id ?? ''}|${selectedEvent ?? ''}`}
+        <div key={`${detailView}|${selectedCrossing?.id ?? ''}|${selectedEvent ?? ''}|${selectedImpactZone?.id ?? ''}`}
              style={{ animation: 'fadeUp 0.18s cubic-bezier(0.23, 1, 0.32, 1)' }}>
 
           {/* Bouton retour */}
@@ -2344,7 +2460,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
               <svg width="8" height="13" viewBox="0 0 8 13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <path d="M7 1L1 6.5 7 12"/>
               </svg>
-              {selectedCrossing ? (detailView === 'douanes' ? t.back.allBorders : t.back.back) : selectedEvent ? t.eventsSection.backToList : t.back.back}
+              {selectedCrossing ? (detailView === 'douanes' ? t.back.allBorders : t.back.back) : selectedEvent ? t.eventsSection.backToList : selectedImpactZone ? 'Retour' : t.back.back}
             </button>
           )}
 
@@ -2360,9 +2476,12 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
               liveStatus={selectedLiveStatus}
               liveWaitMinutes={selectedLiveWaitMin}
             />
+          ) : selectedImpactZone ? (
+            <ImpactZoneDetail zone={selectedImpactZone} map={map} onClose={() => { setSelectedImpactZone(null); setDetailView('overview') }} />
           ) : selectedEvent ? (
             <EventDetail slug={selectedEvent} onBack={() => setSelectedEvent(null)} />
-          ) : detailView === 'overview'   ? <ToutOverview data={data} onSelect={openDetail} />
+          ) : detailView === 'impact-zone' ? null
+            : detailView === 'overview'   ? <ToutOverview data={data} onSelect={openDetail} />
             : detailView === 'douanes'    ? <DouanesDetail onSelect={openCrossing} map={map} />
             : detailView === 'transport'  ? <TransportDetail onExpand={expandToFull} />
             : detailView === 'alertes'    ? <AlertesDetail map={map} />

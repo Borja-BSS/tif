@@ -25,6 +25,7 @@ const ParkingLayer         = dynamic(() => import('./ParkingLayer'),         { s
 const EventsLayer          = dynamic(() => import('./EventsLayer'),          { ssr: false })
 const G7ClosuresLayer      = dynamic(() => import('./G7ClosuresLayer'),      { ssr: false })
 const CustomAlertsLayer    = dynamic(() => import('./CustomAlertsLayer'),    { ssr: false })
+const ImpactZonesLayer    = dynamic(() => import('./ImpactZonesLayer'),     { ssr: false })
 
 const DEFAULT_FILTERS: FilterState = {
   heatmap:   true,
@@ -97,6 +98,7 @@ export default function MapView({ filters: externalFilters, activeFilter = 'all'
           <HereIncidentsLayer map={filters.alerts && !filters.transport ? map : null} />
           <ParkingLayer       map={filters.parking ? map : null} />
           <EventsLayer        map={activeFilter === 'events' ? map : null} />
+          <ImpactZonesLayer   map={map} activeFilter={activeFilter} />
 
           {/* Transport legend — compact Liquid Glass badge, bottom-right */}
           {filters.transport && (
