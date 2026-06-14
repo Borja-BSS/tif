@@ -518,9 +518,17 @@ export default function SearchHandle({ map }: SearchHandleProps) {
             {transLoading ? (
               <div className="w-8 h-3 rounded-full animate-pulse" style={{ background: 'rgba(255,255,255,0.1)' }} />
             ) : transRoutes.length > 0 ? (
-              <span className="text-sm font-bold" style={{ color: activeTab === 'transport' ? '#34C759' : 'rgba(255,255,255,0.75)' }}>
-                {fmt(transRoutes[0].summary.duration)}
-              </span>
+              <div className="flex items-center gap-1">
+                <span className="text-sm font-bold" style={{ color: activeTab === 'transport' ? '#34C759' : 'rgba(255,255,255,0.75)' }}>
+                  {fmt(transRoutes[0].summary.duration)}
+                </span>
+                {transRoutes[0].g7Affected && (
+                  <span className="text-[8px] font-bold px-1 py-0.5 rounded-full leading-none"
+                    style={{ background: 'rgba(255,159,10,0.20)', color: '#FF9F0A' }}>
+                    G7
+                  </span>
+                )}
+              </div>
             ) : <span className="text-xs text-white/35">—</span>}
             <div className="text-[10px] text-white/30">
               {transRoutes.length > 0 ? `${transRoutes[0].summary.transfers} corresp.` : 'Transports'}
@@ -638,41 +646,94 @@ export default function SearchHandle({ map }: SearchHandleProps) {
               </button>
             )
           })}
-          {activeTab === 'transport' && transRoutes.slice(0, 3).map((route, i) => (
-            <div key={route.id} className="mb-3 rounded-2xl p-3" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
-              <div className="flex items-center justify-between mb-1.5">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-white/80">{fmtTime(route.summary.departure)}</span>
-                  <span className="text-xs text-white/30">→</span>
-                  <span className="text-sm font-bold text-white/80">{fmtTime(route.summary.arrival)}</span>
+          {activeTab === 'transport' && (
+            <>
+              {/* Bannière G7 TPG — affichée si les routes signalent g7Affected */}
+              {transRoutes.some(r => r.g7Affected) && (
+                <div className="mb-3 rounded-2xl px-3 py-2.5 flex items-start gap-2"
+                  style={{ background: 'rgba(255,159,10,0.10)', border: '1px solid rgba(255,159,10,0.30)' }}>
+                  <span className="text-sm flex-shrink-0 mt-0.5">⚠️</span>
+                  <div>
+                    <p className="text-[11px] font-semibold leading-tight" style={{ color: '#FF9F0A' }}>
+                      Réseau TPG perturbé — G7 Grand Genève
+                    </p>
+                    <p className="text-[9px] mt-0.5 leading-snug" style={{ color: 'rgba(255,159,10,0.65)' }}>
+                      Horaires modifiés jusqu'au 17 juin. Vérifiez avant départ.
+                      Hotline TPG : 0800 858 900
+                    </p>
+                  </div>
                 </div>
-                <span className="text-xs font-semibold" style={{ color: '#34C759' }}>{fmt(route.summary.duration)}</span>
-              </div>
-              <div className="flex items-center gap-1.5 flex-wrap mb-2">
-                {route.legs.filter(l => l.type !== 'walk').map((leg, li) => (
-                  <span key={li} className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{
-                    background: leg.type === 'ceva' ? 'rgba(175,82,222,0.2)' : leg.type === 'cff' ? 'rgba(10,132,255,0.2)' : 'rgba(255,159,10,0.2)',
-                    color: leg.type === 'ceva' ? '#AF52DE' : leg.type === 'cff' ? '#0A84FF' : '#FF9F0A',
-                  }}>{leg.line}</span>
-                ))}
-                {route.summary.transfers > 0 && <span className="text-[10px] text-white/30">{route.summary.transfers} corresp.</span>}
-              </div>
-              {destination && i === 0 && (
-                <button
-                  onClick={() => setNavPending({
-                    lat: destination.lat,
-                    lng: destination.lng,
-                    label: destination.title,
-                    mode: 'transit',
-                  })}
-                  className="w-full py-2 rounded-xl text-xs font-semibold transition-colors active:scale-[0.98]"
-                  style={{ background: 'rgba(50,215,75,0.15)', color: '#34C759', border: '1px solid rgba(50,215,75,0.3)' }}
-                >
-                  🧭 Y aller · Transports publics
-                </button>
               )}
-            </div>
-          ))}
+
+              {transRoutes.slice(0, 3).map((route, i) => (
+                <div key={route.id} className="mb-3 rounded-2xl p-3"
+                  style={{
+                    background: route.summary.disrupted ? 'rgba(255,69,58,0.05)' : 'rgba(255,255,255,0.04)',
+                    border: `1px solid ${route.summary.disrupted ? 'rgba(255,69,58,0.20)' : 'rgba(255,255,255,0.06)'}`,
+                  }}>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-white/80">{fmtTime(route.summary.departure)}</span>
+                      <span className="text-xs text-white/30">→</span>
+                      <span className="text-sm font-bold text-white/80">{fmtTime(route.summary.arrival)}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      {route.g7Affected && (
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
+                          style={{ background: 'rgba(255,159,10,0.15)', color: '#FF9F0A' }}>
+                          G7
+                        </span>
+                      )}
+                      <span className="text-xs font-semibold" style={{ color: route.summary.disrupted ? '#FF453A' : '#34C759' }}>
+                        {fmt(route.summary.duration)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 flex-wrap mb-2">
+                    {route.legs.filter(l => l.type !== 'walk').map((leg, li) => (
+                      <span key={li} className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{
+                        background: leg.type === 'ceva' ? 'rgba(175,82,222,0.2)' : leg.type === 'cff' ? 'rgba(10,132,255,0.2)' : 'rgba(255,159,10,0.2)',
+                        color: leg.type === 'ceva' ? '#AF52DE' : leg.type === 'cff' ? '#0A84FF' : '#FF9F0A',
+                      }}>
+                        {leg.line}
+                        {leg.disrupted && <span className="ml-0.5 text-[8px]" style={{ color: '#FF453A' }}>⚠</span>}
+                      </span>
+                    ))}
+                    {route.summary.transfers > 0 && (
+                      <span className="text-[10px] text-white/30">{route.summary.transfers} corresp.</span>
+                    )}
+                  </div>
+
+                  {/* Avertissements G7 par itinéraire */}
+                  {route.warnings.length > 0 && (
+                    <div className="mb-2 space-y-0.5">
+                      {route.warnings.map((w, wi) => (
+                        <p key={wi} className="text-[9px] leading-snug" style={{ color: 'rgba(255,159,10,0.65)' }}>
+                          ⚠ {w}
+                        </p>
+                      ))}
+                    </div>
+                  )}
+
+                  {destination && i === 0 && (
+                    <button
+                      onClick={() => setNavPending({
+                        lat: destination.lat,
+                        lng: destination.lng,
+                        label: destination.title,
+                        mode: 'transit',
+                      })}
+                      className="w-full py-2 rounded-xl text-xs font-semibold transition-colors active:scale-[0.98]"
+                      style={{ background: 'rgba(50,215,75,0.15)', color: '#34C759', border: '1px solid rgba(50,215,75,0.3)' }}
+                    >
+                      🧭 Y aller · Transports publics
+                    </button>
+                  )}
+                </div>
+              ))}
+            </>
+          )}
         </div>
       )}
 
