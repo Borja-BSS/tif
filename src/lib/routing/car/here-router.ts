@@ -399,19 +399,13 @@ export async function calculateCarRoute(req: CarRouteRequest): Promise<CarRoute[
 
   // ── Step 2a: cross-border — route via open crossings ─────────────────────────
   if (isCrossBorder) {
-    // Only keep primary routes that pass through OPEN crossings (or no crossing at all)
-    const valid: CarRoute[] = candidates.filter(r => !r.blockedCrossing)
-
-    // Supplement with explicit routes via the best open crossings
+    // Always route via explicit open crossings — never pre-populate from primary routes.
+    // Primary Mapbox routes (no waypoint) may pass via unverified paths, won't carry
+    // "Via Perly" labels, and can fill valid[] to 3 before any explicit crossing is tried.
+    const valid: CarRoute[] = []
     const targets = bestOpenCrossings(req.from, req.to, 5)
     for (const crossing of targets) {
       if (valid.length >= 3) break
-
-      // Skip if we already cover this crossing
-      const alreadyCovered = valid.some(r =>
-        r.geometry.some(pt => haversine({ lat: pt[1], lng: pt[0] }, crossing) < 800),
-      )
-      if (alreadyCovered) continue
 
       const viaData = await fetchMapboxRoutes(req.from, req.to, token, a1Closed, [
         { lat: crossing.lat, lng: crossing.lng },
@@ -443,7 +437,7 @@ export async function calculateCarRoute(req: CarRouteRequest): Promise<CarRoute[
           arrivalTime:       new Date(Date.now() + viaData[0].duration * 1000).toISOString(),
         },
         steps: [], geometry: geo, trafficDelay: 0,
-        alternative: true, warnings,
+        alternative: valid.length > 0, warnings,
       })
     }
 
