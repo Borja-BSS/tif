@@ -30,7 +30,7 @@ function injectStyles() {
     .tif-ca-marker {
       width: 36px; height: 36px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      font-size: 18px; cursor: default;
+      font-size: 18px;
       animation: custom-alert-pulse 2.2s ease-out infinite;
       border: 2px solid rgba(255,255,255,0.3);
     }
@@ -69,9 +69,16 @@ export default function CustomAlertsLayer({ map }: Props) {
         const el = document.createElement('div')
         el.className = 'tif-ca-marker'
         el.style.background = `${color}dd`
+        el.style.cursor = 'pointer'
         el.style.setProperty('--ca-shadow', `0 4px 12px rgba(0,0,0,0.4)`)
         el.style.setProperty('--ca-pulse', `${color}66`)
         el.textContent = icon
+
+        el.addEventListener('click', () => {
+          window.dispatchEvent(new CustomEvent('tif:custom-alert-click', {
+            detail: { id, type, title, description, source: type, color, icon, lng, lat },
+          }))
+        })
 
         const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
           .setLngLat([lng, lat])

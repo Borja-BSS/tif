@@ -2493,6 +2493,22 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
     return () => window.removeEventListener('tif:event-click', handler)
   }, [animateTo])
 
+  // Écoute les clics sur les markers d'alertes custom (map → fiche détail)
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const alert = (e as CustomEvent<AlertDetailItem>).detail
+      if (!alert) return
+      setSelectedAlertItem(alert)
+      setDetailView('alertes')
+      setSelectedCrossing(null)
+      setSelectedEvent(null)
+      setSelectedImpactZone(null)
+      animateTo(getFullH(), true)
+    }
+    window.addEventListener('tif:custom-alert-click', handler)
+    return () => window.removeEventListener('tif:custom-alert-click', handler)
+  }, [animateTo])
+
   // Écoute les clics sur les zones d'impact (polygones NO-G7)
   useEffect(() => {
     const handler = (e: Event) => {
