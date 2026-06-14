@@ -329,6 +329,26 @@ function fallback(req: CarRouteRequest, a1Closed: boolean): CarRoute[] {
   }]
 }
 
+// ── Human-readable labels for open crossings ──────────────────────────────────
+const CROSSING_LABELS: Record<string, string> = {
+  'bardonnex':       'Via Bardonnex',
+  'thonex-vallard':  'Via Thônex-Vallard',
+  'moillesulaz':     'Via Moillesulaz',
+  'meyrin':          'Via Meyrin',
+  'ferney-voltaire': 'Via Ferney-Voltaire',
+  'perly':           'Via Perly',
+  'anieres':         'Via Anières',
+  'divonne':         'Via Divonne',
+  'leaz':            'Via Léaz',
+  'la-cure':         'Via La Cure',
+  'vallorbe':        'Via Vallorbe',
+  'bois-d-amont':    'Via Bois-d\'Amont',
+  'les-hopitaux-neufs': 'Via Les Hôpitaux-Neufs',
+  'saint-Laurent':   'Via Saint-Laurent',
+  'douvaine':        'Via Douvaine',
+  'thonon':          'Via Thonon',
+}
+
 // ── Build a CarRoute from a MapboxRoute ───────────────────────────────────────
 function toCarRoute(
   r:               MapboxRoute,
@@ -398,23 +418,33 @@ export async function calculateCarRoute(req: CarRouteRequest): Promise<CarRoute[
       ])
       if (!viaData.length) continue
 
-      const label = crossing.id === 'bardonnex'       ? 'Via Bardonnex'       :
-                   crossing.id === 'meyrin'           ? 'Via Meyrin'           :
-                   crossing.id === 'ferney-voltaire'  ? 'Via Ferney-Voltaire'  :
-                   crossing.id === 'thonex-vallard'   ? 'Via Thônex-Vallard'   :
-                   crossing.id === 'moillesulaz'      ? 'Via Moillesulaz'      :
-                   `Via ${crossing.id}`
+      const label = CROSSING_LABELS[crossing.id] ?? `Via ${crossing.id}`
+      const geo   = viaData[0].geometry.coordinates as [number, number][]
 
-      const candidate = toCarRoute(
-        viaData[0], `route-via-${crossing.id}`, true, g7, a1Closed, manifestation,
-        label,
-        { lat: crossing.lat, lng: crossing.lng },  // exclude nearby blocked crossings
-      )
+      // ⚠️ Do NOT run findBlockedCrossing on via-crossing routes.
+      // Roads near the Franco-Swiss border run parallel to it and inevitably
+      // pass close to other crossing coordinates, causing false positives.
+      // Mapbox already guarantees the route passes through our chosen open
+      // crossing when we supply it as a waypoint.
+      const warnings: string[] = [label]
+      if (a1Closed) warnings.push('⛔ A1 fermée 14–17 juin — Itinéraire sans autoroute')
+      if (manifestation && routePassesThroughManifestationZone(geo)) {
+        warnings.push('⚠️ Traverse la zone de manifestation NO-G7 — perturbations importantes attendues')
+      }
 
-      if (candidate.blockedCrossing) continue  // Still blocked by a DIFFERENT crossing elsewhere
-      if (valid.some(v => geometrySimilar(candidate.geometry, v.geometry))) continue
+      if (valid.some(v => geometrySimilar(geo, v.geometry))) continue
 
-      valid.push(candidate)
+      valid.push({
+        id:      `route-via-${crossing.id}`,
+        summary: {
+          duration:          Math.round(viaData[0].duration),
+          durationInTraffic: Math.round(viaData[0].duration),
+          distance:          Math.round(viaData[0].distance),
+          arrivalTime:       new Date(Date.now() + viaData[0].duration * 1000).toISOString(),
+        },
+        steps: [], geometry: geo, trafficDelay: 0,
+        alternative: true, warnings,
+      })
     }
 
     if (valid.length === 0) {
