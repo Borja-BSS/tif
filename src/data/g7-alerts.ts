@@ -17,7 +17,7 @@ export const g7Alerts: G7Alert[] = [
   },
   {
     id: 'frontiere-fermeture', category: 'frontiere', severity: 'critical',
-    title: '25 passages frontaliers fermés — 7 douanes seulement ouvertes',
+    title: '28 passages fermés (sur 35) — 7 douanes seulement ouvertes',
     detail: "Fermeture physique dès le 11 juin après-midi. Ouverts 12–18 : Anières, Moillesulaz, Thônex-Vallard, Bardonnex, Perly, Meyrin, Ferney-Voltaire. Également ouverts : gares de Cornavin et d'Annemasse, aéroport de Genève. Pièce d'identité obligatoire. Interdit hors passages dédiés, même à pied ou à vélo. Des temps d'attente sont à prévoir.",
     activeFrom: '2026-06-11T15:00:00', activeTo: '2026-06-18T23:59:00',
     source: 'https://www.ge.ch/document/sommet-du-g7-2026-evian-faq',
@@ -25,15 +25,15 @@ export const g7Alerts: G7Alert[] = [
   {
     id: 'tpg', category: 'transport', severity: 'warning',
     title: 'TPG perturbés (lignes transfrontalières, horaire vacances)',
-    detail: "Lignes 64/69 suspendues ; 38/40/52/82/83 limitées côté suisse ; ligne 29 supprimée 12–14 ; tpgFlex coupé en France ; agences Cornavin/Rive fermées dès le 12. Horaire vacances 15–17 sur tout le réseau.",
+    detail: "Lignes 64/69 suspendues ; 38/40/52/78/82/83/M limitées côté suisse ; tpgFlex coupé en France ; agences Cornavin/Rive fermées dès le 12. Horaire vacances 15–17 sur tout le réseau.",
     activeFrom: '2026-06-12T00:00:00', activeTo: '2026-06-17T23:59:00',
     source: 'https://www.tcs.ch/fr/camping-voyages/informations-touristiques/news-actualites/g7-evian.php',
   },
   {
     id: 'a1', category: 'route', severity: 'critical',
     title: 'Autoroute A1 (contournement) fermée vers la France',
-    detail: "A1 fermée (15–17 juin) en direction de Bardonnex. Depuis Vaud : sortie forcée Meyrin/Vernier/Genève-Centre ; Bernex et Perly/Plan-les-Ouates fermés ; bretelle A1aP La Praille→Bardonnex fermée. Depuis France : circulation maintenue 2 voies, temps d'attente à prévoir. Dim. 14 juin (06h–24h) : sortie Vengeron/Genève-Lac fermée.",
-    activeFrom: '2026-06-14T06:00:00', activeTo: '2026-06-17T23:59:00',
+    detail: "A1 fermée (15–17 juin) en direction de Bardonnex. Depuis Vaud : sortie forcée Meyrin/Vernier/Genève-Centre ; Bernex et Perly/Plan-les-Ouates fermés ; bretelle A1aP La Praille→Bardonnex fermée. Depuis France : circulation maintenue 2 voies, temps d'attente à prévoir.",
+    activeFrom: '2026-06-15T00:01:00', activeTo: '2026-06-17T23:59:00',
     source: 'https://www.ge.ch/dossier/sommet-du-g7-evian-2026',
   },
   {
@@ -46,7 +46,7 @@ export const g7Alerts: G7Alert[] = [
   {
     id: 'cgn', category: 'lac', severity: 'info',
     title: 'CGN — débarcadère Évian fermé, croisières adaptées',
-    detail: "Débarcadère Évian fermé (déviation Lugrin). Nyon–Yvoire interrompue le 15. Navigation de plaisance autorisée sans franchir la frontière.",
+    detail: "Débarcadère Évian fermé (déviation Lugrin). Nyon–Yvoire interrompue le 16 juin (9h–16h20). Navigation de plaisance autorisée sans franchir la frontière.",
     activeFrom: '2026-06-11T00:00:00', activeTo: '2026-06-17T23:59:00',
     source: 'https://www.cgn.ch/g7',
   },
