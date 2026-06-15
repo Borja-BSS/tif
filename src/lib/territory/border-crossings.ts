@@ -76,7 +76,7 @@ const CROSSINGS: Crossing[] = [
       'Vignette autoroutière CH · CHF 40/an (obligatoire A1)',
       'Assurance RC véhicule',
     ],
-    g7Info: '⭐ Poste macaron prioritaire · Accès prioritaire réservé au personnel essentiel des services critiques · Douanes secondaires ouvertes sur plages horaires dédiées · Pièce d\'identité obligatoire · Contrôles systématiques 12–18 juin · Des temps d\'attente sont à prévoir',
+    g7Info: '⭐ Poste macaron prioritaire · Douane OUVERTE 24h/24 · ⚠️ A1 CH→FR fermée 15–17 juin (sortie obligatoire Meyrin/Vernier/Genève-Centre — source : ge.ch) · A1 FR→CH ouverte · Pièce d\'identité obligatoire · Contrôles systématiques · Des temps d\'attente sont à prévoir',
   },
   {
     id: 'thonex-vallard', name: 'Thônex-Vallard',
