@@ -74,30 +74,6 @@ const ZONE_A1: [number, number][] = [
 
 export const IMPACT_ZONES: ImpactZone[] = [
   {
-    id:          'no-g7-manifestation',
-    title:       'Manifestation NO-G7 — Périmètre',
-    description:
-      'Rassemblement autorisé au Parc Mon Repos de 15h00 à 22h30.\n' +
-      'Zone d\'impact direct sur la circulation et le réseau TPG.\n\n' +
-      'Trams rentrés aux dépôts :\n' +
-      '* Ligne 12 → dépôt CMB\n' +
-      '* Lignes 14, 2/3 → dépôt CMC\n' +
-      '* Lignes 15, 18 (moitié) → dépôt CMC\n\n' +
-      'Tous les trolleybus → dépôt Jonction.\n' +
-      'Temps de mise en œuvre : 1h30 avant déclenchement.',
-    lines:       ['12', '14', '15', '18', '2', '3'],
-    type:        'DEMONSTRATION',
-    severity:    'HIGH',
-    coordinates: ZONE_MANIFESTATION,
-    activeFrom:  new Date('2026-06-14T13:30:00+02:00'),
-    activeTo:    new Date('2026-06-14T22:30:00+02:00'),
-    fillColor:   '#FF453A',
-    fillOpacity: 0.14,
-    strokeColor: '#FF453A',
-    source:      'TPG GestE',
-    sourceRef:   'NO-G7 14.06.26',
-  },
-  {
     id:          'no-g7-tpg-disruption',
     renderOnMap: false,
     title:       'Réseau TPG — Perturbations G7 · 11–17 juin',

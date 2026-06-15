@@ -37,20 +37,6 @@ export const g7Alerts: G7Alert[] = [
     source: 'https://www.ge.ch/dossier/sommet-du-g7-evian-2026',
   },
   {
-    id: 'manif', category: 'manifestation', severity: 'critical',
-    title: 'Manifestation No-G7 — rive droite',
-    detail: "Rassemblement ~15h au parc Mon Repos, cortège rive droite (évite le pont du Mont-Blanc), retour au départ. 10 000 attendus (dispositif jusqu'à 50 000). Pont du Mont-Blanc interdit. Tous autres rassemblements interdits.",
-    activeFrom: '2026-06-14T06:00:00', activeTo: '2026-06-14T23:59:00',
-    source: 'https://www.ge.ch/dossier/sommet-du-g7-evian-2026',
-  },
-  {
-    id: 'manif-mobilite', category: 'route', severity: 'warning',
-    title: '14 juin — sortie autoroute Vengeron/Genève-Lac fermée + Léman Express coupé',
-    detail: "Sortie Vengeron/Genève-Lac fermée dès 6h. Léman Express : aucune liaison directe Annemasse–Genève de 08h à 00h. Jour de votations fédérales.",
-    activeFrom: '2026-06-14T06:00:00', activeTo: '2026-06-14T23:59:00',
-    source: 'https://vaud-info-g7.ch/',
-  },
-  {
     id: 'bastions', category: 'culture', severity: 'info',
     title: 'Parc des Bastions fermé au public',
     detail: "Fermé dès le 12 juin ; rouvre le 19 pour la Fête de la musique.",
