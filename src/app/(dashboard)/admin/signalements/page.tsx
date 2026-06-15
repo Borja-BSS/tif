@@ -57,6 +57,29 @@ function DetailPanel({
 
   const isVideo = (url: string) => /\.(mp4|mov|webm|ogg)(\?|$)/i.test(url)
 
+  const [coordInput, setCoordInput] = useState({ lat: '', lng: '' })
+  const [coordSaving, setCoordSaving] = useState(false)
+  const [coordError, setCoordError]   = useState<string | null>(null)
+
+  const saveCoords = async () => {
+    const lat = parseFloat(coordInput.lat)
+    const lng = parseFloat(coordInput.lng)
+    if (isNaN(lat) || isNaN(lng) || lat < 45.8 || lat > 46.6 || lng < 5.9 || lng > 6.4) {
+      setCoordError('Coordonnées hors zone Grand Genève (lat 45.8–46.6, lng 5.9–6.4)')
+      return
+    }
+    setCoordSaving(true)
+    setCoordError(null)
+    const token = await firebaseAuth.currentUser?.getIdToken()
+    await fetch('/api/v1/signalements', {
+      method:  'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body:    JSON.stringify({ id: s.id, lat, lng }),
+    })
+    setCoordSaving(false)
+    onClose()
+  }
+
   return (
     <>
       {/* Overlay */}
@@ -143,6 +166,41 @@ function DetailPanel({
             <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 12, padding: '12px 14px' }}>
               <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Adresse</p>
               <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', margin: 0 }}>📍 {s.address}</p>
+            </div>
+          )}
+          {s.lat == null && (
+            <div style={{ background: 'rgba(255,159,10,0.08)', borderRadius: 12, padding: '12px 14px', border: '1px solid rgba(255,159,10,0.25)' }}>
+              <p style={{ fontSize: 11, color: '#FF9F0A', marginBottom: 8, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                ⚠️ Sans GPS — invisible sur la carte
+              </p>
+              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 10, margin: '0 0 10px' }}>
+                Entrez les coordonnées pour que ce signalement apparaisse sur la carte après approbation.
+              </p>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+                <input
+                  type="number" step="0.000001" placeholder="Latitude ex: 46.2044"
+                  value={coordInput.lat}
+                  onChange={e => setCoordInput(v => ({ ...v, lat: e.target.value }))}
+                  style={{ flex: 1, background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)',
+                    borderRadius: 8, padding: '8px 10px', fontSize: 13, color: '#fff', outline: 'none' }}
+                />
+                <input
+                  type="number" step="0.000001" placeholder="Longitude ex: 6.1432"
+                  value={coordInput.lng}
+                  onChange={e => setCoordInput(v => ({ ...v, lng: e.target.value }))}
+                  style={{ flex: 1, background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)',
+                    borderRadius: 8, padding: '8px 10px', fontSize: 13, color: '#fff', outline: 'none' }}
+                />
+              </div>
+              {coordError && <p style={{ fontSize: 11, color: '#FF453A', margin: '0 0 8px' }}>{coordError}</p>}
+              <button
+                onClick={saveCoords}
+                disabled={coordSaving || !coordInput.lat || !coordInput.lng}
+                style={{ width: '100%', padding: '9px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
+                  background: coordSaving ? 'rgba(255,255,255,0.1)' : 'rgba(10,132,255,0.85)',
+                  color: '#fff', fontSize: 13, fontWeight: 600 }}>
+                {coordSaving ? 'Sauvegarde…' : 'Sauvegarder les coordonnées'}
+              </button>
             </div>
           )}
 
