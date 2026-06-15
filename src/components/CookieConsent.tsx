@@ -98,7 +98,10 @@ export function CookieConsent() {
           <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.50)', lineHeight: 1.5 }}>
             Nous collectons des données anonymes (aucune information personnelle) pour améliorer
             la plateforme. En acceptant, vous autorisez aussi la localisation GPS pour centrer
-            la carte sur votre position.
+            la carte sur votre position.{' '}
+            <a href="/privacy" style={{ color: 'rgba(255,255,255,0.55)', textDecoration: 'underline' }}>
+              Politique de confidentialité
+            </a>
           </div>
         </div>
 
