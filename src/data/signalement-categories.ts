@@ -68,9 +68,10 @@ export interface Signalement {
   lng?:        number
   mediaUrls?:  string[]
   createdAt:   string
-  status:      'pending' | 'approved' | 'rejected'
+  status:      'pending' | 'approved' | 'rejected' | 'disabled'
   approvedAt?: string
   rejectedAt?: string
+  disabledAt?: string
 }
 
 export const REDIS_KEY_SIGNALEMENTS = 'tif:signalements'

@@ -84,17 +84,24 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ signalements: items })
 }
 
-// PATCH admin — approve / reject
+// PATCH admin — approve / reject / disable
 export async function PATCH(req: NextRequest) {
   if (!await isAdmin(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { id, status } = await req.json() as { id: string; status: 'approved' | 'rejected' }
-  if (!id || !['approved','rejected'].includes(status)) {
+  const { id, status } = await req.json() as { id: string; status: 'approved' | 'rejected' | 'disabled' }
+  if (!id || !['approved','rejected','disabled'].includes(status)) {
     return NextResponse.json({ error: 'id et status requis' }, { status: 400 })
   }
   const all = await load()
   const idx = all.findIndex(s => s.id === id)
   if (idx === -1) return NextResponse.json({ error: 'Non trouvé' }, { status: 404 })
-  all[idx] = { ...all[idx], status, ...(status === 'approved' ? { approvedAt: new Date().toISOString() } : { rejectedAt: new Date().toISOString() }) }
+  const now = new Date().toISOString()
+  all[idx] = {
+    ...all[idx],
+    status,
+    ...(status === 'approved' ? { approvedAt: now } : {}),
+    ...(status === 'rejected' ? { rejectedAt: now } : {}),
+    ...(status === 'disabled' ? { disabledAt: now } : {}),
+  }
   await save(all)
   return NextResponse.json({ signalement: all[idx] })
 }

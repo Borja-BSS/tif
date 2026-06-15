@@ -11,6 +11,13 @@ import type { Signalement } from '@/data/signalement-categories'
 
 const ADMIN_EMAILS = ['lostropicosbox@gmail.com', 'aruncalstas@gmail.com']
 
+const STATUS_META = {
+  pending:  { label: 'En attente', icon: '⏳', color: '#FF9F0A', bg: 'rgba(255,159,10,0.12)',  border: 'rgba(255,159,10,0.25)' },
+  approved: { label: 'Approuvé',   icon: '✓',  color: '#30D158', bg: 'rgba(52,199,89,0.12)',   border: 'rgba(52,199,89,0.25)'  },
+  rejected: { label: 'Rejeté',     icon: '✗',  color: '#FF453A', bg: 'rgba(255,59,48,0.10)',   border: 'rgba(255,59,48,0.20)'  },
+  disabled: { label: 'Désactivé',  icon: '⏸',  color: '#8E8E93', bg: 'rgba(142,142,147,0.12)', border: 'rgba(142,142,147,0.22)' },
+}
+
 const PRIORITY_COLOR: Record<string, string> = {
   info:         '#8E8E93',
   vigilance:    '#30D158',
@@ -38,7 +45,7 @@ function DetailPanel({
 }: {
   s: Signalement
   onClose: () => void
-  onAct:   (id: string, status: 'approved' | 'rejected') => Promise<void>
+  onAct:   (id: string, status: 'approved' | 'rejected' | 'disabled') => Promise<void>
   onDel:   (id: string) => Promise<void>
   acting:  string | null
 }) {
@@ -103,13 +110,12 @@ function DetailPanel({
               background: `${priColor}18`, color: priColor, border: `1px solid ${priColor}35` }}>
               {priObj?.icon} {priObj?.label}
             </span>
-            <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 7,
-              background: s.status === 'pending' ? 'rgba(255,159,10,0.12)' : s.status === 'approved' ? 'rgba(52,199,89,0.12)' : 'rgba(255,59,48,0.10)',
-              color:      s.status === 'pending' ? '#FF9F0A' : s.status === 'approved' ? '#30D158' : '#FF453A',
-              border:     `1px solid ${s.status === 'pending' ? 'rgba(255,159,10,0.25)' : s.status === 'approved' ? 'rgba(52,199,89,0.25)' : 'rgba(255,59,48,0.20)'}`,
-            }}>
-              {s.status === 'pending' ? '⏳ En attente' : s.status === 'approved' ? '✓ Approuvé' : '✗ Rejeté'}
-            </span>
+            {(() => { const m = STATUS_META[s.status] ?? STATUS_META.pending; return (
+              <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 7,
+                background: m.bg, color: m.color, border: `1px solid ${m.border}` }}>
+                {m.icon} {m.label}
+              </span>
+            )})()}
           </div>
 
           {/* Description */}
@@ -189,9 +195,10 @@ function DetailPanel({
           )}
 
           {/* Actions */}
-          <div style={{ display: 'flex', gap: 8, paddingTop: 4 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingTop: 4 }}>
+            {/* Pending : approuver / rejeter */}
             {s.status === 'pending' && (
-              <>
+              <div style={{ display: 'flex', gap: 8 }}>
                 <button onClick={async () => { await onAct(s.id, 'approved'); onClose() }}
                   disabled={isActing}
                   style={{ flex: 1, padding: '13px 0', borderRadius: 14, border: 'none', cursor: 'pointer',
@@ -206,13 +213,38 @@ function DetailPanel({
                     color: '#FF453A', fontSize: 14, fontWeight: 700 }}>
                   ✗ Rejeter
                 </button>
-              </>
+              </div>
             )}
+
+            {/* Approuvé : désactiver (retire de la carte sans supprimer) */}
+            {s.status === 'approved' && (
+              <button onClick={async () => { await onAct(s.id, 'disabled'); onClose() }}
+                disabled={isActing}
+                style={{ width: '100%', padding: '13px 0', borderRadius: 14, border: 'none', cursor: 'pointer',
+                  background: isActing ? 'rgba(142,142,147,0.06)' : 'rgba(142,142,147,0.12)',
+                  color: '#8E8E93', fontSize: 14, fontWeight: 700 }}>
+                ⏸ Désactiver — retire de la carte
+              </button>
+            )}
+
+            {/* Désactivé : réactiver */}
+            {s.status === 'disabled' && (
+              <button onClick={async () => { await onAct(s.id, 'approved'); onClose() }}
+                disabled={isActing}
+                style={{ width: '100%', padding: '13px 0', borderRadius: 14, border: 'none', cursor: 'pointer',
+                  background: isActing ? 'rgba(52,199,89,0.08)' : 'rgba(52,199,89,0.12)',
+                  color: '#30D158', fontSize: 14, fontWeight: 700 }}>
+                ▶ Réactiver sur la carte
+              </button>
+            )}
+
+            {/* Supprimer — toujours visible */}
             <button onClick={async () => { await onDel(s.id); onClose() }}
               disabled={isActing}
-              style={{ padding: '13px 16px', borderRadius: 14, border: 'none', cursor: 'pointer',
-                background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)', fontSize: 14 }}>
-              🗑️
+              style={{ width: '100%', padding: '13px 0', borderRadius: 14, border: 'none', cursor: 'pointer',
+                background: isActing ? 'rgba(255,59,48,0.04)' : 'rgba(255,59,48,0.08)',
+                color: '#FF453A', fontSize: 14, fontWeight: 600 }}>
+              🗑️ Supprimer définitivement
             </button>
           </div>
 
@@ -248,7 +280,7 @@ export default function SignalementsAdmin() {
   const router   = useRouter()
   const [items,    setItems]    = useState<Signalement[]>([])
   const [loading,  setLoading]  = useState(true)
-  const [filter,   setFilter]   = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending')
+  const [filter,   setFilter]   = useState<'all' | 'pending' | 'approved' | 'rejected' | 'disabled'>('pending')
   const [acting,   setActing]   = useState<string | null>(null)
   const [selected, setSelected] = useState<Signalement | null>(null)
 
@@ -272,7 +304,7 @@ export default function SignalementsAdmin() {
 
   useEffect(() => { if (isAdmin) load() }, [isAdmin, load])
 
-  const act = async (id: string, status: 'approved' | 'rejected') => {
+  const act = async (id: string, status: 'approved' | 'rejected' | 'disabled') => {
     setActing(id)
     const token = await firebaseAuth.currentUser?.getIdToken()
     await fetch('/api/v1/signalements', {
@@ -338,18 +370,23 @@ export default function SignalementsAdmin() {
 
       {/* Filter tabs */}
       <div className="flex gap-1.5 px-4 py-3 border-b overflow-x-auto" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-        {(['all','pending','approved','rejected'] as const).map(f => (
-          <button key={f} onClick={() => setFilter(f)}
-            className="flex-shrink-0 rounded-xl px-3 py-1.5 text-[12px] font-semibold transition-all"
-            style={{
-              background: filter === f ? '#0A84FF' : 'rgba(255,255,255,0.06)',
-              color:      filter === f ? '#fff'    : 'rgba(255,255,255,0.50)',
-              border:     `1px solid ${filter === f ? 'transparent' : 'rgba(255,255,255,0.09)'}`,
-            }}>
-            {f === 'all' ? 'Tous' : f === 'pending' ? 'En attente' : f === 'approved' ? 'Approuvés' : 'Rejetés'}
-            {f === 'pending' && pendingCount > 0 && <span className="ml-1.5 text-[10px]">({pendingCount})</span>}
-          </button>
-        ))}
+        {(['all','pending','approved','disabled','rejected'] as const).map(f => {
+          const m = f !== 'all' ? STATUS_META[f] : null
+          const count = f === 'pending' ? pendingCount
+            : f !== 'all' ? items.filter(s => s.status === f).length : items.length
+          return (
+            <button key={f} onClick={() => setFilter(f)}
+              className="flex-shrink-0 rounded-xl px-3 py-1.5 text-[12px] font-semibold transition-all"
+              style={{
+                background: filter === f ? (m?.color ?? '#0A84FF') : 'rgba(255,255,255,0.06)',
+                color:      filter === f ? '#fff' : 'rgba(255,255,255,0.50)',
+                border:     `1px solid ${filter === f ? 'transparent' : 'rgba(255,255,255,0.09)'}`,
+              }}>
+              {f === 'all' ? 'Tous' : m!.label}
+              {count > 0 && <span className="ml-1.5 text-[10px] opacity-80">({count})</span>}
+            </button>
+          )
+        })}
       </div>
 
       {/* List */}
@@ -412,14 +449,12 @@ export default function SignalementsAdmin() {
                       📎 {s.mediaUrls.length} média{s.mediaUrls.length > 1 ? 's' : ''}
                     </span>
                   )}
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-auto"
-                    style={{
-                      background: s.status === 'pending' ? 'rgba(255,159,10,0.15)' : s.status === 'approved' ? 'rgba(52,199,89,0.15)' : 'rgba(255,59,48,0.12)',
-                      color:      s.status === 'pending' ? '#FF9F0A'               : s.status === 'approved' ? '#30D158'               : '#FF453A',
-                    }}>
-                    {s.status === 'pending' ? '⏳' : s.status === 'approved' ? '✓' : '✗'}
-                    {' '}{s.status === 'pending' ? 'En attente' : s.status === 'approved' ? 'Approuvé' : 'Rejeté'}
-                  </span>
+                  {(() => { const m = STATUS_META[s.status] ?? STATUS_META.pending; return (
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-auto"
+                      style={{ background: m.bg, color: m.color }}>
+                      {m.icon} {m.label}
+                    </span>
+                  )})()}
                 </div>
               </div>
             </button>
