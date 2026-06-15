@@ -625,7 +625,7 @@ const CROSSINGS: Crossing[] = [
     franceSide: 'south',
     hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Cars', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '✓ Ouvert 24/7 · Axe A41 vers Annecy · Renforcé G7',
+    g7Info: '✓ Ouvert · Axe A41 vers Annecy · Contrôles renforcés G7 · Pièce d\'identité obligatoire',
   },
   {
     id: 'collonges', name: 'Collonges-sous-Salève',
@@ -644,6 +644,7 @@ const G7_END_UTC   = new Date('2026-06-18T21:59:00Z')
 // Synchronized with border-crossings-client.ts G7_OPEN set
 const G7_AUTHORIZED = new Set([
   'bardonnex', 'thonex-vallard', 'moillesulaz', 'meyrin', 'ferney-voltaire', 'perly', 'anieres',
+  'saint-julien',
   'divonne', 'leaz', 'la-cure', 'vallorbe', 'bois-d-amont',
   'les-hopitaux-neufs', 'saint-Laurent', 'douvaine', 'thonon',
 ])

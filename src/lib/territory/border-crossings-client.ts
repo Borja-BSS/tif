@@ -88,7 +88,7 @@ export const ALL_CROSSINGS: CrossingStatic[] = [
 
   // ── NOUVEAU — Zone Annecy / Sud Haute-Savoie ────────────────────────────────
   { id: 'annemasse-gaillard', name: 'Annemasse / Gaillard', lat: 46.1930, lng: 6.2068, type: 'main', capacity: 'high', hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Motos', 'Piétons', 'Tram'], pedestrian: true, g7Info: '⚠️ Passage routier fermé 12-18 juin · Gare d\'Annemasse autorisée (Léman Express) · (source : ge.ch)', nearestOpen: 'Moillesulaz (1 km)' },
-  { id: 'saint-julien', name: 'Saint-Julien-en-Genevois', lat: 46.15063, lng: 6.08890, type: 'main', capacity: 'high', hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Cars', 'Motos'], pedestrian: false, g7Info: '🔒 Fermé 12-18 juin 2026 · Hors périmètre des 7 passages autorisés GE · Axe A41 vers Annecy (source : ge.ch)', nearestOpen: 'Bardonnex (7 km)' },
+  { id: 'saint-julien', name: 'Saint-Julien-en-Genevois', lat: 46.15063, lng: 6.08890, type: 'main', capacity: 'high', hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Cars', 'Motos'], pedestrian: false, g7Info: '✓ Ouvert · Axe A41 vers Annecy · Contrôles renforcés G7 · Pièce d\'identité obligatoire', nearestOpen: undefined },
   { id: 'collonges', name: 'Collonges-sous-Salève', lat: 46.1400, lng: 6.1490, type: 'secondary', capacity: 'medium', hours: '24h/24', vehicles: ['Voitures', 'Motos'], pedestrian: false, g7Info: '🔒 Fermé 12-18 juin 2026', nearestOpen: 'Bardonnex (8 km)' },
 
   // ── NOUVEAU — Zone Jura / Pontarlier / Champagnole ──────────────────────────
@@ -99,7 +99,7 @@ export const ALL_CROSSINGS: CrossingStatic[] = [
 
 const G7_START = new Date('2026-06-11T22:01:00Z')
 const G7_END   = new Date('2026-06-18T21:59:00Z')
-const G7_OPEN  = new Set(['bardonnex','thonex-vallard','moillesulaz','meyrin','ferney-voltaire','perly','anieres','divonne','leaz','la-cure','vallorbe','bois-d-amont','les-hopitaux-neufs','saint-Laurent','douvaine','thonon'])
+const G7_OPEN  = new Set(['bardonnex','thonex-vallard','moillesulaz','meyrin','ferney-voltaire','perly','anieres','saint-julien','divonne','leaz','la-cure','vallorbe','bois-d-amont','les-hopitaux-neufs','saint-Laurent','douvaine','thonon'])
 
 export function computeInstantStatus(c: CrossingStatic, now: Date): { status: BorderStatus; color: string; icon: string; waitMinutes: number } {
   const isG7 = now >= G7_START && now <= G7_END
