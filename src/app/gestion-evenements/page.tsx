@@ -269,6 +269,139 @@ export default function GestionEvenementsPage() {
         </div>
       </section>
 
+      {/* ── Validation médias & utilisateurs ── */}
+      <section style={{ maxWidth: 900, margin: '0 auto', padding: '72px 24px' }}>
+        <h2 style={{ fontSize: 28, fontWeight: 800, marginBottom: 8, textAlign: 'center' }}>Validé par les médias et les utilisateurs</h2>
+        <p style={{ color: 'var(--text-tertiary)', textAlign: 'center', marginBottom: 56, fontSize: 15 }}>
+          TIF a été déployé lors du G7 Évian 2026 et couvert par la presse régionale et nationale.
+        </p>
+
+        {/* Presse */}
+        <div style={{ marginBottom: 56 }}>
+          <p style={{ fontSize: 12, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-tertiary)', textAlign: 'center', marginBottom: 28 }}>Vu dans la presse</p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'center', alignItems: 'center' }}>
+            {[
+              { name: 'Le Temps', abbr: 'LT' },
+              { name: 'RTS', abbr: 'RTS' },
+              { name: 'Tribune de Genève', abbr: 'TdG' },
+              { name: '20 Minutes', abbr: '20m' },
+              { name: 'Heidi.news', abbr: 'HN' },
+            ].map(m => (
+              <div
+                key={m.name}
+                style={{
+                  padding: '12px 24px',
+                  borderRadius: 12,
+                  border: '0.5px solid var(--border)',
+                  background: 'var(--bg-card)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  minWidth: 140,
+                  justifyContent: 'center',
+                }}
+              >
+                <span style={{
+                  width: 32, height: 32, borderRadius: 8,
+                  background: 'var(--brand-subtle)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 10, fontWeight: 800, color: 'var(--brand)', flexShrink: 0,
+                  letterSpacing: '0.04em',
+                }}>{m.abbr}</span>
+                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-secondary)' }}>{m.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Validation utilisateurs */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
+          <a href="#contact" style={CARD}>
+            <p style={{ fontSize: 40, marginBottom: 8 }}>⭐</p>
+            <p style={{ fontSize: 22, fontWeight: 900, color: 'var(--brand)', marginBottom: 4 }}>10'000+</p>
+            <p style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>utilisateurs actifs · G7 2026</p>
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+              Frontaliers, habitants, visiteurs : la plateforme a été adoptée spontanément
+              dès les premières 48h de déploiement, sans campagne publicitaire.
+            </p>
+          </a>
+          <a href="#contact" style={CARD}>
+            <p style={{ fontSize: 40, marginBottom: 8 }}>📡</p>
+            <p style={{ fontSize: 22, fontWeight: 900, color: 'var(--brand)', marginBottom: 4 }}>15 jours</p>
+            <p style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>de disponibilité ininterrompue</p>
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+              Zéro incident de sécurité, zéro interruption de service sur toute la durée du sommet,
+              mises à jour en moins de 30 secondes des sources officielles.
+            </p>
+          </a>
+          <a href="#contact" style={CARD}>
+            <p style={{ fontSize: 40, marginBottom: 8 }}>🌍</p>
+            <p style={{ fontSize: 22, fontWeight: 900, color: 'var(--brand)', marginBottom: 4 }}>9 langues</p>
+            <p style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>accessibilité internationale</p>
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+              FR · EN · DE · IT · ES · PT · AR · SQ · JA : TIF a servi les délégations
+              et les journalistes accrédités du monde entier présents à Genève.
+            </p>
+          </a>
+        </div>
+      </section>
+
+      {/* ── Conformité : RGPD · nLPD · vie privée ── */}
+      <section style={{ background: 'var(--bg-secondary)', borderTop: '0.5px solid var(--border)', borderBottom: '0.5px solid var(--border)', padding: '72px 24px' }}>
+        <div style={{ maxWidth: 820, margin: '0 auto' }}>
+          <h2 style={{ fontSize: 28, fontWeight: 800, marginBottom: 8, textAlign: 'center' }}>Respect de la vie privée</h2>
+          <p style={{ color: 'var(--text-tertiary)', textAlign: 'center', marginBottom: 48, fontSize: 15, maxWidth: 560, margin: '0 auto 48px' }}>
+            Conformité totale RGPD (UE 2016/679) et nLPD suisse (en vigueur depuis septembre 2023).
+            Conçue dès le départ pour protéger les données de vos participants.
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20 }}>
+            {[
+              {
+                badge: 'RGPD',
+                icon: '🇪🇺',
+                title: 'Conforme au RGPD',
+                desc: "Consentement explicite (cookie banner), droit d'accès et de suppression, traitement documenté. Données stockées exclusivement dans l'UE (Vercel EU, Upstash eu-west-1).",
+              },
+              {
+                badge: 'nLPD',
+                icon: '🇨🇭',
+                title: 'Conforme à la nLPD suisse',
+                desc: "Respect de la Loi fédérale sur la Protection des Données révisée (sept. 2023) : minimisation des données, sécurité by design, obligation de notification en cas de violation.",
+              },
+              {
+                badge: '0 vente',
+                icon: '🔒',
+                title: 'Zéro revente de données',
+                desc: "Aucune donnée personnelle vendue ou partagée avec des tiers à des fins commerciales. Aucune publicité ciblée. Le modèle économique est basé sur les services B2B, pas sur les données.",
+              },
+              {
+                badge: 'DPO',
+                icon: '📋',
+                title: 'Responsable du traitement identifié',
+                desc: "Arun Calstas — Börja Swiss Solutions, Genève. Contact DPO : contact@borja-swiss-solutions.ch. Registre des traitements tenu à jour et disponible sur demande.",
+              },
+            ].map(block => (
+              <a key={block.badge} href="#contact" style={CARD}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                  <span style={{ fontSize: 22 }}>{block.icon}</span>
+                  <span style={{
+                    fontSize: 10, fontWeight: 800, letterSpacing: '0.08em',
+                    background: 'var(--brand-subtle)', color: 'var(--brand)',
+                    padding: '3px 8px', borderRadius: 6,
+                  }}>{block.badge}</span>
+                </div>
+                <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 8 }}>{block.title}</h3>
+                <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{block.desc}</p>
+              </a>
+            ))}
+          </div>
+          <p style={{ textAlign: 'center', marginTop: 32, fontSize: 13, color: 'var(--text-tertiary)' }}>
+            Politique de confidentialité complète disponible sur{' '}
+            <a href="/a-propos" style={{ color: 'var(--brand)' }}>tif.borja-swiss-solutions.ch/a-propos</a>
+          </p>
+        </div>
+      </section>
+
       {/* ── TIF × Börja — synergie ── */}
       <section style={{ maxWidth: 820, margin: '0 auto', padding: '72px 24px' }}>
         <h2 style={{ fontSize: 28, fontWeight: 800, marginBottom: 16, textAlign: 'center' }}>TIF + Börja : deux forces, un seul outil</h2>
