@@ -5,6 +5,8 @@ import { latLngToCell } from 'h3-js'
 import { broadcastSignals } from './broadcast-signals'
 import { createHmac } from 'crypto'
 
+// NOTE: ge.ch/sitg migrated to sitg.ge.ch with a different API structure — MapServer/1036 no longer exists.
+// Pending: find the new SITG traffic endpoint. Until then, function falls back to no-op.
 const SIG_TRAFFIC_URL =
   'https://ge.ch/sitg/rest/services/SITG/MapServer/1036/query?f=json&where=1%3D1&outFields=*&resultRecordCount=200'
 
@@ -27,13 +29,20 @@ export const ingestSigGeneve = inngest.createFunction(
   },
   async ({ step }) => {
     const raw = await step.run('fetch-sig-api', async () => {
-      const res = await fetch(SIG_TRAFFIC_URL, {
-        signal:  AbortSignal.timeout(8000),
-        headers: { Accept: 'application/json' },
-      })
-      if (!res.ok) throw new Error(`SIG API ${res.status}`)
-      return res.json() as Promise<{ features: SigFeature[] }>
+      try {
+        const res = await fetch(SIG_TRAFFIC_URL, {
+          signal:  AbortSignal.timeout(8000),
+          headers: { Accept: 'application/json' },
+          redirect: 'follow',
+        })
+        if (!res.ok) return null
+        return res.json() as Promise<{ features: SigFeature[] }>
+      } catch {
+        return null
+      }
     })
+
+    if (!raw) return { ingested: 0, source: 'unavailable' }
 
     const signals: SigSignal[] = await step.run('process-quantify', async () => {
       const daily = new Date().toISOString().slice(0, 10)

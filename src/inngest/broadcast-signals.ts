@@ -16,15 +16,14 @@ function getAblyRest(): Ably.Rest {
 
 export async function broadcastSignals(signals: Signal[]): Promise<void> {
   if (!signals.length) return
-  const channel = getAblyRest().channels.get('tif:signals:grand-geneve')
-
-  // Batch par 50 pour éviter les limites de payload Ably
-  const batches = chunk(signals, 50)
-  await Promise.all(
-    batches.map(batch =>
-      channel.publish('signal', batch)
-    )
-  )
+  if (!process.env.ABLY_API_KEY) return
+  try {
+    const channel = getAblyRest().channels.get('tif:signals:grand-geneve')
+    const batches = chunk(signals, 50)
+    await Promise.all(batches.map(batch => channel.publish('signal', batch)))
+  } catch {
+    // circuit breaker: non-bloquant si Ably indisponible
+  }
 }
 
 function chunk<T>(arr: T[], size: number): T[][] {
