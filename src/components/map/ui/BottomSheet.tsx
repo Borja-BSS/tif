@@ -2013,6 +2013,8 @@ function EventsPanel({ onSelect }: { onSelect: (slug: string) => void }) {
   const [priceFilter, setPriceFilter] = useState<'all' | 'free' | 'paid'>('all')
   const [todayOnly,   setTodayOnly]   = useState(false)
   const [venueFilter, setVenueFilter] = useState('')
+  const [viewMode,    setViewMode]    = useState<'category' | 'agenda'>('category')
+  const [catFilter,   setCatFilter]   = useState<string>('all')
 
   const d = new Date()
   const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -2026,12 +2028,14 @@ function EventsPanel({ onSelect }: { onSelect: (slug: string) => void }) {
   }
 
   let filteredEvents = events
-  if (todayOnly)   filteredEvents = filteredEvents.filter(ev => ev.occurrences.some(o => o.date === today))
-  if (venueFilter) filteredEvents = filteredEvents.filter(ev => ev.venue.name === venueFilter)
+  if (todayOnly)            filteredEvents = filteredEvents.filter(ev => ev.occurrences.some(o => o.date === today))
+  if (venueFilter)          filteredEvents = filteredEvents.filter(ev => ev.venue.name === venueFilter)
+  if (catFilter !== 'all')  filteredEvents = filteredEvents.filter(ev => ev.category === catFilter)
   filteredEvents = priceFilter === 'free' ? filteredEvents.filter(isFree)
     : priceFilter === 'paid' ? filteredEvents.filter(ev => !ev.priceInfo || !isFree(ev))
     : filteredEvents
 
+  // ── Vue Catégorie ─────────────────────────────────────────────────────────
   const byCategory = filteredEvents.reduce<Record<string, EventItem[]>>((acc, ev) => {
     const cat = ev.category
     if (!acc[cat]) acc[cat] = []
@@ -2039,10 +2043,30 @@ function EventsPanel({ onSelect }: { onSelect: (slug: string) => void }) {
     return acc
   }, {})
 
-  const categoryOrder = ['festival', 'concert', 'classique', 'theatre', 'comedie', 'nightlife', 'danse', 'sport', 'art']
+  const categoryOrder = ['festival', 'football', 'concert', 'classique', 'theatre', 'comedie', 'nightlife', 'danse', 'sport', 'art']
   const orderedKeys   = categoryOrder.filter(k => byCategory[k]).concat(
     Object.keys(byCategory).filter(k => !categoryOrder.includes(k))
   )
+
+  // Catégories présentes dans le jeu de données (pour les chips)
+  const allCats = categoryOrder.filter(k => events.some(e => e.category === k))
+
+  // ── Vue Agenda ────────────────────────────────────────────────────────────
+  const allDates = [...new Set(
+    filteredEvents.flatMap(ev => ev.occurrences.map(o => o.date))
+  )].sort()
+
+  const byDate: Record<string, EventItem[]> = {}
+  for (const date of allDates) {
+    byDate[date] = filteredEvents.filter(ev => ev.occurrences.some(o => o.date === date))
+  }
+
+  const fmtDateHeader = (iso: string): string => {
+    const date = new Date(iso + 'T12:00:00')
+    const opts: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long' }
+    const label = date.toLocaleDateString('fr-CH', opts)
+    return iso === today ? `Aujourd'hui — ${label}` : label
+  }
 
   const PRICE_TABS: { id: 'all' | 'free' | 'paid'; label: string }[] = [
     { id: 'all',  label: 'Tous'    },
@@ -2052,6 +2076,50 @@ function EventsPanel({ onSelect }: { onSelect: (slug: string) => void }) {
 
   return (
     <div className="space-y-4">
+      {/* Toggle vue Catégories / Agenda */}
+      <div className="flex gap-1 p-1 rounded-xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+        {(['category', 'agenda'] as const).map(mode => (
+          <button key={mode}
+            onClick={() => setViewMode(mode)}
+            className="flex-1 rounded-lg py-1.5 text-[12px] font-semibold transition-all"
+            style={{
+              background: viewMode === mode ? 'rgba(175,82,222,0.18)' : 'transparent',
+              color: viewMode === mode ? '#AF52DE' : 'var(--text-secondary)',
+            }}>
+            {mode === 'category' ? '🗂️ Catégories' : '📅 Agenda'}
+          </button>
+        ))}
+      </div>
+
+      {/* Chips catégorie (vue Catégories seulement) */}
+      {viewMode === 'category' && (
+        <div className="flex gap-1.5 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none' } as React.CSSProperties}>
+          <button
+            onClick={() => setCatFilter('all')}
+            className="flex-shrink-0 rounded-xl py-1 px-2.5 text-[11px] font-semibold transition-all"
+            style={{
+              background: catFilter === 'all' ? 'rgba(175,82,222,0.18)' : 'var(--bg-card)',
+              color: catFilter === 'all' ? '#AF52DE' : 'var(--text-secondary)',
+              border: `1px solid ${catFilter === 'all' ? 'rgba(175,82,222,0.35)' : 'var(--border)'}`,
+            }}>
+            Tous
+          </button>
+          {allCats.map(cat => (
+            <button key={cat}
+              onClick={() => setCatFilter(catFilter === cat ? 'all' : cat)}
+              className="flex-shrink-0 rounded-xl py-1 px-2.5 text-[11px] font-semibold transition-all"
+              style={{
+                background: catFilter === cat ? 'rgba(175,82,222,0.18)' : 'var(--bg-card)',
+                color: catFilter === cat ? '#AF52DE' : 'var(--text-secondary)',
+                border: `1px solid ${catFilter === cat ? 'rgba(175,82,222,0.35)' : 'var(--border)'}`,
+                whiteSpace: 'nowrap',
+              }}>
+              {CATEGORY_ICONS[cat]} {CATEGORY_LABELS[cat]}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Filtre Aujourd'hui + Lieu */}
       <div className="flex items-center gap-2">
         <button
@@ -2110,7 +2178,64 @@ function EventsPanel({ onSelect }: { onSelect: (slug: string) => void }) {
         <p className="text-sm text-center py-8" style={{ color: 'var(--text-tertiary)' }}>
           {t.eventsSection.noEvents}
         </p>
+      ) : viewMode === 'agenda' ? (
+        // ── Vue Agenda — groupée par date ────────────────────────────────
+        <div className="space-y-5">
+          {allDates.map(date => {
+            const isToday = date === today
+            const isPast  = date < today
+            return (
+              <div key={date}>
+                <div className="flex items-center gap-2 mb-2">
+                  {isToday && (
+                    <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 animate-pulse" style={{ background: '#AF52DE' }} />
+                  )}
+                  <p className="text-[11px] font-bold uppercase tracking-wider flex-1"
+                    style={{ color: isToday ? '#AF52DE' : isPast ? 'var(--text-tertiary)' : 'var(--text-secondary)' }}>
+                    {fmtDateHeader(date)}
+                  </p>
+                  <span className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>
+                    {byDate[date].length} évt{byDate[date].length > 1 ? 's' : ''}
+                  </span>
+                </div>
+                <div className="space-y-1.5">
+                  {byDate[date].map(ev => {
+                    const occ = ev.occurrences.find(o => o.date === date)
+                    return (
+                      <button key={ev.slug} onClick={() => onSelect(ev.slug)}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left active:scale-[0.98] transition-transform"
+                        style={{
+                          background: isToday ? 'rgba(175,82,222,0.07)' : 'var(--bg-card)',
+                          border: isToday ? '1px solid rgba(175,82,222,0.18)' : '1px solid var(--border)',
+                        }}>
+                        <span className="text-base flex-shrink-0">{CATEGORY_ICONS[ev.category] ?? '🎟️'}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] font-medium truncate" style={{ color: 'var(--text-primary)' }}>{ev.title}</p>
+                          <p className="text-[11px] truncate" style={{ color: 'var(--text-secondary)' }}>
+                            {occ?.start ? `${occ.start}${occ.end ? `–${occ.end}` : ''} · ` : ''}{ev.venue.name}
+                            {occ?.note ? ` · ${occ.note}` : ''}
+                          </p>
+                        </div>
+                        <span className="text-[10px] font-semibold flex-shrink-0 px-1.5 py-0.5 rounded-lg"
+                          style={{
+                            background: !ev.priceInfo ? 'rgba(255,255,255,0.04)' : isFree(ev) ? 'rgba(52,199,89,0.12)' : 'rgba(255,255,255,0.06)',
+                            color:      !ev.priceInfo ? 'var(--text-tertiary)'   : isFree(ev) ? '#30D158'               : 'var(--text-tertiary)',
+                          }}>
+                          {!ev.priceInfo ? t.eventsSection.priceUnknown : isFree(ev) ? 'Gratuit' : ev.priceInfo}
+                        </span>
+                        <svg width="6" height="10" viewBox="0 0 6 10" fill="none" stroke="var(--text-tertiary)" strokeWidth="1.5" strokeLinecap="round">
+                          <path d="M1 1l4 4-4 4"/>
+                        </svg>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })}
+        </div>
       ) : (
+        // ── Vue Catégories (existante, enrichie) ─────────────────────────
         orderedKeys.map(cat => (
           <div key={cat}>
             <p className="text-[11px] font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-tertiary)' }}>
