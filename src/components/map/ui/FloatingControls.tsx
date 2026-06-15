@@ -199,7 +199,7 @@ export function FloatingControls({ map }: FloatingControlsProps) {
           {/* Modal */}
           <div className="fixed z-50 rounded-3xl overflow-hidden"
             style={{
-              right: 16, bottom: 'calc(56px + 24px + 54px)',
+              right: 16, bottom: 'calc(env(safe-area-inset-bottom, 0px) + 56px + 24px + 54px)',
               width: 'min(320px, calc(100vw - 32px))',
               background: 'rgba(18,18,20,0.96)',
               backdropFilter: 'blur(48px) saturate(200%)',
@@ -295,7 +295,7 @@ export function FloatingControls({ map }: FloatingControlsProps) {
       </div>
 
       {/* Bouton Signaler — au-dessus du GPS */}
-      <div className="fixed z-20" style={{ right: 16, bottom: 'calc(56px + 24px + 52px)' }}>
+      <div className="fixed z-20" style={{ right: 16, bottom: 'calc(env(safe-area-inset-bottom, 0px) + 56px + 24px + 52px)' }}>
         <button
           onClick={() => setShowReportModal(prev => !prev)}
           style={{
@@ -311,7 +311,7 @@ export function FloatingControls({ map }: FloatingControlsProps) {
         </button>
       </div>
 
-      <div className="fixed z-20" style={{ right: 16, bottom: 'calc(56px + 24px)' }}>
+      <div className="fixed z-20" style={{ right: 16, bottom: 'calc(env(safe-area-inset-bottom, 0px) + 56px + 24px)' }}>
       <button
         onClick={handleGPS}
         data-onboarding="gps-btn"

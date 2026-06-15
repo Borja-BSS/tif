@@ -154,7 +154,8 @@ export function SearchBar({ map }: SearchBarProps) {
 
   if (!isOpen) {
     return (
-      <div className="fixed top-0 left-0 right-0 z-30 flex items-center gap-2 mx-4 mt-3">
+      <div className="fixed top-0 left-0 right-0 z-30 flex items-center gap-2 mx-4"
+        style={{ marginTop: 'calc(12px + env(safe-area-inset-top, 0px))' }}>
         <button
           onClick={() => setIsOpen(true)}
           className="flex-1 flex items-center gap-3 px-4 cursor-text"
@@ -183,7 +184,7 @@ export function SearchBar({ map }: SearchBarProps) {
     )
   }
 
-  const RESULTS_TOP = 'calc(52px + 12px + 8px + 40px + 8px)'
+  const RESULTS_TOP = 'calc(env(safe-area-inset-top, 0px) + 52px + 12px + 8px + 40px + 8px)'
 
   return (
     <>
@@ -195,8 +196,8 @@ export function SearchBar({ map }: SearchBarProps) {
 
       {/* Champ de saisie */}
       <div
-        className="fixed top-0 left-0 right-0 z-30 mx-4 mt-3 overflow-hidden"
-        style={{ ...LG, borderRadius: 16 }}
+        className="fixed top-0 left-0 right-0 z-30 mx-4 overflow-hidden"
+        style={{ ...LG, borderRadius: 16, marginTop: 'calc(12px + env(safe-area-inset-top, 0px))' }}
       >
         <div className="flex items-center gap-3 px-4 py-3">
           <button

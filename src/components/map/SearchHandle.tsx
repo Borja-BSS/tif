@@ -28,7 +28,7 @@ const SPRING_HEIGHT = 'height 0.42s cubic-bezier(0.34, 1.56, 0.64, 1)'
 const SHEET_H: Record<SheetSize, string> = {
   peek: '120px',
   half: '50vh',
-  full: '88vh',
+  full: 'calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 120px)',
 }
 
 // ── NavModal types & helpers ──────────────────────────────────────────────────
@@ -332,8 +332,8 @@ export default function SearchHandle({ map }: SearchHandleProps) {
   if (state === 'search') {
     return (
       <div
-        className="fixed bottom-0 left-0 right-0 z-30 rounded-t-3xl overflow-hidden flex flex-col"
-        style={{ ...LG, height: '55vh', transition: SPRING_HEIGHT }}
+        className="fixed left-0 right-0 z-30 rounded-t-3xl overflow-hidden flex flex-col"
+        style={{ ...LG, height: '55vh', transition: SPRING_HEIGHT, bottom: 'env(safe-area-inset-bottom, 0px)' }}
       >
         {/* Drag handle */}
         <div className="flex justify-center pt-2.5 pb-1 flex-shrink-0">
@@ -399,7 +399,6 @@ export default function SearchHandle({ map }: SearchHandleProps) {
 
         <div className="h-px flex-shrink-0" style={{ background: 'rgba(255,255,255,0.07)' }} />
         <div className="flex-1 overflow-hidden" />
-        <div className="h-[env(safe-area-inset-bottom,0px)] flex-shrink-0" />
       </div>
     )
   }
@@ -416,8 +415,8 @@ export default function SearchHandle({ map }: SearchHandleProps) {
       destination={destination}
     />
     <div
-      className="fixed bottom-0 left-0 right-0 z-30 rounded-t-3xl overflow-hidden flex flex-col"
-      style={{ ...LG, height: SHEET_H[sheetSize], transition: SPRING_HEIGHT }}
+      className="fixed left-0 right-0 z-30 rounded-t-3xl overflow-hidden flex flex-col"
+      style={{ ...LG, height: SHEET_H[sheetSize], transition: SPRING_HEIGHT, bottom: 'env(safe-area-inset-bottom, 0px)' }}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
@@ -737,7 +736,6 @@ export default function SearchHandle({ map }: SearchHandleProps) {
         </div>
       )}
 
-      <div className="h-[env(safe-area-inset-bottom,0px)] flex-shrink-0" />
     </div>
     {navPending && (
       <NavModal

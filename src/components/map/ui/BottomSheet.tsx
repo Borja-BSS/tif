@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useCallback, useEffect, useLayoutEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { PARKINGS_PR, TOTAL_PR_CAPACITY } from '@/lib/parking/pr-data'
 import { TPG_LINES } from '@/lib/transport/tpg-line-stops'
@@ -30,7 +30,14 @@ type AlertDetailItem = {
 }
 
 const COMPACT_H = 56
-const getFullH  = () => (typeof window !== 'undefined' ? window.innerHeight - 120 : 600)
+// Safe area insets — populated on mount, used by getFullH to ensure the sheet
+// doesn't overlap the top UI (SearchBar + QuickFilters) on notched iPhones.
+let _sat = 0  // safe-area-inset-top
+let _sab = 0  // safe-area-inset-bottom
+const getFullH  = () => {
+  if (typeof window === 'undefined') return 600
+  return window.innerHeight - _sat - _sab - 120
+}
 // Spring iOS-like pour les snaps automatiques
 const SPRING    = 'height 0.42s cubic-bezier(0.34, 1.56, 0.64, 1)'
 // Transition douce pour les repositionnements libres
@@ -2392,6 +2399,19 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
   const headerRef    = useRef<HTMLDivElement>(null)
   const contentRef   = useRef<HTMLDivElement>(null)
 
+  // ── Safe area insets (viewport-fit=cover) ─────────────────────────────────
+  useLayoutEffect(() => {
+    const el = document.createElement('div')
+    el.style.cssText = 'position:fixed;pointer-events:none;visibility:hidden;top:-9999px'
+    el.style.paddingTop    = 'env(safe-area-inset-top,0px)'
+    el.style.paddingBottom = 'env(safe-area-inset-bottom,0px)'
+    document.body.appendChild(el)
+    const cs = getComputedStyle(el)
+    _sat = parseFloat(cs.paddingTop)    || 0
+    _sab = parseFloat(cs.paddingBottom) || 0
+    document.body.removeChild(el)
+  }, [])
+
   const { data } = useQuery<DashboardData>({
     queryKey:        ['dashboard'],
     queryFn:         () => fetch('/api/v1/dashboard').then(r => r.json()),
@@ -2690,9 +2710,10 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
     )}
     <div
       ref={containerRef}
-      className="fixed bottom-0 left-0 right-0 z-30 flex flex-col overflow-hidden"
+      className="fixed left-0 right-0 z-30 flex flex-col overflow-hidden"
       style={{
         ...LG,
+        bottom:             'env(safe-area-inset-bottom, 0px)',
         '--text-primary':   'rgba(255,255,255,0.92)',
         '--text-secondary': 'rgba(255,255,255,0.60)',
         '--text-tertiary':  'rgba(255,255,255,0.40)',
@@ -2788,7 +2809,6 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
         </div>
       </div>
 
-      <div className="flex-shrink-0" style={{ height: 'env(safe-area-inset-bottom, 0px)' }} />
     </div>
     </>
   )

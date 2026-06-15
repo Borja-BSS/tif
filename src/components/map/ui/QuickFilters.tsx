@@ -41,7 +41,7 @@ export function QuickFilters({ active, onChange, showJourney = false }: QuickFil
   return (
     <div
       className="fixed left-0 right-0 z-40 flex gap-2 px-4 overflow-x-auto"
-      style={{ top: 'calc(52px + 12px + 8px)', height: 40, scrollbarWidth: 'none', msOverflowStyle: 'none' } as React.CSSProperties}
+      style={{ top: 'calc(env(safe-area-inset-top, 0px) + 52px + 12px + 8px)', height: 40, scrollbarWidth: 'none', msOverflowStyle: 'none' } as React.CSSProperties}
     >
       {visible.map(f => {
         const isActive = active === f.id
