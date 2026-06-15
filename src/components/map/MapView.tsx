@@ -87,7 +87,6 @@ export default function MapView({ filters: externalFilters, activeFilter = 'all'
 
       <BorderCrossingsLayer map={map} activeFilter={activeFilter} />
       <RoadClosuresLayer    map={map} />
-      <G7ClosuresLayer      map={map} />
       <ConstructionLayer    map={map} />
 
       {map && (
