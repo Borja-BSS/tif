@@ -357,10 +357,9 @@ function featureImgProps(f: { properties: unknown }) {
 }
 
 async function applyData(m: mapboxgl.Map, geojson: FeatureCollection) {
-  const borderFeatures = geojson.features.filter(f => {
-    const p = f.properties as Record<string, unknown>
-    return p?.type === 'border' && p?.status !== 'BLOCKED'
-  })
+  const borderFeatures = geojson.features.filter(
+    f => (f.properties as Record<string, unknown>)?.type === 'border',
+  )
 
   // 1. Préparer les features — pas besoin d'attendre les images pour afficher les cercles
   const data: FeatureCollection = {
