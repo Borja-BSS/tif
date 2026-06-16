@@ -17,7 +17,9 @@ async function load(): Promise<Signalement[]> {
 }
 
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get('x-forwarded-for') ?? 'anon'
+  const ip = req.headers.get('x-real-ip')
+    ?? req.headers.get('x-forwarded-for')?.split(',').at(-1)?.trim()
+    ?? 'anon'
   const body = await req.json() as { id?: string; vote?: string; lat?: number; lng?: number }
   const { id, vote, lat, lng } = body
 
