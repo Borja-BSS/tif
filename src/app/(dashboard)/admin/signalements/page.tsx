@@ -38,16 +38,25 @@ function timeAgo(iso: string): string {
 function fmt(iso: string) {
   return new Date(iso).toLocaleString('fr-CH', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
+function timeRemaining(iso: string | undefined): string {
+  if (!iso) return '—'
+  const diff = new Date(iso).getTime() - Date.now()
+  if (diff <= 0) return 'Expiré'
+  const h = Math.floor(diff / 3600000)
+  const m = Math.floor((diff % 3600000) / 60000)
+  return h > 0 ? `${h}h ${m}min` : `${m}min`
+}
 
 // ── Detail panel ──────────────────────────────────────────────────────────────
 function DetailPanel({
-  s, onClose, onAct, onDel, acting,
+  s, onClose, onAct, onDel, onExtend, acting,
 }: {
   s: Signalement
-  onClose: () => void
-  onAct:   (id: string, status: 'approved' | 'rejected' | 'disabled') => Promise<void>
-  onDel:   (id: string) => Promise<void>
-  acting:  string | null
+  onClose:  () => void
+  onAct:    (id: string, status: 'approved' | 'rejected' | 'disabled') => Promise<void>
+  onDel:    (id: string) => Promise<void>
+  onExtend: (id: string) => Promise<void>
+  acting:   string | null
 }) {
   const catObj   = SIGNAL_CATEGORIES.find(c => c.id === s.category)
   const priObj   = PRIORITY_LEVELS.find(p => p.id === s.priority)
@@ -216,6 +225,14 @@ function DetailPanel({
                 <span style={{ fontSize: 12, color: 'rgba(52,199,89,0.8)' }}>{fmt(s.approvedAt)}</span>
               </div>
             )}
+            {s.expiresAt && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: 11, color: new Date(s.expiresAt).getTime() - Date.now() < 600000 ? '#FF9500' : 'rgba(255,255,255,0.35)' }}>
+                  ⏱ Expire dans
+                </span>
+                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)' }}>{timeRemaining(s.expiresAt)}</span>
+              </div>
+            )}
             {s.rejectedAt && (
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ fontSize: 11, color: 'rgba(255,59,48,0.6)' }}>Rejeté</span>
@@ -293,6 +310,16 @@ function DetailPanel({
                   background: isActing ? 'rgba(52,199,89,0.08)' : 'rgba(52,199,89,0.12)',
                   color: '#30D158', fontSize: 14, fontWeight: 700 }}>
                 ▶ Réactiver sur la carte
+              </button>
+            )}
+
+            {/* Prolonger +1h — approuvé avec expiresAt */}
+            {s.status === 'approved' && s.expiresAt && (
+              <button onClick={async () => { await onExtend(s.id) }}
+                disabled={acting === s.id}
+                style={{ width: '100%', padding: '13px 0', borderRadius: 14, border: 'none', cursor: 'pointer',
+                  background: 'rgba(10,132,255,0.10)', color: '#0A84FF', fontSize: 14, fontWeight: 600 }}>
+                ⏱ Prolonger +1h
               </button>
             )}
 
@@ -388,6 +415,16 @@ export default function SignalementsAdmin() {
       body:    JSON.stringify({ id }),
     })
     setActing(null)
+    load()
+  }
+
+  const extend = async (id: string) => {
+    const token = await firebaseAuth.currentUser?.getIdToken()
+    await fetch('/api/v1/signalements', {
+      method:  'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body:    JSON.stringify({ id, extendHours: 1 }),
+    })
     load()
   }
 
@@ -502,6 +539,11 @@ export default function SignalementsAdmin() {
                     <span className="text-[11px]" style={{ color: 'rgba(255,255,255,0.40)' }}>📍 {s.address}</span>
                   ) : null}
                   <span className="text-[11px]" style={{ color: 'rgba(255,255,255,0.30)' }}>{timeAgo(s.createdAt)}</span>
+                  {s.expiresAt && (
+                    <span className="text-[10px]" style={{ color: new Date(s.expiresAt).getTime() - Date.now() < 600000 ? '#FF9500' : 'rgba(255,255,255,0.25)' }}>
+                      ⏱ {timeRemaining(s.expiresAt)}
+                    </span>
+                  )}
                   {s.mediaUrls && s.mediaUrls.length > 0 && (
                     <span className="text-[11px] font-semibold" style={{ color: '#0A84FF' }}>
                       📎 {s.mediaUrls.length} média{s.mediaUrls.length > 1 ? 's' : ''}
@@ -527,6 +569,7 @@ export default function SignalementsAdmin() {
           onClose={() => setSelected(null)}
           onAct={act}
           onDel={del}
+          onExtend={extend}
           acting={acting}
         />
       )}
