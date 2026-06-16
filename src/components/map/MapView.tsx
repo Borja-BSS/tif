@@ -28,6 +28,8 @@ const CustomAlertsLayer    = dynamic(() => import('./CustomAlertsLayer'),    { s
 const ImpactZonesLayer     = dynamic(() => import('./ImpactZonesLayer'),     { ssr: false })
 const SignalementsLayer    = dynamic(() => import('./SignalementsLayer'),    { ssr: false })
 
+import VoteToast from '@/components/map/ui/VoteToast'
+
 const DEFAULT_FILTERS: FilterState = {
   heatmap:   true,
   alerts:    true,
@@ -96,6 +98,7 @@ export default function MapView({ filters: externalFilters, activeFilter = 'all'
           <AlertLayer         map={map} visible={filters.alerts} />
           <CustomAlertsLayer  map={filters.alerts ? map : null} />
           <SignalementsLayer  map={map} />
+          <VoteToast />
           <HereIncidentsLayer map={filters.alerts && !filters.transport ? map : null} />
           <ParkingLayer       map={filters.parking ? map : null} />
           <EventsLayer        map={activeFilter === 'events' ? map : null} />
