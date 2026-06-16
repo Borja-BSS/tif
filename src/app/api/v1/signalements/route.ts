@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { randomUUID } from 'crypto'
 import { redis, ratelimit } from '@/lib/redis'
 import { getFirebaseUserFromRequest } from '@/lib/auth-firebase'
-import { REDIS_KEY_SIGNALEMENTS } from '@/data/signalement-categories'
+import { REDIS_KEY_SIGNALEMENTS, TTL_SECONDS, computeExpiresAt, computeCredibility } from '@/data/signalement-categories'
 import type { Signalement } from '@/data/signalement-categories'
 import { sendSignalementNotification } from '@/lib/email'
 
@@ -42,23 +42,30 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Adresse ou coordonnées GPS requises' }, { status: 400 })
   }
 
+  const ttlSec = TTL_SECONDS[body.priority] ?? TTL_SECONDS.info
   const item: Signalement = {
-    id:          randomUUID(),
-    category:    body.category,
-    subcategory: body.subcategory,
-    priority:    body.priority,
-    description: body.description.trim(),
-    address:     body.address?.trim() || undefined,
-    lat:         body.lat != null ? Number(body.lat) : undefined,
-    lng:         body.lng != null ? Number(body.lng) : undefined,
-    mediaUrls:   Array.isArray(body.mediaUrls) ? body.mediaUrls : undefined,
-    createdAt:   new Date().toISOString(),
-    status:      'pending',
+    id:           randomUUID(),
+    category:     body.category,
+    subcategory:  body.subcategory,
+    priority:     body.priority,
+    description:  body.description.trim(),
+    address:      body.address?.trim() || undefined,
+    lat:          body.lat != null ? Number(body.lat) : undefined,
+    lng:          body.lng != null ? Number(body.lng) : undefined,
+    mediaUrls:    Array.isArray(body.mediaUrls) ? body.mediaUrls : undefined,
+    createdAt:    new Date().toISOString(),
+    status:       'approved',
+    approvedAt:   new Date().toISOString(),
+    expiresAt:    computeExpiresAt(body.priority),
+    confirmCount: 0,
+    denyCount:    0,
+    credibility:  'neutral',
   }
 
   const all = await load()
   all.unshift(item)
   await save(all)
+  await redis.set(`tif:sig:ttl:${item.id}`, '1', { ex: ttlSec })
 
   // Notification email — fire-and-forget, ne bloque pas la réponse
   sendSignalementNotification({
@@ -87,8 +94,14 @@ export async function GET(req: NextRequest) {
 // PATCH admin — approve / reject / disable, ou mise à jour lat/lng
 export async function PATCH(req: NextRequest) {
   if (!await isAdmin(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const body = await req.json() as { id: string; status?: 'approved' | 'rejected' | 'disabled'; lat?: number; lng?: number }
-  const { id, status, lat, lng } = body
+  const body = await req.json()
+  const { id, status, lat, lng, extendHours } = body as {
+    id: string
+    status?: 'approved' | 'rejected' | 'disabled'
+    lat?: number
+    lng?: number
+    extendHours?: number
+  }
   if (!id) return NextResponse.json({ error: 'id requis' }, { status: 400 })
   if (status && !['approved','rejected','disabled'].includes(status)) {
     return NextResponse.json({ error: 'status invalide' }, { status: 400 })
@@ -107,6 +120,13 @@ export async function PATCH(req: NextRequest) {
     } : {}),
     ...(lat != null ? { lat: Number(lat) } : {}),
     ...(lng != null ? { lng: Number(lng) } : {}),
+  }
+  if (extendHours) {
+    const current = all[idx].expiresAt ? new Date(all[idx].expiresAt).getTime() : Date.now()
+    const newExpiry = new Date(current + extendHours * 3600 * 1000).toISOString()
+    all[idx] = { ...all[idx], expiresAt: newExpiry }
+    const remainSec = Math.max(0, Math.floor((new Date(newExpiry).getTime() - Date.now()) / 1000))
+    if (remainSec > 0) await redis.expire(`tif:sig:ttl:${id}`, remainSec)
   }
   await save(all)
   return NextResponse.json({ signalement: all[idx] })
