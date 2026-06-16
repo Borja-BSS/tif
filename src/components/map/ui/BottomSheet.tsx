@@ -468,6 +468,14 @@ function fmtPeriod(from: Date, to: Date) {
   }
   return `${fmtTime(from)}–${fmtTime(to)}`
 }
+function timeRemaining(iso: string): string {
+  const diff = new Date(iso).getTime() - Date.now()
+  if (diff <= 0) return 'Expiré'
+  const h = Math.floor(diff / 3600000)
+  const m = Math.floor((diff % 3600000) / 60000)
+  if (h > 0) return `${h}h${m > 0 ? ' ' + m + 'min' : ''}`
+  return `${m}min`
+}
 
 // ── Transport ─────────────────────────────────────────────────────────────────
 interface TpgDisruptionItem { lineNumber: string; type: string; description: string; detectedAt?: string }
@@ -2373,6 +2381,84 @@ function ImpactZoneDetail({ zone, map, onClose }: { zone: ImpactZone; map: mapbo
         <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.38)' }}>
           Source : {zone.source} · {zone.sourceRef}
         </p>
+      </div>
+    </div>
+  )
+}
+
+// ── Fiche détail signalement ──────────────────────────────────────────────────
+interface SignalDetailItem {
+  createdAt:    string
+  approvedAt?:  string
+  expiresAt?:   string
+  credibility?: string
+  confirmCount?: number
+  denyCount?:    number
+}
+
+interface SignalDetailProps {
+  signalement: SignalDetailItem
+  onBack: () => void
+}
+
+function SignalDetailView({ signalement: s, onBack: _onBack }: SignalDetailProps) {
+  const fmtDate = (iso: string) =>
+    new Date(iso).toLocaleString('fr-CH', {
+      day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
+      timeZone: 'Europe/Zurich',
+    })
+
+  return (
+    <div className="space-y-3">
+      {/* Dates */}
+      <div className="rounded-2xl p-4 space-y-2"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            Signalé le
+          </span>
+          <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)' }}>
+            {fmtDate(s.createdAt)}
+          </span>
+        </div>
+        {s.approvedAt && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Publié le
+            </span>
+            <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)' }}>
+              {fmtDate(s.approvedAt)}
+            </span>
+          </div>
+        )}
+
+        {/* Expiry + crédibilité */}
+        {s.expiresAt && (
+          <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 12, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                ⏱ Expire dans
+              </span>
+              <span style={{ fontSize: 12, color: new Date(s.expiresAt).getTime() - Date.now() < 600000 ? '#FF9500' : 'rgba(255,255,255,0.65)' }}>
+                {timeRemaining(s.expiresAt)}
+              </span>
+            </div>
+            {(() => {
+              const cred = s.credibility ?? 'neutral'
+              const credMap = {
+                confirmed: { label: `✅ Confirmé par ${s.confirmCount ?? 0} utilisateur${(s.confirmCount ?? 0) > 1 ? 's' : ''}`, color: '#30D158' },
+                contested:  { label: `⚠️ Contesté (${s.confirmCount ?? 0} confirm, ${s.denyCount ?? 0} faux)`, color: '#FF9500' },
+                false:      { label: `❌ Signalé faux par la communauté`, color: '#FF453A' },
+                neutral:    null,
+              }
+              const meta = credMap[cred as keyof typeof credMap]
+              if (!meta) return null
+              return (
+                <span style={{ fontSize: 12, color: meta.color, fontWeight: 600 }}>{meta.label}</span>
+              )
+            })()}
+          </div>
+        )}
       </div>
     </div>
   )
