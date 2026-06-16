@@ -57,6 +57,8 @@ export const PRIORITY_LEVELS: PriorityLevel[] = [
   { id: 'critique',     label: 'Critique',     color: '#FF2D55', icon: '🆘' },
 ]
 
+export type Credibility = 'neutral' | 'confirmed' | 'contested' | 'false'
+
 export interface Signalement {
   id:          string
   category:    string
@@ -72,6 +74,33 @@ export interface Signalement {
   approvedAt?: string
   rejectedAt?: string
   disabledAt?: string
+  expiresAt:    string
+  confirmCount: number
+  denyCount:    number
+  credibility:  Credibility
 }
 
 export const REDIS_KEY_SIGNALEMENTS = 'tif:signalements'
+
+// TTL en secondes par niveau de priorité
+export const TTL_SECONDS: Record<string, number> = {
+  info:         3 * 60 * 60,   // 3h
+  vigilance:    2 * 60 * 60,   // 2h
+  perturbation: 90 * 60,       // 1h30
+  important:    60 * 60,       // 1h
+  urgent:       30 * 60,       // 30min
+  critique:     20 * 60,       // 20min
+}
+
+export function computeExpiresAt(priority: string): string {
+  const ttl = TTL_SECONDS[priority] ?? TTL_SECONDS.info
+  return new Date(Date.now() + ttl * 1000).toISOString()
+}
+
+export function computeCredibility(confirmCount: number, denyCount: number): Credibility {
+  const total = confirmCount + denyCount
+  if (total < 2) return 'neutral'
+  if (confirmCount / total >= 0.7) return 'confirmed'
+  if (denyCount / total >= 0.7) return 'false'
+  return 'contested'
+}
