@@ -5,15 +5,19 @@ import mapboxgl from 'mapbox-gl'
 import { SIGNAL_CATEGORIES } from '@/data/signalement-categories'
 
 interface PublicSignalement {
-  id:          string
-  category:    string
-  subcategory: string
-  priority:    string
-  description: string
-  lat:         number
-  lng:         number
-  address?:    string
-  createdAt:   string
+  id:           string
+  category:     string
+  subcategory:  string
+  priority:     string
+  description:  string
+  lat:          number
+  lng:          number
+  address?:     string
+  createdAt:    string
+  expiresAt:    string | null
+  confirmCount: number
+  denyCount:    number
+  credibility:  'neutral' | 'confirmed' | 'contested' | 'false'
 }
 
 const PRIORITY_COLOR: Record<string, string> = {
@@ -25,13 +29,24 @@ const PRIORITY_COLOR: Record<string, string> = {
   critique:     '#FF2D55',
 }
 
+const CREDIBILITY_COLOR: Record<string, string> = {
+  confirmed: '#30D158',
+  contested: '#FF9500',
+  false:     '#FF453A',
+}
+
+function markerColor(s: PublicSignalement): string {
+  if (s.credibility !== 'neutral') return CREDIBILITY_COLOR[s.credibility] ?? PRIORITY_COLOR[s.priority]
+  return PRIORITY_COLOR[s.priority] ?? '#8E8E93'
+}
+
 function esc(s: string) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')
 }
 
 function buildPopupHTML(s: PublicSignalement): string {
   const cat   = SIGNAL_CATEGORIES.find(c => c.id === s.category)
-  const color = PRIORITY_COLOR[s.priority] ?? '#8E8E93'
+  const color = markerColor(s)
   const diff  = (Date.now() - new Date(s.createdAt).getTime()) / 1000
   const ago   = diff < 60 ? `il y a ${Math.round(diff)}s`
               : diff < 3600 ? `il y a ${Math.round(diff / 60)}min`
@@ -42,6 +57,23 @@ function buildPopupHTML(s: PublicSignalement): string {
     info: 'Info', vigilance: 'Vigilance', perturbation: 'Perturbation',
     important: 'Important', urgent: 'Urgent', critique: 'Critique',
   }
+
+  const credBadge = (() => {
+    if (!s.expiresAt) return ''
+    const remain = new Date(s.expiresAt).getTime() - Date.now()
+    const h = Math.floor(remain / 3600000)
+    const m = Math.floor((remain % 3600000) / 60000)
+    const ttlStr = h > 0 ? `${h}h${m > 0 ? m + 'min' : ''}` : `${m}min`
+    const cred = s.credibility
+    const cLabel = cred === 'confirmed' ? `✅ Confirmé (${s.confirmCount})`
+                 : cred === 'contested'  ? `⚠️ Contesté`
+                 : cred === 'false'      ? `❌ Signalé faux`
+                 : ''
+    return `<div style="display:flex;align-items:center;gap:6px;margin-top:6px;flex-wrap:wrap">
+      ${cLabel ? `<span style="font-size:10px;color:${esc(color)}">${esc(cLabel)}</span>` : ''}
+      <span style="font-size:10px;color:rgba(255,255,255,0.25)">⏱ ${esc(ttlStr)}</span>
+    </div>`
+  })()
 
   return `
     <div style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;padding:12px 14px">
@@ -60,6 +92,7 @@ function buildPopupHTML(s: PublicSignalement): string {
           text-transform:uppercase;letter-spacing:0.05em">${esc(priLabels[s.priority] ?? s.priority)}</span>
         <span style="font-size:10px;color:rgba(255,255,255,0.25)">${esc(ago)}</span>
       </div>
+      ${credBadge}
       <div style="font-size:10px;color:rgba(255,255,255,0.2);margin-top:8px">Signalement utilisateur · TIF</div>
     </div>
   `
@@ -110,7 +143,7 @@ export default function SignalementsLayer({ map }: { map: mapboxgl.Map | null })
         markersRef.current = []
 
         for (const s of data.signalements) {
-          const color  = PRIORITY_COLOR[s.priority] ?? '#8E8E93'
+          const color  = markerColor(s)
           const cat    = SIGNAL_CATEGORIES.find(c => c.id === s.category)
           const el   = document.createElement('div')
           const icon = document.createElement('span')
