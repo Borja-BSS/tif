@@ -76,7 +76,10 @@ export function useHereMobilityLayer(map: mapboxgl.Map | null, visible: boolean)
         map.addSource(SOURCE_ID, { type: 'vector', url: 'mapbox://mapbox.mapbox-traffic-v1' })
       }
 
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      const storedTheme = typeof localStorage !== 'undefined' ? localStorage.getItem('tif-theme') : null
+      const prefersDark = storedTheme
+        ? storedTheme === 'dark'
+        : window.matchMedia('(prefers-color-scheme: dark)').matches
       const levels = prefersDark ? LEVELS : LEVELS_LIGHT
 
       // Ajouter les layers du MOINS grave au PLUS grave.

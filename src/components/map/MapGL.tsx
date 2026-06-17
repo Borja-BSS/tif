@@ -36,8 +36,11 @@ export default function MapGL({
 
     mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!
 
-    // Lire la classe HTML (ThemeProvider + layout.tsx inline script = source unique de vérité)
-    const prefersDark = document.documentElement.classList.contains('dark')
+    // Même logique que layout.tsx : localStorage en priorité, sinon prefers-color-scheme
+    const storedTheme = typeof localStorage !== 'undefined' ? localStorage.getItem('tif-theme') : null
+    const prefersDark = storedTheme
+      ? storedTheme === 'dark'
+      : window.matchMedia('(prefers-color-scheme: dark)').matches
     const resolvedStyle = mapStyle ?? (prefersDark
       ? 'mapbox://styles/mapbox/dark-v11'
       : 'mapbox://styles/mapbox/light-v11')

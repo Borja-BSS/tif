@@ -44,16 +44,16 @@
   --brand-subtle:    rgba(10, 132, 255, 0.08);
   --brand-glow:      rgba(10, 132, 255, 0.20);
 
-  --green:           #16A34A;
-  --orange:          #EA580C;
-  --red:             #E05555;
-  --red-glow:        rgba(224,85,85,0.28);
-  --yellow:          #CA8A04;
+  --green:           #15803D;
+  --orange:          #C2410C;
+  --red:             #C53030;
+  --red-glow:        rgba(197,48,48,0.30);
+  --yellow:          #B45309;
 
-  --traffic-clear:    #16A34A;
-  --traffic-light:    #CA8A04;
-  --traffic-moderate: #EA580C;
-  --traffic-heavy:    #E05555;
+  --traffic-clear:    #15803D;
+  --traffic-light:    #B45309;
+  --traffic-moderate: #C2410C;
+  --traffic-heavy:    #C53030;
 
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
   --shadow-md: 0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
@@ -115,13 +115,13 @@
     --brand-subtle:    rgba(10,132,255,0.12);
     --brand-glow:      rgba(10,132,255,0.25);
 
-    --green:           #30D158;
+    --green:           #32D74B;
     --orange:          #FF9F0A;
     --red:             #FF453A;
     --red-glow:        rgba(255,59,48,0.35);
     --yellow:          #FFD60A;
 
-    --traffic-clear:    #30D158;
+    --traffic-clear:    #32D74B;
     --traffic-light:    #FFD60A;
     --traffic-moderate: #FF9F0A;
     --traffic-heavy:    #FF453A;
