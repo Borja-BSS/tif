@@ -827,6 +827,31 @@ export function HomeContent() {
         </div>
       </section>
 
+      {/* PRESSE */}
+      <section className="s" id="presse" style={{ paddingTop: '72px', paddingBottom: '72px' }}>
+        <div className="s-label reveal">Médias</div>
+        <h2 className="s-h reveal" style={{ marginBottom: '8px' }}>Ils parlent de TIF</h2>
+        <p className="s-sub reveal" style={{ marginBottom: '48px' }}>Couverture presse & médias</p>
+        <div className="reveal" style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'center', maxWidth: '900px', margin: '0 auto' }}>
+          {[
+            { name: 'Léman Bleu', type: '📺 Télévision', url: 'https://www.lemanbleu.ch/fr/Accueil/G7/Un-Genevois-centralise-les-perturbations-sur-une-seule-plateforme.html' },
+            { name: 'Radio Lac', type: '📻 Radio', url: 'https://www.radiolac.ch/podcasts/le-meilleur-des-reveils-12-06-2026-0836/' },
+            { name: 'Entreprise Romande', type: '📰 Presse', url: 'https://www.entrepriseromande.ch/web/er/w/g7-un-site-signalera-les-perturbations-en-temps-réel' },
+            { name: 'Blick', type: '📰 Presse', url: 'https://www.blick.ch/fr/suisse/romande/g7-un-site-gratuit-pour-aider-les-genevois-a-circuler-id22023083.html' },
+          ].map(m => (
+            <a key={m.name} href={m.url} target="_blank" rel="noreferrer"
+              style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
+                background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px',
+                padding: '20px 28px', minWidth: '180px', flex: '1 1 180px', maxWidth: '220px',
+                transition: 'border-color 0.2s, box-shadow 0.2s' }}>
+              <span style={{ fontSize: '13px', color: 'var(--text-tertiary)', fontWeight: 500 }}>{m.type}</span>
+              <span style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', textAlign: 'center' }}>{m.name}</span>
+              <span style={{ fontSize: '11px', color: 'var(--brand)', fontWeight: 600, marginTop: '4px' }}>Lire l'article →</span>
+            </a>
+          ))}
+        </div>
+      </section>
+
       {/* CTA DARK */}
       <div className="cta-dark reveal">
         <h2>{t.ctaDark.h2a}<br />{t.ctaDark.h2b}</h2>
