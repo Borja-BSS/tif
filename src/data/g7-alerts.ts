@@ -12,14 +12,14 @@ export const g7Alerts: G7Alert[] = [
     id: 'frontiere-controles', category: 'frontiere', severity: 'warning',
     title: 'Contrôles rétablis à la frontière franco-suisse',
     detail: "Contrôles temporaires sur tous les passages. Pièce d'identité requise.",
-    activeFrom: '2026-06-10T00:00:00', activeTo: '2026-06-19T23:59:00',
+    activeFrom: '2026-06-10T00:00:00', activeTo: '2026-06-19T04:00:00',
     source: 'https://www.ge.ch/dossier/sommet-du-g7-evian-2026',
   },
   {
     id: 'frontiere-fermeture', category: 'frontiere', severity: 'critical',
     title: '28 passages fermés (sur 35) — 7 douanes seulement ouvertes',
     detail: "Fermeture physique dès le 11 juin après-midi. Ouverts 12–18 : Anières, Moillesulaz, Thônex-Vallard, Bardonnex, Perly, Meyrin, Ferney-Voltaire. Également ouverts : gares de Cornavin et d'Annemasse, aéroport de Genève. Pièce d'identité obligatoire. Interdit hors passages dédiés, même à pied ou à vélo. Des temps d'attente sont à prévoir.",
-    activeFrom: '2026-06-11T15:00:00', activeTo: '2026-06-18T23:59:00',
+    activeFrom: '2026-06-11T15:00:00', activeTo: '2026-06-19T04:00:00',
     source: 'https://www.ge.ch/document/sommet-du-g7-2026-evian-faq',
   },
   {
@@ -52,10 +52,33 @@ export const g7Alerts: G7Alert[] = [
   },
   {
     id: 'services', category: 'service', severity: 'info',
-    title: 'Services cantonaux adaptés + ligne verte police',
-    detail: "Postes de police : Pâquis et aéroport 24h/7j ; Plainpalais lun–ven 10h–17h ; autres postes fermés au public (10–19 juin). Guichets Office des poursuites fermés 12–17. Ligne verte 0800 902 456 (lun 8 – jeu 18 juin, 11h–19h). Drones ≤ 25 kg interdits sur tout le canton + lac (10 juin 06h – 19 juin 06h). Urgences : 117.",
-    activeFrom: '2026-06-10T00:00:00', activeTo: '2026-06-19T23:59:00',
+    title: 'Services cantonaux — fin des mesures G7 au 19 juin',
+    detail: "Postes de police : Pâquis et aéroport reprennent horaires normaux le 19 juin. Guichets Office des poursuites rouverts. Drones ≤ 25 kg interdits jusqu'au 19 juin 06h. Urgences : 117.",
+    activeFrom: '2026-06-10T00:00:00', activeTo: '2026-06-19T06:00:00',
     source: 'https://www.ge.ch/dossier/sommet-du-g7-evian-2026',
+  },
+
+  // ── Alertes post-G7 — retour à la normale ────────────────────────────────────
+  {
+    id: 'tpg-retour', category: 'transport', severity: 'info',
+    title: 'TPG — Retour progressif à la normale',
+    detail: "Lignes 64 et 69 reprennent depuis le 18 juin (tracés transfrontaliers complets). tpgFlex rétabli en France. Lignes 38/40/52/78/82/83/M sur tracé complet. Agence Cornavin rouvre le 19 juin, agence Rive le 22 juin. (source : tpg.ch)",
+    activeFrom: '2026-06-18T00:00:00', activeTo: '2026-06-22T23:59:00',
+    source: 'https://www.tpg.ch/fr/periode-du-g7-fortes-perturbations-anticipees-sur-le-reseau-des-transports-publics-genevois',
+  },
+  {
+    id: 'frontiere-retour', category: 'frontiere', severity: 'info',
+    title: 'Toutes les douanes genevoises rouvertes',
+    detail: "Les 28 passages temporairement fermés ont rouvert à partir du 19 juin 6h. Contrôles standard rétablis. Pièce d'identité toujours recommandée. Source : BAZG / Office fédéral des douanes.",
+    activeFrom: '2026-06-19T04:00:00', activeTo: '2026-06-21T23:59:00',
+    source: 'https://www.bazg.admin.ch/fr/fermeture-partielle-des-passages-frontieres-dans-le-canton-de-geneve',
+  },
+  {
+    id: 'fete-musique', category: 'culture', severity: 'info',
+    title: 'Fête de la Musique — Parc des Bastions rouvert',
+    detail: "Le Parc des Bastions rouvre le 19 juin pour la Fête de la Musique (19–21 juin). Concerts gratuits dans toute la ville, scènes de quartier, programme sur geneve.ch. Entrée libre.",
+    activeFrom: '2026-06-19T00:00:00', activeTo: '2026-06-21T23:59:00',
+    source: 'https://www.geneve.ch/actualites/sommet-evian-impacts-geneve',
   },
 ]
 

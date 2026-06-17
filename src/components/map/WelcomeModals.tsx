@@ -66,9 +66,9 @@ function RetourNormaleModal({
   onClose:   () => void
 }) {
   const events = [
-    { icon: '⚽', label: 'FanZone & Mondial FIFA 2026',    desc: 'Gradi24 Village · Stade de Genève' },
-    { icon: '🎪', label: 'Caribana Festival',              desc: 'Genève · Scènes & animations' },
-    { icon: '🎭', label: 'Concerts & Théâtre',             desc: 'Victoria Hall · Alhambra · Alchimic' },
+    { icon: '🎪', label: 'Caribana Festival — Niska · KeBlack', desc: 'Ce soir · Crans-près-Céligny (Vaud)' },
+    { icon: '🎭', label: 'Fête de la Musique',                  desc: '19–21 juin · Parc des Bastions · Gratuit' },
+    { icon: '⚽', label: 'Mondial FIFA 2026 — Nati Suisse',     desc: 'FanZone Gradi24 · tous les matchs' },
   ]
 
   return (
@@ -136,6 +136,15 @@ function RetourNormaleModal({
             </div>
           ))}
         </div>
+      </div>
+
+      {/* App tease */}
+      <div className="rounded-2xl px-3.5 py-3 mb-4 flex items-center gap-3"
+        style={{ background: 'rgba(10,132,255,0.08)', border: '1px solid rgba(10,132,255,0.25)' }}>
+        <span className="text-xl flex-shrink-0">📱</span>
+        <p className="text-[12px] leading-snug" style={{ color: 'rgba(255,255,255,0.80)' }}>
+          <strong style={{ color: '#0A84FF' }}>TIF arrive sur l&apos;App Store</strong> — l&apos;application mobile sort la semaine prochaine.
+        </p>
       </div>
 
       {/* Buttons */}

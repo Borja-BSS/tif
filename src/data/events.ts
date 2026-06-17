@@ -633,6 +633,96 @@ export const events: EventItem[] = [
     ],
     verif: 'confirmed',
   },
+  // ── CARIBANA FESTIVAL 2026 — Crans-près-Céligny (Vaud) ───────────────────────
+  {
+    id: 'caribana-17', slug: 'caribana-festival-17-juin',
+    title: 'Caribana Festival — Kendji · M Pokora · Nâdiya', category: 'festival',
+    description: "Mercredi 17 juin — Kendji (pop-flamenco), M Pokora (R&B), Nâdiya, Marine, Deluxe. Festival estival au bord du lac Léman à Crans-près-Céligny (Vaud). 34e édition · 30 000 spectateurs.",
+    priceInfo: 'CHF 90 standard · CHF 155 VIP · Pass 4j CHF 280',
+    venue: {
+      name: 'Port de Crans-près-Céligny',
+      address: 'Crans-plage, 1299 Crans-près-Céligny',
+      area: 'autour', lat: 46.3765, lng: 6.2155,
+    },
+    occurrences: [{ date: '2026-06-17', start: '17:00', end: '02:00' }],
+    links: [
+      { label: '🎟️ Billetterie (Ticketcorner)', url: 'https://www.ticketcorner.ch/fr/event/caribana-festival-2026-caribana-festival-21007826/', kind: 'tickets', status: 'verified' },
+      { label: 'Programme officiel', url: 'https://caribana.ch/fr/programmation-du-caribana-festival', kind: 'info', status: 'verified' },
+    ],
+    verif: 'confirmed',
+    g7AccessNotes: [
+      'Train CFF : Genève-Cornavin → Nyon (20 min, fréquent) · bus 802 Nyon → Crans-près-Céligny (~15 min)',
+      'Voiture : A1/E25 dir. Lausanne, sortie Crans-Céligny · ~35 km de Genève · Parking sur site',
+      'Navette nocturne Lausanne disponible (CHF 15)',
+    ],
+  },
+  {
+    id: 'caribana-18', slug: 'caribana-festival-18-juin',
+    title: 'Caribana Festival — Mika · Louane · Yoa', category: 'festival',
+    description: "Jeudi 18 juin — Mika (pop-rock), Louane (pop), Yoa (électropop), Broken Back, Ève, Saint Stacy. Festival estival au bord du lac Léman à Crans-près-Céligny (Vaud).",
+    priceInfo: 'CHF 90 standard · CHF 155 VIP · Pass 4j CHF 280',
+    venue: {
+      name: 'Port de Crans-près-Céligny',
+      address: 'Crans-plage, 1299 Crans-près-Céligny',
+      area: 'autour', lat: 46.3765, lng: 6.2155,
+    },
+    occurrences: [{ date: '2026-06-18', start: '17:00', end: '02:00' }],
+    links: [
+      { label: '🎟️ Billetterie (Ticketcorner)', url: 'https://www.ticketcorner.ch/fr/event/caribana-festival-2026-caribana-festival-21007826/', kind: 'tickets', status: 'verified' },
+      { label: 'Programme officiel', url: 'https://caribana.ch/fr/programmation-du-caribana-festival', kind: 'info', status: 'verified' },
+    ],
+    verif: 'confirmed',
+    g7AccessNotes: [
+      'Train CFF : Genève-Cornavin → Nyon (20 min, fréquent) · bus 802 Nyon → Crans-près-Céligny (~15 min)',
+      'Voiture : A1/E25 dir. Lausanne, sortie Crans-Céligny · ~35 km de Genève · Parking sur site',
+      'Navette nocturne Lausanne disponible (CHF 15)',
+    ],
+  },
+  {
+    id: 'caribana-19', slug: 'caribana-festival-19-juin',
+    title: 'Caribana Festival — Niska · Soolking · KeBlack', category: 'festival',
+    description: "Vendredi 19 juin — Niska (afro-trap), Soolking (rap-raï), KeBlack, La Rvfleuze, Genezio, Maureen, a6el. Festival estival au bord du lac Léman à Crans-près-Céligny (Vaud).",
+    priceInfo: 'CHF 90 standard · CHF 155 VIP · Pass 4j CHF 280',
+    venue: {
+      name: 'Port de Crans-près-Céligny',
+      address: 'Crans-plage, 1299 Crans-près-Céligny',
+      area: 'autour', lat: 46.3765, lng: 6.2155,
+    },
+    occurrences: [{ date: '2026-06-19', start: '17:00', end: '02:00' }],
+    links: [
+      { label: '🎟️ Billetterie (Ticketcorner)', url: 'https://www.ticketcorner.ch/fr/event/caribana-festival-2026-caribana-festival-21007826/', kind: 'tickets', status: 'verified' },
+      { label: 'Programme officiel', url: 'https://caribana.ch/fr/programmation-du-caribana-festival', kind: 'info', status: 'verified' },
+    ],
+    verif: 'confirmed',
+    g7AccessNotes: [
+      'Train CFF : Genève-Cornavin → Nyon (20 min, fréquent) · bus 802 Nyon → Crans-près-Céligny (~15 min)',
+      'Voiture : A1/E25 dir. Lausanne, sortie Crans-Céligny · ~35 km de Genève · Parking sur site',
+      'Navette nocturne Lausanne disponible (CHF 15)',
+    ],
+  },
+  {
+    id: 'caribana-20', slug: 'caribana-festival-20-juin',
+    title: 'Caribana Festival — Lost Frequencies · Purple Disco Machine', category: 'festival',
+    description: "Samedi 20 juin — Lost Frequencies (deep house), Purple Disco Machine (disco-house), A-Trak, Etienne de Crécy, Trinix, MYD (live), Bon Entendeur, Leila. Soirée électro au bord du lac Léman.",
+    priceInfo: 'CHF 90 standard · CHF 155 VIP · Pass week-end CHF 140 · Pass 4j CHF 280',
+    venue: {
+      name: 'Port de Crans-près-Céligny',
+      address: 'Crans-plage, 1299 Crans-près-Céligny',
+      area: 'autour', lat: 46.3765, lng: 6.2155,
+    },
+    occurrences: [{ date: '2026-06-20', start: '17:00', end: '02:00' }],
+    links: [
+      { label: '🎟️ Billetterie (Ticketcorner)', url: 'https://www.ticketcorner.ch/fr/event/caribana-festival-2026-caribana-festival-21007826/', kind: 'tickets', status: 'verified' },
+      { label: 'Programme officiel', url: 'https://caribana.ch/fr/programmation-du-caribana-festival', kind: 'info', status: 'verified' },
+    ],
+    verif: 'confirmed',
+    g7AccessNotes: [
+      'Train CFF : Genève-Cornavin → Nyon (20 min, fréquent) · bus 802 Nyon → Crans-près-Céligny (~15 min)',
+      'Voiture : A1/E25 dir. Lausanne, sortie Crans-Céligny · ~35 km de Genève · Parking sur site',
+      'Navette nocturne Lausanne disponible (CHF 15)',
+    ],
+  },
+
   {
     id: 'fete-musique', slug: 'fete-de-la-musique-geneve',
     title: 'Fête de la Musique de Genève', category: 'festival',
