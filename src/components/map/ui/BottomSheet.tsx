@@ -1958,6 +1958,40 @@ function EventDetail({ slug, onBack }: { slug: string; onBack: () => void }) {
         </div>
       </div>
 
+      {/* S'y rendre */}
+      {item.venue.lat && item.venue.lng && (
+        <div className="rounded-2xl p-3 mb-3" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+          <p className="text-[11px] font-semibold uppercase tracking-wider mb-2.5" style={{ color: 'var(--text-tertiary)' }}>S&apos;y rendre</p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('tif:route-to', {
+                detail: { id: `event-${item.id}`, title: item.venue.name, subtitle: item.venue.address, lat: item.venue.lat!, lng: item.venue.lng!, type: 'place' as const, mode: 'car' },
+              }))}
+              className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl text-[13px] font-semibold transition-opacity active:opacity-70"
+              style={{ background: 'rgba(255,159,10,0.10)', border: '1px solid rgba(255,159,10,0.30)', color: '#FF9F0A' }}
+            >
+              🚗 En voiture
+            </button>
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('tif:route-to', {
+                detail: { id: `event-${item.id}`, title: item.venue.name, subtitle: item.venue.address, lat: item.venue.lat!, lng: item.venue.lng!, type: 'station' as const, mode: 'transport' },
+              }))}
+              className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl text-[13px] font-semibold transition-opacity active:opacity-70"
+              style={{ background: 'rgba(10,132,255,0.10)', border: '1px solid rgba(10,132,255,0.30)', color: '#0A84FF' }}
+            >
+              🚌 En transport
+            </button>
+          </div>
+          {item.g7AccessNotes && item.g7AccessNotes.length > 0 && (
+            <div className="space-y-1 mt-2.5">
+              {item.g7AccessNotes.map((note, i) => (
+                <p key={i} className="text-[11px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>· {note}</p>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Description */}
       <p className="text-[13px] mb-4 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{item.description}</p>
 
@@ -2021,39 +2055,6 @@ function EventDetail({ slug, onBack }: { slug: string; onBack: () => void }) {
         )}
       </div>
 
-      {/* S'y rendre */}
-      {item.venue.lat && item.venue.lng && (
-        <div className="rounded-2xl p-3 mb-1" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-          <p className="text-[11px] font-semibold uppercase tracking-wider mb-2.5" style={{ color: 'var(--text-tertiary)' }}>S&apos;y rendre</p>
-          <div className="flex gap-2 mb-2.5">
-            <button
-              onClick={() => window.dispatchEvent(new CustomEvent('tif:route-to', {
-                detail: { id: `event-${item.id}`, title: item.venue.name, subtitle: item.venue.address, lat: item.venue.lat!, lng: item.venue.lng!, type: 'place' as const, mode: 'car' },
-              }))}
-              className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl text-[13px] font-semibold transition-opacity active:opacity-70"
-              style={{ background: 'rgba(255,159,10,0.10)', border: '1px solid rgba(255,159,10,0.30)', color: '#FF9F0A' }}
-            >
-              🚗 En voiture
-            </button>
-            <button
-              onClick={() => window.dispatchEvent(new CustomEvent('tif:route-to', {
-                detail: { id: `event-${item.id}`, title: item.venue.name, subtitle: item.venue.address, lat: item.venue.lat!, lng: item.venue.lng!, type: 'station' as const, mode: 'transport' },
-              }))}
-              className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl text-[13px] font-semibold transition-opacity active:opacity-70"
-              style={{ background: 'rgba(10,132,255,0.10)', border: '1px solid rgba(10,132,255,0.30)', color: '#0A84FF' }}
-            >
-              🚌 En transport
-            </button>
-          </div>
-          {item.g7AccessNotes && item.g7AccessNotes.length > 0 && (
-            <div className="space-y-1">
-              {item.g7AccessNotes.map((note, i) => (
-                <p key={i} className="text-[11px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>· {note}</p>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
     </div>
   )
 }

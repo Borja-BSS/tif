@@ -26,6 +26,7 @@ export function QuickFilters({ active, onChange, showJourney = false }: QuickFil
 
   const FILTERS: FilterDef[] = [
     { id: 'all',     icon: '🗺️',  label: t.filters.all     },
+    { id: 'events',  icon: '🗓️', label: t.eventsSection.filterLabel },
     { id: 'traffic', icon: '🚦',  label: t.filters.traffic  },
     { id: 'alerts',  icon: '⚠️',  label: t.filters.alerts   },
     { id: 'transit', icon: '🚌',  label: t.filters.transit  },
@@ -33,7 +34,6 @@ export function QuickFilters({ active, onChange, showJourney = false }: QuickFil
     { id: 'borders', icon: '🛂',  label: t.filters.borders  },
     { id: 'g7',      icon: '🏛️', label: t.filters.g7       },
     { id: 'journey', icon: '⭐',  label: t.filters.journey  },
-    { id: 'events',  icon: '🗓️', label: t.eventsSection.filterLabel },
   ]
 
   const visible = FILTERS.filter(f => f.id !== 'journey' || showJourney)
