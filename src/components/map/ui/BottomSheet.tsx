@@ -613,14 +613,14 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
               <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
                 Autoroute A1 bloquée jusqu&apos;à Bardonnex
               </p>
-              <p className="text-[12px] mt-1.5" style={{ color: 'rgba(255,255,255,0.60)' }}>
+              <p className="text-[12px] mt-1.5" style={{ color: 'var(--text-secondary)' }}>
                 Douane de Bardonnex inaccessible · Évitez la A1 dans les deux sens
               </p>
               <div className="mt-2.5 space-y-1">
-                <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.70)' }}>Alternatives :</p>
-                <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.50)' }}>✓ Ferney-Voltaire (D1005)</p>
-                <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.50)' }}>✓ Thônex-Vallard (N201)</p>
-                <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.50)' }}>✓ Moillesulaz (N205)</p>
+                <p className="text-[11px] font-semibold" style={{ color: 'var(--text-secondary)' }}>Alternatives :</p>
+                <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>✓ Ferney-Voltaire (D1005)</p>
+                <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>✓ Thônex-Vallard (N201)</p>
+                <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>✓ Moillesulaz (N205)</p>
               </div>
             </div>
           </div>
@@ -664,7 +664,7 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
                 const isBullet = line.startsWith('*')
                 const isHeader = !isBullet && /[A-ZÉÈÊÀÙÂÎÛÔ]{3,}/.test(line)
                 if (isBullet) return (
-                  <p key={i} className="pl-3 text-[12px]" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                  <p key={i} className="pl-3 text-[12px]" style={{ color: 'var(--text-secondary)' }}>
                     {line.replace(/^\*\s*/, '· ')}
                   </p>
                 )
@@ -675,13 +675,13 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
                   </p>
                 )
                 return (
-                  <p key={i} className="text-[12px] font-semibold" style={{ color: 'rgba(255,255,255,0.80)' }}>
+                  <p key={i} className="text-[12px] font-semibold" style={{ color: 'var(--text-primary)' }}>
                     {line}
                   </p>
                 )
               })}
             </div>
-            <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.30)' }}>
+            <p className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>
               {zone.source} · {zone.sourceRef}
             </p>
           </div>
@@ -944,11 +944,11 @@ function AlertDetailView({ alert: a, map, onBack }: {
             <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: a.color }}>
               {customAlertTypeLabel(a.type)}
             </span>
-            <h2 className="text-base font-bold leading-snug mt-0.5" style={{ color: '#fff' }}>{a.title}</h2>
+            <h2 className="text-base font-bold leading-snug mt-0.5" style={{ color: 'var(--text-primary)' }}>{a.title}</h2>
           </div>
         </div>
         {a.description && (
-          <p className="text-[13px] leading-relaxed mt-3" style={{ color: 'rgba(255,255,255,0.70)' }}>
+          <p className="text-[13px] leading-relaxed mt-3" style={{ color: 'var(--text-secondary)' }}>
             {a.description}
           </p>
         )}
@@ -1118,9 +1118,9 @@ function AlertesDetail({ map, onAlertSelect }: { map: mapboxgl.Map | null; onAle
         >
           <span className="text-xl flex-shrink-0">{a.icon}</span>
           <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-semibold truncate" style={{ color: '#fff' }}>{a.title}</p>
+            <p className="text-[13px] font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{a.title}</p>
             {a.description && (
-              <p className="text-[11px] truncate mt-0.5" style={{ color: 'rgba(255,255,255,0.55)' }}>{a.description}</p>
+              <p className="text-[11px] truncate mt-0.5" style={{ color: 'var(--text-secondary)' }}>{a.description}</p>
             )}
           </div>
           <svg width="6" height="10" viewBox="0 0 6 10" fill="none" stroke={a.color} strokeWidth="1.5" strokeLinecap="round" className="flex-shrink-0 opacity-60">
@@ -1139,9 +1139,9 @@ function AlertesDetail({ map, onAlertSelect }: { map: mapboxgl.Map | null; onAle
         >
           <span className="text-base flex-shrink-0">🚫</span>
           <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-semibold truncate" style={{ color: 'rgba(255,255,255,0.9)' }}>{c.name}</p>
+            <p className="text-[13px] font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{c.name}</p>
             {c.nearestOpen && (
-              <p className="text-[11px] truncate mt-0.5" style={{ color: 'rgba(255,255,255,0.45)' }}>
+              <p className="text-[11px] truncate mt-0.5" style={{ color: 'var(--text-tertiary)' }}>
                 {t.alertsSection.nearestOpen}: {c.nearestOpen}
               </p>
             )}
@@ -1255,7 +1255,7 @@ function AlertesDetail({ map, onAlertSelect }: { map: mapboxgl.Map | null; onAle
                   const isHeader = !isBullet && /[A-ZÉÈÊÀÙÂÎÛÔ]{3,}/.test(line)
                   if (isBullet) return (
                     <p key={i} className="pl-3 text-[12px]"
-                      style={{ color: 'rgba(255,255,255,0.55)' }}>
+                      style={{ color: 'var(--text-secondary)' }}>
                       {line.replace(/^\*\s*/, '· ')}
                     </p>
                   )
@@ -1267,7 +1267,7 @@ function AlertesDetail({ map, onAlertSelect }: { map: mapboxgl.Map | null; onAle
                   )
                   return (
                     <p key={i} className="text-[12px] font-semibold"
-                      style={{ color: 'rgba(255,255,255,0.80)' }}>
+                      style={{ color: 'var(--text-primary)' }}>
                       {line}
                     </p>
                   )
@@ -1275,7 +1275,7 @@ function AlertesDetail({ map, onAlertSelect }: { map: mapboxgl.Map | null; onAle
               </div>
 
               {/* Source */}
-              <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.30)' }}>
+              <p className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>
                 {zone.source} · {zone.sourceRef}
               </p>
             </div>
@@ -1752,8 +1752,8 @@ function DonationCard() {
       <div className="flex items-center gap-3 mb-3">
         <span className="text-xl flex-shrink-0">💚</span>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold" style={{ color: 'rgba(255,255,255,0.92)' }}>{t.donation.title}</p>
-          <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.58)' }}>{t.donation.subtitle}</p>
+          <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{t.donation.title}</p>
+          <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{t.donation.subtitle}</p>
         </div>
       </div>
       <div className="grid grid-cols-4 gap-1.5 mb-3">
@@ -1765,7 +1765,7 @@ function DonationCard() {
             style={{
               background: selected === v ? 'rgba(52,199,89,0.22)' : 'rgba(255,255,255,0.06)',
               border: `1px solid ${selected === v ? 'rgba(52,199,89,0.55)' : 'rgba(255,255,255,0.10)'}`,
-              color: selected === v ? '#34C759' : 'rgba(255,255,255,0.60)',
+              color: selected === v ? '#34C759' : 'var(--text-secondary)',
               cursor: 'pointer',
             }}
           >
@@ -1904,7 +1904,7 @@ function G7AccessPanel({ item }: { item: EventItem }) {
     <div className="rounded-2xl p-3 mb-4" style={{ background: 'rgba(255,149,0,0.08)', border: '1px solid rgba(255,149,0,0.25)' }}>
       <p className="text-[12px] font-bold mb-2" style={{ color: '#FF9F0A' }}>{t.eventsSection.g7AccessTitle}</p>
       {note && (
-        <p className="text-[11px] mb-2" style={{ color: 'rgba(255,255,255,0.75)' }}>{note}</p>
+        <p className="text-[11px] mb-2" style={{ color: 'var(--text-primary)' }}>{note}</p>
       )}
       {mobilityAlerts.map(a => (
         <div key={a.id} className="flex items-start gap-2 mb-1.5">
@@ -1912,13 +1912,13 @@ function G7AccessPanel({ item }: { item: EventItem }) {
             {a.severity === 'critical' ? '🔴' : a.severity === 'warning' ? '🟠' : 'ℹ️'}
           </span>
           <div>
-            <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.85)' }}>{a.title}</p>
-            <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.55)' }}>{a.detail}</p>
+            <p className="text-[11px] font-semibold" style={{ color: 'var(--text-primary)' }}>{a.title}</p>
+            <p className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{a.detail}</p>
           </div>
         </div>
       ))}
       {mobilityAlerts.length === 0 && (
-        <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.55)' }}>{t.eventsSection.g7Lifted}</p>
+        <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{t.eventsSection.g7Lifted}</p>
       )}
     </div>
   )
@@ -1945,7 +1945,7 @@ function EventDetail({ slug, onBack }: { slug: string; onBack: () => void }) {
       <div className="flex items-start gap-2 mb-3">
         <span className="text-2xl flex-shrink-0">{CATEGORY_ICONS[item.category] ?? '🎟️'}</span>
         <div className="flex-1 min-w-0">
-          <h2 className="text-base font-bold leading-tight mb-1" style={{ color: 'rgba(255,255,255,0.92)' }}>{item.title}</h2>
+          <h2 className="text-base font-bold leading-tight mb-1" style={{ color: 'var(--text-primary)' }}>{item.title}</h2>
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'var(--bg-card)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
               {CATEGORY_LABELS[item.category] ?? item.category}
@@ -2333,17 +2333,17 @@ function ImpactZoneDetail({ zone, map, onClose }: { zone: ImpactZone; map: mapbo
         <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color }}>
           {label}
         </span>
-        <h2 className="text-[15px] font-bold leading-snug mt-1.5" style={{ color: 'rgba(255,255,255,0.92)' }}>
+        <h2 className="text-[15px] font-bold leading-snug mt-1.5" style={{ color: 'var(--text-primary)' }}>
           {zone.title}
         </h2>
-        <p className="text-[11px] mt-2 tabular-nums" style={{ color: 'rgba(255,255,255,0.45)' }}>
+        <p className="text-[11px] mt-2 tabular-nums" style={{ color: 'var(--text-tertiary)' }}>
           {fmt(zone.activeFrom)} – {fmt(zone.activeTo)}
         </p>
       </div>
 
       {/* Description */}
       <div className="rounded-2xl p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-        <p className="text-[13px] leading-relaxed whitespace-pre-line" style={{ color: 'rgba(255,255,255,0.72)' }}>
+        <p className="text-[13px] leading-relaxed whitespace-pre-line" style={{ color: 'var(--text-primary)' }}>
           {zone.description}
         </p>
       </div>
@@ -2378,7 +2378,7 @@ function ImpactZoneDetail({ zone, map, onClose }: { zone: ImpactZone; map: mapbo
 
       {/* Source */}
       <div className="rounded-2xl px-4 py-3" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-        <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.38)' }}>
+        <p className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
           Source : {zone.source} · {zone.sourceRef}
         </p>
       </div>
@@ -2414,19 +2414,19 @@ function SignalDetailView({ signalement: s, onBack: _onBack }: SignalDetailProps
       <div className="rounded-2xl p-4 space-y-2"
         style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Signalé le
           </span>
-          <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)' }}>
+          <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
             {fmtDate(s.createdAt)}
           </span>
         </div>
         {s.approvedAt && (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               Publié le
             </span>
-            <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)' }}>
+            <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
               {fmtDate(s.approvedAt)}
             </span>
           </div>
@@ -2436,10 +2436,10 @@ function SignalDetailView({ signalement: s, onBack: _onBack }: SignalDetailProps
         {s.expiresAt && (
           <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 12, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 ⏱ Expire dans
               </span>
-              <span style={{ fontSize: 12, color: new Date(s.expiresAt).getTime() - Date.now() < 600000 ? '#FF9500' : 'rgba(255,255,255,0.65)' }}>
+              <span style={{ fontSize: 12, color: new Date(s.expiresAt).getTime() - Date.now() < 600000 ? '#FF9500' : 'var(--text-secondary)' }}>
                 {timeRemaining(s.expiresAt)}
               </span>
             </div>
@@ -2801,7 +2801,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
         ...LG,
         bottom:             'env(safe-area-inset-bottom, 0px)',
         '--text-primary':   'rgba(255,255,255,0.92)',
-        '--text-secondary': 'rgba(255,255,255,0.60)',
+        '--text-secondary': 'var(--text-secondary)',
         '--text-tertiary':  'rgba(255,255,255,0.40)',
         '--bg-card':        'rgba(255,255,255,0.06)',
         '--bg':             'rgba(255,255,255,0.03)',

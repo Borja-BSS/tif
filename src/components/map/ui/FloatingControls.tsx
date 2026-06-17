@@ -215,28 +215,28 @@ export function FloatingControls({ map }: FloatingControlsProps) {
                 <span className="text-xl">📡</span>
               </div>
               <div className="flex-1">
-                <p className="text-[14px] font-bold" style={{ color: 'rgba(255,255,255,0.92)' }}>Signaler en direct</p>
-                <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.45)' }}>Remontée communautaire · G7 2026</p>
+                <p className="text-[14px] font-bold" style={{ color: 'var(--text-primary)' }}>Signaler en direct</p>
+                <p className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>Remontée communautaire · G7 2026</p>
               </div>
               <button onClick={() => setShowReportModal(false)}
                 className="w-7 h-7 flex items-center justify-center rounded-full text-[16px] leading-none"
-                style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.50)' }}>×</button>
+                style={{ background: 'rgba(255,255,255,0.08)', color: 'var(--text-secondary)' }}>×</button>
             </div>
 
             {/* Body */}
             <div className="px-4 py-4 space-y-3">
-              <p className="text-[13px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.65)' }}>
+              <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                 Vous observez quelque chose de notable — circulation, incident, manifestation, contrôle douanier ?
               </p>
               <p className="text-[13px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.65)' }}>
-                Signalez-le en quelques secondes. Chaque signalement est <strong style={{ color: 'rgba(255,255,255,0.85)' }}>examiné avant publication</strong> sur la carte.
+                Signalez-le en quelques secondes. Chaque signalement est <strong style={{ color: 'var(--text-primary)' }}>examiné avant publication</strong> sur la carte.
               </p>
 
               <div className="rounded-2xl px-3 py-2.5 space-y-1.5"
                 style={{ background: 'rgba(255,255,255,0.05)', border: '0.5px solid rgba(255,255,255,0.10)' }}>
                 {['🚦 Circulation & incidents','🛂 Douanes & frontières','👥 Rassemblements','🚨 Forces de l\'ordre','⚠️ Sécurité & zones à risque'].map(item => (
                   <div key={item} className="flex items-center gap-2">
-                    <span className="text-[11px]" style={{ color: 'rgba(255,255,255,0.55)' }}>{item}</span>
+                    <span className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{item}</span>
                   </div>
                 ))}
               </div>
@@ -256,7 +256,7 @@ export function FloatingControls({ map }: FloatingControlsProps) {
                 Signaler un événement
               </button>
 
-              <p className="text-[10px] text-center" style={{ color: 'rgba(255,255,255,0.22)' }}>
+              <p className="text-[10px] text-center" style={{ color: 'var(--text-tertiary)' }}>
                 Anonyme · Aucune donnée personnelle
               </p>
             </div>
@@ -267,14 +267,14 @@ export function FloatingControls({ map }: FloatingControlsProps) {
       {/* Zoom + — desktop uniquement */}
       <div className="fixed z-20 hidden md:flex" style={{ right: 16, bottom: 'calc(56px + 24px + 208px)' }}>
         <button onClick={handleZoomIn}
-          style={{ ...BTN_BASE, background: 'rgba(255,255,255,0.07)', border: '0.5px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.75)', fontSize: 22, fontWeight: 300, lineHeight: 1 }}
+          style={{ ...BTN_BASE, background: 'rgba(255,255,255,0.07)', border: '0.5px solid rgba(255,255,255,0.22)', color: 'var(--text-secondary)', fontSize: 22, fontWeight: 300, lineHeight: 1 }}
           aria-label="Zoom avant">+</button>
       </div>
 
       {/* Zoom − — desktop uniquement */}
       <div className="fixed z-20 hidden md:flex" style={{ right: 16, bottom: 'calc(56px + 24px + 156px)' }}>
         <button onClick={handleZoomOut}
-          style={{ ...BTN_BASE, background: 'rgba(255,255,255,0.07)', border: '0.5px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.75)', fontSize: 22, fontWeight: 300, lineHeight: 1 }}
+          style={{ ...BTN_BASE, background: 'rgba(255,255,255,0.07)', border: '0.5px solid rgba(255,255,255,0.22)', color: 'var(--text-secondary)', fontSize: 22, fontWeight: 300, lineHeight: 1 }}
           aria-label="Zoom arrière">−</button>
       </div>
 
@@ -282,7 +282,7 @@ export function FloatingControls({ map }: FloatingControlsProps) {
       <div className="fixed z-20 hidden md:flex" style={{ right: 16, bottom: 'calc(56px + 24px + 104px)' }}>
         <button
           onClick={handleFitAll}
-          style={{ ...BTN_BASE, background: 'rgba(255,255,255,0.07)', border: '0.5px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.75)' }}
+          style={{ ...BTN_BASE, background: 'rgba(255,255,255,0.07)', border: '0.5px solid rgba(255,255,255,0.22)', color: 'var(--text-secondary)' }}
           aria-label="Voir toute la région"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

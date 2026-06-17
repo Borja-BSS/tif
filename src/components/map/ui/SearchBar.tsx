@@ -72,7 +72,7 @@ function highlightMatch(title: string, query: string): React.ReactNode {
   return (
     <>
       {title.slice(0, idx)}
-      <strong style={{ color: 'rgba(255,255,255,1)', fontWeight: 600 }}>
+      <strong style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
         {title.slice(idx, idx + query.length)}
       </strong>
       {title.slice(idx + query.length)}
@@ -162,10 +162,10 @@ export function SearchBar({ map }: SearchBarProps) {
           style={{ ...LG, height: 52, borderRadius: 16, transition: springs.search }}
           aria-label="Rechercher un lieu"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2.5" strokeLinecap="round">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" strokeWidth="2.5" strokeLinecap="round">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
           </svg>
-          <span className="flex-1 text-left text-sm" style={{ color: 'rgba(255,255,255,0.35)', fontFamily: '-apple-system, sans-serif' }}>
+          <span className="flex-1 text-left text-sm" style={{ color: 'var(--text-tertiary)', fontFamily: '-apple-system, sans-serif' }}>
             {PLACEHOLDERS[placeholderIdx]}
           </span>
         </button>
@@ -175,7 +175,7 @@ export function SearchBar({ map }: SearchBarProps) {
           style={{ ...LG, width: 52, height: 52, borderRadius: 16, transition: springs.search }}
           aria-label="Accueil"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.75)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
             <polyline points="9 22 9 12 15 12 15 22"/>
           </svg>
@@ -202,7 +202,7 @@ export function SearchBar({ map }: SearchBarProps) {
         <div className="flex items-center gap-3 px-4 py-3">
           <button
             onClick={() => { setIsOpen(false); setQuery(''); setResults([]) }}
-            style={{ color: 'rgba(255,255,255,0.5)', flexShrink: 0 }}
+            style={{ color: 'var(--text-secondary)', flexShrink: 0 }}
             aria-label="Fermer"
           >
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
@@ -215,7 +215,7 @@ export function SearchBar({ map }: SearchBarProps) {
             onChange={e => setQuery(e.target.value)}
             placeholder={PLACEHOLDERS[0]}
             className="flex-1 bg-transparent text-sm outline-none"
-            style={{ color: 'rgba(255,255,255,0.9)', caretColor: 'var(--brand)', fontSize: '16px' }}
+            style={{ color: 'var(--text-primary)', caretColor: 'var(--brand)', fontSize: '16px' }}
           />
           {loading && (
             <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white/70 animate-spin flex-shrink-0" />
@@ -237,15 +237,15 @@ export function SearchBar({ map }: SearchBarProps) {
                   onClick={() => handleSelect(r)}
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors active:bg-white/5"
                 >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2" strokeLinecap="round" className="flex-shrink-0">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" strokeWidth="2" strokeLinecap="round" className="flex-shrink-0">
                     <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/>
                   </svg>
                   <div className="min-w-0 flex-1">
-                    <div className="text-sm truncate" style={{ color: 'rgba(255,255,255,0.80)' }}>
+                    <div className="text-sm truncate" style={{ color: 'var(--text-primary)' }}>
                       {highlightMatch(r.title, query)}
                     </div>
                     {r.subtitle && (
-                      <div className="text-[11px] truncate mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                      <div className="text-[11px] truncate mt-0.5" style={{ color: 'var(--text-tertiary)' }}>
                         {r.subtitle}
                       </div>
                     )}
@@ -254,7 +254,7 @@ export function SearchBar({ map }: SearchBarProps) {
               ))
             ) : (
               <>
-                <p className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.25)' }}>{t.search.recent}</p>
+                <p className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>{t.search.recent}</p>
                 {recentSearches.map(r => (
                   <button
                     key={r.id}
@@ -263,9 +263,9 @@ export function SearchBar({ map }: SearchBarProps) {
                   >
                     <span className="text-sm flex-shrink-0">🕐</span>
                     <div className="min-w-0 flex-1">
-                      <div className="text-sm truncate" style={{ color: 'rgba(255,255,255,0.65)' }}>{r.title}</div>
+                      <div className="text-sm truncate" style={{ color: 'var(--text-secondary)' }}>{r.title}</div>
                       {r.subtitle && (
-                        <div className="text-[11px] truncate mt-0.5" style={{ color: 'rgba(255,255,255,0.30)' }}>{r.subtitle}</div>
+                        <div className="text-[11px] truncate mt-0.5" style={{ color: 'var(--text-tertiary)' }}>{r.subtitle}</div>
                       )}
                     </div>
                   </button>

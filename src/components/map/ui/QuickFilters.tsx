@@ -55,7 +55,7 @@ export function QuickFilters({ active, onChange, showJourney = false }: QuickFil
               ...PILL_BASE,
               height: 36,
               background: isActive ? 'var(--brand)' : 'rgba(255,255,255,0.07)',
-              color:      isActive ? '#fff'          : 'rgba(255,255,255,0.65)',
+              color:      isActive ? '#fff'          : 'var(--text-secondary)',
               transition: springs.filter,
               transform:  isActive ? 'scale(1.04)'  : 'scale(1)',
             }}
