@@ -281,15 +281,18 @@ export default function GestionEvenementsPage() {
           <p style={{ fontSize: 12, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-tertiary)', textAlign: 'center', marginBottom: 28 }}>Vu dans la presse</p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'center', alignItems: 'center' }}>
             {[
-              { name: 'Le Temps', abbr: 'LT' },
-              { name: 'RTS', abbr: 'RTS' },
-              { name: 'Tribune de Genève', abbr: 'TdG' },
-              { name: '20 Minutes', abbr: '20m' },
-              { name: 'Heidi.news', abbr: 'HN' },
+              { name: 'Léman Bleu', abbr: '📺', url: 'https://www.lemanbleu.ch/fr/Accueil/G7/Un-Genevois-centralise-les-perturbations-sur-une-seule-plateforme.html' },
+              { name: 'Radio Lac', abbr: '📻', url: 'https://www.radiolac.ch/podcasts/le-meilleur-des-reveils-12-06-2026-0836/' },
+              { name: 'Entreprise Romande', abbr: '📰', url: 'https://www.entrepriseromande.ch/web/er/w/g7-un-site-signalera-les-perturbations-en-temps-réel' },
+              { name: 'Blick', abbr: '📰', url: 'https://www.blick.ch/fr/suisse/romande/g7-un-site-gratuit-pour-aider-les-genevois-a-circuler-id22023083.html' },
             ].map(m => (
-              <div
+              <a
                 key={m.name}
+                href={m.url}
+                target="_blank"
+                rel="noreferrer"
                 style={{
+                  textDecoration: 'none',
                   padding: '12px 24px',
                   borderRadius: 12,
                   border: '0.5px solid var(--border)',
@@ -301,15 +304,9 @@ export default function GestionEvenementsPage() {
                   justifyContent: 'center',
                 }}
               >
-                <span style={{
-                  width: 32, height: 32, borderRadius: 8,
-                  background: 'var(--brand-subtle)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 10, fontWeight: 800, color: 'var(--brand)', flexShrink: 0,
-                  letterSpacing: '0.04em',
-                }}>{m.abbr}</span>
+                <span style={{ fontSize: 20 }}>{m.abbr}</span>
                 <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-secondary)' }}>{m.name}</span>
-              </div>
+              </a>
             ))}
           </div>
         </div>

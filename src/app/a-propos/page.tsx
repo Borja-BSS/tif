@@ -97,6 +97,25 @@ export default function AProposPage() {
         </section>
 
         <section style={{ marginBottom: 40 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>Couverture médias</h2>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: 16 }}>TIF a été couvert par les médias suivants lors du G7 Évian 2026 :</p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+            {[
+              { name: 'Léman Bleu', type: 'Télévision', url: 'https://www.lemanbleu.ch/fr/Accueil/G7/Un-Genevois-centralise-les-perturbations-sur-une-seule-plateforme.html' },
+              { name: 'Radio Lac', type: 'Radio', url: 'https://www.radiolac.ch/podcasts/le-meilleur-des-reveils-12-06-2026-0836/' },
+              { name: 'Entreprise Romande', type: 'Presse', url: 'https://www.entrepriseromande.ch/web/er/w/g7-un-site-signalera-les-perturbations-en-temps-réel' },
+              { name: 'Blick', type: 'Presse nationale', url: 'https://www.blick.ch/fr/suisse/romande/g7-un-site-gratuit-pour-aider-les-genevois-a-circuler-id22023083.html' },
+            ].map(m => (
+              <a key={m.name} href={m.url} target="_blank" rel="noreferrer"
+                style={{ textDecoration: 'none', padding: '10px 16px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-card)', display: 'inline-flex', flexDirection: 'column', gap: 2 }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{m.name}</span>
+                <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{m.type} · Lire →</span>
+              </a>
+            ))}
+          </div>
+        </section>
+
+        <section style={{ marginBottom: 40 }}>
           <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>Contact</h2>
           <p style={{ color: 'var(--text-secondary)' }}>
             Pour toute question ou signalement d'erreur :{' '}
