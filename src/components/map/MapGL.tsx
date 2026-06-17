@@ -24,7 +24,7 @@ export default function MapGL({
   initialLat  = 46.35,
   initialLng  = 6.30,
   initialZoom = 9,
-  mapStyle    = 'mapbox://styles/mapbox/dark-v11',
+  mapStyle,
   onMapReady,
 }: MapGLProps) {
   const containerRef = useRef<HTMLDivElement>(null)
