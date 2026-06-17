@@ -6,38 +6,30 @@ import mapboxgl from 'mapbox-gl'
 const SOURCE_ID = 'mapbox-traffic-native'
 const ARROW_ID  = 'tif-arrow'
 
+type TrafficLevel = {
+  congestion:  string
+  color:       string
+  widthFactor: number
+  glowOpacity: number
+  flowOpacity: number
+}
+
 // Niveaux du moins grave au plus grave — l'ordre d'ajout des layers détermine le z-order.
 // Green est ajouté en premier (en dessous), severe en dernier (au-dessus de tout).
-const LEVELS = [
-  {
-    congestion:   'low',
-    color:        '#30D158',
-    widthFactor:  1.0,
-    glowOpacity:  0.18,
-    flowOpacity:  0.90,
-  },
-  {
-    congestion:   'moderate',
-    color:        '#FF9F0A',
-    widthFactor:  1.35,
-    glowOpacity:  0.30,
-    flowOpacity:  0.97,
-  },
-  {
-    congestion:   'heavy',
-    color:        '#FF453A',
-    widthFactor:  1.65,
-    glowOpacity:  0.40,
-    flowOpacity:  1.0,
-  },
-  {
-    congestion:   'severe',
-    color:        '#FF2D55',
-    widthFactor:  1.90,
-    glowOpacity:  0.50,
-    flowOpacity:  1.0,
-  },
-] as const
+const LEVELS: TrafficLevel[] = [
+  { congestion: 'low',      color: '#30D158', widthFactor: 1.0,  glowOpacity: 0.18, flowOpacity: 0.90 },
+  { congestion: 'moderate', color: '#FF9F0A', widthFactor: 1.35, glowOpacity: 0.30, flowOpacity: 0.97 },
+  { congestion: 'heavy',    color: '#FF453A', widthFactor: 1.65, glowOpacity: 0.40, flowOpacity: 1.0  },
+  { congestion: 'severe',   color: '#FF2D55', widthFactor: 1.90, glowOpacity: 0.50, flowOpacity: 1.0  },
+]
+
+// Même teintes mais moins saturées + opacités réduites pour le fond clair
+const LEVELS_LIGHT: TrafficLevel[] = [
+  { congestion: 'low',      color: '#28904A', widthFactor: 1.0,  glowOpacity: 0.10, flowOpacity: 0.70 },
+  { congestion: 'moderate', color: '#CC7A00', widthFactor: 1.35, glowOpacity: 0.16, flowOpacity: 0.78 },
+  { congestion: 'heavy',    color: '#C5302A', widthFactor: 1.65, glowOpacity: 0.20, flowOpacity: 0.78 },
+  { congestion: 'severe',   color: '#A02030', widthFactor: 1.90, glowOpacity: 0.26, flowOpacity: 0.78 },
+]
 
 function glowId(c: string) { return `tif-glow-${c}` }
 function flowId(c: string) { return `tif-flow-${c}` }
@@ -84,9 +76,12 @@ export function useHereMobilityLayer(map: mapboxgl.Map | null, visible: boolean)
         map.addSource(SOURCE_ID, { type: 'vector', url: 'mapbox://mapbox.mapbox-traffic-v1' })
       }
 
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      const levels = prefersDark ? LEVELS : LEVELS_LIGHT
+
       // Ajouter les layers du MOINS grave au PLUS grave.
       // Chaque niveau suivant est dessiné PAR-DESSUS le précédent.
-      for (const lvl of LEVELS) {
+      for (const lvl of levels) {
         const filter = ['==', ['get', 'congestion'], lvl.congestion] as mapboxgl.Expression
 
         // 1. Halo / glow (flou) — sous le trait net
@@ -134,7 +129,7 @@ export function useHereMobilityLayer(map: mapboxgl.Map | null, visible: boolean)
       // Flèches — ajoutées après toutes les couches de trafic
       const addArrows = () => {
         if (!active) return
-        for (const lvl of LEVELS) {
+        for (const lvl of levels) {
           if (map.getLayer(arrowId(lvl.congestion))) continue
           map.addLayer({
             id: arrowId(lvl.congestion),
