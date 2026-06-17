@@ -16,6 +16,7 @@ export interface MapGLProps {
   initialLat?:  number
   initialLng?:  number
   initialZoom?: number
+  mapStyle?:    string
   onMapReady?:  (map: mapboxgl.Map) => void
 }
 
@@ -23,6 +24,7 @@ export default function MapGL({
   initialLat  = 46.35,
   initialLng  = 6.30,
   initialZoom = 9,
+  mapStyle    = 'mapbox://styles/mapbox/dark-v11',
   onMapReady,
 }: MapGLProps) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -36,7 +38,7 @@ export default function MapGL({
 
     const map = new mapboxgl.Map({
       container:    containerRef.current,
-      style:        'mapbox://styles/mapbox/dark-v11',
+      style:        mapStyle,
       center:       [initialLng, initialLat],
       zoom:         initialZoom,
       antialias:    false,
@@ -140,7 +142,7 @@ export default function MapGL({
     <div className="relative w-full h-full">
       <div ref={containerRef} className="w-full h-full" />
       {!ready && (
-        <div className="absolute inset-0 flex items-center justify-center bg-[#0d0d10]">
+        <div className="absolute inset-0 flex items-center justify-center" style={{ background: mapStyle.includes('light') ? '#f2f2f7' : '#0d0d10' }}>
           <div className="flex gap-1.5">
             {[0, 1, 2].map(i => (
               <span
