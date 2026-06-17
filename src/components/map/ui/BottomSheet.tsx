@@ -1818,7 +1818,7 @@ function ToutOverview({ data, onSelect }: {
         subtitle={t.overview.transportSub}
         badge={hasIssue ? t.overview.disruption : undefined} badgeColor="#FF9F0A"
         onPress={() => onSelect('transport')} />
-      <CategoryCard icon="🗓️" title={t.eventsSection.filterLabel}
+      <CategoryCard icon="⭐" title={t.eventsSection.filterLabel}
         subtitle={t.welcome.feat7D}
         badge={t.welcome.newBadge} badgeColor="#AF52DE"
         onPress={() => onSelect('events')} />
