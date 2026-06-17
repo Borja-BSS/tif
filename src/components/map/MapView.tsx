@@ -42,11 +42,10 @@ const DEFAULT_FILTERS: FilterState = {
 interface MapViewProps extends Omit<MapGLProps, 'onMapReady'> {
   filters?:      FilterState
   activeFilter?: FilterId
-  colorScheme?:  'dark' | 'light'
   onMapReady?:   (map: mapboxgl.Map) => void
 }
 
-export default function MapView({ filters: externalFilters, activeFilter = 'all', colorScheme = 'dark', onMapReady, ...props }: MapViewProps) {
+export default function MapView({ filters: externalFilters, activeFilter = 'all', onMapReady, ...props }: MapViewProps) {
   const [map,             setMap]             = useState<mapboxgl.Map | null>(null)
   const [internalFilters, setInternalFilters] = useState<FilterState>(DEFAULT_FILTERS)
   const filters = externalFilters ?? internalFilters
@@ -86,13 +85,7 @@ export default function MapView({ filters: externalFilters, activeFilter = 'all'
 
   return (
     <>
-      <MapGL
-        {...props}
-        mapStyle={colorScheme === 'dark'
-          ? 'mapbox://styles/mapbox/dark-v11'
-          : 'mapbox://styles/mapbox/light-v11'}
-        onMapReady={m => { setMap(m); onMapReady?.(m) }}
-      />
+      <MapGL {...props} onMapReady={m => { setMap(m); onMapReady?.(m) }} />
 
       <BorderCrossingsLayer map={map} activeFilter={activeFilter} />
       <RoadClosuresLayer    map={map} />

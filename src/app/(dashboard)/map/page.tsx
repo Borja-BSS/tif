@@ -23,7 +23,6 @@ import { GuestExpiredModal }  from '@/components/guest/GuestExpiredModal'
 import { GuestWelcomeModal }  from '@/components/guest/GuestWelcomeModal'
 import { WelcomeModals }      from '@/components/map/WelcomeModals'
 import { AiAssistant }       from '@/components/map/ui/AiAssistant'
-import { useTheme }          from '@/lib/theme/ThemeProvider'
 
 const MapView = dynamicImport(() => import('@/components/map/MapView'), { ssr: false })
 
@@ -77,10 +76,6 @@ export default function MapPage() {
   const isG7Active                        = useG7Active()
   const router                            = useRouter()
   const { isGuest, endGuest }             = useGuest()
-  const { theme }                         = useTheme()
-
-  // Reset mapRef when theme changes so sibling components get null before the new map is ready
-  useEffect(() => { setMapRef(null) }, [theme])
 
   useEffect(() => {
     if (sessionResult.status !== 'loading' && !session && !isGuest) router.replace('/login')
@@ -116,15 +111,13 @@ export default function MapPage() {
   const filterState = useMemo(() => toFilterState(activeFilter), [activeFilter])
 
   return (
-    <div className="h-screen w-full overflow-hidden relative" style={{ background: theme === 'dark' ? '#000' : '#f2f2f7' }}>
+    <div className="h-screen w-full overflow-hidden relative" style={{ background: '#000' }}>
 
       {/* Layer 1: Carte — reçoit les filtres depuis la page + expose le map ref */}
       {/* MapView cadre automatiquement sur le Grand Genève complet au chargement */}
       <MapView
-        key={theme}
         filters={filterState}
         activeFilter={activeFilter}
-        colorScheme={theme}
         onMapReady={handleMapReady}
       />
 
