@@ -111,7 +111,7 @@ export default function MapPage() {
   const filterState = useMemo(() => toFilterState(activeFilter), [activeFilter])
 
   return (
-    <div className="h-screen w-full overflow-hidden relative" style={{ background: '#000' }}>
+    <div className="h-screen w-full overflow-hidden relative" style={{ background: 'var(--bg)' }}>
 
       {/* Layer 1: Carte — reçoit les filtres depuis la page + expose le map ref */}
       {/* MapView cadre automatiquement sur le Grand Genève complet au chargement */}

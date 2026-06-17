@@ -36,8 +36,8 @@ export default function MapGL({
 
     mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!
 
-    // Lire la préférence système au moment de l'init — pas de remount, pas de prop
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    // Lire la classe HTML (ThemeProvider + layout.tsx inline script = source unique de vérité)
+    const prefersDark = document.documentElement.classList.contains('dark')
     const resolvedStyle = mapStyle ?? (prefersDark
       ? 'mapbox://styles/mapbox/dark-v11'
       : 'mapbox://styles/mapbox/light-v11')
@@ -148,7 +148,7 @@ export default function MapGL({
     <div className="relative w-full h-full">
       <div ref={containerRef} className="w-full h-full" />
       {!ready && (
-        <div className="absolute inset-0 flex items-center justify-center bg-[#0d0d10]">
+        <div className="absolute inset-0 flex items-center justify-center" style={{ background: 'var(--bg)' }}>
           <div className="flex gap-1.5">
             {[0, 1, 2].map(i => (
               <span

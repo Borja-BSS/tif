@@ -201,7 +201,7 @@ export function FloatingControls({ map }: FloatingControlsProps) {
             style={{
               right: 16, bottom: 'calc(env(safe-area-inset-bottom, 0px) + 56px + 24px + 54px)',
               width: 'min(320px, calc(100vw - 32px))',
-              background: 'rgba(18,18,20,0.96)',
+              background: 'var(--bg-modal)',
               backdropFilter: 'blur(48px) saturate(200%)',
               WebkitBackdropFilter: 'blur(48px) saturate(200%)',
               border: '0.5px solid rgba(255,255,255,0.18)',
