@@ -1,4 +1,16 @@
-import type { EventItem } from './types'
+import type { EventItem, Occurrence } from './types'
+
+// Génère une occurrence par jour entre deux dates ISO (incluses)
+const dailyRange = (start: string, end: string, note?: string): Occurrence[] => {
+  const out: Occurrence[] = []
+  const cur = new Date(start + 'T12:00:00Z')
+  const fin = new Date(end   + 'T12:00:00Z')
+  while (cur <= fin) {
+    out.push({ date: cur.toISOString().slice(0, 10), ...(note ? { note } : {}) })
+    cur.setUTCDate(cur.getUTCDate() + 1)
+  }
+  return out
+}
 
 export const events: EventItem[] = [
   {
@@ -951,6 +963,197 @@ export const events: EventItem[] = [
     ],
   },
 
+  // ── CINÉMAS — Genève & Grand Genève ──────────────────────────────────────────
+  {
+    id: 'pathe-balexert', slug: 'cinema-pathe-balexert',
+    title: 'Pathé Balexert', category: 'cinema',
+    description: "Plus grand multiplex de Suisse. 13 salles, 2909 places. Blockbusters, IMAX, VF et VO. Ouvert tous les jours dès 13h (11h sam/dim).",
+    venue: {
+      name: 'Pathé Balexert',
+      address: 'Avenue Louis-Casaï 27, 1209 Genève (CC Balexert)',
+      phone: '+41 22 979 01 11',
+      area: 'Grand-Saconnex', lat: 46.2278, lng: 6.1086,
+    },
+    occurrences: dailyRange('2026-06-18', '2026-08-31', 'Séances dès 13h · 13 salles'),
+    priceInfo: 'Dès CHF 17.– · Ciné Pass CHF 10.–',
+    links: [
+      { label: 'Pathé Balexert — programme', url: 'https://www.pathe.ch/fr/cinemas/cinema-pathe-balexert', kind: 'venue', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'arena-la-praille', slug: 'cinema-arena-la-praille',
+    title: 'Arena Cinemas La Praille', category: 'cinema',
+    description: "Multiplex de Carouge avec technologies immersives 4DX et ScreenX. Films grand public en VF, VO et formats spéciaux. Parking gratuit.",
+    venue: {
+      name: 'Arena Cinemas La Praille',
+      address: 'Route des Jeunes 10, 1227 Carouge (Grand-Lancy)',
+      phone: '0900 916 916',
+      area: 'Carouge', lat: 46.1796, lng: 6.1283,
+    },
+    occurrences: dailyRange('2026-06-18', '2026-08-31', 'Séances dès 13h · 4DX & ScreenX'),
+    priceInfo: 'Dès CHF 17.– · 4DX et ScreenX disponibles',
+    links: [
+      { label: 'Arena Cinemas — programme', url: 'https://www.arena.ch/fr/geneve/programme/horaires-des-films', kind: 'venue', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'grutli', slug: 'cinemas-du-grutli',
+    title: 'Cinémas du Grütli', category: 'cinema',
+    description: "Cinéphile genevois incontournable. Art & essai, cinématographies émergentes, ciné-clubs, avant-premières et rencontres avec réalisateurs. 2 salles (196 + 59 places) au sous-sol de la Maison des Arts du Grütli.",
+    venue: {
+      name: 'Maison des Arts du Grütli',
+      address: 'Rue du Général-Dufour 16, 1204 Genève',
+      phone: '+41 22 320 78 78',
+      area: 'GE', lat: 46.2001, lng: 6.1453,
+    },
+    occurrences: dailyRange('2026-06-18', '2026-08-31', 'Art & essai · ciné-clubs'),
+    priceInfo: 'CHF 14.– · Ciné Pass CHF 10.–',
+    links: [
+      { label: 'Cinémas du Grütli — programme', url: 'https://www.cinemas-du-grutli.ch/programme', kind: 'venue', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'spoutnik', slug: 'cinema-spoutnik',
+    title: 'Cinéma Spoutnik', category: 'cinema',
+    description: "Cinéma alternatif et militant fondé en 1986, logé dans L'Usine (1er étage). Films en marge des circuits commerciaux, expérimentaux et politiques. 1 salle. Payez ce que vous pouvez les mardis.",
+    venue: {
+      name: 'L\'Usine (Cinéma Spoutnik)',
+      address: '11 rue de la Coulouvrenière, 1er étage, 1204 Genève',
+      phone: '+41 22 328 09 26',
+      area: 'GE', lat: 46.2040, lng: 6.1361,
+    },
+    occurrences: dailyRange('2026-06-18', '2026-08-31', 'Cinéma alternatif · 1 salle'),
+    priceInfo: 'CHF 12.– · réduit CHF 10.– · mardi prix libre',
+    links: [
+      { label: 'Spoutnik — programme', url: 'https://spoutnik.info/', kind: 'venue', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'cinema-bio', slug: 'cinema-bio-carouge',
+    title: 'Cinéma Bio — Carouge', category: 'cinema',
+    description: "Cinéma indépendant de Carouge. Films grand public et d'auteur, documentaires, opéras filmés, séances seniors et jeune public. Grande salle 194 places + petite salle vidéo 20 places.",
+    venue: {
+      name: 'Cinéma Bio',
+      address: 'Rue Saint-Joseph 47, 1227 Carouge',
+      phone: '+41 22 301 54 43',
+      area: 'Carouge', lat: 46.1820, lng: 6.1401,
+    },
+    occurrences: dailyRange('2026-06-18', '2026-08-31', 'Ouvert lun–dim · séances dès 13h30'),
+    priceInfo: 'CHF 15.– · Ciné Pass CHF 10.–',
+    links: [
+      { label: 'Cinéma Bio — programme', url: 'https://cinema-bio.ch/programme', kind: 'venue', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'les-scala', slug: 'cinema-les-scala',
+    title: 'Les Scala', category: 'cinema',
+    description: "Cinéma indépendant des Eaux-Vives. Films en VO et VF, films d'auteur et grand public. Programmation soignée dans un cadre de quartier.",
+    venue: {
+      name: 'Les Scala',
+      address: 'Rue des Eaux-Vives 23, 1207 Genève',
+      phone: '+41 22 736 04 22',
+      area: 'GE', lat: 46.2003, lng: 6.1576,
+    },
+    occurrences: dailyRange('2026-06-18', '2026-08-31', 'VO & VF · Eaux-Vives'),
+    priceInfo: 'CHF 16.– · Ciné Pass CHF 10.–',
+    links: [
+      { label: 'Les Scala — programme', url: 'https://www.les-scala.ch/fr/a-l-affiche', kind: 'venue', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'le-city', slug: 'cinema-le-city',
+    title: 'Le City', category: 'cinema',
+    description: "Salle indépendante de la Place des Eaux-Vives. Films en VO sous-titrée, auteur et grand public. Même groupe que Les Scala et Le Nord-Sud.",
+    venue: {
+      name: 'Le City',
+      address: 'Place des Eaux-Vives 3, 1207 Genève',
+      phone: '+41 22 736 04 22',
+      area: 'GE', lat: 46.2005, lng: 6.1582,
+    },
+    occurrences: dailyRange('2026-06-18', '2026-08-31', 'VO & VF · Place Eaux-Vives'),
+    priceInfo: 'CHF 16.– · Ciné Pass CHF 10.–',
+    links: [
+      { label: 'Le City — programme', url: 'https://www.les-scala.ch/fr/a-l-affiche', kind: 'venue', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'nord-sud', slug: 'cinema-nord-sud',
+    title: 'Le Nord-Sud', category: 'cinema',
+    description: "Cinéma de quartier au cœur de la Servette depuis 1951, entièrement rénové en 2019. 2 salles (Nord + Sud). Cinéma d'auteur européen et américain, films Art & Essai.",
+    venue: {
+      name: 'Le Nord-Sud',
+      address: 'Rue de la Servette 78, 1202 Genève',
+      phone: '+41 22 736 04 22',
+      area: 'GE', lat: 46.2127, lng: 6.1368,
+    },
+    occurrences: dailyRange('2026-06-18', '2026-08-31', 'Art & essai · quartier Servette'),
+    priceInfo: 'CHF 16.– · Ciné Pass CHF 10.–',
+    links: [
+      { label: 'Le Nord-Sud — programme', url: 'https://www.les-scala.ch/fr/a-l-affiche', kind: 'venue', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'allianz-cinema', slug: 'allianz-cinema-plein-air',
+    title: 'Allianz Cinema — Cinéma en plein air', category: 'cinema',
+    description: "8 semaines de cinéma en plein air au bord du lac Léman, entre la plage des Eaux-Vives et Genève Plage. Séances chaque soir à la tombée de la nuit (~22h). Restaurant, terrasses et cocktails sur place dès 18h.",
+    venue: {
+      name: 'Place du Port-Noir',
+      address: 'Place du Port-Noir, 1207 Genève (bord du lac)',
+      area: 'GE', lat: 46.2014, lng: 6.1680,
+    },
+    occurrences: dailyRange('2026-06-29', '2026-08-24', 'Plein air · bord du lac · ~22h'),
+    priceInfo: 'CHF 16.– · Enfants (–16 ans) CHF 12.–',
+    links: [
+      { label: 'Allianz Cinema — programme 2026', url: 'https://geneve.allianzcinema.ch/fr/programmation', kind: 'venue', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'cinema-voltaire-ferney', slug: 'cinema-voltaire-ferney-voltaire',
+    title: 'Cinéma Voltaire — Ferney-Voltaire', category: 'cinema',
+    description: "Cinéma de proximité à Ferney-Voltaire (France), à 10 min de Genève. 3 salles climatisées. Films en VF et VOST, 2D et 3D. Idéal pour les frontaliers genevois.",
+    venue: {
+      name: 'Cinéma Voltaire',
+      address: '77 CCAL de la Poterie, 01210 Ferney-Voltaire (France)',
+      phone: '+33 4 50 40 84 86',
+      area: 'autour', lat: 46.2584, lng: 6.1098,
+    },
+    occurrences: dailyRange('2026-06-18', '2026-08-31', 'VF & VOST · 3 salles · Ferney-Voltaire'),
+    priceInfo: '€9.– · réduit €7.–',
+    links: [
+      { label: 'Cinéma Voltaire — programme', url: 'https://cinemavoltaire.fr/', kind: 'venue', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'pathe-archamps', slug: 'cinema-pathe-archamps',
+    title: 'Pathé Archamps — IMAX', category: 'cinema',
+    description: "Multiplex à l'ArchParc d'Archamps (France), à 15 min de Genève. 12 salles dont la seule salle IMAX LASER de la région (350 m² d'écran). Blockbusters, films en VO et VF. Accessible depuis la douane de Bardonnex.",
+    venue: {
+      name: 'Pathé Archamps',
+      address: 'Rue des Frères Lumière, ArchParc, 74160 Archamps (France)',
+      area: 'autour', lat: 46.1327, lng: 6.0878,
+    },
+    occurrences: dailyRange('2026-06-18', '2026-08-31', 'IMAX · 12 salles · Archamps'),
+    priceInfo: 'Dès €12.50 · IMAX disponible',
+    links: [
+      { label: 'Pathé Archamps — programme', url: 'https://www.pathe.ch/fr/cinemas/cinema-pathe-archamps', kind: 'venue', status: 'verified' },
+    ],
+    verif: 'confirmed',
+    g7AccessNotes: [
+      'Depuis Genève : douane Bardonnex–Saint-Julien (ouverte 24h) · ~15 min en voiture',
+      'Bus STO ligne 43/44 depuis Genève Gare Routière vers Archamps',
+    ],
+  },
+
   // ── PALÉO FESTIVAL NYON — 21–26 juillet 2026 ─────────────────────────────────
   {
     id: 'paleo-2026', slug: 'paleo-festival-nyon-2026',
@@ -994,6 +1197,7 @@ export const CATEGORY_LABELS: Record<string, string> = {
   sport:     'Sport',
   festival:  'Festival',
   football:  'Football & Mondial',
+  cinema:    'Cinéma',
 }
 
 export const CATEGORY_ICONS: Record<string, string> = {
@@ -1007,4 +1211,5 @@ export const CATEGORY_ICONS: Record<string, string> = {
   sport:     '🥊',
   festival:  '🎪',
   football:  '⚽',
+  cinema:    '🎬',
 }

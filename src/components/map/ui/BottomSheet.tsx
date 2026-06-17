@@ -2126,7 +2126,7 @@ function EventsPanel({ onSelect }: { onSelect: (slug: string) => void }) {
     return acc
   }, {})
 
-  const categoryOrder = ['festival', 'football', 'concert', 'classique', 'theatre', 'comedie', 'nightlife', 'danse', 'sport', 'art']
+  const categoryOrder = ['festival', 'football', 'cinema', 'concert', 'classique', 'theatre', 'comedie', 'nightlife', 'danse', 'sport', 'art']
   const orderedKeys   = categoryOrder.filter(k => byCategory[k]).concat(
     Object.keys(byCategory).filter(k => !categoryOrder.includes(k))
   )
