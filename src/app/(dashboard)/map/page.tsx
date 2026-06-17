@@ -181,8 +181,8 @@ export default function MapPage() {
         </div>
       )}
 
-      {/* Welcome modals — G7 zone info + features list (once per localStorage) */}
-      <WelcomeModals />
+      {/* Welcome modals — retour à la normale post-G7 (once per localStorage) */}
+      <WelcomeModals onOpenEvents={() => setActiveFilter('events')} />
 
       {/* Guest mode — welcome popup + countdown banner + expiry modal */}
       <GuestWelcomeModal />

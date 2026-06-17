@@ -98,7 +98,7 @@ export const ALL_CROSSINGS: CrossingStatic[] = [
 ]
 
 const G7_START = new Date('2026-06-11T22:01:00Z')
-const G7_END   = new Date('2026-06-18T21:59:00Z')
+const G7_END   = new Date('2026-06-19T04:00:00Z') // 06h00 heure genevoise (CEST = UTC+2)
 const G7_OPEN  = new Set(['bardonnex','thonex-vallard','moillesulaz','meyrin','ferney-voltaire','perly','anieres','saint-julien','divonne','leaz','la-cure','vallorbe','bois-d-amont','les-hopitaux-neufs','saint-Laurent','douvaine','thonon'])
 
 export function computeInstantStatus(c: CrossingStatic, now: Date): { status: BorderStatus; color: string; icon: string; waitMinutes: number } {

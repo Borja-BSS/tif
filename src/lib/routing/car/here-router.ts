@@ -48,9 +48,10 @@ interface MapboxResponse {
 
 // ── G7 / A1 date helpers ──────────────────────────────────────────────────────
 
+const G7_ROUTING_END = new Date('2026-06-19T04:00:00Z') // 06h00 heure genevoise (CEST = UTC+2)
+
 function isA1ClosurePeriod(now = new Date()): boolean {
-  const d = now.toLocaleDateString('fr-CH', { timeZone: 'Europe/Zurich' })
-  return ['14.06.2026','15.06.2026','16.06.2026','17.06.2026'].includes(d)
+  return now >= new Date('2026-06-14T00:00:00Z') && now < G7_ROUTING_END
 }
 
 function isManifestationDay(now = new Date()): boolean {
@@ -58,7 +59,7 @@ function isManifestationDay(now = new Date()): boolean {
 }
 
 function isG7Period(now = new Date()): boolean {
-  return now >= new Date('2026-06-11T22:01:00Z') && now <= new Date('2026-06-18T21:59:00Z')
+  return now >= new Date('2026-06-11T22:01:00Z') && now < G7_ROUTING_END
 }
 
 // ── Douanes ouvertes pendant G7 ───────────────────────────────────────────────
