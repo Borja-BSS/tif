@@ -20,7 +20,7 @@ export function GuestBanner() {
   const borderColor = urgency === 'red'    ? 'rgba(255,69,58,0.40)'
                     : urgency === 'orange' ? 'rgba(255,159,10,0.35)'
                     :                        'rgba(255,255,255,0.14)'
-  const timeColor   = urgency === 'red'    ? '#FF453A'
+  const timeColor   = urgency === 'red'    ? 'var(--red)'
                     : urgency === 'orange' ? '#FF9F0A'
                     :                        'rgba(255,255,255,0.55)'
 
@@ -47,7 +47,7 @@ export function GuestBanner() {
         whiteSpace:     'nowrap',
       }}
     >
-      <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.55)', lineHeight: 1 }}>
+      <span style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1 }}>
         Mode invité
       </span>
 

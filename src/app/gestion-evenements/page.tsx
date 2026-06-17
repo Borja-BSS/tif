@@ -129,7 +129,7 @@ export default function GestionEvenementsPage() {
             style={{
               display: 'inline-block',
               background: 'var(--brand)',
-              color: '#fff',
+              color: 'var(--text-primary)',
               padding: '14px 32px',
               borderRadius: 100,
               fontWeight: 700,
@@ -489,7 +489,7 @@ export default function GestionEvenementsPage() {
           style={{
             display: 'inline-block',
             background: 'var(--brand)',
-            color: '#fff',
+            color: 'var(--text-primary)',
             padding: '16px 40px',
             borderRadius: 100,
             fontWeight: 700,

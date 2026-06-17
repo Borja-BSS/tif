@@ -28,7 +28,7 @@ function routeType(route: CarRoute): RouteType {
 // ── Route paint config by type ────────────────────────────────────────────────
 const ROUTE_STYLE: Record<RouteType, { color: string; width: number; opacity: number; dasharray?: number[] }> = {
   fastest:     { color: '#0A84FF', width: 5,  opacity: 0.96 },
-  alternative: { color: 'rgba(255,255,255,0.3)', width: 3, opacity: 0.5, dasharray: [4, 3] },
+  alternative: { color: 'var(--text-tertiary)', width: 3, opacity: 0.5, dasharray: [4, 3] },
   safe:        { color: '#34C759', width: 3,  opacity: 0.85, dasharray: [5, 2] },
 }
 

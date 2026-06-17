@@ -88,18 +88,18 @@ export function CookieConsent() {
             style={{
               fontSize: '13px',
               fontWeight: 700,
-              color: 'rgba(255,255,255,0.95)',
+              color: 'var(--text-primary)',
               marginBottom: '3px',
               letterSpacing: '-0.2px',
             }}
           >
             Confidentialité &amp; Localisation
           </div>
-          <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.50)', lineHeight: 1.5 }}>
+          <div style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
             Nous collectons des données anonymes (aucune information personnelle) pour améliorer
             la plateforme. En acceptant, vous autorisez aussi la localisation GPS pour centrer
             la carte sur votre position.{' '}
-            <a href="/privacy" style={{ color: 'rgba(255,255,255,0.55)', textDecoration: 'underline' }}>
+            <a href="/privacy" style={{ color: 'var(--text-secondary)', textDecoration: 'underline' }}>
               Politique de confidentialité
             </a>
           </div>
@@ -114,7 +114,7 @@ export function CookieConsent() {
               borderRadius: '100px',
               border: '0.5px solid rgba(255,255,255,0.18)',
               background: 'rgba(255,255,255,0.07)',
-              color: 'rgba(255,255,255,0.60)',
+              color: 'var(--text-secondary)',
               fontSize: '12px',
               fontWeight: 600,
               cursor: 'pointer',
@@ -131,7 +131,7 @@ export function CookieConsent() {
               borderRadius: '100px',
               border: 'none',
               background: '#E8000E',
-              color: '#fff',
+              color: 'var(--text-primary)',
               fontSize: '12px',
               fontWeight: 700,
               cursor: 'pointer',

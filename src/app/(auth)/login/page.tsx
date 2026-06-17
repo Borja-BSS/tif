@@ -206,7 +206,7 @@ function LoginPageInner() {
 
         {/* Erreur */}
         {displayError && (
-          <p className="text-center text-[12px] mt-3" style={{ color: '#FF453A' }}>
+          <p className="text-center text-[12px] mt-3" style={{ color: 'var(--red)' }}>
             {displayError}
           </p>
         )}

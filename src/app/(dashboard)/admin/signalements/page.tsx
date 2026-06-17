@@ -14,7 +14,7 @@ const ADMIN_EMAILS = ['lostropicosbox@gmail.com', 'aruncalstas@gmail.com']
 const STATUS_META = {
   pending:  { label: 'En attente', icon: '⏳', color: '#FF9F0A', bg: 'rgba(255,159,10,0.12)',  border: 'rgba(255,159,10,0.25)' },
   approved: { label: 'Approuvé',   icon: '✓',  color: '#30D158', bg: 'rgba(52,199,89,0.12)',   border: 'rgba(52,199,89,0.25)'  },
-  rejected: { label: 'Rejeté',     icon: '✗',  color: '#FF453A', bg: 'rgba(255,59,48,0.10)',   border: 'rgba(255,59,48,0.20)'  },
+  rejected: { label: 'Rejeté',     icon: '✗',  color: 'var(--red)', bg: 'rgba(255,59,48,0.10)',   border: 'rgba(255,59,48,0.20)'  },
   disabled: { label: 'Désactivé',  icon: '⏸',  color: '#8E8E93', bg: 'rgba(142,142,147,0.12)', border: 'rgba(142,142,147,0.22)' },
 }
 
@@ -152,15 +152,15 @@ function DetailPanel({
 
           {/* Description */}
           <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 12, padding: '12px 14px' }}>
-            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Description</p>
-            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.88)', lineHeight: 1.55, margin: 0 }}>{s.description}</p>
+            <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Description</p>
+            <p style={{ fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.55, margin: 0 }}>{s.description}</p>
           </div>
 
           {/* Location */}
           {(s.lat != null && s.lng != null) && (
             <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 12, padding: '12px 14px' }}>
-              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginBottom: 6, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Localisation GPS</p>
-              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', margin: '0 0 8px' }}>
+              <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 6, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Localisation GPS</p>
+              <p style={{ fontSize: 13, color: 'var(--text-primary)', margin: '0 0 8px' }}>
                 {s.lat.toFixed(6)}, {s.lng.toFixed(6)}
               </p>
               <a
@@ -173,8 +173,8 @@ function DetailPanel({
           )}
           {!s.lat && s.address && (
             <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 12, padding: '12px 14px' }}>
-              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Adresse</p>
-              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', margin: 0 }}>📍 {s.address}</p>
+              <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Adresse</p>
+              <p style={{ fontSize: 13, color: 'var(--text-primary)', margin: 0 }}>📍 {s.address}</p>
             </div>
           )}
           {s.lat == null && (
@@ -182,7 +182,7 @@ function DetailPanel({
               <p style={{ fontSize: 11, color: '#FF9F0A', marginBottom: 8, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 ⚠️ Sans GPS — invisible sur la carte
               </p>
-              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 10, margin: '0 0 10px' }}>
+              <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 10, margin: '0 0 10px' }}>
                 Entrez les coordonnées pour que ce signalement apparaisse sur la carte après approbation.
               </p>
               <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
@@ -191,23 +191,23 @@ function DetailPanel({
                   value={coordInput.lat}
                   onChange={e => setCoordInput(v => ({ ...v, lat: e.target.value }))}
                   style={{ flex: 1, background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)',
-                    borderRadius: 8, padding: '8px 10px', fontSize: 13, color: '#fff', outline: 'none' }}
+                    borderRadius: 8, padding: '8px 10px', fontSize: 13, color: 'var(--text-primary)', outline: 'none' }}
                 />
                 <input
                   type="number" step="0.000001" placeholder="Longitude ex: 6.1432"
                   value={coordInput.lng}
                   onChange={e => setCoordInput(v => ({ ...v, lng: e.target.value }))}
                   style={{ flex: 1, background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)',
-                    borderRadius: 8, padding: '8px 10px', fontSize: 13, color: '#fff', outline: 'none' }}
+                    borderRadius: 8, padding: '8px 10px', fontSize: 13, color: 'var(--text-primary)', outline: 'none' }}
                 />
               </div>
-              {coordError && <p style={{ fontSize: 11, color: '#FF453A', margin: '0 0 8px' }}>{coordError}</p>}
+              {coordError && <p style={{ fontSize: 11, color: 'var(--red)', margin: '0 0 8px' }}>{coordError}</p>}
               <button
                 onClick={saveCoords}
                 disabled={coordSaving || !coordInput.lat || !coordInput.lng}
                 style={{ width: '100%', padding: '9px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
                   background: coordSaving ? 'rgba(255,255,255,0.1)' : 'rgba(10,132,255,0.85)',
-                  color: '#fff', fontSize: 13, fontWeight: 600 }}>
+                  color: 'var(--text-primary)', fontSize: 13, fontWeight: 600 }}>
                 {coordSaving ? 'Sauvegarde…' : 'Sauvegarder les coordonnées'}
               </button>
             </div>
@@ -216,7 +216,7 @@ function DetailPanel({
           {/* Dates */}
           <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 12, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 6 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>Signalé</span>
+              <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>Signalé</span>
               <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)' }}>{fmt(s.createdAt)}</span>
             </div>
             {s.approvedAt && (
@@ -244,7 +244,7 @@ function DetailPanel({
           {/* Media */}
           {s.mediaUrls && s.mediaUrls.length > 0 && (
             <div>
-              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginBottom: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Pièces jointes ({s.mediaUrls.length})
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
@@ -257,7 +257,7 @@ function DetailPanel({
                     {isVideo(url) ? (
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
                         <span style={{ fontSize: 28 }}>▶️</span>
-                        <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>Vidéo</span>
+                        <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>Vidéo</span>
                       </div>
                     ) : (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -285,7 +285,7 @@ function DetailPanel({
                   disabled={isActing}
                   style={{ flex: 1, padding: '13px 0', borderRadius: 14, border: 'none', cursor: 'pointer',
                     background: isActing ? 'rgba(255,59,48,0.06)' : 'rgba(255,59,48,0.12)',
-                    color: '#FF453A', fontSize: 14, fontWeight: 700 }}>
+                    color: 'var(--red)', fontSize: 14, fontWeight: 700 }}>
                   ✗ Rejeter
                 </button>
               </div>
@@ -328,7 +328,7 @@ function DetailPanel({
               disabled={isActing}
               style={{ width: '100%', padding: '13px 0', borderRadius: 14, border: 'none', cursor: 'pointer',
                 background: isActing ? 'rgba(255,59,48,0.04)' : 'rgba(255,59,48,0.08)',
-                color: '#FF453A', fontSize: 14, fontWeight: 600 }}>
+                color: 'var(--red)', fontSize: 14, fontWeight: 600 }}>
               🗑️ Supprimer définitivement
             </button>
           </div>
@@ -434,7 +434,7 @@ export default function SignalementsAdmin() {
   if (!isAdmin) return null
 
   return (
-    <div className="min-h-screen" style={{ background: '#0a0a0a', color: 'rgba(255,255,255,0.92)' }}>
+    <div className="min-h-screen" style={{ background: '#0a0a0a', color: 'var(--text-primary)' }}>
 
       {/* Header */}
       <div className="sticky top-0 z-10 px-4 py-4 flex items-center gap-3 border-b"
@@ -447,11 +447,11 @@ export default function SignalementsAdmin() {
           </svg>
         </button>
         <div className="flex-1">
-          <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.35)' }}>Admin</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>Admin</p>
           <p className="text-[15px] font-bold">Signalements</p>
         </div>
         {pendingCount > 0 && (
-          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(255,59,48,0.20)', color: '#FF453A' }}>
+          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(255,59,48,0.20)', color: 'var(--red)' }}>
             {pendingCount} en attente
           </span>
         )}
@@ -495,7 +495,7 @@ export default function SignalementsAdmin() {
         {!loading && shown.length === 0 && (
           <div className="text-center py-16">
             <p className="text-3xl mb-3">📭</p>
-            <p className="text-[14px] font-semibold" style={{ color: 'rgba(255,255,255,0.50)' }}>Aucun signalement</p>
+            <p className="text-[14px] font-semibold" style={{ color: 'var(--text-secondary)' }}>Aucun signalement</p>
           </div>
         )}
 
@@ -519,10 +519,10 @@ export default function SignalementsAdmin() {
                       <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: catObj?.color ?? '#fff' }}>
                         {catObj?.label}
                       </span>
-                      <span className="text-[11px]" style={{ color: 'rgba(255,255,255,0.40)' }}>·</span>
-                      <span className="text-[11px]" style={{ color: 'rgba(255,255,255,0.60)' }}>{s.subcategory}</span>
+                      <span className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>·</span>
+                      <span className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{s.subcategory}</span>
                     </div>
-                    <p className="text-[13px] font-semibold leading-snug line-clamp-2" style={{ color: 'rgba(255,255,255,0.88)' }}>{s.description}</p>
+                    <p className="text-[13px] font-semibold leading-snug line-clamp-2" style={{ color: 'var(--text-primary)' }}>{s.description}</p>
                   </div>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0"
                     style={{ background: `${priColor}18`, color: priColor, border: `1px solid ${priColor}35` }}>
@@ -532,13 +532,13 @@ export default function SignalementsAdmin() {
 
                 <div className="flex items-center gap-3 flex-wrap">
                   {(s.lat != null && s.lng != null) ? (
-                    <span className="text-[11px]" style={{ color: 'rgba(255,255,255,0.40)' }}>
+                    <span className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
                       📍 {s.lat.toFixed(4)}, {s.lng.toFixed(4)}
                     </span>
                   ) : s.address ? (
-                    <span className="text-[11px]" style={{ color: 'rgba(255,255,255,0.40)' }}>📍 {s.address}</span>
+                    <span className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>📍 {s.address}</span>
                   ) : null}
-                  <span className="text-[11px]" style={{ color: 'rgba(255,255,255,0.30)' }}>{timeAgo(s.createdAt)}</span>
+                  <span className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>{timeAgo(s.createdAt)}</span>
                   {s.expiresAt && (
                     <span className="text-[10px]" style={{ color: new Date(s.expiresAt).getTime() - Date.now() < 600000 ? '#FF9500' : 'rgba(255,255,255,0.25)' }}>
                       ⏱ {timeRemaining(s.expiresAt)}

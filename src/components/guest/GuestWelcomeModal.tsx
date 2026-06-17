@@ -46,7 +46,7 @@ export function GuestWelcomeModal() {
         <div style={{ fontSize: '38px', marginBottom: '14px', lineHeight: 1, textAlign: 'center' }}>👋</div>
 
         <h2 style={{
-          color:         'rgba(255,255,255,0.92)',
+          color: 'var(--text-primary)',
           fontSize:      '19px',
           fontWeight:    700,
           marginBottom:  '8px',
@@ -58,13 +58,13 @@ export function GuestWelcomeModal() {
         </h2>
 
         <p style={{
-          color:        'rgba(255,255,255,0.50)',
+          color: 'var(--text-secondary)',
           fontSize:     '13px',
           lineHeight:   1.55,
           marginBottom: '22px',
           textAlign:    'center',
         }}>
-          Vous avez <strong style={{ color: 'rgba(255,255,255,0.75)' }}>10 minutes</strong> pour explorer la carte live. Créez un compte pour accéder à toutes les fonctionnalités.
+          Vous avez <strong style={{ color: 'var(--text-primary)' }}>10 minutes</strong> pour explorer la carte live. Créez un compte pour accéder à toutes les fonctionnalités.
         </p>
 
         <div style={{ marginBottom: '22px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -80,8 +80,8 @@ export function GuestWelcomeModal() {
             }}>
               <span style={{ fontSize: '18px', lineHeight: 1, marginTop: '1px', flexShrink: 0 }}>{f.icon}</span>
               <div>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.80)', marginBottom: '2px' }}>{f.label}</div>
-                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.38)', lineHeight: 1.4 }}>{f.desc}</div>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '2px' }}>{f.label}</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-tertiary)', lineHeight: 1.4 }}>{f.desc}</div>
               </div>
               <span style={{
                 marginLeft:   'auto',
@@ -124,7 +124,7 @@ export function GuestWelcomeModal() {
             onClick={dismissWelcome}
             style={{
               background:   'transparent',
-              color:        'rgba(255,255,255,0.38)',
+              color: 'var(--text-tertiary)',
               border:       '1px solid rgba(255,255,255,0.10)',
               borderRadius: '13px',
               padding:      '13px',

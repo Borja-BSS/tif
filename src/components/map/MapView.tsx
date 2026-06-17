@@ -156,14 +156,14 @@ function TransportLegend() {
                 strokeDasharray={item.dashed ? '4 2' : undefined}
               />
             </svg>
-            <span className="text-[10px] font-medium" style={{ color: 'rgba(255,255,255,0.65)' }}>
+            <span className="text-[10px] font-medium" style={{ color: 'var(--text-secondary)' }}>
               {item.label}
             </span>
           </div>
         ))}
         <div className="flex items-center gap-2 border-t pt-1 mt-0.5" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
           <span className="text-[10px]">🚧</span>
-          <span className="text-[10px] font-medium" style={{ color: 'rgba(255,255,255,0.55)' }}>
+          <span className="text-[10px] font-medium" style={{ color: 'var(--text-secondary)' }}>
             {t.mapView.stopDisruption}
           </span>
         </div>

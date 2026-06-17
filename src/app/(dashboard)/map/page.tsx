@@ -170,8 +170,8 @@ export default function MapPage() {
               boxShadow: '0 16px 48px rgba(0,0,0,0.55)',
             }}>
             <p className="text-3xl mb-1">🙏</p>
-            <p className="text-[16px] font-bold mb-0.5" style={{ color: 'rgba(255,255,255,0.95)' }}>Merci pour votre signalement !</p>
-            <p className="text-[12px] mb-3" style={{ color: 'rgba(255,255,255,0.50)' }}>Il sera examiné et publié si pertinent.</p>
+            <p className="text-[16px] font-bold mb-0.5" style={{ color: 'var(--text-primary)' }}>Merci pour votre signalement !</p>
+            <p className="text-[12px] mb-3" style={{ color: 'var(--text-secondary)' }}>Il sera examiné et publié si pertinent.</p>
             <a href="/donate"
               className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-[12px] font-semibold pointer-events-auto active:scale-95 transition-transform"
               style={{ background: 'rgba(52,199,89,0.15)', border: '1px solid rgba(52,199,89,0.35)', color: '#30D158' }}>

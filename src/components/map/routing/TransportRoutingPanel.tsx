@@ -334,7 +334,7 @@ export function TransportRoutingPanel({ map, onClose }: TransportRoutingPanelPro
                     {route.summary.disrupted && (
                       <span
                         className="text-[10px] px-1.5 py-0.5 rounded-full"
-                        style={{ background: 'rgba(255,69,58,0.15)', color: '#FF453A' }}
+                        style={{ background: 'rgba(255,69,58,0.15)', color: 'var(--red)' }}
                       >
                         {t.transit.disruption}
                       </span>

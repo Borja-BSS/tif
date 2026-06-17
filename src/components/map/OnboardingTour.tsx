@@ -233,15 +233,15 @@ export function OnboardingTour({ onDone }: Props) {
           <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg,#0A84FF,#5E5CE6)', borderRadius: 3, transition: 'width 0.35s ease' }}/>
         </div>
 
-        <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.32)', marginBottom: 6, fontWeight: 500 }}>
+        <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 6, fontWeight: 500 }}>
           Étape {idx + 1} / {STEPS.length}
         </p>
 
-        <p style={{ fontSize: 15, fontWeight: 700, color: '#fff', marginBottom: 8, lineHeight: 1.3 }}>
+        <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8, lineHeight: 1.3 }}>
           {step.title}
         </p>
 
-        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.62)', lineHeight: 1.55, marginBottom: 16 }}>
+        <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.55, marginBottom: 16 }}>
           {step.body}
         </p>
 
@@ -269,7 +269,7 @@ export function OnboardingTour({ onDone }: Props) {
                 flex: 1, padding: '10px 0', borderRadius: 12,
                 background: 'rgba(255,255,255,0.05)',
                 border: '1px solid rgba(255,255,255,0.10)',
-                color: 'rgba(255,255,255,0.42)', fontSize: 13,
+                color: 'var(--text-tertiary)', fontSize: 13,
                 fontWeight: 600, cursor: 'pointer',
               }}
             >
@@ -294,7 +294,7 @@ export function OnboardingTour({ onDone }: Props) {
                 padding: '10px 14px', borderRadius: 12,
                 background: 'rgba(255,255,255,0.04)',
                 border: '1px solid rgba(255,255,255,0.10)',
-                color: 'rgba(255,255,255,0.36)', fontSize: 12,
+                color: 'var(--text-tertiary)', fontSize: 12,
                 cursor: 'pointer',
               }}
             >

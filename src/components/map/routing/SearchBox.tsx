@@ -17,9 +17,9 @@ interface SearchBoxProps {
 
 // Type-specific styling for search results
 const TYPE_CONFIG: Record<SearchResult['type'], { icon: string; color: string }> = {
-  address: { icon: '📍', color: 'rgba(255,255,255,0.35)' },
-  place:   { icon: '🏢', color: 'rgba(255,255,255,0.35)' },
-  street:  { icon: '🛣️', color: 'rgba(255,255,255,0.35)' },
+  address: { icon: '📍', color: 'var(--text-tertiary)' },
+  place:   { icon: '🏢', color: 'var(--text-tertiary)' },
+  street:  { icon: '🛣️', color: 'var(--text-tertiary)' },
   station: { icon: '🚉', color: 'rgba(50,215,75,0.9)' },   // green for transit stops
 }
 
@@ -187,7 +187,7 @@ export function SearchBox({
                 <div className="text-sm font-semibold" style={{ color: '#0A84FF' }}>
                   {t.searchBox.gpsTitle}
                 </div>
-                <div className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
                   {t.searchBox.gpsSub}
                 </div>
               </div>
@@ -221,11 +221,11 @@ export function SearchBox({
                 </span>
 
                 <div className="min-w-0 flex-1">
-                  <div className="text-sm font-medium truncate" style={{ color: 'rgba(255,255,255,0.88)' }}>
+                  <div className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
                     {highlightMatch(result.title, query)}
                   </div>
                   {result.subtitle && (
-                    <div className="text-xs truncate mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                    <div className="text-xs truncate mt-0.5" style={{ color: 'var(--text-tertiary)' }}>
                       {result.subtitle}
                     </div>
                   )}
@@ -257,7 +257,7 @@ function highlightMatch(title: string, query: string): React.ReactNode {
   return (
     <>
       {title.slice(0, idx)}
-      <strong style={{ color: 'rgba(255,255,255,1)', fontWeight: 600 }}>
+      <strong style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
         {title.slice(idx, idx + query.length)}
       </strong>
       {title.slice(idx + query.length)}

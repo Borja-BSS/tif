@@ -85,7 +85,7 @@ export function DisruptionsPanel() {
                     </span>
                     <span className="text-xs text-white/50 capitalize">{d.type}</span>
                   </div>
-                  <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.75)' }}>
+                  <p className="text-xs leading-relaxed" style={{ color: 'var(--text-primary)' }}>
                     {d.description}
                   </p>
                 </div>
@@ -115,7 +115,7 @@ export function DisruptionsPanel() {
                       </span>
                     )}
                   </div>
-                  <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.75)' }}>
+                  <p className="text-xs leading-relaxed" style={{ color: 'var(--text-primary)' }}>
                     {d.description}
                   </p>
                 </div>

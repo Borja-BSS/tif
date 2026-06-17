@@ -100,7 +100,7 @@ function NavModal({ pending, origin, onClose }: {
       >
         <p
           className="text-xs font-semibold uppercase tracking-wider text-center"
-          style={{ color: 'rgba(255,255,255,0.4)' }}
+          style={{ color: 'var(--text-tertiary)' }}
         >
           Ouvrir dans…
         </p>
@@ -117,7 +117,7 @@ function NavModal({ pending, origin, onClose }: {
           <span className="text-xl">🗺️</span>
           <div className="flex-1 text-left">
             <p className="text-sm font-semibold text-white">Google Maps</p>
-            <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.45)' }}>
+            <p className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
               Avec la route exacte {pending.waypoints?.length ? '(waypoints inclus)' : ''}
             </p>
           </div>
@@ -134,7 +134,7 @@ function NavModal({ pending, origin, onClose }: {
             <span className="text-xl">🍎</span>
             <div className="flex-1 text-left">
               <p className="text-sm font-semibold text-white">Plans</p>
-              <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.45)' }}>Apple Maps · iOS uniquement</p>
+              <p className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>Apple Maps · iOS uniquement</p>
             </div>
           </a>
         )}
@@ -152,7 +152,7 @@ function NavModal({ pending, origin, onClose }: {
             <span className="text-xl">🚗</span>
             <div className="flex-1 text-left">
               <p className="text-sm font-semibold text-white">Waze</p>
-              <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.45)' }}>Navigation communautaire</p>
+              <p className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>Navigation communautaire</p>
             </div>
           </a>
         ) : (
@@ -169,7 +169,7 @@ function NavModal({ pending, origin, onClose }: {
             <span className="text-xl">🚌</span>
             <div className="flex-1 text-left">
               <p className="text-sm font-semibold text-white">App TPG</p>
-              <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.45)' }}>Horaires & billets TPG</p>
+              <p className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>Horaires & billets TPG</p>
             </div>
           </a>
         )}
@@ -177,7 +177,7 @@ function NavModal({ pending, origin, onClose }: {
         <button
           onClick={onClose}
           className="w-full py-2.5 text-sm text-center rounded-2xl active:scale-[0.98]"
-          style={{ color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.04)' }}
+          style={{ color: 'var(--text-tertiary)', background: 'rgba(255,255,255,0.04)' }}
         >
           Annuler
         </button>
@@ -444,7 +444,7 @@ export default function SearchHandle({ map }: SearchHandleProps) {
             />
             <button onClick={() => setEditingOrigin(false)}
               className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center"
-              style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.4)' }}>
+              style={{ background: 'rgba(255,255,255,0.08)', color: 'var(--text-tertiary)' }}>
               <svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M1 1l8 8M9 1L1 9"/></svg>
             </button>
           </div>
@@ -457,7 +457,7 @@ export default function SearchHandle({ map }: SearchHandleProps) {
                 className="flex items-center gap-1.5 w-full text-left mb-0.5 active:opacity-60"
               >
                 <span className="text-[10px]">🔵</span>
-                <span className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                <span className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>
                   {origin?.title ?? 'Modifier le départ…'}
                 </span>
                 <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2.5" strokeLinecap="round" className="flex-shrink-0">
@@ -466,13 +466,13 @@ export default function SearchHandle({ map }: SearchHandleProps) {
               </button>
               <div className="flex items-center gap-1.5">
                 <span className="text-[10px]">🔴</span>
-                <span className="text-xs font-semibold truncate" style={{ color: 'rgba(255,255,255,0.85)' }}>
+                <span className="text-xs font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
                   {destination?.title ?? '?'}
                 </span>
               </div>
             </div>
             <button onClick={reset} className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center"
-              style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.4)' }}>
+              style={{ background: 'rgba(255,255,255,0.08)', color: 'var(--text-tertiary)' }}>
               <svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M1 1l8 8M9 1L1 9"/></svg>
             </button>
           </div>
@@ -683,7 +683,7 @@ export default function SearchHandle({ map }: SearchHandleProps) {
                           G7
                         </span>
                       )}
-                      <span className="text-xs font-semibold" style={{ color: route.summary.disrupted ? '#FF453A' : '#34C759' }}>
+                      <span className="text-xs font-semibold" style={{ color: route.summary.disrupted ? 'var(--red)' : '#34C759' }}>
                         {fmt(route.summary.duration)}
                       </span>
                     </div>
@@ -696,7 +696,7 @@ export default function SearchHandle({ map }: SearchHandleProps) {
                         color: leg.type === 'ceva' ? '#AF52DE' : leg.type === 'cff' ? '#0A84FF' : '#FF9F0A',
                       }}>
                         {leg.line}
-                        {leg.disrupted && <span className="ml-0.5 text-[8px]" style={{ color: '#FF453A' }}>⚠</span>}
+                        {leg.disrupted && <span className="ml-0.5 text-[8px]" style={{ color: 'var(--red)' }}>⚠</span>}
                       </span>
                     ))}
                     {route.summary.transfers > 0 && (

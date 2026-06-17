@@ -31,7 +31,7 @@ export default function MapControls({ filters, onChange }: MapControlsProps) {
     { key: 'heatmap'   as keyof FilterState, icon: '🚦', label: t.layers.traffic,  accent: '#0A84FF'  },
     { key: 'transport' as keyof FilterState, icon: '🚌', label: t.layers.tpg,      accent: '#34C759'  },
     { key: 'territory' as keyof FilterState, icon: '🗺️', label: t.layers.zones,    accent: '#FFD60A'  },
-    { key: 'alerts'    as keyof FilterState, icon: '⚠️', label: t.layers.alerts,   accent: '#FF453A'  },
+    { key: 'alerts'    as keyof FilterState, icon: '⚠️', label: t.layers.alerts,   accent: 'var(--red)'  },
   ]
 
   const toggle = (key: keyof FilterState) => onChange({ ...filters, [key]: !filters[key] })
@@ -64,7 +64,7 @@ export default function MapControls({ filters, onChange }: MapControlsProps) {
           <button
             onClick={() => setExpanded(false)}
             className="w-8 h-6 flex items-center justify-center rounded-full mb-0.5 transition-colors active:bg-white/10"
-            style={{ color: 'rgba(255,255,255,0.25)' }}
+            style={{ color: 'var(--text-tertiary)' }}
           >
             <svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
               <path d="M1 5l4-4 4 4"/>
@@ -123,7 +123,7 @@ export default function MapControls({ filters, onChange }: MapControlsProps) {
           {territoryTooltip && (
             <div
               className="absolute left-full ml-2 bottom-0 w-56 p-3 rounded-2xl z-50 text-[11px] leading-relaxed"
-              style={{ ...LG_STYLE, color: 'rgba(255,255,255,0.65)' }}
+              style={{ ...LG_STYLE, color: 'var(--text-secondary)' }}
               onClick={() => setTerritoryTooltip(false)}
             >
               <div className="font-semibold text-amber-400 mb-1">{t.layers.zonesG7Title}</div>

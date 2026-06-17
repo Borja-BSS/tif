@@ -167,7 +167,7 @@ export default function VoteToast() {
             <p style={{ fontSize: 12, fontWeight: 700, color: cat?.color ?? '#fff', margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               {cat?.label ?? target.category}
             </p>
-            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.78)', margin: 0, lineHeight: 1.4 }}>
+            <p style={{ fontSize: 13, color: 'var(--text-primary)', margin: 0, lineHeight: 1.4 }}>
               {target.description.slice(0, 80)}{target.description.length > 80 ? '…' : ''}
             </p>
           </div>
@@ -180,7 +180,7 @@ export default function VoteToast() {
             }}>×</button>
         </div>
 
-        <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', margin: '0 0 10px' }}>
+        <p style={{ fontSize: 11, color: 'var(--text-tertiary)', margin: '0 0 10px' }}>
           Tu es à proximité — c'est toujours vrai ?
         </p>
 
@@ -202,7 +202,7 @@ export default function VoteToast() {
             style={{
               flex: 1, padding: '10px 0', borderRadius: 12, border: 'none', cursor: 'pointer',
               background: voting ? 'rgba(255,59,48,0.04)' : 'rgba(255,59,48,0.10)',
-              color: '#FF453A', fontSize: 13, fontWeight: 700,
+              color: 'var(--red)', fontSize: 13, fontWeight: 700,
             }}>
             ❌ Signaler faux
           </button>

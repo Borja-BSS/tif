@@ -41,14 +41,14 @@ export function G7Banner() {
               {g7.suspendedLines.length > 0 &&
                 ` ${g7.suspendedLines.length > 1 ? t.banner.lineSuppPrefixP : t.banner.lineSuppPrefixS} ${g7.suspendedLines.join(', ')} ${g7.suspendedLines.length > 1 ? t.banner.lineSuppSuffixP : t.banner.lineSuppSuffixS}`}
             </p>
-            <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
-              {t.banner.infoPrefix}<span style={{ color: 'rgba(255,255,255,0.65)' }}>{g7.hotline}</span>
+            <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>
+              {t.banner.infoPrefix}<span style={{ color: 'var(--text-secondary)' }}>{g7.hotline}</span>
             </p>
           </div>
           <button
             onClick={() => setDismissed(true)}
             className="text-xl leading-none flex-shrink-0 mt-0.5 transition-opacity hover:opacity-70"
-            style={{ color: 'rgba(255,255,255,0.35)' }}
+            style={{ color: 'var(--text-tertiary)' }}
             aria-label="Fermer"
           >
             ×

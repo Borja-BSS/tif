@@ -317,7 +317,7 @@ export default function AdminCrossingsPage() {
                         boxShadow: ov ? `0 0 6px ${color}` : 'none',
                       }}
                     />
-                    <span className="text-[12px] truncate flex-1" style={{ color: 'rgba(255,255,255,0.8)' }}>
+                    <span className="text-[12px] truncate flex-1" style={{ color: 'var(--text-primary)' }}>
                       {c.name}
                     </span>
                     {ov && (

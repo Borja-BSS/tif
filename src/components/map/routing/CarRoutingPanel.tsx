@@ -338,7 +338,7 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
           {hasG7LongerNotice && !openCrossingLabel && (
             <div className="mt-1.5 flex items-center gap-1">
               <span className="text-[9px]" style={{ color: 'rgba(255,159,10,0.7)' }}>ℹ</span>
-              <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.25)' }}>
+              <span className="text-[9px]" style={{ color: 'var(--text-tertiary)' }}>
                 A1 fermée — itinéraire sans autoroute, délai possible
               </span>
             </div>
@@ -415,8 +415,8 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
             style={{ background: 'rgba(255,69,58,0.14)', border: '1px solid rgba(255,69,58,0.40)' }}>
             <span className="text-base flex-shrink-0">⛔</span>
             <div>
-              <p className="text-[12px] font-bold" style={{ color: '#FF453A' }}>A1 fermée 14–17 juin</p>
-              <p className="text-[11px] mt-0.5" style={{ color: 'rgba(255,255,255,0.55)' }}>
+              <p className="text-[12px] font-bold" style={{ color: 'var(--red)' }}>A1 fermée 14–17 juin</p>
+              <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>
                 Itinéraires calculés sans autoroute. Prévoir des délais supplémentaires.
               </p>
             </div>
@@ -453,7 +453,7 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
             <span className="text-xs text-white/45">{t.car.calculating}</span>
           </div>
         )}
-        {error && <div className="px-4 pb-3 text-xs" style={{ color: '#FF453A' }}>{error}</div>}
+        {error && <div className="px-4 pb-3 text-xs" style={{ color: 'var(--red)' }}>{error}</div>}
 
         {routes.length > 0 && !loading && (
           <div className="pb-3">
@@ -523,8 +523,8 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
                 style={{ background: 'rgba(255,69,58,0.14)', border: '1px solid rgba(255,69,58,0.40)' }}>
                 <span className="text-base flex-shrink-0">⛔</span>
                 <div>
-                  <p className="text-[12px] font-bold" style={{ color: '#FF453A' }}>A1 fermée 14–17 juin</p>
-                  <p className="text-[11px] mt-0.5" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                  <p className="text-[12px] font-bold" style={{ color: 'var(--red)' }}>A1 fermée 14–17 juin</p>
+                  <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>
                     Itinéraires calculés sans autoroute. Prévoir des délais supplémentaires.
                   </p>
                 </div>
@@ -561,7 +561,7 @@ export function CarRoutingPanel({ map, onClose }: CarRoutingPanelProps) {
                 <span className="text-xs text-white/45">{t.car.calculating}</span>
               </div>
             )}
-            {error && <div className="px-4 pb-3 text-xs" style={{ color: '#FF453A' }}>{error}</div>}
+            {error && <div className="px-4 pb-3 text-xs" style={{ color: 'var(--red)' }}>{error}</div>}
 
             {routes.length > 0 && !loading && (
               <div className="pb-3">

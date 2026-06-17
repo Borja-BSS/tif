@@ -490,7 +490,7 @@ export default function AdminAlertsPage() {
                         <span className="text-[10px] font-semibold" style={{ color: statusStyle.text }}>{statusStyle.label}</span>
                       </div>
                       {a.description && (
-                        <p className="text-[11px] mt-0.5 truncate" style={{ color: 'rgba(255,255,255,0.45)' }}>{a.description}</p>
+                        <p className="text-[11px] mt-0.5 truncate" style={{ color: 'var(--text-tertiary)' }}>{a.description}</p>
                       )}
                       {(() => {
                         if (!a.source) return null
@@ -511,10 +511,10 @@ export default function AdminAlertsPage() {
                         } catch { return null }
                       })()}
                       <div className="flex items-center gap-3 mt-1 flex-wrap">
-                        <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                        <span className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>
                           {fmtDate(a.activeFrom)}{a.activeTo ? ` → ${fmtDate(a.activeTo)}` : ' → ∞'}
                         </span>
-                        <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.2)' }}>
+                        <span className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>
                           {a.lat.toFixed(4)}, {a.lng.toFixed(4)}{a.radius ? ` · r=${a.radius}m` : ''}
                         </span>
                       </div>

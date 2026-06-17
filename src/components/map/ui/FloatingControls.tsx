@@ -249,7 +249,7 @@ export function FloatingControls({ map }: FloatingControlsProps) {
                   window.location.href = '/signaler'
                 }}
                 className="w-full flex items-center justify-center gap-2 rounded-2xl py-3.5 font-bold text-[14px] active:scale-[0.97] transition-transform"
-                style={{ background: 'linear-gradient(135deg, #FF453A, #FF2D55)', color: '#fff', boxShadow: '0 4px 16px rgba(255,59,48,0.35)' }}>
+                style={{ background: 'var(--red)', color: '#fff', boxShadow: '0 4px 16px var(--red-glow)' }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                   <polygon points="3 11 22 2 13 21 11 13 3 11"/>
                 </svg>
@@ -302,7 +302,7 @@ export function FloatingControls({ map }: FloatingControlsProps) {
             ...BTN_BASE,
             background: showReportModal ? 'rgba(255,59,48,0.22)' : 'rgba(255,59,48,0.12)',
             border: `0.5px solid ${showReportModal ? 'rgba(255,59,48,0.70)' : 'rgba(255,59,48,0.45)'}`,
-            color: '#FF453A',
+            color: 'var(--red)',
           }}
           aria-label="Signaler un événement">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">

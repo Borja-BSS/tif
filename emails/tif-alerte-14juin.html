@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:v="urn:schemas-microsoft-com:vml">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>TIF — Alerte Genève · 14 juin 2026</title>
+  <!--[if mso]>
+  <noscript>
+    <xml><o:OfficeDocumentSettings>
+      <o:PixelsPerInch>96</o:PixelsPerInch>
+    </o:OfficeDocumentSettings></xml>
+  </noscript>
+  <![endif]-->
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      background-color: #0a0a0a;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      color: #ffffff;
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrapper  { width:100%; background-color:#0a0a0a; padding:24px 0 48px; }
+    .container { max-width:600px; margin:0 auto; padding:0 20px; }
+
+    .header {
+      background: linear-gradient(135deg, #0d0d10 0%, #111118 100%);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 32px 32px 28px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .logo      { font-size:32px; font-weight:900; letter-spacing:-0.04em; color:#fff; margin-bottom:4px; }
+    .logo-sub  { font-size:11px; font-weight:500; letter-spacing:0.2em; text-transform:uppercase; color:rgba(255,255,255,0.35); margin-bottom:24px; }
+
+    .alert-banner  { background:rgba(255,69,58,0.12); border:1px solid rgba(255,69,58,0.4); border-radius:14px; padding:16px 20px; margin-bottom:20px; }
+    .alert-badge   { display:inline-block; background:#FF453A; color:#fff; font-size:10px; font-weight:800; letter-spacing:0.15em; text-transform:uppercase; padding:4px 10px; border-radius:100px; margin-bottom:10px; }
+    .alert-title   { font-size:22px; font-weight:800; letter-spacing:-0.02em; color:#fff; line-height:1.2; margin-bottom:8px; }
+    .alert-subtitle { font-size:14px; color:rgba(255,255,255,0.6); line-height:1.5; }
+
+    .btn-primary   { display:inline-block; background:#0A84FF; color:#fff !important; text-decoration:none; font-size:14px; font-weight:700; padding:12px 28px; border-radius:100px; letter-spacing:0.01em; }
+    .btn-secondary { display:inline-block; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:#fff !important; text-decoration:none; font-size:14px; font-weight:600; padding:11px 24px; border-radius:100px; margin-left:10px; }
+
+    .signal-box  { background:linear-gradient(135deg,rgba(10,132,255,0.15),rgba(10,132,255,0.08)); border:1px solid rgba(10,132,255,0.4); border-radius:16px; padding:20px 24px; margin-bottom:16px; text-align:center; }
+    .signal-icon  { font-size:28px; margin-bottom:8px; }
+    .signal-title { font-size:17px; font-weight:700; color:#fff; margin-bottom:6px; }
+    .signal-desc  { font-size:13px; color:rgba(255,255,255,0.55); line-height:1.5; margin-bottom:16px; }
+
+    .share-box   { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:16px; padding:20px 24px; margin-bottom:16px; text-align:center; }
+    .share-title { font-size:15px; font-weight:700; color:#fff; margin-bottom:6px; }
+    .share-desc  { font-size:12px; color:rgba(255,255,255,0.45); margin-bottom:14px; line-height:1.5; }
+    .share-links a { display:inline-block; color:rgba(255,255,255,0.7) !important; text-decoration:none; font-size:12px; font-weight:600; padding:8px 14px; border-radius:100px; border:1px solid rgba(255,255,255,0.1); margin:4px; }
+
+    .section        { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:16px; padding:20px 24px; margin-bottom:12px; }
+    .section-header { display:flex; align-items:center; gap:8px; margin-bottom:14px; }
+    .section-icon   { font-size:18px; }
+    .section-title  { font-size:13px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.5); }
+
+    .item           { padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05); }
+    .item:last-child { border-bottom:none; }
+    .item-dot       { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:8px; vertical-align:middle; }
+    .item-text      { font-size:13px; color:rgba(255,255,255,0.8); line-height:1.5; }
+    .item-text strong { color:#fff; }
+    .item-badge     { display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:100px; margin-left:6px; vertical-align:middle; }
+
+    .donation-box   { background:linear-gradient(135deg,rgba(48,209,88,0.1),rgba(48,209,88,0.05)); border:1px solid rgba(48,209,88,0.25); border-radius:16px; padding:24px; margin-bottom:12px; text-align:center; }
+    .donation-icon  { font-size:28px; margin-bottom:8px; }
+    .donation-title { font-size:17px; font-weight:700; color:#fff; margin-bottom:8px; }
+    .donation-desc  { font-size:13px; color:rgba(255,255,255,0.55); line-height:1.6; margin-bottom:18px; }
+    .btn-donate     { display:inline-block; background:#30D158; color:#000 !important; text-decoration:none; font-size:14px; font-weight:800; padding:13px 32px; border-radius:100px; }
+
+    .footer      { text-align:center; padding:24px 0 0; }
+    .footer-text { font-size:11px; color:rgba(255,255,255,0.2); line-height:1.7; }
+    .footer-text a { color:rgba(255,255,255,0.35) !important; text-decoration:none; }
+
+    @media (max-width:480px) {
+      .container { padding:0 12px; }
+      .header    { padding:24px 20px; }
+      .alert-title { font-size:19px; }
+      .btn-secondary { display:block; margin:10px auto 0; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">TIF</div>
+    <div class="logo-sub">Territorial Intelligence Fabric · Grand Genève</div>
+
+    <div class="alert-banner">
+      <div class="alert-badge">⚠️ Alerte active — Dimanche 14 juin 2026</div>
+      <div class="alert-title">Situation critique à Genève aujourd'hui</div>
+      <div class="alert-subtitle">
+        Manifestation NO-G7 · Réseau TPG fortement perturbé ·
+        Restrictions de circulation · Parc Mon Repos 15h–22h30
+      </div>
+    </div>
+
+    <a href="https://tif.borja-swiss-solutions.ch/map" class="btn-primary">Voir la carte en direct →</a>
+    <a href="https://tif.borja-swiss-solutions.ch/map" class="btn-secondary">Ouvrir TIF</a>
+  </div>
+
+  <!-- SIGNALEMENT -->
+  <div class="signal-box">
+    <div class="signal-icon">📡</div>
+    <div class="signal-title">Envoyez vos signalements en direct</div>
+    <div class="signal-desc">
+      Vous êtes sur le terrain ? Signalez un incident, un embouteillage,
+      une perturbation non répertoriée — directement depuis la carte.
+      Votre signal aide tous les utilisateurs TIF en temps réel.
+    </div>
+    <a href="https://tif.borja-swiss-solutions.ch/map" class="btn-primary">📍 Signaler maintenant</a>
+  </div>
+
+  <!-- PARTAGER -->
+  <div class="share-box">
+    <div class="share-title">🔗 Partagez TIF avec vos proches</div>
+    <div class="share-desc">
+      La situation est critique aujourd'hui. Aidez vos proches à se déplacer
+      en sécurité en partageant l'application.
+    </div>
+    <div class="share-links">
+      <a href="https://wa.me/?text=Regarde%20TIF%20pour%20suivre%20la%20situation%20%C3%A0%20Gen%C3%A8ve%20aujourd%27hui%20%3A%20https%3A%2F%2Ftif.borja-swiss-solutions.ch%2Fmap">💬 WhatsApp</a>
+      <a href="https://t.me/share/url?url=https://tif.borja-swiss-solutions.ch/map&text=Situation%20critique%20%C3%A0%20Gen%C3%A8ve%20aujourd%27hui%20%E2%80%94%20suis%20la%20carte%20en%20direct">✈️ Telegram</a>
+      <a href="https://tif.borja-swiss-solutions.ch/map">🔗 Copier le lien</a>
+    </div>
+  </div>
+
+  <!-- SITUATION GENÈVE -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">⚠️</span>
+      <span class="section-title">Situation actuelle — Genève</span>
+    </div>
+    <div class="item">
+      <p class="item-text">
+        <span class="item-dot" style="background:#FF453A"></span>
+        <strong>Manifestation NO-G7</strong> — Rassemblement autorisé au Parc Mon Repos de 15h00 à 22h30. Zone d'impact sur la circulation du centre-ville.
+        <span class="item-badge" style="background:rgba(255,69,58,0.2);color:#FF453A">EN COURS</span>
+      </p>
+    </div>
+    <div class="item">
+      <p class="item-text">
+        <span class="item-dot" style="background:#FF9F0A"></span>
+        <strong>G7 Évian</strong> — Dispositif sécuritaire actif aux passages frontière CH-FR. Contrôles renforcés à Bardonnex, Thônex-Vallard, Meyrin.
+      </p>
+    </div>
+    <div class="item">
+      <p class="item-text">
+        <span class="item-dot" style="background:#FF9F0A"></span>
+        <strong>Trafic</strong> — Congestion importante prévue sur les axes menant au centre-ville dès 14h30. Privilégiez les transports publics non impactés.
+      </p>
+    </div>
+    <div class="item">
+      <p class="item-text">
+        <span class="item-dot" style="background:#0A84FF"></span>
+        <strong>Accès temps réel</strong> — Suivez l'évolution minute par minute sur la carte TIF. Activez le layer "Alertes" pour voir les zones d'impact.
+      </p>
+    </div>
+  </div>
+
+  <!-- PERTURBATIONS TPG -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">🚌</span>
+      <span class="section-title">Perturbations réseau TPG</span>
+    </div>
+    <div class="item">
+      <p class="item-text">
+        <span class="item-dot" style="background:#FF453A"></span>
+        <strong>Lignes supprimées</strong> dès 13h30 : 1 · 2 · 3 · 6 · 7 · 10 · 12 · 17 · 19 · 25 · 91 · 92
+      </p>
+    </div>
+    <div class="item">
+      <p class="item-text">
+        <span class="item-dot" style="background:#FF9F0A"></span>
+        <strong>Rebroussements</strong> : 5 · 8 · 9 · 11 · 14 · 15 · 18 · 20 · 22 · 33 · 51 · 60 · 80 · A · E · G
+      </p>
+    </div>
+    <div class="item">
+      <p class="item-text">
+        <span class="item-dot" style="background:#FF9F0A"></span>
+        <strong>Tous les trolleybus</strong> rentrés au dépôt Jonction. <strong>Trams 12, 14, 15, 18</strong> partiellement ou totalement aux dépôts CMB/CMC.
+      </p>
+    </div>
+    <div class="item">
+      <p class="item-text">
+        <span class="item-dot" style="background:#30D158"></span>
+        Source officielle : Document TPG GestE "NO-G7 14.06.26" — 13 juin 2026 21h28
+      </p>
+    </div>
+  </div>
+
+  <!-- PERTURBATIONS CFF -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">🚂</span>
+      <span class="section-title">Perturbations réseau CFF / Léman Express</span>
+    </div>
+    <div class="item">
+      <p class="item-text">
+        <span class="item-dot" style="background:#FF9F0A"></span>
+        <strong>Gare Cornavin</strong> — Accès et desserte perturbés en lien avec le dispositif sécuritaire G7. Vérifiez vos correspondances.
+      </p>
+    </div>
+    <div class="item">
+      <p class="item-text">
+        <span class="item-dot" style="background:#FF9F0A"></span>
+        <strong>Léman Express</strong> — Lignes L1 à L5 susceptibles d'être impactées aux arrêts du centre-ville. Vérifiez en temps réel sur TIF ou cff.ch.
+      </p>
+    </div>
+    <div class="item">
+      <p class="item-text">
+        <span class="item-dot" style="background:#0A84FF"></span>
+        Consultez le layer <strong>Transport</strong> sur TIF pour les positions des véhicules CFF et Léman Express en temps réel.
+      </p>
+    </div>
+  </div>
+
+  <!-- PASSAGES FRONTIÈRE -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">🛂</span>
+      <span class="section-title">Passages frontière CH-FR</span>
+    </div>
+    <div class="item">
+      <p class="item-text">
+        <span class="item-dot" style="background:#FF453A"></span>
+        <strong>Contrôles renforcés</strong> à tous les passages dans le cadre du G7 Évian. Prévoyez un document d'identité valide.
+      </p>
+    </div>
+    <div class="item">
+      <p class="item-text">
+        <span class="item-dot" style="background:#FF453A"></span>
+        <strong>Bardonnex &amp; Thônex-Vallard</strong> — Système de macarons actif. Attentes importantes prévues.
+        <span class="item-badge" style="background:rgba(255,69,58,0.2);color:#FF453A">CRITIQUE</span>
+      </p>
+    </div>
+    <div class="item">
+      <p class="item-text">
+        <span class="item-dot" style="background:#FF9F0A"></span>
+        <strong>Meyrin, Ferney-Voltaire, Moillesulaz</strong> — Délais accrus. Privilégiez les postes secondaires si possible.
+      </p>
+    </div>
+    <div class="item">
+      <p class="item-text">
+        <span class="item-dot" style="background:#0A84FF"></span>
+        Suivez les temps d'attente en direct → layer <strong>Frontières</strong> sur TIF.
+      </p>
+    </div>
+  </div>
+
+  <!-- DON -->
+  <div class="donation-box">
+    <div class="donation-icon">💚</div>
+    <div class="donation-title">Soutenez TIF</div>
+    <div class="donation-desc">
+      TIF est un projet indépendant au service des habitants du Grand Genève.
+      Toutes les données, les alertes, le développement — financés de notre poche.
+      Si TIF vous a été utile aujourd'hui, un don — même symbolique — nous aide
+      à maintenir et améliorer la plateforme.
+    </div>
+    <a href="https://tif.borja-swiss-solutions.ch/donate" class="btn-donate">💚 Faire un don</a>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <p class="footer-text">
+      Vous recevez cet email car vous utilisez la plateforme TIF.<br>
+      <a href="https://tif.borja-swiss-solutions.ch">Se désabonner</a>
+      &nbsp;·&nbsp;
+      <a href="https://tif.borja-swiss-solutions.ch/map">Ouvrir TIF</a>
+      &nbsp;·&nbsp;
+      <a href="https://tif.borja-swiss-solutions.ch/a-propos">Confidentialité</a>
+      <br><br>
+      Borja Swiss Solutions · Genève, Suisse<br>
+      tif.borja-swiss-solutions.ch
+    </p>
+  </div>
+
+</div>
+</div>
+</body>
+</html>

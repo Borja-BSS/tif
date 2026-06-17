@@ -112,7 +112,7 @@ function G7Modal({ w, onNext }: { w: WelcomeT; onNext: () => void }) {
       <button
         onClick={onNext}
         className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full transition-opacity active:opacity-60"
-        style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.45)' }}
+        style={{ background: 'rgba(255,255,255,0.08)', color: 'var(--text-tertiary)' }}
         aria-label="Fermer"
       >
         <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -129,9 +129,9 @@ function G7Modal({ w, onNext }: { w: WelcomeT; onNext: () => void }) {
       </div>
 
       <div className="rounded-2xl p-4 mb-5 space-y-3" style={{ background: 'rgba(255,196,0,0.07)', border: '1px solid rgba(255,196,0,0.22)' }}>
-        <p className="text-[13px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.78)' }}
+        <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-primary)' }}
           dangerouslySetInnerHTML={{ __html: w.g7Body1 }} />
-        <p className="text-[13px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.78)' }}
+        <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-primary)' }}
           dangerouslySetInnerHTML={{ __html: w.g7Body2 }} />
         <p className="text-[12px]" style={{ color: 'rgba(255,196,0,0.7)' }}>
           {w.g7Warn}
@@ -173,7 +173,7 @@ function SurveyModal({ w, onNext }: { w: WelcomeT; onNext: () => void }) {
       <div className="text-center mb-5">
         <div className="text-5xl mb-3">📱</div>
         <h2 className="text-[16px] font-bold text-white mb-2 leading-snug">{w.surveyTitle}</h2>
-        <p className="text-[12px] font-medium" style={{ color: 'rgba(255,255,255,0.45)' }}>
+        <p className="text-[12px] font-medium" style={{ color: 'var(--text-tertiary)' }}>
           {w.surveySub}
         </p>
       </div>
@@ -212,7 +212,7 @@ function SurveyModal({ w, onNext }: { w: WelcomeT; onNext: () => void }) {
         style={{
           background:  'rgba(255,255,255,0.05)',
           border:      '1px solid rgba(255,255,255,0.10)',
-          color:       'rgba(255,255,255,0.85)',
+          color: 'var(--text-primary)',
           caretColor:  'white',
         }}
       />
@@ -249,7 +249,7 @@ function FeaturesModal({ w, onDismiss }: { w: WelcomeT; onDismiss: () => void })
       <div className="text-center mb-4">
         <div className="text-4xl mb-2">🎉</div>
         <h2 className="text-[17px] font-bold text-white mb-1">{w.featTitle}</h2>
-        <p className="text-[12px]" style={{ color: 'rgba(255,255,255,0.45)' }}>
+        <p className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
           {w.featSub}
         </p>
       </div>
@@ -273,7 +273,7 @@ function FeaturesModal({ w, onDismiss }: { w: WelcomeT; onDismiss: () => void })
                   </span>
                 )}
               </div>
-              <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.42)' }}>{f.desc}</p>
+              <p className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>{f.desc}</p>
             </div>
           </div>
         ))}
@@ -314,7 +314,7 @@ function CrisisModal({ onDismiss }: { onDismiss: () => void }) {
       <button
         onClick={onDismiss}
         className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full transition-opacity active:opacity-60"
-        style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.45)' }}
+        style={{ background: 'rgba(255,255,255,0.08)', color: 'var(--text-tertiary)' }}
         aria-label="Fermer"
       >
         <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -337,10 +337,10 @@ function CrisisModal({ onDismiss }: { onDismiss: () => void }) {
         <p className="text-[13px] font-semibold text-white">
           📡 Partagez vos infos en direct
         </p>
-        <p className="text-[12px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.55)' }}>
+        <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
           Vous êtes sur le terrain ? Signalez un incident, un embouteillage ou une fermeture de route. Votre signal aide tous les utilisateurs TIF en temps réel.
         </p>
-        <p className="text-[12px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.55)' }}>
+        <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
           Partagez aussi l&apos;application avec vos proches pour qu&apos;ils puissent suivre la situation et se déplacer en sécurité.
         </p>
       </div>
@@ -383,7 +383,7 @@ function UpdateModal({ onSkip, onDiscover }: { onSkip: () => void; onDiscover: (
       <div className="text-center mb-4">
         <div className="text-4xl mb-2">✨</div>
         <h2 className="text-[17px] font-bold text-white mb-1">Nouvelle mise à jour</h2>
-        <p className="text-[12px]" style={{ color: 'rgba(255,255,255,0.42)' }}>
+        <p className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
           Voici ce qui a été ajouté depuis ta dernière visite
         </p>
       </div>
@@ -409,7 +409,7 @@ function UpdateModal({ onSkip, onDiscover }: { onSkip: () => void; onDiscover: (
                   NOUVEAU
                 </span>
               </div>
-              <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.42)' }}>{f.desc}</p>
+              <p className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>{f.desc}</p>
             </div>
           </div>
         ))}
@@ -430,7 +430,7 @@ function UpdateModal({ onSkip, onDiscover }: { onSkip: () => void; onDiscover: (
           style={{
             background: 'rgba(255,255,255,0.06)',
             border:     '0.5px solid rgba(255,255,255,0.14)',
-            color:      'rgba(255,255,255,0.52)',
+            color: 'var(--text-secondary)',
           }}
         >
           Passer

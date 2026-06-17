@@ -118,7 +118,7 @@ export default function SignalerPage() {
   const goBack = () => { const i = STEPS.indexOf(step); if (i > 0) setStep(STEPS[i - 1]); else router.back() }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#0a0a0a', color: 'rgba(255,255,255,0.92)' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: '#0a0a0a', color: 'var(--text-primary)' }}>
 
       {/* Header */}
       <div className="flex items-center gap-3 px-4 pt-safe-top pt-4 pb-3 flex-shrink-0" style={LG}>
@@ -130,7 +130,7 @@ export default function SignalerPage() {
           </svg>
         </button>
         <div className="flex-1 min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.40)' }}>Signalement</p>
+          <p className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: 'var(--text-tertiary)' }}>Signalement</p>
           <p className="text-[13px] font-bold truncate">
             {step === 'category'    ? 'Catégorie'
             : step === 'subcategory' ? 'Type d\'événement'
@@ -141,7 +141,7 @@ export default function SignalerPage() {
             : 'Confirmer'}
           </p>
         </div>
-        <span className="text-[11px] font-semibold flex-shrink-0" style={{ color: 'rgba(255,255,255,0.35)' }}>
+        <span className="text-[11px] font-semibold flex-shrink-0" style={{ color: 'var(--text-tertiary)' }}>
           {stepIdx + 1}/{STEPS.length}
         </span>
       </div>
@@ -159,7 +159,7 @@ export default function SignalerPage() {
         {/* ── Étape 1 : Catégorie ─────────────────────────────────────── */}
         {step === 'category' && (
           <div className="space-y-2">
-            <p className="text-[12px]" style={{ color: 'rgba(255,255,255,0.45)' }}>
+            <p className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
               Sélectionnez la catégorie qui correspond le mieux à ce que vous observez.
             </p>
             {SIGNAL_CATEGORIES.map(c => (
@@ -209,7 +209,7 @@ export default function SignalerPage() {
         {/* ── Étape 3 : Priorité ──────────────────────────────────────── */}
         {step === 'priority' && (
           <div className="space-y-2">
-            <p className="text-[12px] mb-4" style={{ color: 'rgba(255,255,255,0.45)' }}>
+            <p className="text-[12px] mb-4" style={{ color: 'var(--text-tertiary)' }}>
               Évaluez l&apos;urgence de la situation. En cas de doute, choisissez &laquo; Vigilance &raquo;.
             </p>
             {PRIORITY_LEVELS.map(p => (
@@ -234,8 +234,8 @@ export default function SignalerPage() {
         {/* ── Étape 4 : Description ───────────────────────────────────── */}
         {step === 'description' && (
           <div className="space-y-3">
-            <p className="text-[12px]" style={{ color: 'rgba(255,255,255,0.45)' }}>
-              Décrivez ce que vous observez. Soyez précis et factuel. <span style={{ color: 'rgba(255,255,255,0.25)' }}>Min. 10 caractères.</span>
+            <p className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
+              Décrivez ce que vous observez. Soyez précis et factuel. <span style={{ color: 'var(--text-tertiary)' }}>Min. 10 caractères.</span>
             </p>
             <textarea
               autoFocus
@@ -247,7 +247,7 @@ export default function SignalerPage() {
               style={{
                 background: 'rgba(255,255,255,0.06)',
                 border: `1px solid ${description.trim().length >= 10 ? 'rgba(52,199,89,0.45)' : 'rgba(255,255,255,0.12)'}`,
-                color: 'rgba(255,255,255,0.90)',
+                color: 'var(--text-primary)',
               }}
             />
             <p className="text-[11px] text-right" style={{ color: description.trim().length >= 10 ? '#30D158' : 'rgba(255,255,255,0.25)' }}>
@@ -259,7 +259,7 @@ export default function SignalerPage() {
         {/* ── Étape 5 : Localisation ──────────────────────────────────── */}
         {step === 'location' && (
           <div className="space-y-3">
-            <p className="text-[12px]" style={{ color: 'rgba(255,255,255,0.45)' }}>
+            <p className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
               Indiquez l&apos;adresse <strong>ou</strong> utilisez votre position GPS.
             </p>
 
@@ -280,17 +280,17 @@ export default function SignalerPage() {
               )}
             </button>
 
-            {gpsError && <p className="text-[12px]" style={{ color: '#FF453A' }}>{gpsError}</p>}
+            {gpsError && <p className="text-[12px]" style={{ color: 'var(--red)' }}>{gpsError}</p>}
 
             <div className="flex items-center gap-2 my-1">
               <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.10)' }}/>
-              <span className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.30)' }}>OU</span>
+              <span className="text-[11px] font-semibold" style={{ color: 'var(--text-tertiary)' }}>OU</span>
               <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.10)' }}/>
             </div>
 
             {/* Adresse manuelle */}
             <div>
-              <label className="text-[11px] font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: 'rgba(255,255,255,0.35)' }}>
+              <label className="text-[11px] font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: 'var(--text-tertiary)' }}>
                 Adresse ou lieu
               </label>
               <input
@@ -302,7 +302,7 @@ export default function SignalerPage() {
                 style={{
                   background: 'rgba(255,255,255,0.06)',
                   border: `1px solid ${address.trim() ? 'rgba(52,199,89,0.45)' : 'rgba(255,255,255,0.12)'}`,
-                  color: 'rgba(255,255,255,0.90)',
+                  color: 'var(--text-primary)',
                 }}
               />
             </div>
@@ -312,12 +312,12 @@ export default function SignalerPage() {
         {/* ── Étape 6 : Médias ────────────────────────────────────────── */}
         {step === 'media' && (
           <div className="space-y-3">
-            <p className="text-[12px]" style={{ color: 'rgba(255,255,255,0.45)' }}>
+            <p className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
               Optionnel — ajoutez jusqu&apos;à 5 photos ou vidéos. Elles seront examinées avant publication.
             </p>
             <button onClick={() => fileInputRef.current?.click()}
               className="w-full flex items-center justify-center gap-3 rounded-2xl py-4 active:scale-[0.97] transition-transform"
-              style={{ background: 'rgba(255,255,255,0.05)', border: '1px dashed rgba(255,255,255,0.20)', color: 'rgba(255,255,255,0.60)' }}>
+              style={{ background: 'rgba(255,255,255,0.05)', border: '1px dashed rgba(255,255,255,0.20)', color: 'var(--text-secondary)' }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
                 <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
               </svg>
@@ -331,15 +331,15 @@ export default function SignalerPage() {
                   <div key={i} className="flex items-center gap-3 rounded-xl px-3 py-2.5"
                     style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)' }}>
                     <span className="text-base flex-shrink-0">{f.type.startsWith('video') ? '🎬' : '📷'}</span>
-                    <p className="flex-1 text-[12px] truncate" style={{ color: 'rgba(255,255,255,0.70)' }}>{f.name}</p>
+                    <p className="flex-1 text-[12px] truncate" style={{ color: 'var(--text-secondary)' }}>{f.name}</p>
                     <button onClick={() => removeFile(i)} className="text-[16px] leading-none active:scale-95 transition-transform"
-                      style={{ color: 'rgba(255,255,255,0.35)' }}>×</button>
+                      style={{ color: 'var(--text-tertiary)' }}>×</button>
                   </div>
                 ))}
               </div>
             )}
 
-            <p className="text-[11px] text-center" style={{ color: 'rgba(255,255,255,0.25)' }}>
+            <p className="text-[11px] text-center" style={{ color: 'var(--text-tertiary)' }}>
               {mediaFiles.length}/5 fichier{mediaFiles.length > 1 ? 's' : ''}
             </p>
           </div>
@@ -351,7 +351,7 @@ export default function SignalerPage() {
           const priObj  = PRIORITY_LEVELS.find(p => p.id === priority)
           return (
             <div className="space-y-3">
-              <p className="text-[12px] mb-2" style={{ color: 'rgba(255,255,255,0.45)' }}>
+              <p className="text-[12px] mb-2" style={{ color: 'var(--text-tertiary)' }}>
                 Vérifiez les informations avant d&apos;envoyer. Le signalement sera examiné avant toute publication.
               </p>
 
@@ -367,7 +367,7 @@ export default function SignalerPage() {
               </div>
 
               {error && (
-                <p className="text-[13px] rounded-xl px-4 py-3" style={{ background: 'rgba(255,59,48,0.12)', border: '1px solid rgba(255,59,48,0.30)', color: '#FF453A' }}>
+                <p className="text-[13px] rounded-xl px-4 py-3" style={{ background: 'rgba(255,59,48,0.12)', border: '1px solid rgba(255,59,48,0.30)', color: 'var(--red)' }}>
                   {error}
                 </p>
               )}
@@ -382,7 +382,7 @@ export default function SignalerPage() {
                 )}
               </button>
 
-              <p className="text-[11px] text-center" style={{ color: 'rgba(255,255,255,0.25)' }}>
+              <p className="text-[11px] text-center" style={{ color: 'var(--text-tertiary)' }}>
                 Votre signalement sera modéré avant publication · Aucune donnée personnelle enregistrée
               </p>
             </div>
@@ -403,13 +403,13 @@ export default function SignalerPage() {
               <div className="text-6xl">✅</div>
               <div>
                 <h2 className="text-[20px] font-bold text-white mb-1">Merci pour votre signalement !</h2>
-                <p className="text-[13px]" style={{ color: 'rgba(255,255,255,0.50)' }}>
+                <p className="text-[13px]" style={{ color: 'var(--text-secondary)' }}>
                   Il sera examiné avant publication sur la carte.
                 </p>
               </div>
 
               <div className="w-full rounded-2xl p-4 space-y-2" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)' }}>
-                <p className="text-[12px] font-semibold uppercase tracking-widest mb-3" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                <p className="text-[12px] font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-tertiary)' }}>
                   Partager l&apos;info
                 </p>
                 {hasNativeShare ? (
@@ -441,7 +441,7 @@ export default function SignalerPage() {
 
               <button onClick={() => { window.location.href = '/map' }}
                 className="w-full flex items-center justify-center gap-2 rounded-2xl py-4 font-bold text-[15px] active:scale-[0.97] transition-transform"
-                style={{ background: 'rgba(255,255,255,0.08)', border: '0.5px solid rgba(255,255,255,0.14)', color: 'rgba(255,255,255,0.85)' }}>
+                style={{ background: 'rgba(255,255,255,0.08)', border: '0.5px solid rgba(255,255,255,0.14)', color: 'var(--text-primary)' }}>
                 ← Retour à la carte
               </button>
             </div>
@@ -477,7 +477,7 @@ function Row({ icon, label, value, color }: { icon: string; label: string; value
     <div className="flex items-start gap-3">
       <span className="text-base flex-shrink-0 mt-0.5">{icon}</span>
       <div className="flex-1 min-w-0">
-        <p className="text-[10px] font-semibold uppercase tracking-wider mb-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>{label}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-wider mb-0.5" style={{ color: 'var(--text-tertiary)' }}>{label}</p>
         <p className="text-[13px] leading-snug" style={{ color: color ?? 'rgba(255,255,255,0.80)' }}>{value}</p>
       </div>
     </div>

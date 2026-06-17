@@ -316,7 +316,7 @@ function CrossingDetail({ crossing, onBack: _onBack, onLocate, waitDirection, wa
             border:     displayStatus === 'BLOCKED' ? '1px solid rgba(255,69,58,0.25)' : '1px solid rgba(255,149,0,0.25)',
           }}>
           <p className="text-[10px] font-semibold uppercase tracking-wider mb-2"
-            style={{ color: displayStatus === 'BLOCKED' ? '#FF453A' : '#FF9F0A' }}>
+            style={{ color: displayStatus === 'BLOCKED' ? 'var(--red)' : '#FF9F0A' }}>
             🏛️ G7 · 12 au 18 juin 2026
           </p>
           <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
@@ -523,7 +523,7 @@ function StopDeparturesPanel({ name, line, onClose }: { name: string; line: stri
       )}
       {!isLoading && (data?.departures ?? []).map((d, i) => {
         const delay = d.delay ?? 0
-        const c = delay >= 10 ? '#FF453A' : delay >= 3 ? '#FF9F0A' : '#30D158'
+        const c = delay >= 10 ? 'var(--red)' : delay >= 3 ? '#FF9F0A' : '#30D158'
         return (
           <div key={i} className="flex items-center gap-3">
             <span className="text-sm font-bold tabular-nums" style={{ color: 'var(--text-primary)', minWidth: 40 }}>{fmt(d.time)}</span>
@@ -552,7 +552,7 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
   }, [onExpand])
 
   const handleLineBadgeClick = (l: TpgLineStatus) => {
-    const c = l.status === 'disrupted' ? '#FF453A' : l.status === 'delayed' ? '#FF9F0A' : '#30D158'
+    const c = l.status === 'disrupted' ? 'var(--red)' : l.status === 'delayed' ? '#FF9F0A' : '#30D158'
     const newLine = selectedLine === l.line ? null : l.line
     setSelectedLine(newLine)
     setSelectedStop(null)
@@ -607,7 +607,7 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
           <div className="flex items-start gap-3">
             <span className="text-2xl flex-shrink-0">🛑</span>
             <div className="flex-1">
-              <p className="text-[11px] font-bold uppercase tracking-wider mb-1" style={{ color: '#FF453A' }}>
+              <p className="text-[11px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--red)' }}>
                 ⛔ A1 FERMÉE — 14 AU 17 JUIN 2026
               </p>
               <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
@@ -733,7 +733,7 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
         {!linesLoading && (tpgLines?.lines ?? []).length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {(tpgLines?.lines ?? []).map(l => {
-              const c       = l.status === 'disrupted' ? '#FF453A' : l.status === 'delayed' ? '#FF9F0A' : '#30D158'
+              const c       = l.status === 'disrupted' ? 'var(--red)' : l.status === 'delayed' ? '#FF9F0A' : '#30D158'
               const active  = selectedLine === l.line
               return (
                 <button key={l.line}
@@ -759,7 +759,7 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
         {selectedLine && !selectedStop && (() => {
           const cfg      = (tpgLines?.lines ?? []).find(l => l.line === selectedLine)
           const lineCfg  = TPG_LINES[selectedLine]
-          const c        = cfg ? (cfg.status === 'disrupted' ? '#FF453A' : cfg.status === 'delayed' ? '#FF9F0A' : '#30D158') : '#30D158'
+          const c        = cfg ? (cfg.status === 'disrupted' ? 'var(--red)' : cfg.status === 'delayed' ? '#FF9F0A' : '#30D158') : '#30D158'
           const termA    = lineCfg?.terminusA ?? '—'
           const termB    = lineCfg?.terminusB ?? '—'
           return (
@@ -1092,12 +1092,12 @@ function AlertesDetail({ map, onAlertSelect }: { map: mapboxgl.Map | null; onAle
       {/* ══ ALERTES ACTIVES ═══════════════════════════════════════════════ */}
       <div className="flex items-center gap-2 mb-1">
         <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 animate-pulse" style={{ background: '#FF453A' }} />
-        <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: '#FF453A' }}>
+        <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: 'var(--red)' }}>
           Alertes actives
         </p>
         {totalActive > 0 && (
           <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-            style={{ background: 'rgba(255,69,58,0.18)', color: '#FF453A' }}>
+            style={{ background: 'rgba(255,69,58,0.18)', color: 'var(--red)' }}>
             {totalActive}
           </span>
         )}
@@ -1595,7 +1595,7 @@ function G7Detail() {
           : { background: 'var(--bg-card)', border: '1px solid var(--border)' }
         }
       >
-        <p className="text-sm font-bold mb-1" style={{ color: isActive ? '#FF453A' : 'var(--text-primary)' }}>
+        <p className="text-sm font-bold mb-1" style={{ color: isActive ? 'var(--red)' : 'var(--text-primary)' }}>
           {isActive ? t.g7Section.activeBadge : t.g7Section.upcomingBadge}
         </p>
         <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
@@ -1826,7 +1826,7 @@ function ToutOverview({ data, onSelect }: {
         onPress={() => onSelect('parking')} />
       <CategoryCard icon="⚠️" title={t.overview.alertsTitle}
         subtitle={alertCount > 0 ? `${alertCount} ${alertCount > 1 ? t.overview.incidentPlural : t.overview.incidentSingular}` : t.overview.noIncident}
-        badge={alertCount > 0 ? String(alertCount) : undefined} badgeColor="#FF453A"
+        badge={alertCount > 0 ? String(alertCount) : undefined} badgeColor="var(--red)"
         onPress={() => onSelect('alertes')} />
       <CategoryCard icon="🛤️" title={t.overview.journey}
         subtitle={t.overview.journeySub}
@@ -1888,7 +1888,7 @@ function G7AccessPanel({ item }: { item: EventItem }) {
   )
 
   const sevColor = (s: string) =>
-    s === 'critical' ? '#FF453A' : s === 'warning' ? '#FF9F0A' : 'rgba(255,255,255,0.45)'
+    s === 'critical' ? 'var(--red)' : s === 'warning' ? '#FF9F0A' : 'rgba(255,255,255,0.45)'
 
   const areaNote = () => {
     if (item.venue.area === 'Grand-Saconnex')
@@ -2448,7 +2448,7 @@ function SignalDetailView({ signalement: s, onBack: _onBack }: SignalDetailProps
               const credMap = {
                 confirmed: { label: `✅ Confirmé par ${s.confirmCount ?? 0} utilisateur${(s.confirmCount ?? 0) > 1 ? 's' : ''}`, color: '#30D158' },
                 contested:  { label: `⚠️ Contesté (${s.confirmCount ?? 0} confirm, ${s.denyCount ?? 0} faux)`, color: '#FF9500' },
-                false:      { label: `❌ Signalé faux par la communauté`, color: '#FF453A' },
+                false:      { label: `❌ Signalé faux par la communauté`, color: 'var(--red)' },
                 neutral:    null,
               }
               const meta = credMap[cred as keyof typeof credMap]
