@@ -26,7 +26,7 @@ export function QuickFilters({ active, onChange, showJourney = false }: QuickFil
 
   const FILTERS: FilterDef[] = [
     { id: 'all',     icon: '🗺️',  label: t.filters.all     },
-    { id: 'events',  icon: '🗓️', label: t.eventsSection.filterLabel },
+    { id: 'events',  icon: '⭐', label: t.eventsSection.filterLabel },
     { id: 'traffic', icon: '🚦',  label: t.filters.traffic  },
     { id: 'alerts',  icon: '⚠️',  label: t.filters.alerts   },
     { id: 'transit', icon: '🚌',  label: t.filters.transit  },

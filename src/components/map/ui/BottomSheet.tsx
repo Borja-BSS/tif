@@ -1758,7 +1758,7 @@ function DonationCard() {
         </div>
       </div>
       <div className="grid grid-cols-4 gap-1.5 mb-3">
-        {[5, 10, 20, 50].map(v => (
+        {[1, 5, 10, 20].map(v => (
           <button
             key={v}
             onClick={() => setSelected(selected === v ? null : v)}
