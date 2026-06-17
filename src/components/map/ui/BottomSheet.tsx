@@ -13,6 +13,7 @@ import type mapboxgl from 'mapbox-gl'
 import { JourneySetup } from '@/components/my-journey/JourneySetup'
 import { firebaseAuth } from '@/lib/firebase'
 import { G7BulletinsPanel } from './G7Bulletins'
+import { useTheme } from '@/lib/theme/ThemeProvider'
 import { useMapT } from '@/i18n/map'
 import type { MapT } from '@/i18n/map'
 import { events, CATEGORY_LABELS, CATEGORY_ICONS } from '@/data/events'
@@ -816,7 +817,7 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
                       <p className="flex-1 text-[13px] font-medium" style={{ color: (isFirst || isLast) ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
                         {stop.name}
                       </p>
-                      <svg width="6" height="10" viewBox="0 0 6 10" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" strokeLinecap="round" className="flex-shrink-0">
+                      <svg width="6" height="10" viewBox="0 0 6 10" fill="none" stroke="var(--text-tertiary)" strokeWidth="1.5" strokeLinecap="round" className="flex-shrink-0">
                         <path d="M1 1l4 4-4 4"/>
                       </svg>
                     </button>
@@ -1147,7 +1148,7 @@ function AlertesDetail({ map, onAlertSelect }: { map: mapboxgl.Map | null; onAle
             )}
           </div>
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="flex-shrink-0">
-            <path d="M5 3l4 4-4 4" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M5 3l4 4-4 4" stroke="var(--text-tertiary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
       ))}
@@ -1685,7 +1686,7 @@ function WeatherBanner({ onPress }: { onPress: () => void }) {
         <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'rgba(10,132,255,0.75)' }}>{t.weather.next4h}</p>
         <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{tempStr} · {wmoLabel(code, t)}{precipStr}</p>
       </div>
-      <svg width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="2" strokeLinecap="round">
+      <svg width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="var(--text-tertiary)" strokeWidth="2" strokeLinecap="round">
         <path d="M1 1l5 5-5 5"/>
       </svg>
     </button>
@@ -1888,7 +1889,7 @@ function G7AccessPanel({ item }: { item: EventItem }) {
   )
 
   const sevColor = (s: string) =>
-    s === 'critical' ? 'var(--red)' : s === 'warning' ? '#FF9F0A' : 'rgba(255,255,255,0.45)'
+    s === 'critical' ? 'var(--red)' : s === 'warning' ? '#FF9F0A' : 'var(--text-tertiary)'
 
   const areaNote = () => {
     if (item.venue.area === 'Grand-Saconnex')
@@ -2466,6 +2467,8 @@ function SignalDetailView({ signalement: s, onBack: _onBack }: SignalDetailProps
 
 // ── Composant principal ───────────────────────────────────────────────────────
 export function BottomSheet({ session: _session, activeFilter, map, onFilterChange }: BottomSheetProps) {
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
   const t = useMapT()
   const [isOpen,              setIsOpen]              = useState(false)
   const [detailView,          setDetailView]          = useState<DetailView>('overview')
@@ -2800,12 +2803,14 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
       style={{
         ...LG,
         bottom:             'env(safe-area-inset-bottom, 0px)',
-        '--text-primary':   'rgba(255,255,255,0.92)',
-        '--text-secondary': 'var(--text-secondary)',
-        '--text-tertiary':  'rgba(255,255,255,0.40)',
-        '--bg-card':        'rgba(255,255,255,0.06)',
-        '--bg':             'rgba(255,255,255,0.03)',
-        '--border':         'rgba(255,255,255,0.10)',
+        ...(isDark ? {
+          '--text-primary':   'rgba(255,255,255,0.92)',
+          '--text-secondary': 'rgba(255,255,255,0.65)',
+          '--text-tertiary':  'rgba(255,255,255,0.40)',
+          '--bg-card':        'rgba(255,255,255,0.06)',
+          '--bg':             'rgba(255,255,255,0.03)',
+          '--border':         'rgba(255,255,255,0.10)',
+        } : {}),
       } as React.CSSProperties}
     >
       {/* Header drag zone — touch géré par listeners natifs (useEffect) */}
