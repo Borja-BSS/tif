@@ -22,16 +22,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>('light')
 
   useEffect(() => {
-    const stored = localStorage.getItem('tif-theme') as Theme | null
     const mq = window.matchMedia('(prefers-color-scheme: dark)')
-    const resolved: Theme = stored ?? (mq.matches ? 'dark' : 'light')
+    const resolved: Theme = mq.matches ? 'dark' : 'light'
     setTheme(resolved)
     document.documentElement.classList.remove('light', 'dark')
     document.documentElement.classList.add(resolved)
 
-    // Follow system changes only when no manual preference is stored
     const handleSystemChange = (e: MediaQueryListEvent) => {
-      if (localStorage.getItem('tif-theme')) return
       const next: Theme = e.matches ? 'dark' : 'light'
       setTheme(next)
       document.documentElement.classList.remove('light', 'dark')

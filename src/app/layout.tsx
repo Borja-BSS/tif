@@ -66,7 +66,7 @@ export default function RootLayout({
         {/* FOUC prevention — applique le thème avant le premier render */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){var t=localStorage.getItem('tif-theme');var m=window.matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.classList.add(t||(m?'dark':'light'));})();`,
+            __html: `(function(){localStorage.removeItem('tif-theme');var m=window.matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.classList.add(m?'dark':'light');})();`,
           }}
         />
         {/* hreflang — même URL pour toutes les langues (sélecteur intégré) */}
