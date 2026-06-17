@@ -45,3 +45,8 @@ next-env.d.ts
 .claude/
 /backups
 .worktrees/
+
+# Données locales / exports à ne pas versionner
+*.csv
+emails/
+scripts/clean-*.ts
