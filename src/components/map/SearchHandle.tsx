@@ -242,11 +242,12 @@ export default function SearchHandle({ map }: SearchHandleProps) {
     })
   }, [map])
 
-  // Écoute tif:route-to depuis SearchBar — destination pré-remplie, GPS auto
+  // Écoute tif:route-to depuis SearchBar ou EventDetail — destination pré-remplie, GPS auto
   useEffect(() => {
     const handler = (e: Event) => {
-      const dest = (e as CustomEvent<SearchResult>).detail
-      setDestination(dest)
+      const detail = (e as CustomEvent<SearchResult & { mode?: RouteTab }>).detail
+      if (detail.mode) setActiveTab(detail.mode)
+      setDestination(detail)
       setState('search')
       setSheetSize('peek')
       // Auto-fill GPS origin

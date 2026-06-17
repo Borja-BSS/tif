@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback, useEffect, useLayoutEffect } from 'react'
+import { useState, useRef, useCallback, useEffect, useLayoutEffect, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { PARKINGS_PR, TOTAL_PR_CAPACITY } from '@/lib/parking/pr-data'
 import { TPG_LINES } from '@/lib/transport/tpg-line-stops'
@@ -164,8 +164,8 @@ function CrossingDetail({ crossing, onBack: _onBack, onLocate, waitDirection, wa
   const live     = liveData[crossing.id]
 
   const G7_START   = new Date('2026-06-08T00:00:00Z')
-  const G7_END     = new Date('2026-06-18T23:59:59Z')
-  const isG7Period = now >= G7_START && now <= G7_END
+  const G7_END     = new Date('2026-06-19T04:00:00Z') // 06h00 heure genevoise (CEST = UTC+2)
+  const isG7Period = now >= G7_START && now < G7_END
 
   const sources = getCrossingSources(crossing.id, isG7Period)
 
@@ -309,8 +309,8 @@ function CrossingDetail({ crossing, onBack: _onBack, onLocate, waitDirection, wa
         </>)}
       </div>
 
-      {/* Info G7 */}
-      {crossing.g7Info && (
+      {/* Info G7 — masqué automatiquement après la fin du G7 */}
+      {isG7Period && crossing.g7Info && (
         <div className="rounded-2xl p-4 mb-3"
           style={{
             background: displayStatus === 'BLOCKED' ? 'rgba(255,69,58,0.08)' : 'rgba(255,149,0,0.08)',
@@ -2020,20 +2020,81 @@ function EventDetail({ slug, onBack }: { slug: string; onBack: () => void }) {
           </div>
         )}
       </div>
+
+      {/* S'y rendre */}
+      {item.venue.lat && item.venue.lng && (
+        <div className="rounded-2xl p-3 mb-1" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+          <p className="text-[11px] font-semibold uppercase tracking-wider mb-2.5" style={{ color: 'var(--text-tertiary)' }}>S&apos;y rendre</p>
+          <div className="flex gap-2 mb-2.5">
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('tif:route-to', {
+                detail: { id: `event-${item.id}`, title: item.venue.name, subtitle: item.venue.address, lat: item.venue.lat!, lng: item.venue.lng!, type: 'place' as const, mode: 'car' },
+              }))}
+              className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl text-[13px] font-semibold transition-opacity active:opacity-70"
+              style={{ background: 'rgba(255,159,10,0.10)', border: '1px solid rgba(255,159,10,0.30)', color: '#FF9F0A' }}
+            >
+              🚗 En voiture
+            </button>
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('tif:route-to', {
+                detail: { id: `event-${item.id}`, title: item.venue.name, subtitle: item.venue.address, lat: item.venue.lat!, lng: item.venue.lng!, type: 'station' as const, mode: 'transport' },
+              }))}
+              className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl text-[13px] font-semibold transition-opacity active:opacity-70"
+              style={{ background: 'rgba(10,132,255,0.10)', border: '1px solid rgba(10,132,255,0.30)', color: '#0A84FF' }}
+            >
+              🚌 En transport
+            </button>
+          </div>
+          {item.g7AccessNotes && item.g7AccessNotes.length > 0 && (
+            <div className="space-y-1">
+              {item.g7AccessNotes.map((note, i) => (
+                <p key={i} className="text-[11px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>· {note}</p>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
 
 function EventsPanel({ onSelect }: { onSelect: (slug: string) => void }) {
   const t = useMapT()
-  const [priceFilter, setPriceFilter] = useState<'all' | 'free' | 'paid'>('all')
-  const [todayOnly,   setTodayOnly]   = useState(false)
-  const [venueFilter, setVenueFilter] = useState('')
-  const [viewMode,    setViewMode]    = useState<'category' | 'agenda'>('category')
-  const [catFilter,   setCatFilter]   = useState<string>('all')
+  const [priceFilter,  setPriceFilter]  = useState<'all' | 'free' | 'paid'>('all')
+  const [venueFilter,  setVenueFilter]  = useState('')
+  const [viewMode,     setViewMode]     = useState<'category' | 'agenda'>('category')
+  const [catFilter,    setCatFilter]    = useState<string>('all')
+  const [selectedDate, setSelectedDate] = useState<string | null>(null) // null = all
+  const dateStripRef = useRef<HTMLDivElement>(null)
 
   const d = new Date()
   const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+
+  // 28-day strip starting today
+  const dateStrip = useMemo(() => Array.from({ length: 28 }, (_, i) => {
+    const dt = new Date(d)
+    dt.setDate(d.getDate() + i)
+    return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [])
+
+  // Set of dates that have at least one event (for dot indicator)
+  const datesWithEvents = useMemo(
+    () => new Set(events.flatMap(ev => ev.occurrences.map(o => o.date))),
+    []
+  )
+
+  // Auto-scroll to today chip when entering agenda view
+  useEffect(() => {
+    if (viewMode !== 'agenda' || !dateStripRef.current) return
+    const chip = dateStripRef.current.querySelector(`[data-date="${today}"]`) as HTMLElement | null
+    chip?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'instant' })
+  }, [viewMode, today])
+
+  // When switching to agenda, default to today
+  useEffect(() => {
+    if (viewMode === 'agenda' && selectedDate === null) setSelectedDate(today)
+  }, [viewMode, today, selectedDate])
 
   const venueNames = [...new Set(events.map(e => e.venue.name))].sort((a, b) => a.localeCompare(b, 'fr'))
 
@@ -2043,16 +2104,21 @@ function EventsPanel({ onSelect }: { onSelect: (slug: string) => void }) {
     return p.includes('gratuit') || p.includes('libre') || p === '0' || p === 'free'
   }
 
-  let filteredEvents = events
-  if (todayOnly)            filteredEvents = filteredEvents.filter(ev => ev.occurrences.some(o => o.date === today))
-  if (venueFilter)          filteredEvents = filteredEvents.filter(ev => ev.venue.name === venueFilter)
-  if (catFilter !== 'all')  filteredEvents = filteredEvents.filter(ev => ev.category === catFilter)
-  filteredEvents = priceFilter === 'free' ? filteredEvents.filter(isFree)
-    : priceFilter === 'paid' ? filteredEvents.filter(ev => !ev.priceInfo || !isFree(ev))
-    : filteredEvents
+  // Base filtered events (applies to both views — no date filter here)
+  let baseEvents = events
+  if (venueFilter)         baseEvents = baseEvents.filter(ev => ev.venue.name === venueFilter)
+  if (catFilter !== 'all') baseEvents = baseEvents.filter(ev => ev.category === catFilter)
+  baseEvents = priceFilter === 'free' ? baseEvents.filter(isFree)
+    : priceFilter === 'paid' ? baseEvents.filter(ev => !ev.priceInfo || !isFree(ev))
+    : baseEvents
+
+  // Agenda events: apply date filter
+  const agendaEvents = (viewMode === 'agenda' && selectedDate)
+    ? baseEvents.filter(ev => ev.occurrences.some(o => o.date === selectedDate))
+    : baseEvents
 
   // ── Vue Catégorie ─────────────────────────────────────────────────────────
-  const byCategory = filteredEvents.reduce<Record<string, EventItem[]>>((acc, ev) => {
+  const byCategory = baseEvents.reduce<Record<string, EventItem[]>>((acc, ev) => {
     const cat = ev.category
     if (!acc[cat]) acc[cat] = []
     acc[cat].push(ev)
@@ -2063,18 +2129,17 @@ function EventsPanel({ onSelect }: { onSelect: (slug: string) => void }) {
   const orderedKeys   = categoryOrder.filter(k => byCategory[k]).concat(
     Object.keys(byCategory).filter(k => !categoryOrder.includes(k))
   )
-
-  // Catégories présentes dans le jeu de données (pour les chips)
   const allCats = categoryOrder.filter(k => events.some(e => e.category === k))
 
   // ── Vue Agenda ────────────────────────────────────────────────────────────
-  const allDates = [...new Set(
-    filteredEvents.flatMap(ev => ev.occurrences.map(o => o.date))
-  )].sort()
+  // When date selected: show that day. When null: show all upcoming dates grouped.
+  const agendaDates = selectedDate
+    ? (agendaEvents.length > 0 ? [selectedDate] : [])
+    : [...new Set(agendaEvents.flatMap(ev => ev.occurrences.map(o => o.date)))].sort().filter(d => d >= today)
 
   const byDate: Record<string, EventItem[]> = {}
-  for (const date of allDates) {
-    byDate[date] = filteredEvents.filter(ev => ev.occurrences.some(o => o.date === date))
+  for (const date of agendaDates) {
+    byDate[date] = agendaEvents.filter(ev => ev.occurrences.some(o => o.date === date))
   }
 
   const fmtDateHeader = (iso: string): string => {
@@ -2082,6 +2147,15 @@ function EventsPanel({ onSelect }: { onSelect: (slug: string) => void }) {
     const opts: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long' }
     const label = date.toLocaleDateString('fr-CH', opts)
     return iso === today ? `Aujourd'hui — ${label}` : label
+  }
+
+  const fmtChip = (iso: string): { day: string; num: number; month: string } => {
+    const dt = new Date(iso + 'T12:00:00')
+    return {
+      day:   dt.toLocaleDateString('fr-CH', { weekday: 'short' }).replace('.', ''),
+      num:   dt.getDate(),
+      month: dt.toLocaleDateString('fr-CH', { month: 'short' }).replace('.', ''),
+    }
   }
 
   const PRICE_TABS: { id: 'all' | 'free' | 'paid'; label: string }[] = [
@@ -2106,6 +2180,68 @@ function EventsPanel({ onSelect }: { onSelect: (slug: string) => void }) {
           </button>
         ))}
       </div>
+
+      {/* ── DATE STRIP — visible uniquement en mode Agenda ─────────────────── */}
+      {viewMode === 'agenda' && (
+        <div>
+          <div
+            ref={dateStripRef}
+            className="flex gap-1.5 overflow-x-auto pb-1"
+            style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
+          >
+            {/* Chip "Tout" */}
+            <button
+              onClick={() => setSelectedDate(null)}
+              className="flex-shrink-0 flex flex-col items-center rounded-2xl px-2.5 py-1.5 transition-all min-w-[44px]"
+              style={{
+                background: selectedDate === null ? 'rgba(175,82,222,0.18)' : 'var(--bg-card)',
+                border: `1px solid ${selectedDate === null ? 'rgba(175,82,222,0.45)' : 'var(--border)'}`,
+              }}
+            >
+              <span className="text-[9px] font-semibold uppercase" style={{ color: selectedDate === null ? '#AF52DE' : 'var(--text-tertiary)' }}>Tout</span>
+              <span className="text-[14px] font-bold leading-tight" style={{ color: selectedDate === null ? '#AF52DE' : 'var(--text-secondary)' }}>★</span>
+            </button>
+
+            {/* Chips jours */}
+            {dateStrip.map(iso => {
+              const chip = fmtChip(iso)
+              const isToday   = iso === today
+              const isActive  = iso === selectedDate
+              const hasEvents = datesWithEvents.has(iso)
+              return (
+                <button
+                  key={iso}
+                  data-date={iso}
+                  onClick={() => setSelectedDate(iso)}
+                  className="flex-shrink-0 flex flex-col items-center rounded-2xl px-2 py-1.5 transition-all min-w-[44px] relative"
+                  style={{
+                    background: isActive ? 'rgba(175,82,222,0.18)' : isToday ? 'rgba(255,255,255,0.05)' : 'var(--bg-card)',
+                    border: isActive ? '1px solid rgba(175,82,222,0.45)' : isToday ? '1px solid rgba(255,255,255,0.18)' : '1px solid var(--border)',
+                  }}
+                >
+                  <span className="text-[9px] font-semibold uppercase leading-tight"
+                    style={{ color: isActive ? '#AF52DE' : isToday ? 'rgba(255,255,255,0.65)' : 'var(--text-tertiary)' }}>
+                    {chip.day}
+                  </span>
+                  <span className="text-[15px] font-bold leading-tight"
+                    style={{ color: isActive ? '#AF52DE' : isToday ? '#fff' : 'var(--text-primary)' }}>
+                    {chip.num}
+                  </span>
+                  <span className="text-[8px] leading-tight"
+                    style={{ color: isActive ? 'rgba(175,82,222,0.7)' : 'var(--text-tertiary)' }}>
+                    {chip.month}
+                  </span>
+                  {/* Dot — has events */}
+                  {hasEvents && (
+                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
+                      style={{ background: isActive ? '#AF52DE' : '#30D158' }} />
+                  )}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Chips catégorie (vue Catégories seulement) */}
       {viewMode === 'category' && (
@@ -2136,19 +2272,8 @@ function EventsPanel({ onSelect }: { onSelect: (slug: string) => void }) {
         </div>
       )}
 
-      {/* Filtre Aujourd'hui + Lieu */}
+      {/* Filtre Lieu + Prix (communs aux deux vues) */}
       <div className="flex items-center gap-2">
-        <button
-          onClick={() => setTodayOnly(v => !v)}
-          className="flex-shrink-0 rounded-xl py-2 px-3 text-[12px] font-semibold transition-all"
-          style={{
-            background: todayOnly ? 'var(--brand)' : 'var(--bg-card)',
-            color:      todayOnly ? '#fff'         : 'var(--text-secondary)',
-            border:     `1px solid ${todayOnly ? 'transparent' : 'var(--border)'}`,
-          }}
-        >
-          📅 Aujourd&apos;hui
-        </button>
         <div className="flex-1 relative">
           <select
             value={venueFilter}
@@ -2170,88 +2295,103 @@ function EventsPanel({ onSelect }: { onSelect: (slug: string) => void }) {
             <path d="M1 1l3 3 3-3" stroke={venueFilter ? '#fff' : 'var(--text-tertiary)'} strokeWidth="1.5" strokeLinecap="round"/>
           </svg>
         </div>
+        <div className="flex gap-1.5 flex-shrink-0">
+          {PRICE_TABS.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setPriceFilter(tab.id)}
+              className="rounded-xl py-2 px-2.5 text-[11px] font-semibold transition-all"
+              style={{
+                background: priceFilter === tab.id ? 'var(--brand)' : 'var(--bg-card)',
+                color:      priceFilter === tab.id ? '#fff'         : 'var(--text-secondary)',
+                border:     `1px solid ${priceFilter === tab.id ? 'transparent' : 'var(--border)'}`,
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Filtre prix */}
-      <div className="flex gap-2">
-        {PRICE_TABS.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setPriceFilter(tab.id)}
-            className="flex-1 rounded-xl py-2 text-[12px] font-semibold transition-all"
-            style={{
-              background: priceFilter === tab.id ? 'var(--brand)' : 'var(--bg-card)',
-              color:      priceFilter === tab.id ? '#fff'         : 'var(--text-secondary)',
-              border:     `1px solid ${priceFilter === tab.id ? 'transparent' : 'var(--border)'}`,
-            }}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {filteredEvents.length === 0 ? (
+      {/* ── Contenu ─────────────────────────────────────────────────────────── */}
+      {viewMode === 'agenda' ? (
+        agendaDates.length === 0 ? (
+          <div className="text-center py-10">
+            <p className="text-2xl mb-2">📭</p>
+            <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+              Aucun événement{selectedDate ? ' ce jour' : ''}
+            </p>
+            {selectedDate && (
+              <button onClick={() => setSelectedDate(null)}
+                className="mt-3 text-[12px] font-semibold rounded-xl px-3 py-1.5"
+                style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}>
+                Voir tous les jours
+              </button>
+            )}
+          </div>
+        ) : (
+          // ── Vue Agenda — groupée par date ──────────────────────────────
+          <div className="space-y-5">
+            {agendaDates.map(date => {
+              const dayEvents = byDate[date] ?? []
+              const isToday   = date === today
+              return (
+                <div key={date}>
+                  <div className="flex items-center gap-2 mb-2">
+                    {isToday && (
+                      <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 animate-pulse" style={{ background: '#AF52DE' }} />
+                    )}
+                    <p className="text-[11px] font-bold uppercase tracking-wider flex-1"
+                      style={{ color: isToday ? '#AF52DE' : 'var(--text-secondary)' }}>
+                      {fmtDateHeader(date)}
+                    </p>
+                    <span className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>
+                      {dayEvents.length} évt{dayEvents.length > 1 ? 's' : ''}
+                    </span>
+                  </div>
+                  <div className="space-y-1.5">
+                    {dayEvents.map(ev => {
+                      const occ = ev.occurrences.find(o => o.date === date)
+                      return (
+                        <button key={ev.slug} onClick={() => onSelect(ev.slug)}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left active:scale-[0.98] transition-transform"
+                          style={{
+                            background: isToday ? 'rgba(175,82,222,0.07)' : 'var(--bg-card)',
+                            border: isToday ? '1px solid rgba(175,82,222,0.18)' : '1px solid var(--border)',
+                          }}>
+                          <span className="text-base flex-shrink-0">{CATEGORY_ICONS[ev.category] ?? '🎟️'}</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[13px] font-medium truncate" style={{ color: 'var(--text-primary)' }}>{ev.title}</p>
+                            <p className="text-[11px] truncate" style={{ color: 'var(--text-secondary)' }}>
+                              {occ?.start ? `${occ.start}${occ.end ? `–${occ.end}` : ''} · ` : ''}{ev.venue.name}
+                              {occ?.note ? ` · ${occ.note}` : ''}
+                            </p>
+                          </div>
+                          <span className="text-[10px] font-semibold flex-shrink-0 px-1.5 py-0.5 rounded-lg"
+                            style={{
+                              background: !ev.priceInfo ? 'rgba(255,255,255,0.04)' : isFree(ev) ? 'rgba(52,199,89,0.12)' : 'rgba(255,255,255,0.06)',
+                              color:      !ev.priceInfo ? 'var(--text-tertiary)'   : isFree(ev) ? '#30D158'               : 'var(--text-tertiary)',
+                            }}>
+                            {!ev.priceInfo ? t.eventsSection.priceUnknown : isFree(ev) ? 'Gratuit' : ev.priceInfo}
+                          </span>
+                          <svg width="6" height="10" viewBox="0 0 6 10" fill="none" stroke="var(--text-tertiary)" strokeWidth="1.5" strokeLinecap="round">
+                            <path d="M1 1l4 4-4 4"/>
+                          </svg>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )
+      ) : baseEvents.length === 0 ? (
         <p className="text-sm text-center py-8" style={{ color: 'var(--text-tertiary)' }}>
           {t.eventsSection.noEvents}
         </p>
-      ) : viewMode === 'agenda' ? (
-        // ── Vue Agenda — groupée par date ────────────────────────────────
-        <div className="space-y-5">
-          {allDates.map(date => {
-            const isToday = date === today
-            const isPast  = date < today
-            return (
-              <div key={date}>
-                <div className="flex items-center gap-2 mb-2">
-                  {isToday && (
-                    <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 animate-pulse" style={{ background: '#AF52DE' }} />
-                  )}
-                  <p className="text-[11px] font-bold uppercase tracking-wider flex-1"
-                    style={{ color: isToday ? '#AF52DE' : isPast ? 'var(--text-tertiary)' : 'var(--text-secondary)' }}>
-                    {fmtDateHeader(date)}
-                  </p>
-                  <span className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>
-                    {byDate[date].length} évt{byDate[date].length > 1 ? 's' : ''}
-                  </span>
-                </div>
-                <div className="space-y-1.5">
-                  {byDate[date].map(ev => {
-                    const occ = ev.occurrences.find(o => o.date === date)
-                    return (
-                      <button key={ev.slug} onClick={() => onSelect(ev.slug)}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left active:scale-[0.98] transition-transform"
-                        style={{
-                          background: isToday ? 'rgba(175,82,222,0.07)' : 'var(--bg-card)',
-                          border: isToday ? '1px solid rgba(175,82,222,0.18)' : '1px solid var(--border)',
-                        }}>
-                        <span className="text-base flex-shrink-0">{CATEGORY_ICONS[ev.category] ?? '🎟️'}</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[13px] font-medium truncate" style={{ color: 'var(--text-primary)' }}>{ev.title}</p>
-                          <p className="text-[11px] truncate" style={{ color: 'var(--text-secondary)' }}>
-                            {occ?.start ? `${occ.start}${occ.end ? `–${occ.end}` : ''} · ` : ''}{ev.venue.name}
-                            {occ?.note ? ` · ${occ.note}` : ''}
-                          </p>
-                        </div>
-                        <span className="text-[10px] font-semibold flex-shrink-0 px-1.5 py-0.5 rounded-lg"
-                          style={{
-                            background: !ev.priceInfo ? 'rgba(255,255,255,0.04)' : isFree(ev) ? 'rgba(52,199,89,0.12)' : 'rgba(255,255,255,0.06)',
-                            color:      !ev.priceInfo ? 'var(--text-tertiary)'   : isFree(ev) ? '#30D158'               : 'var(--text-tertiary)',
-                          }}>
-                          {!ev.priceInfo ? t.eventsSection.priceUnknown : isFree(ev) ? 'Gratuit' : ev.priceInfo}
-                        </span>
-                        <svg width="6" height="10" viewBox="0 0 6 10" fill="none" stroke="var(--text-tertiary)" strokeWidth="1.5" strokeLinecap="round">
-                          <path d="M1 1l4 4-4 4"/>
-                        </svg>
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            )
-          })}
-        </div>
       ) : (
-        // ── Vue Catégories (existante, enrichie) ─────────────────────────
+        // ── Vue Catégories ─────────────────────────────────────────────
         orderedKeys.map(cat => (
           <div key={cat}>
             <p className="text-[11px] font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-tertiary)' }}>

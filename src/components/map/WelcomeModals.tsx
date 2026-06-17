@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { fireConfetti } from './OnboardingTour'
 
-const RETOUR_KEY = 'tif:retour-normale:v1'
+const RETOUR_KEY = 'tif:retour-normale:session'
 
 const LG_MODAL: React.CSSProperties = {
   background:           'rgba(18,18,24,0.96)',
@@ -25,7 +25,7 @@ export function WelcomeModals({ onOpenEvents }: WelcomeModalsProps) {
       sessionStorage.removeItem('tif:from-signaler')
       return
     }
-    if (!localStorage.getItem(RETOUR_KEY)) {
+    if (!sessionStorage.getItem(RETOUR_KEY)) {
       setVisible(true)
     }
   }, [])
@@ -33,7 +33,7 @@ export function WelcomeModals({ onOpenEvents }: WelcomeModalsProps) {
   if (!visible) return null
 
   const dismiss = () => {
-    localStorage.setItem(RETOUR_KEY, '1')
+    sessionStorage.setItem(RETOUR_KEY, '1')
     setVisible(false)
   }
 

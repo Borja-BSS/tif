@@ -493,14 +493,46 @@ export const events: EventItem[] = [
   {
     id: 'worldcup-2026', slug: 'coupe-du-monde-fifa-2026',
     title: '⚽ Coupe du Monde FIFA 2026', category: 'football',
-    description: "104 matchs, 48 nations. USA, Canada & Mexique. Pas de grande fan zone officielle à Genève (G7), mais bars et terrasses autorisés avec écran jusqu'à minuit (semaine) / 2h (weekend). Fan zones à Nyon et Saint-Genis-Pouilly.",
+    description: "104 matchs, 48 nations. USA, Canada & Mexique. Bars et terrasses autorisés avec écran jusqu'à minuit (semaine) / 2h (weekend). Fan zones à Nyon, Saint-Genis-Pouilly et Plan-les-Ouates (Gradi24).",
     venue: {
       name: 'Bars & terrasses de Genève',
       address: 'Cafés, bars et terrasses de la Ville de Genève',
       area: 'GE', lat: 46.2044, lng: 6.1432,
     },
     occurrences: [
-      { date: '2026-06-11', note: '11 juin – 19 juillet 2026 · 104 matchs' },
+      // Phase de groupes (11–26 juin) — matchs chaque jour
+      { date: '2026-06-11', note: 'Ouverture : USA · 3 matchs' },
+      { date: '2026-06-12', note: 'Phase de groupes · 4 matchs' },
+      { date: '2026-06-13', note: '🇨🇭 Qatar vs Suisse 21h · 4 matchs' },
+      { date: '2026-06-14', note: 'Phase de groupes · 4 matchs' },
+      { date: '2026-06-15', note: 'Phase de groupes · 4 matchs' },
+      { date: '2026-06-16', note: 'Phase de groupes · 4 matchs' },
+      { date: '2026-06-17', note: 'Phase de groupes · 4 matchs' },
+      { date: '2026-06-18', note: '🇨🇭 Suisse vs Bosnie 21h · 4 matchs' },
+      { date: '2026-06-19', note: 'Phase de groupes · 4 matchs' },
+      { date: '2026-06-20', note: 'Phase de groupes · 4 matchs' },
+      { date: '2026-06-21', note: 'Phase de groupes · 4 matchs' },
+      { date: '2026-06-22', note: 'Phase de groupes · 4 matchs' },
+      { date: '2026-06-23', note: 'Phase de groupes · 4 matchs' },
+      { date: '2026-06-24', note: '🇨🇭 Suisse vs Canada 21h · 4 matchs' },
+      { date: '2026-06-25', note: 'Phase de groupes · 4 matchs (décisifs)' },
+      { date: '2026-06-26', note: 'Phase de groupes · 4 matchs (décisifs)' },
+      // 8es de finale
+      { date: '2026-06-28', note: '8es de finale · 2 matchs' },
+      { date: '2026-06-29', note: '8es de finale · 2 matchs' },
+      { date: '2026-06-30', note: '8es de finale · 2 matchs' },
+      { date: '2026-07-01', note: '8es de finale · 2 matchs' },
+      { date: '2026-07-02', note: '8es de finale · 2 matchs' },
+      { date: '2026-07-03', note: '8es de finale · 2 matchs' },
+      // 16es de finale → QF → SF → Finale
+      { date: '2026-07-04', note: 'Quarts de finale · 2 matchs' },
+      { date: '2026-07-05', note: 'Quarts de finale · 2 matchs' },
+      { date: '2026-07-06', note: 'Quarts de finale · 2 matchs' },
+      { date: '2026-07-07', note: 'Quarts de finale · 2 matchs' },
+      { date: '2026-07-09', note: 'Demi-finales' },
+      { date: '2026-07-11', note: 'Demi-finales' },
+      { date: '2026-07-14', note: 'Match pour la 3e place' },
+      { date: '2026-07-19', note: '🏆 Finale · soirée exceptionnelle' },
     ],
     priceInfo: 'Gratuit (bars autorisés par la Ville)',
     links: [
@@ -508,7 +540,6 @@ export const events: EventItem[] = [
       { label: 'Grand Genève — Fan Zone', url: 'https://www.grand-geneve.org/evenements/fan-zone-coupe-du-monde-fifa-2026/', kind: 'info', status: 'verified' },
     ],
     verif: 'confirmed',
-    g7AccessNotes: ['Pas de grande fan zone officielle à Genève (contraintes G7)', 'Cafés et terrasses autorisés à diffuser les matchs'],
   },
   {
     id: 'nati-qatar-suisse', slug: 'nati-qatar-vs-suisse',
@@ -566,31 +597,93 @@ export const events: EventItem[] = [
       area: 'GE', lat: 46.1671, lng: 6.1230,
     },
     occurrences: [
-      { date: '2026-06-11', note: '11 juin – 19 juillet · tous les matchs sur écran géant' },
+      // Phase de groupes
+      { date: '2026-06-11', start: '18:00', note: 'Ouverture · USA' },
+      { date: '2026-06-12', start: '18:00', note: 'Phase de groupes' },
+      { date: '2026-06-13', start: '18:00', note: '🇨🇭 Qatar vs Suisse 21h' },
+      { date: '2026-06-14', start: '18:00', note: 'Phase de groupes' },
+      { date: '2026-06-15', start: '18:00', note: 'Phase de groupes' },
+      { date: '2026-06-16', start: '18:00', note: 'Phase de groupes' },
+      { date: '2026-06-17', start: '18:00', note: 'Phase de groupes' },
+      { date: '2026-06-18', start: '18:00', note: '🇨🇭 Suisse vs Bosnie 21h' },
+      { date: '2026-06-19', start: '18:00', note: 'Phase de groupes' },
+      { date: '2026-06-20', start: '18:00', note: 'Phase de groupes' },
+      { date: '2026-06-21', start: '18:00', note: 'Phase de groupes' },
+      { date: '2026-06-22', start: '18:00', note: 'Phase de groupes' },
+      { date: '2026-06-23', start: '18:00', note: 'Phase de groupes' },
+      { date: '2026-06-24', start: '18:00', note: '🇨🇭 Suisse vs Canada 21h' },
+      { date: '2026-06-25', start: '18:00', note: 'Phase de groupes (décisifs)' },
+      { date: '2026-06-26', start: '18:00', note: 'Phase de groupes (décisifs)' },
+      // 8es de finale
+      { date: '2026-06-28', start: '18:00', note: '8es de finale' },
+      { date: '2026-06-29', start: '18:00', note: '8es de finale' },
+      { date: '2026-06-30', start: '18:00', note: '8es de finale' },
+      { date: '2026-07-01', start: '18:00', note: '8es de finale' },
+      { date: '2026-07-02', start: '18:00', note: '8es de finale' },
+      { date: '2026-07-03', start: '18:00', note: '8es de finale' },
+      // Phases finales
+      { date: '2026-07-04', start: '18:00', note: 'Quarts de finale' },
+      { date: '2026-07-05', start: '18:00', note: 'Quarts de finale' },
+      { date: '2026-07-06', start: '18:00', note: 'Quarts de finale' },
+      { date: '2026-07-07', start: '18:00', note: 'Quarts de finale' },
+      { date: '2026-07-09', start: '18:00', note: 'Demi-finale' },
+      { date: '2026-07-11', start: '18:00', note: 'Demi-finale' },
+      { date: '2026-07-14', start: '18:00', note: '3e place' },
+      { date: '2026-07-19', start: '18:00', note: '🏆 Finale' },
     ],
     priceInfo: 'À confirmer sur place',
     links: [
       { label: 'TikTok @gradi24fanzone', url: 'https://www.tiktok.com/@gradi24fanzone', kind: 'info', status: 'verified' },
     ],
     verif: 'confirmed',
+    g7AccessNotes: [
+      'Bus 11 → arrêt Plan-les-Ouates / Galaise · 15 min depuis Carouge',
+      'Voiture : sortie Lancy/Plan-les-Ouates · parking gratuit sur site',
+    ],
   },
   {
     id: 'fanzone-nyon', slug: 'fanzone-cantine-de-rive-nyon',
     title: '⚽ Fan Zone Nyon — Cantine de Rive', category: 'football',
-    description: "Vaste fan zone organisée par l'association Etaris sous la Cantine de Rive à Nyon. Écran géant, bar, restauration et animations. Environ 40 matchs retransmis sur toute la durée du Mondial. 25 km de Genève.",
+    description: "Vaste fan zone organisée par l'association Etaris sous la Cantine de Rive à Nyon. Écran géant, bar, restauration et animations. ~40 matchs sélectionnés. 25 km de Genève. Entrée libre.",
     venue: {
       name: 'Cantine de Rive (Nyon)',
       address: 'Rive du lac, 1260 Nyon',
       area: 'autour', lat: 46.3821, lng: 6.2376,
     },
     occurrences: [
-      { date: '2026-06-11', note: '11 juin – 19 juillet · tous les matchs sélectionnés' },
+      // Nati + matchs sélectionnés (env. 40 sur la durée du Mondial)
+      { date: '2026-06-11', start: '18:00', note: 'Ouverture · USA' },
+      { date: '2026-06-13', start: '19:00', note: '🇨🇭 Qatar vs Suisse 21h' },
+      { date: '2026-06-14', start: '18:00', note: 'Matchs sélectionnés' },
+      { date: '2026-06-15', start: '18:00', note: 'Matchs sélectionnés' },
+      { date: '2026-06-17', start: '18:00', note: 'Matchs sélectionnés' },
+      { date: '2026-06-18', start: '19:00', note: '🇨🇭 Suisse vs Bosnie 21h' },
+      { date: '2026-06-19', start: '18:00', note: 'Matchs sélectionnés' },
+      { date: '2026-06-20', start: '18:00', note: 'Matchs sélectionnés' },
+      { date: '2026-06-21', start: '18:00', note: 'Matchs sélectionnés' },
+      { date: '2026-06-22', start: '18:00', note: 'Matchs sélectionnés' },
+      { date: '2026-06-24', start: '19:00', note: '🇨🇭 Suisse vs Canada 21h' },
+      { date: '2026-06-25', start: '18:00', note: 'Phase de groupes décisifs' },
+      { date: '2026-06-26', start: '18:00', note: 'Phase de groupes décisifs' },
+      { date: '2026-06-29', start: '18:00', note: '8es de finale' },
+      { date: '2026-06-30', start: '18:00', note: '8es de finale' },
+      { date: '2026-07-01', start: '18:00', note: '8es de finale' },
+      { date: '2026-07-02', start: '18:00', note: '8es de finale' },
+      { date: '2026-07-05', start: '18:00', note: 'Quarts de finale' },
+      { date: '2026-07-06', start: '18:00', note: 'Quarts de finale' },
+      { date: '2026-07-09', start: '18:00', note: 'Demi-finale' },
+      { date: '2026-07-11', start: '18:00', note: 'Demi-finale' },
+      { date: '2026-07-19', start: '18:00', note: '🏆 Finale' },
     ],
     priceInfo: 'Entrée libre',
     links: [
       { label: 'RTS — Nyon fan zone', url: 'https://www.rts.ch/info/suisse/2026/article/ou-regarder-la-coupe-du-monde-2026-en-suisse-romande-fan-zones-et-bars-29266676.html', kind: 'info', status: 'verified' },
     ],
     verif: 'confirmed',
+    g7AccessNotes: [
+      'Train CFF : Genève-Cornavin → Nyon (18 min, très fréquent)',
+      'Voiture : A1 dir. Lausanne, sortie Nyon · ~25 km de Genève',
+    ],
   },
   {
     id: 'fanzone-saint-genis', slug: 'fanzone-saint-genis-pouilly',
@@ -726,22 +819,169 @@ export const events: EventItem[] = [
   {
     id: 'fete-musique', slug: 'fete-de-la-musique-geneve',
     title: 'Fête de la Musique de Genève', category: 'festival',
-    description: "35e édition, gratuite, dans toute la ville (Bastions, Victoria Hall, Conservatoire, Vieille-Ville…).",
+    description: "35e édition, gratuite, dans toute la ville (Bastions, Victoria Hall, Conservatoire, Vieille-Ville, Jonction, Place des Volontaires…). ~500 concerts, 30 scènes. Ven 19h–02h · Sam 11h–02h · Dim 10h–22h.",
     venue: {
       name: 'Toute la ville de Genève',
       address: 'Parc des Bastions, Plainpalais, Vieille-Ville…',
       area: 'GE', lat: 46.2044, lng: 6.1432,
     },
     occurrences: [
-      { date: '2026-06-19', note: '19h–02h' },
-      { date: '2026-06-20', note: '11h–02h' },
-      { date: '2026-06-21', note: '10h–22h' },
+      { date: '2026-06-19', start: '19:00', end: '02:00' },
+      { date: '2026-06-20', start: '11:00', end: '02:00' },
+      { date: '2026-06-21', start: '10:00', end: '22:00' },
     ],
     priceInfo: 'Gratuit',
     links: [
       { label: 'Programme officiel', url: 'https://evenements.geneve.ch/fetedelamusique/', kind: 'info', status: 'verified' },
     ],
     verif: 'confirmed',
+  },
+
+  // ── L'AMR AUX CROPETTES — 24–28 juin 2026 ────────────────────────────────────
+  {
+    id: 'amr-cropettes', slug: 'amr-aux-cropettes-2026',
+    title: "L'AMR aux Cropettes", category: 'festival',
+    description: "27 concerts de jazz gratuits en plein air sur 5 jours. Festival emblématique de Genève organisé par l'AMR (Association pour l'encouragement de la Musique Improvisée). Scènes en plein air, atmosphère conviviale, bar et restauration.",
+    venue: {
+      name: 'Parc des Cropettes',
+      address: 'Rue Élisabeth Baulacre 12, 1202 Genève',
+      area: 'GE', lat: 46.2115, lng: 6.1399,
+    },
+    occurrences: [
+      { date: '2026-06-24', start: '17:00', end: '23:00', note: 'Jour 1 — 5–6 concerts' },
+      { date: '2026-06-25', start: '17:00', end: '23:00', note: 'Jour 2 — 5–6 concerts' },
+      { date: '2026-06-26', start: '17:00', end: '23:00', note: 'Jour 3 — 5–6 concerts' },
+      { date: '2026-06-27', start: '17:00', end: '23:00', note: 'Jour 4 — 5–6 concerts' },
+      { date: '2026-06-28', start: '14:00', end: '22:00', note: 'Jour 5 — clôture · programme complet sur amr-geneve.ch' },
+    ],
+    priceInfo: 'Gratuit',
+    links: [
+      { label: 'AMR — programme', url: 'https://www.amr-geneve.ch/programme', kind: 'organizer', status: 'verified' },
+    ],
+    verif: 'confirmed',
+    g7AccessNotes: [
+      'Tram 15 → arrêt Cropettes · Bus 3/5 → arrêt Servette',
+      'Parking Servette à proximité',
+    ],
+  },
+
+  // ── SCÈNE ELLA FITZGERALD — Parc La Grange (dès le 29 juin) ──────────────────
+  {
+    id: 'scene-ella', slug: 'scene-ella-fitzgerald-parc-la-grange',
+    title: 'Scène Ella Fitzgerald — Parc La Grange', category: 'concert',
+    description: "26 concerts gratuits en plein air tout l'été dans le Parc La Grange, au bord du lac Léman. Programmation jazz, world music et variétés. Lundi, mercredi et vendredi à 21h. Entrée libre, apporter un pique-nique recommandé.",
+    venue: {
+      name: 'Parc La Grange — Scène Ella Fitzgerald',
+      address: 'Avenue William-Favre 35, 1207 Genève',
+      area: 'GE', lat: 46.2041, lng: 6.1745,
+    },
+    occurrences: [
+      { date: '2026-06-19', start: '21:00', note: 'Concert inaugural' },
+      { date: '2026-06-29', start: '21:00', note: 'Lundi' },
+      { date: '2026-07-01', start: '21:00', note: 'Mercredi' },
+      { date: '2026-07-03', start: '21:00', note: 'Vendredi' },
+      { date: '2026-07-06', start: '21:00', note: 'Lundi' },
+      { date: '2026-07-08', start: '21:00', note: 'Mercredi' },
+      { date: '2026-07-10', start: '21:00', note: 'Vendredi' },
+      { date: '2026-07-13', start: '21:00', note: 'Lundi' },
+      { date: '2026-07-15', start: '21:00', note: 'Mercredi' },
+    ],
+    priceInfo: 'Gratuit',
+    links: [
+      { label: 'Ville de Genève — concerts La Grange', url: 'https://www.geneve.ch/fr/actualites/concerts-gratuits-parc-la-grange', kind: 'info', status: 'verified' },
+    ],
+    verif: 'confirmed',
+    g7AccessNotes: [
+      'Bus 2/9 → arrêt Eaux-Vives / Genève · 10 min à pied jusqu\'au parc',
+      'Parking Eaux-Vives à proximité',
+    ],
+  },
+
+  // ── PLEIN-LES-WATTS FESTIVAL — 9–11 juillet 2026 ────────────────────────────
+  {
+    id: 'plein-les-watts', slug: 'plein-les-watts-festival-2026',
+    title: 'Plein-les-Watts Festival', category: 'festival',
+    description: "Festival reggae 3 jours à Grand-Lancy. Lineup international exceptionnel : Richie Spice, Barrington Levy, Burning Spear, Israel Vibration, Danakil, Culture feat. Kenyatta Hill, KT Gorique. Portes 18h.",
+    venue: {
+      name: 'Parc Navazza-Oltramare',
+      address: 'Avenue Eugène-Lance 28, 1212 Grand-Lancy',
+      area: 'GE', lat: 46.1770, lng: 6.1258,
+    },
+    occurrences: [
+      { date: '2026-07-09', start: '18:00', end: '23:59', note: 'Jour 1 — Richie Spice · Danakil · KT Gorique' },
+      { date: '2026-07-10', start: '18:00', end: '23:59', note: 'Jour 2 — Barrington Levy · Israel Vibration' },
+      { date: '2026-07-11', start: '18:00', end: '23:59', note: 'Jour 3 — Burning Spear · Culture ft. Kenyatta Hill' },
+    ],
+    priceInfo: 'Payant — billetterie sur place',
+    links: [
+      { label: 'Plein-les-Watts', url: 'https://www.pleinleswatts.ch', kind: 'info', status: 'verified' },
+    ],
+    verif: 'confirmed',
+    g7AccessNotes: [
+      'Bus 11 → arrêt Lancy-Bâtie · 5 min à pied',
+      'Tram 14/18 → Carouge-Bachet puis bus 23 → Grand-Lancy',
+      'Voiture : sortie Lancy depuis le contournement · parking sur site',
+    ],
+  },
+
+  // ── GUITARE EN SCÈNE — 14–18 juillet 2026 ────────────────────────────────────
+  {
+    id: 'guitare-en-scene', slug: 'guitare-en-scene-saint-julien-2026',
+    title: 'Guitare en Scène — Saint-Julien-en-Genevois', category: 'festival',
+    description: "Festival rock et guitare 5 soirées, ~5000 places, au Stade des Burgondes à Saint-Julien-en-Genevois (France, 15 km de Genève). Lineup : Kool & The Gang, Pixies, Ben Harper, Gregory Porter, hommage Michael Jackson.",
+    venue: {
+      name: 'Stade des Burgondes',
+      address: 'Stade des Burgondes, 74160 Saint-Julien-en-Genevois',
+      area: 'autour', lat: 46.1430, lng: 6.0853,
+    },
+    occurrences: [
+      { date: '2026-07-14', start: '19:00', end: '23:30', note: 'Soirée 1' },
+      { date: '2026-07-15', start: '19:00', end: '23:30', note: 'Soirée 2' },
+      { date: '2026-07-16', start: '19:00', end: '23:30', note: 'Soirée 3' },
+      { date: '2026-07-17', start: '19:00', end: '23:30', note: 'Soirée 4' },
+      { date: '2026-07-18', start: '19:00', end: '23:30', note: 'Soirée 5 — clôture' },
+    ],
+    priceInfo: 'Payant — billetterie sur le site officiel',
+    links: [
+      { label: 'Guitare en Scène (officiel)', url: 'https://www.guitare-en-scene.com', kind: 'info', status: 'verified' },
+    ],
+    verif: 'confirmed',
+    g7AccessNotes: [
+      'Bus TPG 44/46 → Saint-Julien depuis Genève (30 min)',
+      'Voiture : A40 sortie Saint-Julien-en-Genevois · ~15 km de Genève · Parking sur site',
+      'Douane Bardonnex–Saint-Julien (ouverte 24h)',
+    ],
+  },
+
+  // ── PALÉO FESTIVAL NYON — 21–26 juillet 2026 ─────────────────────────────────
+  {
+    id: 'paleo-2026', slug: 'paleo-festival-nyon-2026',
+    title: 'Paléo Festival Nyon', category: 'festival',
+    description: "L'un des plus grands festivals en plein air d'Europe. 6 jours, 200 000 spectateurs. Édition 2026 : Katy Perry, Gorillaz, The Cure, Lorde, Gims, Twenty One Pilots, Orelsan et bien d'autres. 6 scènes simultanées.",
+    venue: {
+      name: "Plaine de l'Asse",
+      address: "Route des Plantaz 10, 1260 Nyon",
+      area: 'autour', lat: 46.3809, lng: 6.2318,
+    },
+    occurrences: [
+      { date: '2026-07-21', start: '14:00', end: '03:00', note: 'Jour 1' },
+      { date: '2026-07-22', start: '14:00', end: '03:00', note: 'Jour 2' },
+      { date: '2026-07-23', start: '14:00', end: '03:00', note: 'Jour 3' },
+      { date: '2026-07-24', start: '14:00', end: '03:00', note: 'Jour 4' },
+      { date: '2026-07-25', start: '14:00', end: '03:00', note: 'Jour 5' },
+      { date: '2026-07-26', start: '14:00', end: '03:00', note: 'Jour 6 — clôture' },
+    ],
+    priceInfo: 'Journée ~CHF 95 · Pass 6j ~CHF 440 · Camping disponible',
+    links: [
+      { label: 'Paléo Festival (officiel)', url: 'https://yeah.paleo.ch', kind: 'info', status: 'verified' },
+      { label: 'Billetterie (Ticketcorner)', url: 'https://www.ticketcorner.ch', kind: 'tickets', status: 'verified' },
+    ],
+    verif: 'confirmed',
+    g7AccessNotes: [
+      'Train CFF : Genève-Cornavin → Nyon (18 min, très fréquent) · navette festival Nyon → Plaine de l\'Asse',
+      'Voiture : A1 dir. Lausanne, sortie Nyon · ~25 km de Genève · Parking payant sur site',
+      'Vélo : piste cyclable bord du lac Genève–Nyon (~25 km)',
+    ],
   },
 ]
 
