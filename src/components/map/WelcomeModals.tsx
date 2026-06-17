@@ -191,8 +191,9 @@ function RetourNormaleModal({
             />
             {/* Soutenir TIF */}
             <a
-              href="/donate"
-              onClick={e => { e.preventDefault(); window.location.href = '/donate' }}
+              href="https://buy.stripe.com/fZu5kCar71V38erfdR97G00"
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 active:opacity-70 transition-opacity"
               style={{ background: 'rgba(255,55,95,0.08)', border: '1px solid rgba(255,55,95,0.22)' }}
             >
