@@ -78,10 +78,11 @@ export default function SurveyPageClient() {
 
       <nav className="flex gap-0 px-4 border-b border-white/[0.06] mb-8">
         {[
-          { label: 'Alertes',       href: '/admin/alerts'       },
-          { label: 'Signalements',  href: '/admin/signalements' },
-          { label: 'Sondage',  href: '/admin/survey'    },
-          { label: 'Douanes',  href: '/admin/crossings' },
+          { label: 'Alertes',      href: '/admin/alerts'       },
+          { label: 'Signalements', href: '/admin/signalements' },
+          { label: 'Sondage',      href: '/admin/survey'       },
+          { label: 'Douanes',      href: '/admin/crossings'    },
+          { label: 'Avis ⭐',      href: '/admin/ratings'      },
         ].map(tab => {
           const active = pathname === tab.href
           return (

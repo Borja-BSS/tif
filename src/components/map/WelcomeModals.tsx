@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import { fireConfetti } from './OnboardingTour'
 
-const RETOUR_KEY = 'tif:retour-normale:session'
+const DISMISS_KEY  = 'tif:popup:dismiss-ts'
+const EIGHT_HOURS  = 8 * 60 * 60 * 1000
 
 const LG_MODAL: React.CSSProperties = {
   background:           'rgba(18,18,24,0.96)',
@@ -19,31 +20,56 @@ interface WelcomeModalsProps {
 
 export function WelcomeModals({ onOpenEvents }: WelcomeModalsProps) {
   const [visible, setVisible] = useState(false)
+  const [stars,   setStars]   = useState(0)
+  const [hover,   setHover]   = useState(0)
+  const [comment, setComment] = useState('')
+  const [submitted, setSubmitted] = useState(false)
 
   useEffect(() => {
     if (sessionStorage.getItem('tif:from-signaler')) {
       sessionStorage.removeItem('tif:from-signaler')
       return
     }
-    if (!sessionStorage.getItem(RETOUR_KEY)) {
+    try {
+      const ts = localStorage.getItem(DISMISS_KEY)
+      if (!ts || Date.now() - Number(ts) > EIGHT_HOURS) {
+        setVisible(true)
+      }
+    } catch {
       setVisible(true)
     }
   }, [])
 
   if (!visible) return null
 
+  const submitRating = async (s: number, c: string) => {
+    if (s === 0 || submitted) return
+    setSubmitted(true)
+    try {
+      await fetch('/api/v1/ratings', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ stars: s, comment: c.trim() || undefined }),
+      })
+    } catch {
+      // fire-and-forget
+    }
+  }
+
   const dismiss = () => {
-    sessionStorage.setItem(RETOUR_KEY, '1')
+    try { localStorage.setItem(DISMISS_KEY, String(Date.now())) } catch {}
     setVisible(false)
   }
 
   const handleOk = () => {
     fireConfetti()
+    submitRating(stars, comment)
     dismiss()
   }
 
   const handleEvents = () => {
     fireConfetti()
+    submitRating(stars, comment)
     dismiss()
     onOpenEvents?.()
   }
@@ -51,19 +77,32 @@ export function WelcomeModals({ onOpenEvents }: WelcomeModalsProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
       <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.72)' }} />
-      <RetourNormaleModal onOk={handleOk} onEvents={handleEvents} onClose={dismiss} />
+      <RetourNormaleModal
+        stars={stars} setStars={setStars}
+        hover={hover} setHover={setHover}
+        comment={comment} setComment={setComment}
+        submitted={submitted}
+        onOk={handleOk} onEvents={handleEvents} onClose={dismiss}
+      />
     </div>
   )
 }
 
 function RetourNormaleModal({
-  onOk,
-  onEvents,
-  onClose,
+  stars, setStars, hover, setHover,
+  comment, setComment, submitted,
+  onOk, onEvents, onClose,
 }: {
-  onOk:      () => void
-  onEvents:  () => void
-  onClose:   () => void
+  stars:      number
+  setStars:   (n: number) => void
+  hover:      number
+  setHover:   (n: number) => void
+  comment:    string
+  setComment: (s: string) => void
+  submitted:  boolean
+  onOk:       () => void
+  onEvents:   () => void
+  onClose:    () => void
 }) {
   const events = [
     { icon: '🎪', label: 'Caribana Festival — Niska · KeBlack', desc: 'Ce soir · Crans-près-Céligny (Vaud)' },
@@ -71,8 +110,10 @@ function RetourNormaleModal({
     { icon: '⚽', label: 'Mondial FIFA 2026 — Nati Suisse',     desc: 'FanZone Gradi24 · tous les matchs' },
   ]
 
+  const active = hover || stars
+
   return (
-    <div className="relative z-10 w-full max-w-sm rounded-3xl p-6" style={LG_MODAL}>
+    <div className="relative z-10 w-full max-w-sm rounded-3xl p-6 overflow-y-auto max-h-[92dvh]" style={LG_MODAL}>
       {/* Close */}
       <button
         onClick={onClose}
@@ -86,7 +127,7 @@ function RetourNormaleModal({
       </button>
 
       {/* Header */}
-      <div className="text-center mb-5">
+      <div className="text-center mb-4">
         <div className="text-5xl mb-3">✅</div>
         <h2 className="text-[18px] font-bold text-white mb-1.5 leading-snug">
           Début du retour à la normale
@@ -94,6 +135,75 @@ function RetourNormaleModal({
         <p className="text-[12px] font-medium" style={{ color: 'rgba(255,255,255,0.45)' }}>
           Merci d&apos;avoir utilisé TIF pendant le G7
         </p>
+      </div>
+
+      {/* ── Zone étoiles ───────────────────────────────────────────────── */}
+      <div className="rounded-2xl p-4 mb-4" style={{ background: 'rgba(255,214,10,0.06)', border: '1px solid rgba(255,214,10,0.18)' }}>
+        <p className="text-[12px] font-semibold text-center mb-3" style={{ color: 'rgba(255,255,255,0.70)' }}>
+          {submitted ? '✅ Avis envoyé — merci !' : 'Comment évaluez-vous TIF ?'}
+        </p>
+
+        {/* 5 étoiles */}
+        <div className="flex justify-center gap-2 mb-1"
+          onMouseLeave={() => setHover(0)}>
+          {[1,2,3,4,5].map(i => (
+            <button
+              key={i}
+              onClick={() => !submitted && setStars(i)}
+              onMouseEnter={() => !submitted && setHover(i)}
+              aria-label={`${i} étoile${i > 1 ? 's' : ''}`}
+              className="transition-transform active:scale-90"
+              style={{ transform: active >= i ? 'scale(1.12)' : 'scale(1)' }}
+            >
+              <svg width="36" height="36" viewBox="0 0 24 24"
+                fill={active >= i ? '#FFD60A' : 'none'}
+                stroke={active >= i ? '#FFD60A' : 'rgba(255,255,255,0.22)'}
+                strokeWidth="1.5"
+                style={{ transition: 'fill 0.12s, stroke 0.12s' }}
+              >
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+            </button>
+          ))}
+        </div>
+
+        {stars > 0 && (
+          <p className="text-[11px] text-center mt-0.5" style={{ color: 'rgba(255,214,10,0.65)' }}>
+            {stars === 1 ? 'Peut mieux faire…' : stars === 2 ? 'Pas terrible…' : stars === 3 ? 'Bien !' : stars === 4 ? 'Très bien !' : 'Excellent ! 🎉'}
+          </p>
+        )}
+
+        {/* Commentaire — apparaît si étoile sélectionnée */}
+        {stars > 0 && !submitted && (
+          <div className="mt-3 space-y-2.5">
+            <textarea
+              value={comment}
+              onChange={e => setComment(e.target.value)}
+              placeholder="Un commentaire ? (facultatif)"
+              rows={2}
+              maxLength={300}
+              className="w-full rounded-xl px-3 py-2 text-[12px] resize-none outline-none"
+              style={{
+                background: 'rgba(255,255,255,0.06)',
+                border:     '1px solid rgba(255,255,255,0.12)',
+                color:      'rgba(255,255,255,0.80)',
+              }}
+            />
+            {/* Soutenir TIF */}
+            <a
+              href="/donate"
+              onClick={e => { e.preventDefault(); window.location.href = '/donate' }}
+              className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 active:opacity-70 transition-opacity"
+              style={{ background: 'rgba(255,55,95,0.08)', border: '1px solid rgba(255,55,95,0.22)' }}
+            >
+              <span className="text-lg">❤️</span>
+              <div>
+                <p className="text-[12px] font-semibold" style={{ color: 'rgba(255,255,255,0.85)' }}>Soutenir TIF</p>
+                <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.40)' }}>Faire un don pour continuer l&apos;aventure</p>
+              </div>
+            </a>
+          </div>
+        )}
       </div>
 
       {/* Status bloc */}
@@ -114,7 +224,7 @@ function RetourNormaleModal({
       </div>
 
       {/* Events bloc */}
-      <div className="mb-5">
+      <div className="mb-4">
         <p className="text-[12px] font-semibold mb-2.5" style={{ color: 'rgba(255,255,255,0.55)' }}>
           Retrouvez maintenant tous les événements proches de vous
         </p>
@@ -165,7 +275,7 @@ function RetourNormaleModal({
             color:      'rgba(255,255,255,0.65)',
           }}
         >
-          OK, merci
+          Continuer
         </button>
       </div>
     </div>
