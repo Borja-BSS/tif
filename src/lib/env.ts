@@ -21,5 +21,9 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']),
 })
 
-export const env = envSchema.parse(process.env)
+// SKIP_ENV_VALIDATION=1 permet aux preview deployments Vercel de builder
+// sans les vars de prod (DATABASE_URL, NEXTAUTH_*, etc.)
+export const env = process.env.SKIP_ENV_VALIDATION
+  ? (process.env as unknown as z.infer<typeof envSchema>)
+  : envSchema.parse(process.env)
 // App crashe au démarrage si une variable manque — intentionnel (ADR-001)

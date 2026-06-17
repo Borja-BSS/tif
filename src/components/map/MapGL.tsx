@@ -16,6 +16,7 @@ export interface MapGLProps {
   initialLat?:  number
   initialLng?:  number
   initialZoom?: number
+  mapStyle?:    string
   onMapReady?:  (map: mapboxgl.Map) => void
 }
 
@@ -23,6 +24,7 @@ export default function MapGL({
   initialLat  = 46.35,
   initialLng  = 6.30,
   initialZoom = 9,
+  mapStyle,
   onMapReady,
 }: MapGLProps) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -34,9 +36,15 @@ export default function MapGL({
 
     mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!
 
+    // Lire la préférence système au moment de l'init — pas de remount, pas de prop
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const resolvedStyle = mapStyle ?? (prefersDark
+      ? 'mapbox://styles/mapbox/dark-v11'
+      : 'mapbox://styles/mapbox/light-v11')
+
     const map = new mapboxgl.Map({
       container:    containerRef.current,
-      style:        'mapbox://styles/mapbox/dark-v11',
+      style:        resolvedStyle,
       center:       [initialLng, initialLat],
       zoom:         initialZoom,
       antialias:    false,
