@@ -1088,7 +1088,7 @@ export function HomeContent() {
                 { icon: '🛡️', title: 'Sécurité et anticipation', desc: "Détection d'anomalies en temps réel, alertes configurables, coordination avec les services compétents." },
                 { icon: '🚦', title: 'Gestion de la mobilité', desc: 'Optimisation des accès, signalement dynamique, coordination avec les réseaux TPG et CFF.' },
                 { icon: '📡', title: 'Tableau de bord opérationnel', desc: "Vue temps réel dédiée à votre équipe, reporting post-événement, métriques de performance." },
-                { icon: '🌐', title: 'Visibilité territoriale', desc: "Intégration de votre événement dans la plateforme TIF, accès à 10 000 utilisateurs quotidiens du Grand Genève." },
+                { icon: '🌐', title: 'Visibilité territoriale', desc: "Intégration de votre événement dans la plateforme TIF, visibilité maximale auprès des habitants du Grand Genève." },
               ].map((c, i) => (
                 <li key={i} style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', padding: '14px 0', borderBottom: i < 4 ? '1px solid var(--border)' : 'none' }}>
                   <span style={{ fontSize: '20px', flexShrink: 0, marginTop: '2px' }}>{c.icon}</span>
