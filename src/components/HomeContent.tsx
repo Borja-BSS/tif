@@ -68,50 +68,66 @@ const PRK_SLIDES = [
   { id: 'bernex',      name: 'Bernex',         capacity:  254, tpg: 'Tram 15',         hasRT: false },
 ]
 
-const STATIC_INC: IncSlide[] = [
-  { id: '1', icon: '🚦', title: 'A1, km 4.2 direction Lausanne, 2 voies bloquées sur 3', severity: 'CRITICAL', timeAgo: '07:43', source: 'OFROU' },
-  { id: '2', icon: '⬡', title: 'G7 Zones rouges actives : Palais des Nations, Quai Wilson, Rue de Lausanne', severity: 'HIGH', timeAgo: '06:00', source: 'Police Cantonale GE' },
-  { id: '3', icon: '📢', title: 'Manifestation Quai du Mont-Blanc, blocage, durée estimée 45 min', severity: 'HIGH', timeAgo: '08:12', source: 'Police Cantonale GE' },
-  { id: '4', icon: '🚌', title: 'TPG Ligne 12, Déviation Cornavin vers Rive, retard cumulé 8 min', severity: 'MEDIUM', timeAgo: '07:58', source: 'TPG' },
-  { id: '5', icon: '⛈️', title: 'Alerte météo orange, orages dès 17h, rafales 80 km/h, grêle possible', severity: 'MEDIUM', timeAgo: '05:30', source: 'MétéoSuisse' },
-  { id: '6', icon: '🚆', title: 'CFF IR90 Genève vers Berne, retard 14 min suite incident Lausanne', severity: 'MEDIUM', timeAgo: '08:02', source: 'CFF' },
-  { id: '7', icon: '⬡', title: 'G7 Consigne, éviter secteur aéroport 11h à 14h, convois officiels', severity: 'HIGH', timeAgo: '09:00', source: 'Police Cantonale GE' },
-  { id: '8', icon: '🚧', title: 'Travaux Rue de Rive, fermeture totale, déviation par Cours de Rive', severity: 'LOW', timeAgo: '00:00', source: 'Canton GE, SITG' },
+const EVENTS = [
+  { date:'2026-06-18', title:'Suisse 🇨🇭 vs Bosnie',         cat:'Football', desc:'Coupe du Monde · Groupe B · 21h00',           loc:'FanZone Gradi24, Plan-les-Ouates', free:true,  url:'https://tif.borja-swiss-solutions.ch/map' },
+  { date:'2026-06-19', title:'Scène Ella Fitzgerald',         cat:'Musique',  desc:'Concerts gratuits plein air · Lun, Mer, Ven',  loc:'Genève',                             free:true,  url:'https://www.geneve.ch/faire-geneve' },
+  { date:'2026-06-24', title:'Suisse 🇨🇭 vs Canada',          cat:'Football', desc:'Coupe du Monde · Groupe B · 21h00',           loc:'FanZone Gradi24, Plan-les-Ouates', free:true,  url:'https://tif.borja-swiss-solutions.ch/map' },
+  { date:'2026-06-25', title:'Tous À la Plage',               cat:'Musique',  desc:'Afro-Latino, Jazz, Latino · 3 soirées',        loc:'Canopée, Genève',                   free:false, url:'https://www.geneve.ch/faire-geneve' },
+  { date:'2026-07-03', title:'Montreux Jazz Festival',        cat:'Musique',  desc:'Festival international de renommée mondiale',  loc:'Montreux',                          free:false, url:'https://www.montreuxjazz.com' },
+  { date:'2026-07-04', title:'Grand Juillet',                 cat:'Culture',  desc:'Festival littéraire · Plusieurs lieux',        loc:'Canton de Genève',                  free:true,  url:'https://www.geneve.ch/faire-geneve' },
+  { date:'2026-07-05', title:'La Tour Genève Triathlon',      cat:'Sport',    desc:'Compétition internationale',                   loc:'Genève',                            free:false, url:'https://tif.borja-swiss-solutions.ch/map' },
+  { date:'2026-07-09', title:'Plein-les-Watts Festival',      cat:'Musique',  desc:'Concerts live, street art, food trucks',       loc:'Parc Navazza, Genève',              free:false, url:'https://infomaniak.events/fr-ch/festival/geneve' },
+  { date:'2026-07-14', title:'Guitare en Scène',              cat:'Musique',  desc:'Festival rock international',                  loc:'Saint-Julien-en-Genevois',          free:false, url:'https://tif.borja-swiss-solutions.ch/map' },
+  { date:'2026-07-19', title:'Finale Coupe du Monde',         cat:'Football', desc:'FIFA World Cup 2026 · MetLife Stadium',        loc:'FanZone Saint-Genis-Pouilly',       free:true,  url:'https://tif.borja-swiss-solutions.ch/map' },
+  { date:'2026-07-21', title:'Paléo Festival Nyon',           cat:'Musique',  desc:'Le festival phare de la région',               loc:'Nyon',                              free:false, url:'https://www.paleo.ch' },
+  { date:'2026-07-27', title:'Nocturne de Saint-Pierre',      cat:'Culture',  desc:'Accès aux tours · Pleine lune',                loc:'Cathédrale Saint-Pierre',           free:false, url:'https://tif.borja-swiss-solutions.ch/map' },
+  { date:'2026-08-07', title:'Jazz sur la Plage',             cat:'Musique',  desc:'Concert jazz en plein air',                    loc:"Plage d'Hermance",                  free:true,  url:'https://www.geneve.ch/faire-geneve' },
+  { date:'2026-08-13', title:'OSR · Festival Genève-Plage',   cat:'Musique',  desc:'Classique · Ciné-concert · Jazz',              loc:'Genève-Plage',                      free:false, url:'https://www.osr.ch' },
+  { date:'2026-08-14', title:'Piz Palü Festival',             cat:'Musique',  desc:'Rock, pop, électro · Gratuit -14 ans',         loc:'Plan-les-Ouates',                   free:false, url:'https://infomaniak.events/fr-ch/festival/geneve' },
+  { date:'2026-08-25', title:"La Bâtie — Festival de Genève", cat:'Culture',  desc:"Danse, musique, cirque, théâtre · 50e édition", loc:'Genève',                           free:false, url:'https://www.batie.ch' },
 ]
 
-// WHY_SLIDES content moved to i18n/home.ts → t.why.slides
+const CAT_COLORS: Record<string, string> = {
+  Football: 'var(--orange)',
+  Musique:  'var(--blue-d)',
+  Sport:    'var(--green)',
+  Culture:  '#8e4ec6',
+}
 
-const WHY_DETAILS: DetailInfo[] = [
-  { icon: '🏥', title: 'Scénario 01 : Mobilité professionnelle', rows: [
-    { label: 'Profil', value: 'Infirmière, départ 7h45' },
-    { label: 'Problème', value: 'Bardonnex fermée, non signalée' },
-    { label: 'Sans TIF', value: '+20 min de queue découverte sur place', color: 'var(--red)' },
-    { label: 'Avec TIF', value: 'Alerte 6h30, itinéraire Thônex planifié', color: 'var(--green)' },
-    { label: 'Gain estimé', value: '35 à 45 min' },
-    { label: 'Source données', value: 'BAZG (frontières), Police Cantonale GE' },
-  ], note: 'Ce scénario se produit chaque matin de sommet international pour des milliers de professionnels de santé dans le Grand Genève.' },
-  { icon: '👨‍👩‍👧', title: 'Scénario 02 : Sécurité familiale', rows: [
-    { label: 'Profil', value: 'Famille, sortie Quai Wilson' },
-    { label: 'Problème', value: 'Zone rouge G7 non connue' },
-    { label: 'Sans TIF', value: 'Blocage surprise, demi-tour forcé', color: 'var(--red)' },
-    { label: 'Avec TIF', value: 'Zone visible à 6h00 avec itinéraire alternatif', color: 'var(--green)' },
-    { label: 'Source données', value: 'Police Cantonale GE, Veille G7 TIF' },
-  ], note: 'Les zones G7 changent quotidiennement. TIF les met à jour dès leur publication officielle.' },
-  { icon: '🚚', title: 'Scénario 03 : Logistique entreprise', rows: [
-    { label: 'Profil', value: 'Livreur, 14 arrêts dans Genève' },
-    { label: 'Problème', value: '4 zones G7 fermées sur le trajet' },
-    { label: 'Sans TIF', value: '3 heures perdues, 6 livraisons ratées', color: 'var(--red)' },
-    { label: 'Avec TIF', value: 'Tournée planifiée avant 7h30, 14 livraisons OK', color: 'var(--green)' },
-    { label: 'Gain estimé', value: '3h et 6 livraisons supplémentaires' },
-    { label: 'Source données', value: 'OFROU, SITG, Veille G7 TIF' },
-  ], note: 'Pour les entreprises logistiques, TIF Pro offre une API directe pour automatiser la planification.' },
-  { icon: '⚡', title: 'Scénario 04 : Réaction en temps réel', rows: [
-    { label: 'Situation', value: 'Incident soudain, information dispersée' },
-    { label: 'Twitter / Waze', value: 'Délai 5 à 15 min, rumeurs non vérifiées', color: 'var(--red)' },
-    { label: 'Google Maps', value: 'Délai 5 à 15 min, pas de contexte G7', color: 'var(--orange)' },
-    { label: 'TIF', value: 'Sources officielles agrégées en moins de 30s', color: 'var(--green)' },
-    { label: 'Sources', value: 'OFROU, Police, TPG, CFF, MétéoSuisse' },
-  ], note: 'TIF ne produit pas de données. Il les agrège et les attribue. Chaque information est traçable à sa source primaire.' },
+const MONTHS_FR = ['jan','fév','mar','avr','mai','juin','juil','août','sep','oct','nov','déc']
+
+const WHY_SLIDES_LOCAL = [
+  { numLabel: 'Agenda & Billets',         title: 'Découvrez les événements de votre région',      withoutText: 'informations dispersées, billets introuvables',             withText: 'agenda centralisé, filtrable, billets en 1 clic' },
+  { numLabel: 'Mobilité événementielle',  title: "Anticipez les impacts trafic avant d'y aller",  withoutText: "embouteillages surprises, parking saturé à l'arrivée",     withText: 'TPG conseillé, P+R disponibles, alerte 30 min avant' },
+  { numLabel: 'Frontières en temps réel', title: 'Passez la frontière au bon moment',             withoutText: 'file découverte sur place, retard +20 min',                withText: "temps d'attente live sur 5 postes, passage optimal" },
+  { numLabel: 'Réaction immédiate',       title: 'Sources officielles agrégées en moins de 30s',  withoutText: 'délai 15–20 min sur les réseaux sociaux, rumeurs',          withText: '7 sources officielles synchronisées, info traçable' },
+]
+
+const WHY_DETAILS_LOCAL: DetailInfo[] = [
+  { icon: '🎭', title: 'Agenda & Billets — habitant Grand Genève', rows: [
+    { label: 'Profil',      value: 'Habitant Grand Genève' },
+    { label: 'Sans TIF',    value: 'Informations dispersées, billets introuvables', color: 'var(--red)' },
+    { label: 'Avec TIF',    value: 'Agenda complet, filtrable, billets en 1 clic',  color: 'var(--green)' },
+    { label: 'Catégories',  value: 'Musique, Football, Sport, Culture' },
+  ], note: '10 000 utilisateurs quotidiens consultent TIF pour anticiper leur semaine.' },
+  { icon: '🚌', title: 'Mobilité événementielle — festivalier', rows: [
+    { label: 'Exemple',  value: 'Paléo Festival · 50 000 spectateurs / soir' },
+    { label: 'Sans TIF', value: 'Embouteillages surprises, parking saturé',              color: 'var(--red)' },
+    { label: 'Avec TIF', value: 'TPG conseillé, P+R disponibles, itinéraire optimal',   color: 'var(--green)' },
+    { label: 'Sources',  value: 'TPG, OFROU, Parkings P+R' },
+  ], note: 'TIF corrèle les données de transport avec le calendrier événementiel pour alerter en amont.' },
+  { icon: '🛂', title: 'Frontières — frontalier quotidien', rows: [
+    { label: 'Profil',   value: '47 000 frontaliers/jour · Grand Genève' },
+    { label: 'Sans TIF', value: 'File découverte sur place, +20 min',                    color: 'var(--red)' },
+    { label: 'Avec TIF', value: "Temps d'attente live, 5 postes, passage optimal",       color: 'var(--green)' },
+    { label: 'Source',   value: 'BAZG, Bureau fédéral des douanes suisses' },
+  ], note: 'Moillesulaz, Bardonnex, Thônex, Meyrin, Ferney-Voltaire — 5 postes en temps réel.' },
+  { icon: '⚡', title: 'Réaction en temps réel', rows: [
+    { label: 'Situation',               value: 'Incident soudain, information dispersée' },
+    { label: 'Réseaux sociaux',         value: 'Délai 15–20 min, rumeurs non vérifiées',  color: 'var(--red)' },
+    { label: 'Applications classiques', value: 'Délai 5–15 min, contexte limité',         color: 'var(--orange)' },
+    { label: 'TIF',                     value: 'Sources officielles agrégées en < 30s',   color: 'var(--green)' },
+  ], note: 'OFROU, TPG, CFF, MétéoSuisse, BAZG, SITG, HERE — 7 sources synchronisées en continu.' },
 ]
 
 // desc + live moved to i18n/home.ts → t.src.slides
@@ -194,6 +210,9 @@ export function HomeContent() {
   const [contactForm, setContactForm] = useState({ name: '', email: '', subject: '', message: '', loading: false, success: false, error: '' })
   const [auditForm, setAuditForm] = useState({ name: '', email: '', expertise: '', loading: false, success: false, error: '' })
   const [partnerForm, setPartnerForm] = useState({ institution: '', email: '', expertise: '', loading: false, success: false, error: '' })
+  const [activeCat, setActiveCat] = useState<string>('Tous')
+  const [statsEmail, setStatsEmail] = useState('')
+  const [statsSent, setStatsSent] = useState(false)
   const lastFocus = useRef<HTMLElement | null>(null)
   const { user } = useAuth()
   const router = useRouter()
@@ -290,6 +309,17 @@ export function HomeContent() {
 
   useEffect(() => { fetchLive(); const id = setInterval(fetchLive, 30000); return () => clearInterval(id) }, [fetchLive])
 
+  // Events derived
+  const today = new Date(); today.setHours(0,0,0,0)
+  const upcomingEvents = EVENTS.filter(e => new Date(e.date) >= today)
+  const filteredEvents = activeCat === 'Tous' ? upcomingEvents : upcomingEvents.filter(e => e.cat === activeCat)
+  const handleStatsRequest = async () => {
+    if (!statsEmail.includes('@')) return
+    setStatsSent(true)
+    await fetch('/api/v1/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'stats-request', email: statsEmail }) }).catch(() => null)
+  }
+
   // Derived
   const tpgDisrupted = transport?.disruptions.tpg ?? []
   const uniqueTpgLines = [...new Set(tpgDisrupted.map(d => d.lineNumber))]
@@ -368,7 +398,7 @@ export function HomeContent() {
   }
 
   const shareUrl = 'https://tif.borja-swiss-solutions.ch'
-  const shareText = 'TIF centralise toutes les perturbations du G7 Grand Genève en temps réel. Routes, frontières, TPG, météo : gratuit et sans inscription.'
+  const shareText = 'TIF — agenda des événements Grand Genève, mobilité en temps réel, frontières live. Gratuit, sans inscription.'
   function copyLink() {
     navigator.clipboard.writeText(shareUrl).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000) })
   }
@@ -450,9 +480,10 @@ export function HomeContent() {
       <nav id="nav">
         <a className="n-logo" href="#">TIF</a>
         <div className="n-links">
+          <a className="n-link" href="#evenements">{t.nav.events}</a>
           <a className="n-link" href="#live">{t.nav.live}</a>
           <a className="n-link" href="#sources">{t.nav.sources}</a>
-          <a className="n-link" href="#soutien">{t.nav.support}</a>
+          <a className="n-link" href="#pro">{t.nav.organizers}</a>
           <a className="n-link" href="#confiance">{t.nav.transparency}</a>
         </div>
         <div className="n-right">
@@ -500,8 +531,86 @@ export function HomeContent() {
         </div>
       </section>
 
+      {/* METRICS */}
+      <section className="s reveal">
+        <div className="s-label">{t.metrics.sectionLabel}</div>
+        <h2 className="s-h">{t.metrics.h2a}<br />{t.metrics.h2b}</h2>
+        <div className="metrics-row">
+          <div className="metric-card">
+            <div className="metric-val">10K+</div>
+            <div className="metric-lbl">{t.metrics.kpi1lbl}</div>
+            <div className="metric-sub">{t.metrics.kpi1sub}</div>
+          </div>
+          <div className="metric-card">
+            <div className="metric-val">150K+</div>
+            <div className="metric-lbl">{t.metrics.kpi2lbl}</div>
+            <div className="metric-sub">{t.metrics.kpi2sub}</div>
+          </div>
+          <div className="metric-card">
+            <div className="metric-val">7</div>
+            <div className="metric-lbl">{t.metrics.kpi3lbl}</div>
+            <div className="metric-sub">{t.metrics.kpi3sub}</div>
+          </div>
+          <div className="metric-card">
+            <div className="metric-val">30s</div>
+            <div className="metric-lbl">{t.metrics.kpi4lbl}</div>
+            <div className="metric-sub">{t.metrics.kpi4sub}</div>
+          </div>
+        </div>
+      </section>
+
+      {/* ÉVÉNEMENTS */}
+      <section className="s s-alt reveal" id="evenements">
+        <div className="s-label">{t.eventsSection.sectionLabel}</div>
+        <h2 className="s-h">{t.eventsSection.h2a}<br /><span className="accent">{t.eventsSection.h2b}</span></h2>
+        <p className="s-sub">{t.eventsSection.sub}</p>
+        <div style={{ display:'flex', gap:'8px', flexWrap:'wrap', justifyContent:'center', marginBottom:'28px' }}>
+          {['Tous','Football','Musique','Sport','Culture'].map(cat => (
+            <button key={cat} className={`filter-btn${activeCat === cat ? ' active' : ''}`}
+              style={activeCat === cat && cat !== 'Tous' ? { borderColor: CAT_COLORS[cat] ?? 'var(--blue)', color: CAT_COLORS[cat] ?? 'var(--blue)' } : {}}
+              onClick={() => setActiveCat(cat)}>{cat}</button>
+          ))}
+        </div>
+        <div className="events-scroll">
+          {filteredEvents.slice(0,12).map((ev, i) => {
+            const d = new Date(ev.date)
+            return (
+              <a key={i} href={ev.url} target="_blank" rel="noreferrer" className="event-card" style={{ textDecoration:'none' }}>
+                <div className="ev-date">
+                  <div className="ev-day">{d.getDate()}</div>
+                  <div className="ev-mon">{MONTHS_FR[d.getMonth()]}</div>
+                </div>
+                <div className="ev-body">
+                  <div className="ev-cat" style={{ color: CAT_COLORS[ev.cat] ?? 'var(--blue)' }}>{ev.cat}</div>
+                  <div className="ev-title">{ev.title}</div>
+                  <div className="ev-desc">{ev.desc}</div>
+                  <div className="ev-loc">📍 {ev.loc}</div>
+                </div>
+                <div className="ev-right">
+                  {ev.free
+                    ? <span className="ev-badge free">{t.eventsSection.freeLabel}</span>
+                    : <span className="ev-badge paid">{t.eventsSection.ticketsLabel}</span>}
+                </div>
+              </a>
+            )
+          })}
+        </div>
+        {filteredEvents.length === 0 && (
+          <p style={{ textAlign:'center', color:'var(--ink3)', fontSize:'14px', padding:'24px 0' }}>{t.eventsSection.noEvents}</p>
+        )}
+        <div className="live-cta reveal" style={{ marginTop:'28px' }}>
+          <div className="lct"><strong>{t.eventsSection.ctaStrong}</strong><br />{t.eventsSection.ctaDesc}</div>
+          <div className="lcb">
+            <a className="lc-a" href={user ? '/map' : '/login'} onClick={handleOpenMap}>
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="2.2" fill="currentColor" /><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" strokeWidth="1.4" /></svg>
+              {t.eventsSection.ctaBtn}
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* DASHBOARD LIVE */}
-      <section className="s s-alt" id="live">
+      <section className="s" id="live">
         <div className="s-label">{t.dash.sectionLabel}</div>
         <h2 className="s-h">{t.dash.h2a}<br />{t.dash.h2b}</h2>
         <p className="s-sub" style={{ marginBottom: lastRefresh ? '8px' : undefined }}>{t.dash.sub}</p>
@@ -542,23 +651,29 @@ export function HomeContent() {
             </div>
           </div>
           <div className="dash-row dash-row-3">
-            {/* G7 */}
+            {/* Événements actifs */}
             <div className="dc">
-              <div className="g7-head"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><polygon points="5,1 9,3 9,7 5,9 1,7 1,3" stroke="currentColor" strokeWidth="1.2" /></svg>{t.dash.g7.label}</div>
+              <div className="dc-top"><div className="dc-label">Événements actifs</div><div className="dc-live-dot" /></div>
               <div className="g7-grid">
-                <div className="g7m g7m-btn" onClick={() => setDetail({ icon: '🔴', title: `${g7Zones} ${t.dash.g7.zonesLabel}`, rows: [{ label: 'Nombre', value: `${g7Zones}`, color: 'var(--red)' }, { label: 'Source', value: 'Police Cantonale GE' }], note: t.dash.g7.zonesDesc })}>
-                  <div className="g7m-l">{t.dash.g7.zonesLabel}</div><div className="g7m-v" style={{ color: 'var(--red)' }}>{g7Zones}</div><div className="g7m-d">{t.dash.g7.zonesDesc}</div>
+                <div className="g7m g7m-btn" onClick={() => { setActiveCat('Tous'); document.getElementById('evenements')?.scrollIntoView({ behavior:'smooth' }) }}>
+                  <div className="g7m-l">Total agenda</div>
+                  <div className="g7m-v" style={{ color: 'var(--blue-d)' }}>{upcomingEvents.length}</div>
+                  <div className="g7m-d">événements à venir</div>
                 </div>
-                <div className="g7m g7m-btn" onClick={() => setDetail({ icon: '🚫', title: `11 ${t.dash.g7.roadsLabel}`, rows: [{ label: 'Nombre', value: '11', color: 'var(--orange)' }, { label: 'Source', value: 'Police Cantonale GE, SITG, OFROU' }], note: t.dash.g7.roadsDesc })}>
-                  <div className="g7m-l">{t.dash.g7.roadsLabel}</div><div className="g7m-v" style={{ color: 'var(--orange)' }}>11</div><div className="g7m-d">{t.dash.g7.roadsDesc}</div>
+                <div className="g7m g7m-btn" onClick={() => { setActiveCat('Football'); document.getElementById('evenements')?.scrollIntoView({ behavior:'smooth' }) }}>
+                  <div className="g7m-l">Football</div>
+                  <div className="g7m-v" style={{ color: 'var(--orange)' }}>{upcomingEvents.filter(e=>e.cat==='Football').length}</div>
+                  <div className="g7m-d">matchs à venir</div>
                 </div>
-                <div className="g7m g7m-btn" onClick={() => setDetail({ icon: '🚌', title: t.dash.g7.tpgLabel, rows: [{ label: 'Nombre', value: `${g7Lines.length > 0 ? g7Lines.length : 3}`, color: 'var(--gold)' }, { label: 'Source', value: 'TPG' }], note: t.dash.g7.tpgDesc })}>
-                  <div className="g7m-l">{t.dash.g7.tpgLabel}</div>
-                  <div className="g7m-v" style={{ color: 'var(--gold)' }}>{g7Lines.length > 0 ? g7Lines.length : transport?.g7.isActive ? '—' : 3}</div>
-                  <div className="g7m-d">{g7Lines.length > 0 ? `Lignes ${g7Lines.slice(0, 4).map(l => l.startsWith('L') || l.startsWith('l') ? l : `L${l}`).join(', ')}` : t.dash.g7.tpgDesc}</div>
+                <div className="g7m g7m-btn" onClick={() => { setActiveCat('Musique'); document.getElementById('evenements')?.scrollIntoView({ behavior:'smooth' }) }}>
+                  <div className="g7m-l">Musique</div>
+                  <div className="g7m-v" style={{ color: 'var(--blue)' }}>{upcomingEvents.filter(e=>e.cat==='Musique').length}</div>
+                  <div className="g7m-d">concerts &amp; festivals</div>
                 </div>
-                <div className="g7m g7m-btn" onClick={() => setDetail({ icon: '📢', title: `${dashData?.alerts.length ?? 28} ${t.dash.g7.alertsLabel}`, rows: [{ label: 'Total', value: `${dashData?.alerts.length ?? 28}` }, { label: 'Sources', value: 'OFROU, Police GE, TPG, CFF, MétéoSuisse, BAZG' }], note: t.dash.g7.alertsFrom })}>
-                  <div className="g7m-l">{t.dash.g7.alertsLabel}</div><div className="g7m-v" style={{ color: 'var(--blue-d)' }}>{dashData?.alerts.length ?? 28}</div><div className="g7m-d">{t.dash.g7.alertsFrom}</div>
+                <div className="g7m g7m-btn" onClick={() => setDetail({ icon: '📢', title: `${dashData?.alerts.length ?? 0} alertes actives`, rows: [{ label: 'Total', value: `${dashData?.alerts.length ?? 0}` }, { label: 'Sources', value: 'OFROU, TPG, CFF, MétéoSuisse, BAZG' }], note: 'Alertes mobilité en temps réel depuis 7 sources officielles.' })}>
+                  <div className="g7m-l">Alertes mobilité</div>
+                  <div className="g7m-v" style={{ color: 'var(--gold)' }}>{dashData?.alerts.length ?? 0}</div>
+                  <div className="g7m-d">flux temps réel</div>
                 </div>
               </div>
             </div>
@@ -626,34 +741,34 @@ export function HomeContent() {
         </div>
       </section>
 
-      {/* POURQUOI G7 */}
+      {/* CAS D'USAGE */}
       <section className="s reveal">
-        <div className="s-label">{t.why.sectionLabel}</div>
-        <h2 className="s-h">{t.why.h2a}<br />{t.why.h2b}</h2>
-        <p className="s-sub">{t.why.sub}</p>
+        <div className="s-label">{t.usecases.sectionLabel}</div>
+        <h2 className="s-h">{t.usecases.h2a}<br />{t.usecases.h2b}</h2>
+        <p className="s-sub">{t.usecases.sub}</p>
         <div className="car-outer" style={{ maxWidth: '960px', margin: '0 auto' }}>
           <div className="car-head">
-            <span className="car-head-t">{t.why.carHead}</span>
+            <span className="car-head-t">{t.usecases.carHead}</span>
             <div className="car-arrows">
               <button className="c-arr" onClick={() => carMove('why', -1)} aria-label="Précédent"><svg viewBox="0 0 11 11"><polyline points="7.5,1.5 3,5.5 7.5,9.5" /></svg></button>
               <button className="c-arr" onClick={() => carMove('why', 1)} aria-label="Suivant"><svg viewBox="0 0 11 11"><polyline points="3.5,1.5 8,5.5 3.5,9.5" /></svg></button>
             </div>
           </div>
           <div className="ctrack" id="ctr-why" ref={el => { carRefs.current['why'] = el }} onScroll={() => csync('why')}>
-            {[...t.why.slides, ...t.why.slides, ...t.why.slides].map((s, i) => (
-              <div key={i} className="cslide" style={{ cursor: 'pointer' }} onClick={() => setDetail(WHY_DETAILS[i % t.why.slides.length])}>
+            {[...WHY_SLIDES_LOCAL, ...WHY_SLIDES_LOCAL, ...WHY_SLIDES_LOCAL].map((s, i) => (
+              <div key={i} className="cslide" style={{ cursor: 'pointer' }} onClick={() => setDetail(WHY_DETAILS_LOCAL[i % WHY_SLIDES_LOCAL.length])}>
                 <div className="why-card">
-                  <div className="why-num">{String(i % t.why.slides.length + 1).padStart(2, '0')}{'  '}{s.numLabel}</div>
+                  <div className="why-num">{String(i % WHY_SLIDES_LOCAL.length + 1).padStart(2, '0')}{'  '}{s.numLabel}</div>
                   <div className="why-title">{s.title}</div>
                   <div className="why-body">
-                    <span className="before">{t.why.withoutTIF}</span>{' '}{s.withoutText}{' '}<span className="after">{t.why.withTIF}</span>{' '}{s.withText}
+                    <span className="before">{t.usecases.withoutLabel}</span>{' '}{s.withoutText}{' '}<span className="after">{t.usecases.withLabel}</span>{' '}{s.withText}
                   </div>
-                  <div style={{ fontSize: '11px', color: 'var(--blue)', marginTop: '10px' }}>{t.why.analyzeLink}</div>
+                  <div style={{ fontSize: '11px', color: 'var(--blue)', marginTop: '10px' }}>{t.usecases.detailLink}</div>
                 </div>
               </div>
             ))}
           </div>
-          <Dots id="why" logical={t.why.slides.length} />
+          <Dots id="why" logical={WHY_SLIDES_LOCAL.length} />
         </div>
       </section>
 
@@ -719,80 +834,6 @@ export function HomeContent() {
         </div>
       </section>
 
-      {/* LIGNE VERTE G7 */}
-      <section className="s reveal" id="ligne-verte">
-        <div className="s-label reveal">{t.lgv.sectionLabel}</div>
-        <h2 className="s-h reveal">{t.lgv.h2}</h2>
-        <p className="s-sub reveal">{t.lgv.sub}</p>
-        <div className="reveal" style={{ maxWidth: '560px', margin: '0 auto' }}>
-          {/* Card principale — numéro vert */}
-          <div style={{
-            background:   'var(--bg-card)',
-            border:       '1px solid var(--border)',
-            borderRadius: '20px',
-            padding:      '32px 28px',
-            boxShadow:    'var(--shadow-lg)',
-            textAlign:    'center',
-            marginBottom: '16px',
-          }}>
-            <div style={{ fontSize: '13px', fontWeight: 600, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--green)', marginBottom: '12px' }}>
-              {t.lgv.freeNumberLabel}
-            </div>
-            <a
-              href="tel:0800902456"
-              style={{
-                display:       'block',
-                fontSize:      'clamp(32px, 8vw, 48px)',
-                fontWeight:    800,
-                letterSpacing: '-0.03em',
-                color:         'var(--green)',
-                textDecoration:'none',
-                lineHeight:    1,
-                marginBottom:  '8px',
-              }}
-            >
-              0800 902 456
-            </a>
-            <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '24px' }}>
-              {t.lgv.freeCallLabel}
-            </div>
-            <div style={{ borderTop: '1px solid var(--border)', paddingTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px', textAlign: 'left' }}>
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                <span style={{ fontSize: '16px', flexShrink: 0, marginTop: '1px' }}>🕐</span>
-                <div>
-                  <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-tertiary)', letterSpacing: '.05em', textTransform: 'uppercase', marginBottom: '3px' }}>{t.lgv.hoursLabel}</div>
-                  <div style={{ fontSize: '14px', color: 'var(--text-primary)', lineHeight: 1.5 }}>
-                    Lun 1er – ven 5 juin 2026<br />
-                    Lun 8 – jeu 18 juin 2026<br />
-                    <span style={{ color: 'var(--text-secondary)' }}>11h – 19h</span>
-                  </div>
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                <span style={{ fontSize: '16px', flexShrink: 0, marginTop: '1px' }}>🚨</span>
-                <div>
-                  <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-tertiary)', letterSpacing: '.05em', textTransform: 'uppercase', marginBottom: '3px' }}>{t.lgv.emergencyLabel}</div>
-                  <a href="tel:117" style={{ fontSize: '18px', fontWeight: 700, color: 'var(--red)', textDecoration: 'none', letterSpacing: '-0.01em' }}>117</a>
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                <span style={{ fontSize: '16px', flexShrink: 0, marginTop: '1px' }}>📧</span>
-                <div>
-                  <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-tertiary)', letterSpacing: '.05em', textTransform: 'uppercase', marginBottom: '3px' }}>{t.lgv.pressLabel}</div>
-                  <div style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                    <a href="tel:+41224275600" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>+41 (0)22 427 56 00</a><br />
-                    <a href="mailto:communication@police.ge.ch" style={{ color: 'var(--blue-d)', textDecoration: 'none' }}>communication@police.ge.ch</a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div style={{ fontSize: '12px', color: 'var(--text-tertiary)', textAlign: 'center', lineHeight: 1.6 }}>
-            {t.lgv.sourceText}
-          </div>
-        </div>
-      </section>
-
       {/* SOURCES */}
       <section className="s s-alt" id="sources">
         <div className="s-label reveal">{t.src.sectionLabel}</div>
@@ -827,6 +868,72 @@ export function HomeContent() {
         </div>
       </section>
 
+      {/* TRACK RECORD */}
+      <section className="s reveal">
+        <div className="s-label">{t.track.sectionLabel}</div>
+        <h2 className="s-h">{t.track.h2a}<br />{t.track.h2b}</h2>
+        <p className="s-sub">{t.track.sub}</p>
+        <div className="track-grid">
+          <div className="proof-card">
+            <div className="proof-stat">10K</div>
+            <div className="proof-lbl">{t.track.stat1lbl}</div>
+            <div className="proof-desc">{t.track.stat1desc}</div>
+          </div>
+          <div className="proof-card">
+            <div className="proof-stat">150K+</div>
+            <div className="proof-lbl">{t.track.stat2lbl}</div>
+            <div className="proof-desc">{t.track.stat2desc}</div>
+          </div>
+          <div className="proof-card">
+            <div className="proof-stat">7</div>
+            <div className="proof-lbl">{t.track.stat3lbl}</div>
+            <div className="proof-desc">{t.track.stat3desc}</div>
+          </div>
+          <div className="proof-card">
+            <div className="proof-stat">30s</div>
+            <div className="proof-lbl">{t.track.stat4lbl}</div>
+            <div className="proof-desc">{t.track.stat4desc}</div>
+          </div>
+        </div>
+        <p style={{ textAlign:'center', fontSize:'12px', color:'var(--ink3)', marginTop:'20px' }}>
+          {t.track.footnote}
+        </p>
+      </section>
+
+      {/* PRO */}
+      <section className="s s-alt reveal" id="pro">
+        <div className="s-label">{t.pro.sectionLabel}</div>
+        <h2 className="s-h">{t.pro.h2a}<br />{t.pro.h2b}</h2>
+        <p className="s-sub">{t.pro.sub}</p>
+        <div className="pro-grid">
+          <div className="pro-cta-card">
+            <div style={{ fontSize:'13px', fontWeight:600, letterSpacing:'.06em', textTransform:'uppercase', color:'#f5f5f7', opacity:0.6, marginBottom:'12px' }}>{t.pro.ctaTag}</div>
+            <h3 style={{ fontSize:'clamp(20px,4vw,28px)', fontWeight:700, color:'#f5f5f7', letterSpacing:'-0.02em', marginBottom:'12px', lineHeight:1.2 }}>{t.pro.ctaH3a}<br />{t.pro.ctaH3b}</h3>
+            <ul style={{ listStyle:'none', padding:0, margin:'0 0 20px', display:'flex', flexDirection:'column', gap:'8px' }}>
+              {[t.pro.cap1, t.pro.cap2, t.pro.cap3, t.pro.cap4].map((item,i) => (
+                <li key={i} style={{ fontSize:'14px', color:'#f5f5f7', opacity:0.85, display:'flex', gap:'8px' }}>
+                  <span style={{ color:'#30d158', flexShrink:0 }}>✓</span>{item}
+                </li>
+              ))}
+            </ul>
+            <button className="btn-pro" onClick={() => openM('m-pro')}>{t.pro.ctaBtn}</button>
+          </div>
+          <div style={{ display:'flex', flexDirection:'column', gap:'16px' }}>
+            {[
+              { icon:'🎭', title: t.pro.card1title, desc: t.pro.card1desc },
+              { icon:'⚽', title: t.pro.card2title, desc: t.pro.card2desc },
+              { icon:'🏛️', title: t.pro.card3title, desc: t.pro.card3desc },
+            ].map((item,i) => (
+              <div key={i} style={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:'16px', padding:'20px 22px' }}>
+                <div style={{ fontSize:'22px', marginBottom:'8px' }}>{item.icon}</div>
+                <div style={{ fontSize:'15px', fontWeight:600, color:'var(--ink)', marginBottom:'6px' }}>{item.title}</div>
+                <div style={{ fontSize:'13px', color:'var(--ink3)', lineHeight:1.5 }}>{item.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* CTA DARK */}
       <div className="cta-dark reveal">
         <h2>{t.ctaDark.h2a}<br />{t.ctaDark.h2b}</h2>
@@ -838,9 +945,9 @@ export function HomeContent() {
           </a>
         </div>
         <div className="cta-stats">
-          <div className="cta-stat"><div className="cta-stat-v">7</div><div className="cta-stat-l">{t.ctaDark.stat1l}</div></div>
-          <div className="cta-stat"><div className="cta-stat-v">30s</div><div className="cta-stat-l">{t.ctaDark.stat2l}</div></div>
-          <div className="cta-stat"><div className="cta-stat-v">1M+</div><div className="cta-stat-l">{t.ctaDark.stat3l}</div></div>
+          <div className="cta-stat"><div className="cta-stat-v">10K+</div><div className="cta-stat-l">{t.ctaDark.stat1l}</div></div>
+          <div className="cta-stat"><div className="cta-stat-v">150K+</div><div className="cta-stat-l">{t.ctaDark.stat2l}</div></div>
+          <div className="cta-stat"><div className="cta-stat-v">30s</div><div className="cta-stat-l">{t.ctaDark.stat3l}</div></div>
         </div>
       </div>
 
@@ -954,8 +1061,12 @@ export function HomeContent() {
           <div className="ft-top">
             <div className="ft-brand"><p>TIF</p><span>{t.footer.tagline}</span></div>
             <div className="ft-links">
-              <a href="#live">{t.footer.live}</a><a href="#sources">{t.footer.sources}</a>
-              <a href="#soutien">{t.footer.support}</a><a href="#confiance">{t.footer.transparency}</a>
+              <a href="#evenements">{t.nav.events}</a>
+              <a href="#live">{t.footer.live}</a>
+              <a href="#sources">{t.footer.sources}</a>
+              <a href="#pro">{t.nav.organizers}</a>
+              <a href="#confiance">{t.footer.transparency}</a>
+              <a href="#soutien">{t.footer.support}</a>
               <a href="#" onClick={e => { e.preventDefault(); openM('m-contact') }}>{t.footer.contact}</a>
               <a href="#" onClick={e => { e.preventDefault(); openM('m-privacy') }}>{t.footer.privacy}</a>
             </div>
