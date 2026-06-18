@@ -137,23 +137,23 @@ const TC2_ICONS  = ['❓', '📚', '🎯', '🏗️']
 const BORDER_HOME_IDS = ['bardonnex', 'thonex-vallard', 'moillesulaz', 'meyrin', 'ferney-voltaire']
 
 const EVENTS_DATA = [
-  { date: '2026-06-18', title: 'Suisse 🇨🇭 vs Bosnie', cat: 'Football', desc: 'Coupe du Monde · Groupe B · 21h00 CEST', loc: 'FanZone Gradi24, Plan-les-Ouates', free: true, url: 'https://tif.borja-swiss-solutions.ch/map' },
+  { date: '2026-06-18', title: 'Suisse 🇨🇭 vs Bosnie', cat: 'Football', desc: 'Coupe du Monde · Groupe B · 21h00 CEST', loc: 'FanZone Gradi24, Plan-les-Ouates', free: true, url: '/map' },
   { date: '2026-06-19', endDate: '2026-08-21', title: 'Scène Ella Fitzgerald', cat: 'Musique', desc: 'Concerts gratuits plein air · lun, mer, ven', loc: 'Genève', free: true, url: 'https://www.geneve.ch/faire-geneve' },
-  { date: '2026-06-24', title: 'Suisse 🇨🇭 vs Canada', cat: 'Football', desc: 'Coupe du Monde · Groupe B · 21h00 CEST', loc: 'FanZone Gradi24, Plan-les-Ouates', free: true, url: 'https://tif.borja-swiss-solutions.ch/map' },
+  { date: '2026-06-24', title: 'Suisse 🇨🇭 vs Canada', cat: 'Football', desc: 'Coupe du Monde · Groupe B · 21h00 CEST', loc: 'FanZone Gradi24, Plan-les-Ouates', free: true, url: '/map' },
   { date: '2026-06-25', endDate: '2026-06-27', title: 'Tous À la Plage', cat: 'Musique', desc: 'Afro-Latino, Jazz, Latino · 3 soirées', loc: 'Canopée, Genève', free: false, url: 'https://www.geneve.ch/faire-geneve' },
   { date: '2026-07-03', endDate: '2026-07-18', title: 'Montreux Jazz Festival', cat: 'Musique', desc: 'Festival international de renommée mondiale', loc: 'Montreux', free: false, url: 'https://www.montreuxjazz.com' },
   { date: '2026-07-04', endDate: '2026-07-12', title: 'Grand Juillet', cat: 'Culture', desc: 'Festival littéraire · Plusieurs lieux', loc: 'Canton de Genève', free: true, url: 'https://www.geneve.ch/faire-geneve' },
-  { date: '2026-07-05', endDate: '2026-07-06', title: 'La Tour Genève Triathlon', cat: 'Sport', desc: 'Compétition internationale de triathlon', loc: 'Genève', free: false, url: 'https://tif.borja-swiss-solutions.ch/map' },
+  { date: '2026-07-05', endDate: '2026-07-06', title: 'La Tour Genève Triathlon', cat: 'Sport', desc: 'Compétition internationale de triathlon', loc: 'Genève', free: false, url: '/map' },
   { date: '2026-07-09', endDate: '2026-07-11', title: 'Plein-les-Watts Festival', cat: 'Musique', desc: 'Concerts live, street art, food trucks', loc: 'Parc Navazza, Genève', free: false, url: 'https://infomaniak.events/fr-ch/festival/geneve' },
-  { date: '2026-07-14', endDate: '2026-07-18', title: 'Guitare en Scène', cat: 'Musique', desc: 'Festival rock international', loc: 'Saint-Julien-en-Genevois', free: false, url: 'https://tif.borja-swiss-solutions.ch/map' },
-  { date: '2026-07-14', endDate: '2026-07-18', title: 'Swiss Open Geneva', cat: 'Sport', desc: 'Compétition tennis en fauteuil roulant', loc: 'Genève', free: false, url: 'https://tif.borja-swiss-solutions.ch/map' },
-  { date: '2026-07-19', title: 'Finale Coupe du Monde', cat: 'Football', desc: 'FIFA World Cup 2026 · MetLife Stadium · 21h00', loc: 'FanZone Saint-Genis-Pouilly', free: true, url: 'https://tif.borja-swiss-solutions.ch/map' },
+  { date: '2026-07-14', endDate: '2026-07-18', title: 'Guitare en Scène', cat: 'Musique', desc: 'Festival rock international', loc: 'Saint-Julien-en-Genevois', free: false, url: '/map' },
+  { date: '2026-07-14', endDate: '2026-07-18', title: 'Swiss Open Geneva', cat: 'Sport', desc: 'Compétition tennis en fauteuil roulant', loc: 'Genève', free: false, url: '/map' },
+  { date: '2026-07-19', title: 'Finale Coupe du Monde', cat: 'Football', desc: 'FIFA World Cup 2026 · MetLife Stadium · 21h00', loc: 'FanZone Saint-Genis-Pouilly', free: true, url: '/map' },
   { date: '2026-07-21', endDate: '2026-07-26', title: 'Paléo Festival Nyon', cat: 'Musique', desc: 'Le festival phare de la région', loc: 'Nyon', free: false, url: 'https://www.paleo.ch' },
-  { date: '2026-07-27', title: 'Nocturne de Saint-Pierre', cat: 'Culture', desc: 'Accès aux tours · Pleine lune', loc: 'Cathédrale Saint-Pierre', free: false, url: 'https://tif.borja-swiss-solutions.ch/map' },
+  { date: '2026-07-27', title: 'Nocturne de Saint-Pierre', cat: 'Culture', desc: 'Accès aux tours · Pleine lune', loc: 'Cathédrale Saint-Pierre', free: false, url: '/map' },
   { date: '2026-08-07', endDate: '2026-08-08', title: 'Jazz sur la Plage', cat: 'Musique', desc: 'Concert jazz en plein air', loc: "Plage d'Hermance", free: true, url: 'https://www.geneve.ch/faire-geneve' },
   { date: '2026-08-13', endDate: '2026-08-15', title: 'OSR · Festival Genève-Plage', cat: 'Musique', desc: 'Classique · Ciné-concert Hitchcock · Jazz', loc: 'Genève-Plage', free: false, url: 'https://www.osr.ch' },
   { date: '2026-08-14', endDate: '2026-08-16', title: 'Piz Palü Festival', cat: 'Musique', desc: 'Rock, pop, électro · Gratuit -14 ans', loc: 'Plan-les-Ouates', free: false, url: 'https://infomaniak.events/fr-ch/festival/geneve' },
-  { date: '2026-08-22', endDate: '2026-08-23', title: 'Festiverbant', cat: 'Musique', desc: 'Festival rock', loc: 'Compesières', free: false, url: 'https://tif.borja-swiss-solutions.ch/map' },
+  { date: '2026-08-22', endDate: '2026-08-23', title: 'Festiverbant', cat: 'Musique', desc: 'Festival rock', loc: 'Compesières', free: false, url: '/map' },
   { date: '2026-08-25', endDate: '2026-09-13', title: 'La Bâtie — Festival de Genève', cat: 'Culture', desc: 'Danse, musique, cirque, théâtre · 50e édition', loc: 'Genève', free: false, url: 'https://www.batie.ch' },
 ]
 
@@ -519,15 +519,11 @@ export function HomeContent() {
 
       {/* HERO */}
       <section className="hero">
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', border: '1px solid var(--border)', borderRadius: '100px', padding: '7px 16px', fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '36px', background: 'var(--bg-card)' }}>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--green)', boxShadow: '0 0 8px var(--green)', display: 'inline-block', flexShrink: 0 }} />
-          Plateforme live · Grand Genève · Été 2026
-        </div>
         <h1 className="hero-h1">Intelligence<br />Territoriale <span className="accent">Grand Genève</span></h1>
         <p className="hero-p">
           Mobilité en temps réel, agenda événementiel complet, gestion de foule.<br />
-          <strong>Comprendre et anticiper votre territoire — avant les autres.</strong><br />
-          10 000 utilisateurs quotidiens · 6 sources live · mise à jour toutes les 30s
+          <strong>Comprendre et anticiper votre territoire.</strong><br />
+          6 sources live · mise à jour toutes les 30s · Développement interne
         </p>
         <div className="hero-btns">
           <a className="btn-p" href={user ? '/map' : '/login'} onClick={handleOpenMap}>
@@ -542,52 +538,19 @@ export function HomeContent() {
         </div>
       </section>
 
-      {/* MÉTRIQUES */}
-      <section className="s reveal">
-        <div className="dash reveal">
-          <div className="dash-row dash-row-4">
-            <div className="dc" style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 'clamp(36px,6vw,52px)', fontWeight: 800, letterSpacing: '-0.04em', color: 'var(--text-primary)', lineHeight: 1, marginBottom: '6px' }}>10K</div>
-              <div className="dc-label" style={{ marginBottom: '4px' }}>Utilisateurs uniques / jour</div>
-              <div className="dc-desc">Mesurés sur les 7 derniers jours</div>
-            </div>
-            <div className="dc" style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 'clamp(36px,6vw,52px)', fontWeight: 800, letterSpacing: '-0.04em', color: 'var(--text-primary)', lineHeight: 1, marginBottom: '6px' }}>150K+</div>
-              <div className="dc-label" style={{ marginBottom: '4px' }}>Connexions sur 7 jours</div>
-              <div className="dc-desc">+15 sessions par utilisateur en moyenne</div>
-            </div>
-            <div className="dc" style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 'clamp(36px,6vw,52px)', fontWeight: 800, letterSpacing: '-0.04em', color: 'var(--text-primary)', lineHeight: 1, marginBottom: '6px' }}>6</div>
-              <div className="dc-label" style={{ marginBottom: '4px' }}>Sources de données live</div>
-              <div className="dc-desc">HERE · CFF · TPG · Météo · OFDF · OSM</div>
-            </div>
-            <div className="dc" style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 'clamp(36px,6vw,52px)', fontWeight: 800, letterSpacing: '-0.04em', color: 'var(--text-primary)', lineHeight: 1, marginBottom: '6px' }}>30s</div>
-              <div className="dc-label" style={{ marginBottom: '4px' }}>Fréquence de mise à jour</div>
-              <div className="dc-desc">Trafic, transports, alertes</div>
-            </div>
-          </div>
-          <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginTop: '4px' }}>
-            <span style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>
-              Données d'engagement détaillées disponibles sur demande pour les partenaires institutionnels.
-            </span>
-            <a href="#stats-request" style={{ fontSize: '12px', color: 'var(--blue)', fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}>
-              Recevoir le rapport complet →
-            </a>
-          </div>
-        </div>
-      </section>
-
       {/* ÉVÉNEMENTS TICKER */}
       <section className="s s-alt" id="evenements">
         <div className="s-label reveal">Agenda · Grand Genève · Été 2026</div>
         <h2 className="s-h reveal">Tout ce qui se passe<br /><span style={{ fontStyle: 'italic', color: 'var(--text-secondary)' }}>dans votre région.</span></h2>
         <p className="s-sub reveal" style={{ marginBottom: '32px' }}>Événements vérifiés · Sources officielles · Mis à jour en continu</p>
         <div className="reveal" style={{ overflowX: 'auto', display: 'flex', gap: '12px', padding: '4px 0 20px', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
-          {EVENTS_DATA.filter(ev => new Date(ev.date) >= new Date(Date.now() - 86400000 * 3)).map((ev, i) => {
+          {EVENTS_DATA
+            .filter(ev => (ev.endDate ?? ev.date) >= new Date().toISOString().split('T')[0])
+            .sort((a, b) => a.date.localeCompare(b.date))
+            .map((ev, i) => {
             const color = CAT_COLORS[ev.cat] ?? '#636366'
             return (
-              <a key={i} href={ev.url} target={ev.url.startsWith('http') && !ev.url.includes('tif.borja') ? '_blank' : undefined} rel="noreferrer"
+              <a key={i} href={ev.url} target={ev.url.startsWith('http') ? '_blank' : undefined} rel="noreferrer"
                 style={{ textDecoration: 'none', flexShrink: 0, width: '200px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '18px 16px', display: 'flex', flexDirection: 'column', gap: '8px', transition: 'border-color 0.2s', cursor: 'pointer' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'space-between' }}>
                   <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color, background: `${color}18`, padding: '3px 8px', borderRadius: '100px' }}>{ev.cat}</span>
@@ -597,10 +560,10 @@ export function HomeContent() {
                 <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.4 }}>{ev.desc}</div>
                 <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '3px' }}>
                   <div style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>📍 {ev.loc}</div>
-                  <div style={{ fontSize: '11px', fontWeight: 700, color, marginTop: '2px' }}>{fmtEventDate(ev.date)}{ev.endDate ? ` — ${fmtEventDate(ev.endDate)}` : ''}</div>
+                  <div style={{ fontSize: '11px', fontWeight: 700, color, marginTop: '2px' }}>{fmtEventDate(ev.date)}{ev.endDate ? ` au ${fmtEventDate(ev.endDate)}` : ''}</div>
                 </div>
                 <div style={{ fontSize: '11px', color: 'var(--blue)', fontWeight: 600, marginTop: '4px' }}>
-                  {ev.url.includes('tif.borja') ? 'Voir sur la carte →' : 'Billetterie →'}
+                  {ev.url.startsWith('/') ? 'Voir sur la carte →' : 'Billetterie →'}
                 </div>
               </a>
             )
@@ -624,11 +587,12 @@ export function HomeContent() {
         </div>
         <div style={{ maxWidth: '760px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2px' }}>
           {EVENTS_DATA
-            .filter(ev => agendaFilter === 'Tout' || ev.cat === agendaFilter)
+            .filter(ev => (agendaFilter === 'Tout' || ev.cat === agendaFilter) && (ev.endDate ?? ev.date) >= new Date().toISOString().split('T')[0])
+            .sort((a, b) => a.date.localeCompare(b.date))
             .map((ev, i) => {
               const color = CAT_COLORS[ev.cat] ?? '#636366'
               return (
-                <a key={i} href={ev.url} target={ev.url.startsWith('http') && !ev.url.includes('tif.borja') ? '_blank' : undefined} rel="noreferrer"
+                <a key={i} href={ev.url} target={ev.url.startsWith('http') ? '_blank' : undefined} rel="noreferrer"
                   style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '16px', padding: '14px 16px', borderRadius: '12px', border: '1px solid transparent', transition: 'background 0.15s, border-color 0.15s', cursor: 'pointer' }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-card)'; (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)' }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.borderColor = 'transparent' }}>
@@ -661,11 +625,47 @@ export function HomeContent() {
         </div>
       </section>
 
+      {/* MÉTRIQUES */}
+      <section className="s reveal">
+        <div className="dash reveal">
+          <div className="dash-row dash-row-4">
+            <div className="dc" style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 'clamp(36px,6vw,52px)', fontWeight: 800, letterSpacing: '-0.04em', color: 'var(--text-primary)', lineHeight: 1, marginBottom: '6px' }}>10K</div>
+              <div className="dc-label" style={{ marginBottom: '4px' }}>Utilisateurs uniques / jour</div>
+              <div className="dc-desc">Mesurés sur les 7 derniers jours</div>
+            </div>
+            <div className="dc" style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 'clamp(36px,6vw,52px)', fontWeight: 800, letterSpacing: '-0.04em', color: 'var(--text-primary)', lineHeight: 1, marginBottom: '6px' }}>150K+</div>
+              <div className="dc-label" style={{ marginBottom: '4px' }}>Connexions sur 7 jours</div>
+              <div className="dc-desc">+15 sessions par utilisateur en moyenne</div>
+            </div>
+            <div className="dc" style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 'clamp(36px,6vw,52px)', fontWeight: 800, letterSpacing: '-0.04em', color: 'var(--text-primary)', lineHeight: 1, marginBottom: '6px' }}>6+</div>
+              <div className="dc-label" style={{ marginBottom: '4px' }}>Sources & algo internes</div>
+              <div className="dc-desc">HERE · CFF · TPG · Météo · OFDF · OSM + algorithmes propriétaires</div>
+            </div>
+            <div className="dc" style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 'clamp(36px,6vw,52px)', fontWeight: 800, letterSpacing: '-0.04em', color: 'var(--text-primary)', lineHeight: 1, marginBottom: '6px' }}>30s</div>
+              <div className="dc-label" style={{ marginBottom: '4px' }}>Fréquence de mise à jour</div>
+              <div className="dc-desc">Trafic, transports, alertes</div>
+            </div>
+          </div>
+          <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginTop: '4px' }}>
+            <span style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>
+              Données d'engagement détaillées disponibles sur demande pour les partenaires institutionnels.
+            </span>
+            <a href="#stats-request" style={{ fontSize: '12px', color: 'var(--blue)', fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}>
+              Recevoir le rapport complet →
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* DASHBOARD LIVE */}
       <section className="s s-alt" id="live">
         <div className="s-label">Mobilité temps réel</div>
         <h2 className="s-h">Conditions en direct<br /><span style={{ fontStyle: 'italic', color: 'var(--text-secondary)' }}>sur le territoire.</span></h2>
-        <p className="s-sub" style={{ marginBottom: lastRefresh ? '8px' : undefined }}>Trafic, transports publics, frontières — agrégés depuis 6 sources officielles, mis à jour toutes les 30 secondes.</p>
+        <p className="s-sub" style={{ marginBottom: lastRefresh ? '8px' : undefined }}>Trafic, transports publics, frontières, agrégés depuis 6 sources officielles et nos algorithmes internes, mis à jour toutes les 30 secondes.</p>
         {lastRefresh && (
           <div className="live-refresh-block" style={{ marginBottom: '40px' }}>
             {t.dash.updatedAt} {lastRefresh.toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
@@ -771,10 +771,10 @@ export function HomeContent() {
             <div className="s-label" style={{ marginBottom: '12px' }}>G7 Évian · 8–17 juin 2026</div>
             <div className="cc-h">Notre savoir-faire,<br /><span style={{ fontStyle: 'italic', color: 'var(--text-secondary)', fontWeight: 400 }}>éprouvé sous pression.</span></div>
             <div className="cc-p" style={{ marginTop: '16px' }}>
-              Le Sommet du G7 à Évian a constitué pour TIF un test opérationnel d'envergure internationale. Durant dix jours, la plateforme a assuré une couverture temps réel du territoire genevois sous dispositif sécuritaire maximal — passages frontière renforcés, restrictions de circulation, perturbations TPG majeures, manifestations en centre-ville.
+              Le Sommet du G7 à Évian a constitué pour TIF un test opérationnel d'envergure internationale. Durant dix jours, la plateforme a assuré une couverture temps réel du territoire genevois sous dispositif sécuritaire maximal, passages frontière renforcés, restrictions de circulation, perturbations TPG majeures, manifestations en centre-ville.
             </div>
             <div className="cc-p">
-              Résultat : zéro incident technique, adoption immédiate par la population, couverture presse nationale. Le G7 a démontré qu'une intelligence territoriale réellement distribuée peut absorber les crises sans délai de latence.
+              Résultat : zéro incident technique, adoption immédiate par la population, couverture presse nationale. Le G7 a démontré qu'une intelligence territoriale réellement distribuée, enrichie de nos algorithmes internes sur mesure, peut absorber les crises sans délai de latence.
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
               <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700 }}>Couverts par</span>
@@ -803,7 +803,7 @@ export function HomeContent() {
                   { val: '0', key: 'Incident technique', sub: 'Sur 10 jours de déploiement' },
                   { val: '10K', key: 'Utilisateurs / jour', sub: 'Pic atteint dès J+2' },
                   { val: '150K+', key: 'Sessions · 7 jours', sub: 'Engagement quotidien soutenu' },
-                  { val: '6', key: 'Sources fusionnées', sub: 'Synchronisées toutes les 30s' },
+                  { val: '6+', key: 'Sources & algo internes', sub: 'Algorithmes propriétaires développés en interne' },
                 ].map((s, i) => (
                   <div key={i} style={{ padding: '12px', background: 'var(--off)', borderRadius: '12px' }}>
                     <div style={{ fontSize: 'clamp(22px,4vw,28px)', fontWeight: 800, letterSpacing: '-0.04em', color: 'var(--text-primary)', lineHeight: 1, marginBottom: '4px' }}>{s.val}</div>
@@ -814,8 +814,7 @@ export function HomeContent() {
               </div>
               <div style={{ borderTop: '1px solid var(--border)', paddingTop: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--green)', display: 'inline-block' }} />
-                <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--green)' }}>Disponibilité plateforme : 100%</span>
-                <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginLeft: '2px' }}>— aucune interruption</span>
+                <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--green)' }}>Disponibilité plateforme : 100% · aucune interruption de service</span>
               </div>
             </div>
           </div>
@@ -834,6 +833,19 @@ export function HomeContent() {
               <div className="faq-body"><p>{item.a}</p></div>
             </div>
           ))}
+          {[
+            { q: "Y a-t-il une application mobile ?", a: "Oui, l'application TIF sera disponible fin juin 2026 sur l'App Store et le Google Play Store. Elle offrira toutes les fonctionnalités de la version web, optimisées pour mobile, avec des notifications en temps réel." },
+            { q: "Comment TIF fonctionne-t-il ?", a: "TIF agrège 6 sources de données officielles (HERE, CFF, TPG, MétéoSuisse, OFDF, OpenStreetMap) et les enrichit avec ses propres algorithmes de traitement développés en interne. Ces algorithmes propriétaires permettent d'analyser, croiser et prédire les conditions territoriales avec une précision supérieure à chaque source prise individuellement." },
+            { q: "TIF est-il gratuit ?", a: "Oui, TIF est entièrement gratuit pour tous les utilisateurs. Aucune inscription n'est requise pour consulter la carte et les données en temps réel. Un compte permet d'accéder à des fonctionnalités supplémentaires comme les favoris et les alertes personnalisées." },
+            { q: "Les données sont-elles fiables ?", a: "TIF croise des sources officielles certifiées avec ses propres algorithmes internes sur mesure. En cas de divergence entre sources, notre système de validation prioritise la donnée la plus récente et la plus cohérente avec le contexte territorial. La disponibilité de la plateforme est de 100% depuis son lancement." },
+            { q: "Qui peut utiliser TIF ?", a: "TIF est conçu pour tous : résidents du Grand Genève, visiteurs, navetteurs transfrontaliers, organisateurs d'événements et services publics. La version grand public est gratuite et sans inscription. Des accès professionnels avec données enrichies sont disponibles sur demande pour les partenaires institutionnels." },
+            { q: "Comment mes données sont-elles protégées ?", a: "TIF applique le principe Privacy by Design. Aucune coordonnée GPS exacte n'est stockée. Les données d'usage sont anonymisées et agrégées. L'hébergement est exclusivement en Europe, conforme à la nLPD suisse et au RGPD européen." },
+          ].map((item, i) => (
+            <div key={100 + i} className={`faq-item${openFaq === 100 + i ? ' open' : ''}`}>
+              <button className="faq-q" onClick={() => setOpenFaq(openFaq === 100 + i ? null : 100 + i)}>{item.q}<span className="faq-icon">+</span></button>
+              <div className="faq-body"><p>{item.a}</p></div>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -841,7 +853,7 @@ export function HomeContent() {
       <section className="s reveal" id="parkings">
         <div className="s-label">Se déplacer malin</div>
         <h2 className="s-h">Parkings P+Rail<br /><span style={{ fontStyle: 'italic', color: 'var(--text-secondary)' }}>pour rejoindre vos événements.</span></h2>
-        <p className="s-sub">Garez-vous en périphérie et rejoignez le cœur de Genève en transports publics — rapide, sans stress, sans chercher une place.</p>
+        <p className="s-sub">Garez-vous en périphérie et rejoignez le cœur de Genève en transports publics, rapide, sans stress, sans chercher une place.</p>
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
           <div className="car-outer">
             <div className="car-head">
@@ -944,6 +956,35 @@ export function HomeContent() {
         </div>
       </section>
 
+      {/* APP TEASER */}
+      <section className="s reveal" id="app">
+        <div className="s-label reveal">Application mobile</div>
+        <h2 className="s-h reveal">TIF dans votre poche.<br /><span style={{ fontStyle: 'italic', color: 'var(--text-secondary)' }}>Disponible la semaine prochaine.</span></h2>
+        <p className="s-sub reveal">Toute l'intelligence territoriale du Grand Genève, optimisée pour mobile. Mobilité, agenda événementiel et alertes en temps réel, où que vous soyez.</p>
+        <div className="reveal" style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center', marginTop: '32px' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '14px', background: 'var(--text-primary)', color: 'var(--bg)', borderRadius: '16px', padding: '16px 28px', minWidth: '200px', cursor: 'not-allowed', opacity: 0.85 }}>
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+            <div>
+              <div style={{ fontSize: '10px', fontWeight: 500, opacity: 0.6, letterSpacing: '0.04em' }}>Bientôt disponible sur</div>
+              <div style={{ fontSize: '17px', fontWeight: 700, lineHeight: 1.1, letterSpacing: '-0.02em' }}>App Store</div>
+            </div>
+          </div>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '14px', background: 'var(--text-primary)', color: 'var(--bg)', borderRadius: '16px', padding: '16px 28px', minWidth: '200px', cursor: 'not-allowed', opacity: 0.85 }}>
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.18 23.76c.31.17.67.22 1.04.13l11.35-6.55-2.43-2.43-9.96 8.85zm15.29-10.7L5.02 5.89l9.82 8.74 3.63-1.57zM1.21 5.27C1.08 5.53 1 5.83 1 6.17v11.65c0 .34.08.64.21.9l.1.1 6.53-6.53v-.14L1.31 5.17l-.1.1zm15.75 8.18l-2.06 1.19-2.58-2.58 2.58-2.58 2.07 1.2c.59.34.59 1.43-.01 1.77z"/></svg>
+            <div>
+              <div style={{ fontSize: '10px', fontWeight: 500, opacity: 0.6, letterSpacing: '0.04em' }}>Bientôt disponible sur</div>
+              <div style={{ fontSize: '17px', fontWeight: 700, lineHeight: 1.1, letterSpacing: '-0.02em' }}>Google Play</div>
+            </div>
+          </div>
+        </div>
+        <div style={{ marginTop: '20px', textAlign: 'center' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--text-tertiary)', fontWeight: 600, background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '100px', padding: '7px 16px' }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--green)', boxShadow: '0 0 8px var(--green)', display: 'inline-block', flexShrink: 0 }} />
+            Lancement prévu fin juin 2026 · iOS & Android
+          </span>
+        </div>
+      </section>
+
       {/* CTA DARK */}
       <div className="cta-dark reveal">
         <h2>{t.ctaDark.h2a}<br />{t.ctaDark.h2b}</h2>
@@ -968,7 +1009,7 @@ export function HomeContent() {
           <div className="cc" style={{ flex: '1 1 420px' }}>
             <div className="cc-h">Votre événement mérite<br /><span style={{ fontStyle: 'italic', color: 'var(--text-secondary)', fontWeight: 400 }}>une infrastructure à sa hauteur.</span></div>
             <div className="cc-p" style={{ marginTop: '16px' }}>
-              TIF accompagne les organisateurs qui visent l'excellence opérationnelle. Nous intégrons l'intelligence territoriale au cœur de vos dispositifs — de la phase de planification jusqu'à l'heure de fermeture.
+              TIF accompagne les organisateurs qui visent l'excellence opérationnelle. Nous intégrons l'intelligence territoriale au cœur de vos dispositifs, de la phase de planification jusqu'à l'heure de fermeture.
             </div>
             <ul className="pro-list" style={{ marginTop: '24px' }}>
               {[
@@ -976,7 +1017,7 @@ export function HomeContent() {
                 { icon: '🛡️', title: 'Sécurité et anticipation', desc: "Détection d'anomalies en temps réel, alertes configurables, coordination avec les services compétents." },
                 { icon: '🚦', title: 'Gestion de la mobilité', desc: 'Optimisation des accès, signalement dynamique, coordination avec les réseaux TPG et CFF.' },
                 { icon: '📡', title: 'Tableau de bord opérationnel', desc: "Vue temps réel dédiée à votre équipe, reporting post-événement, métriques de performance." },
-                { icon: '🌐', title: 'Visibilité territoriale', desc: "Intégration de votre événement dans la plateforme TIF — accès à 10 000 utilisateurs quotidiens du Grand Genève." },
+                { icon: '🌐', title: 'Visibilité territoriale', desc: "Intégration de votre événement dans la plateforme TIF, accès à 10 000 utilisateurs quotidiens du Grand Genève." },
               ].map((c, i) => (
                 <li key={i} style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', padding: '14px 0', borderBottom: i < 4 ? '1px solid var(--border)' : 'none' }}>
                   <span style={{ fontSize: '20px', flexShrink: 0, marginTop: '2px' }}>{c.icon}</span>
@@ -1010,7 +1051,7 @@ export function HomeContent() {
               <div id="stats-request" style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid var(--border)' }}>
                 <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '6px' }}>Accès aux statistiques détaillées</div>
                 <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '14px', lineHeight: 1.5 }}>
-                  Données d'engagement, démographie utilisateurs, zones de couverture — sur demande et sous NDA.
+                  Données d'engagement, démographie utilisateurs, zones de couverture, sur demande et sous NDA.
                 </div>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <input
@@ -1158,7 +1199,7 @@ export function HomeContent() {
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                   Réseau Börja
                 </a>
-                <a className="m-src-btn m-src-map" href="https://tif.borja-swiss-solutions.ch/map" target="_blank" rel="noreferrer">
+                <a className="m-src-btn m-src-map" href="/map" target="_blank" rel="noreferrer">
                   <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="2.2" fill="currentColor" /><circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.4" /></svg>
                   Carte live
                 </a>
@@ -1196,7 +1237,7 @@ export function HomeContent() {
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                   Réseau Börja
                 </a>
-                <a className="m-src-btn m-src-map" href="https://tif.borja-swiss-solutions.ch/map" target="_blank" rel="noreferrer">
+                <a className="m-src-btn m-src-map" href="/map" target="_blank" rel="noreferrer">
                   <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="2.2" fill="currentColor" /><circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.4" /></svg>
                   Carte live
                 </a>
