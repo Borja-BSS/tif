@@ -184,6 +184,25 @@ export interface HomeT {
     auditSuccessMsg: string; partnerSuccessMsg: string
   }
   ticker: Array<{ label: string; text: string }>
+  shareText: string
+  agenda: {
+    navLink: string
+    sectionLabel: string
+    h2a: string; h2b: string
+    sub: string
+    fullLabel: string
+    fullH2a: string; fullH2b: string
+    free: string; freeLower: string
+    seeMap: string; ticket: string
+    showMore: string; eventsLabel: string
+    filterAll: string; filterMusic: string; filterSport: string
+    filterCulture: string; filterFootball: string; filterCinema: string
+  }
+  app: {
+    sub: string
+    launch: string
+  }
+  faq2: Array<{ q: string; a: string }>
 }
 
 export const T: Record<Lang, HomeT> = {
@@ -474,6 +493,32 @@ export const T: Record<Lang, HomeT> = {
       { label: 'Info',      text: '47 000 frontaliers par jour dans le Grand Genève concernés par les restrictions G7' },
       { label: 'Sources',   text: 'OFROU, Police Cantonale GE, TPG, CFF, MétéoSuisse, SITG, BAZG' },
     ],
+    shareText: 'TIF centralise toutes les perturbations du G7 Grand Genève en temps réel. Routes, frontières, TPG, météo : gratuit et sans inscription.',
+    agenda: {
+      navLink: 'Événements',
+      sectionLabel: 'Agenda · Grand Genève · Été 2026',
+      h2a: 'Tout ce qui se passe', h2b: 'dans votre région.',
+      sub: 'Événements vérifiés · Sources officielles · Mis à jour en continu',
+      fullLabel: 'Agenda complet',
+      fullH2a: 'Tous les événements', fullH2b: 'du Grand Genève.',
+      free: 'GRATUIT', freeLower: 'Gratuit',
+      seeMap: 'Voir sur la carte →', ticket: 'Billetterie →',
+      showMore: 'Voir plus', eventsLabel: 'événements',
+      filterAll: 'Tout', filterMusic: 'Musique', filterSport: 'Sport',
+      filterCulture: 'Culture', filterFootball: 'Football 🇨🇭', filterCinema: 'Cinéma',
+    },
+    app: {
+      sub: "Toute l'intelligence territoriale du Grand Genève, optimisée pour mobile. Mobilité, agenda événementiel et alertes en temps réel, où que vous soyez.",
+      launch: 'Lancement prévu fin juin 2026 · iOS & Android',
+    },
+    faq2: [
+      { q: "Y a-t-il une application mobile ?", a: "Oui, l'application TIF sera disponible fin juin 2026 sur l'App Store et le Google Play Store. Elle offrira toutes les fonctionnalités de la version web, optimisées pour mobile, avec des notifications en temps réel." },
+      { q: "Comment TIF fonctionne-t-il ?", a: "TIF agrège 6 sources de données officielles (HERE, CFF, TPG, MétéoSuisse, OFDF, OpenStreetMap) et les enrichit avec ses propres algorithmes de traitement développés en interne. Ces algorithmes propriétaires permettent d'analyser, croiser et prédire les conditions territoriales avec une précision supérieure à chaque source prise individuellement." },
+      { q: "TIF est-il gratuit ?", a: "Oui, TIF est entièrement gratuit pour tous les utilisateurs. Aucune inscription n'est requise pour consulter la carte et les données en temps réel. Un compte permet d'accéder à des fonctionnalités supplémentaires comme les favoris et les alertes personnalisées." },
+      { q: "Les données sont-elles fiables ?", a: "TIF croise des sources officielles certifiées avec ses propres algorithmes internes sur mesure. En cas de divergence entre sources, notre système de validation prioritise la donnée la plus récente et la plus cohérente avec le contexte territorial. La disponibilité de la plateforme est de 100% depuis son lancement." },
+      { q: "Qui peut utiliser TIF ?", a: "TIF est conçu pour tous : résidents du Grand Genève, visiteurs, navetteurs transfrontaliers, organisateurs d'événements et services publics. La version grand public est gratuite et sans inscription. Des accès professionnels avec données enrichies sont disponibles sur demande pour les partenaires institutionnels." },
+      { q: "Comment mes données sont-elles protégées ?", a: "TIF applique le principe Privacy by Design. Aucune coordonnée GPS exacte n'est stockée. Les données d'usage sont anonymisées et agrégées. L'hébergement est exclusivement en Europe, conforme à la nLPD suisse et au RGPD européen." },
+    ],
   },
 
   en: {
@@ -762,6 +807,32 @@ export const T: Record<Lang, HomeT> = {
       { label: 'CEVA',     text: 'Léman Express 4 monitored lines: L1, L2, L3, L4' },
       { label: 'Info',     text: '47,000 cross-border workers per day in Greater Geneva affected by G7 restrictions' },
       { label: 'Sources',  text: 'OFROU, Geneva Cantonal Police, TPG, SBB, MeteoSwiss, SITG, BAZG' },
+    ],
+    shareText: 'TIF centralizes all G7 Grand Geneva disruptions in real time. Roads, borders, TPG, weather: free and no registration required.',
+    agenda: {
+      navLink: 'Events',
+      sectionLabel: 'Events · Greater Geneva · Summer 2026',
+      h2a: 'Everything happening', h2b: 'in your area.',
+      sub: 'Verified events · Official sources · Updated continuously',
+      fullLabel: 'Full agenda',
+      fullH2a: 'All events', fullH2b: 'in Greater Geneva.',
+      free: 'FREE', freeLower: 'Free',
+      seeMap: 'View on map →', ticket: 'Tickets →',
+      showMore: 'Show more', eventsLabel: 'events',
+      filterAll: 'All', filterMusic: 'Music', filterSport: 'Sport',
+      filterCulture: 'Culture', filterFootball: 'Football 🇨🇭', filterCinema: 'Cinema',
+    },
+    app: {
+      sub: 'All the territorial intelligence of Greater Geneva, optimised for mobile. Mobility, event calendar and real-time alerts, wherever you are.',
+      launch: 'Expected launch late June 2026 · iOS & Android',
+    },
+    faq2: [
+      { q: "Is there a mobile app?", a: "Yes, the TIF app will be available in late June 2026 on the App Store and Google Play Store. It will offer all web version features, optimised for mobile, with real-time notifications." },
+      { q: "How does TIF work?", a: "TIF aggregates 6 official data sources (HERE, SBB, TPG, MeteoSwiss, OFDF, OpenStreetMap) and enriches them with its own in-house processing algorithms. These proprietary algorithms analyse, cross-reference and predict territorial conditions with greater accuracy than any single source." },
+      { q: "Is TIF free?", a: "Yes, TIF is completely free for all users. No registration is required to view the map and real-time data. An account gives access to additional features such as favourites and personalised alerts." },
+      { q: "How reliable is the data?", a: "TIF cross-references certified official sources with its own custom internal algorithms. When sources disagree, our validation system prioritises the most recent and most contextually coherent data. Platform uptime has been 100% since launch." },
+      { q: "Who can use TIF?", a: "TIF is designed for everyone: Greater Geneva residents, visitors, cross-border commuters, event organisers and public services. The public version is free and requires no registration. Professional access with enriched data is available on request for institutional partners." },
+      { q: "How is my data protected?", a: "TIF applies the Privacy by Design principle. No exact GPS coordinates are stored. Usage data is anonymised and aggregated. Hosting is exclusively in Europe, compliant with Swiss nDPA and the EU GDPR." },
     ],
   },
 
@@ -1052,6 +1123,32 @@ export const T: Record<Lang, HomeT> = {
       { label: 'Info',      text: '47 000 Grenzgänger pro Tag im Grossraum Genf von G7-Einschränkungen betroffen' },
       { label: 'Quellen',   text: 'ASTRA, Kantonspolizei GE, TPG, SBB, MeteoSchweiz, SITG, BAZG' },
     ],
+    shareText: 'TIF bündelt alle G7-Störungen im Grossraum Genf in Echtzeit. Strassen, Grenzen, TPG, Wetter: kostenlos und ohne Registrierung.',
+    agenda: {
+      navLink: 'Veranstaltungen',
+      sectionLabel: 'Agenda · Grossraum Genf · Sommer 2026',
+      h2a: 'Was gerade passiert', h2b: 'in Ihrer Region.',
+      sub: 'Geprüfte Veranstaltungen · Offizielle Quellen · Laufend aktualisiert',
+      fullLabel: 'Vollständiger Agenda',
+      fullH2a: 'Alle Veranstaltungen', fullH2b: 'im Grossraum Genf.',
+      free: 'KOSTENLOS', freeLower: 'Kostenlos',
+      seeMap: 'Auf der Karte ansehen →', ticket: 'Tickets →',
+      showMore: 'Mehr anzeigen', eventsLabel: 'Veranstaltungen',
+      filterAll: 'Alle', filterMusic: 'Musik', filterSport: 'Sport',
+      filterCulture: 'Kultur', filterFootball: 'Fussball 🇨🇭', filterCinema: 'Kino',
+    },
+    app: {
+      sub: 'Die gesamte territoriale Intelligenz des Grossraums Genf, optimiert für Mobilgeräte. Mobilität, Veranstaltungskalender und Echtzeit-Warnungen, wo immer Sie sich befinden.',
+      launch: 'Geplanter Start Ende Juni 2026 · iOS & Android',
+    },
+    faq2: [
+      { q: "Gibt es eine mobile App?", a: "Ja, die TIF-App wird Ende Juni 2026 im App Store und Google Play Store verfügbar sein. Sie bietet alle Funktionen der Web-Version, für Mobilgeräte optimiert, mit Echtzeit-Benachrichtigungen." },
+      { q: "Wie funktioniert TIF?", a: "TIF aggregiert 6 offizielle Datenquellen (HERE, SBB, TPG, MeteoSchweiz, OFDF, OpenStreetMap) und reichert sie mit proprietären Algorithmen an. Diese hauseigenen Algorithmen analysieren, kreuzen und prognostizieren territoriale Bedingungen mit höherer Genauigkeit als jede einzelne Quelle." },
+      { q: "Ist TIF kostenlos?", a: "Ja, TIF ist für alle Nutzer vollständig kostenlos. Keine Registrierung erforderlich, um die Karte und Echtzeit-Daten einzusehen. Ein Konto ermöglicht zusätzliche Funktionen wie Favoriten und personalisierte Warnungen." },
+      { q: "Wie zuverlässig sind die Daten?", a: "TIF kreuzt zertifizierte offizielle Quellen mit eigenen massgeschneiderten Algorithmen. Bei Abweichungen zwischen Quellen priorisiert unser Validierungssystem die aktuellsten und kohärentesten Daten. Die Plattformverfügbarkeit beträgt seit dem Start 100%." },
+      { q: "Wer kann TIF nutzen?", a: "TIF ist für alle konzipiert: Einwohner des Grossraums Genf, Besucher, Grenzpendler, Veranstaltungsorganisatoren und öffentliche Dienste. Die öffentliche Version ist kostenlos und ohne Registrierung. Professioneller Zugang mit erweiterten Daten ist auf Anfrage für institutionelle Partner verfügbar." },
+      { q: "Wie werden meine Daten geschützt?", a: "TIF wendet das Prinzip Privacy by Design an. Es werden keine genauen GPS-Koordinaten gespeichert. Nutzungsdaten werden anonymisiert und aggregiert. Das Hosting erfolgt ausschliesslich in Europa, konform mit dem Schweizer nDSG und der EU-DSGVO." },
+    ],
   },
 
   it: {
@@ -1340,6 +1437,32 @@ export const T: Record<Lang, HomeT> = {
       { label: 'CEVA',      text: 'Léman Express 4 linee monitorate: L1, L2, L3, L4' },
       { label: 'Info',      text: '47 000 frontalieri al giorno nella Grande Ginevra interessati dalle restrizioni G7' },
       { label: 'Fonti',     text: 'USTRA, Polizia cantonale GE, TPG, FFS, MeteoSvizzera, SITG, BAZG' },
+    ],
+    shareText: 'TIF centralizza in tempo reale tutte le perturbazioni G7 della Grande Ginevra. Strade, frontiere, TPG, meteo: gratuito e senza registrazione.',
+    agenda: {
+      navLink: 'Eventi',
+      sectionLabel: 'Agenda · Grande Ginevra · Estate 2026',
+      h2a: 'Tutto quello che succede', h2b: 'nella vostra regione.',
+      sub: 'Eventi verificati · Fonti ufficiali · Aggiornati continuamente',
+      fullLabel: 'Agenda completo',
+      fullH2a: 'Tutti gli eventi', fullH2b: 'della Grande Ginevra.',
+      free: 'GRATUITO', freeLower: 'Gratuito',
+      seeMap: 'Vedi sulla mappa →', ticket: 'Biglietteria →',
+      showMore: 'Mostra altro', eventsLabel: 'eventi',
+      filterAll: 'Tutti', filterMusic: 'Musica', filterSport: 'Sport',
+      filterCulture: 'Cultura', filterFootball: 'Calcio 🇨🇭', filterCinema: 'Cinema',
+    },
+    app: {
+      sub: "Tutta l'intelligenza territoriale della Grande Ginevra, ottimizzata per mobile. Mobilità, agenda eventi e alerting in tempo reale, ovunque voi siate.",
+      launch: 'Lancio previsto fine giugno 2026 · iOS & Android',
+    },
+    faq2: [
+      { q: "C'è un'applicazione mobile?", a: "Sì, l'applicazione TIF sarà disponibile fine giugno 2026 sull'App Store e il Google Play Store. Offrirà tutte le funzionalità della versione web, ottimizzate per mobile, con notifiche in tempo reale." },
+      { q: "Come funziona TIF?", a: "TIF aggrega 6 fonti di dati ufficiali (HERE, FFS, TPG, MeteoSvizzera, OFDF, OpenStreetMap) e le arricchisce con propri algoritmi di elaborazione sviluppati internamente. Questi algoritmi proprietari analizzano, incrociano e prevedono le condizioni territoriali con una precisione superiore a qualsiasi singola fonte." },
+      { q: "TIF è gratuito?", a: "Sì, TIF è completamente gratuito per tutti gli utenti. Non è richiesta alcuna registrazione per consultare la mappa e i dati in tempo reale. Un account dà accesso a funzionalità aggiuntive come preferiti e avvisi personalizzati." },
+      { q: "I dati sono affidabili?", a: "TIF incrocia fonti ufficiali certificate con propri algoritmi interni su misura. In caso di divergenza tra fonti, il nostro sistema di validazione prioritizza il dato più recente e più coerente con il contesto territoriale. La disponibilità della piattaforma è del 100% dal suo lancio." },
+      { q: "Chi può usare TIF?", a: "TIF è progettato per tutti: residenti della Grande Ginevra, visitatori, pendolari transfrontalieri, organizzatori di eventi e servizi pubblici. La versione pubblica è gratuita e senza registrazione. Accessi professionali con dati arricchiti sono disponibili su richiesta per i partner istituzionali." },
+      { q: "Come vengono protetti i miei dati?", a: "TIF applica il principio Privacy by Design. Nessuna coordinata GPS esatta viene memorizzata. I dati d'uso sono anonimizzati e aggregati. L'hosting è esclusivamente in Europa, conforme alla nLPD svizzera e al GDPR europeo." },
     ],
   },
 
@@ -1630,6 +1753,32 @@ export const T: Record<Lang, HomeT> = {
       { label: 'Info',      text: '47 000 trabajadores fronterizos por día en el Gran Ginebra afectados por las restricciones G7' },
       { label: 'Fuentes',   text: 'OFROU, Policía Cantonal GE, TPG, FFS, MeteoSuiza, SITG, BAZG' },
     ],
+    shareText: 'TIF centraliza en tiempo real todas las perturbaciones del G7 en el Gran Ginebra. Carreteras, fronteras, TPG, tiempo: gratis y sin registro.',
+    agenda: {
+      navLink: 'Eventos',
+      sectionLabel: 'Agenda · Gran Ginebra · Verano 2026',
+      h2a: 'Todo lo que pasa', h2b: 'en tu región.',
+      sub: 'Eventos verificados · Fuentes oficiales · Actualizado continuamente',
+      fullLabel: 'Agenda completo',
+      fullH2a: 'Todos los eventos', fullH2b: 'del Gran Ginebra.',
+      free: 'GRATIS', freeLower: 'Gratis',
+      seeMap: 'Ver en el mapa →', ticket: 'Entradas →',
+      showMore: 'Ver más', eventsLabel: 'eventos',
+      filterAll: 'Todo', filterMusic: 'Música', filterSport: 'Deporte',
+      filterCulture: 'Cultura', filterFootball: 'Fútbol 🇨🇭', filterCinema: 'Cine',
+    },
+    app: {
+      sub: 'Toda la inteligencia territorial del Gran Ginebra, optimizada para móvil. Movilidad, agenda de eventos y alertas en tiempo real, donde quieras.',
+      launch: 'Lanzamiento previsto a finales de junio 2026 · iOS & Android',
+    },
+    faq2: [
+      { q: "¿Hay una aplicación móvil?", a: "Sí, la aplicación TIF estará disponible a finales de junio 2026 en el App Store y Google Play Store. Ofrecerá todas las funcionalidades de la versión web, optimizadas para móvil, con notificaciones en tiempo real." },
+      { q: "¿Cómo funciona TIF?", a: "TIF agrega 6 fuentes de datos oficiales (HERE, FFS, TPG, MeteoSwiss, OFDF, OpenStreetMap) y las enriquece con sus propios algoritmos de procesamiento desarrollados internamente. Estos algoritmos propietarios permiten analizar, cruzar y predecir las condiciones territoriales con mayor precisión que cualquier fuente individual." },
+      { q: "¿TIF es gratuito?", a: "Sí, TIF es completamente gratuito para todos los usuarios. No se requiere registro para consultar el mapa y los datos en tiempo real. Una cuenta permite acceder a funciones adicionales como favoritos y alertas personalizadas." },
+      { q: "¿Son fiables los datos?", a: "TIF cruza fuentes oficiales certificadas con sus propios algoritmos internos a medida. En caso de divergencia entre fuentes, nuestro sistema de validación prioriza el dato más reciente y coherente con el contexto territorial. La disponibilidad de la plataforma es del 100% desde su lanzamiento." },
+      { q: "¿Quién puede usar TIF?", a: "TIF está diseñado para todos: residentes del Gran Ginebra, visitantes, trabajadores transfronterizos, organizadores de eventos y servicios públicos. La versión pública es gratuita y sin registro. Accesos profesionales con datos enriquecidos están disponibles bajo demanda para socios institucionales." },
+      { q: "¿Cómo se protegen mis datos?", a: "TIF aplica el principio Privacy by Design. No se almacenan coordenadas GPS exactas. Los datos de uso se anonimizan y agregan. El alojamiento es exclusivamente en Europa, conforme a la nLPD suiza y el RGPD europeo." },
+    ],
   },
 
   pt: {
@@ -1918,6 +2067,32 @@ export const T: Record<Lang, HomeT> = {
       { label: 'CEVA',      text: 'Léman Express 4 linhas monitorizadas: L1, L2, L3, L4' },
       { label: 'Info',      text: '47 000 trabalhadores fronteiriços por dia na Grande Genebra afetados pelas restrições G7' },
       { label: 'Fontes',    text: 'OFROU, Polícia Cantonal GE, TPG, FFS, MeteoSuíça, SITG, BAZG' },
+    ],
+    shareText: 'O TIF centraliza em tempo real todas as perturbações do G7 na Grande Genebra. Estradas, fronteiras, TPG, meteorologia: gratuito e sem registo.',
+    agenda: {
+      navLink: 'Eventos',
+      sectionLabel: 'Agenda · Grande Genebra · Verão 2026',
+      h2a: 'Tudo o que acontece', h2b: 'na sua região.',
+      sub: 'Eventos verificados · Fontes oficiais · Atualizado continuamente',
+      fullLabel: 'Agenda completo',
+      fullH2a: 'Todos os eventos', fullH2b: 'da Grande Genebra.',
+      free: 'GRATUITO', freeLower: 'Gratuito',
+      seeMap: 'Ver no mapa →', ticket: 'Bilheteira →',
+      showMore: 'Ver mais', eventsLabel: 'eventos',
+      filterAll: 'Tudo', filterMusic: 'Música', filterSport: 'Desporto',
+      filterCulture: 'Cultura', filterFootball: 'Futebol 🇨🇭', filterCinema: 'Cinema',
+    },
+    app: {
+      sub: 'Toda a inteligência territorial da Grande Genebra, otimizada para telemóvel. Mobilidade, agenda de eventos e alertas em tempo real, onde quer que esteja.',
+      launch: 'Lançamento previsto para o final de junho de 2026 · iOS & Android',
+    },
+    faq2: [
+      { q: "Existe uma aplicação móvel?", a: "Sim, a aplicação TIF estará disponível no final de junho de 2026 na App Store e no Google Play Store. Oferecerá todas as funcionalidades da versão web, otimizadas para telemóvel, com notificações em tempo real." },
+      { q: "Como funciona o TIF?", a: "O TIF agrega 6 fontes de dados oficiais (HERE, CFF, TPG, MeteoSuíça, OFDF, OpenStreetMap) e enriquece-as com os seus próprios algoritmos de processamento desenvolvidos internamente. Estes algoritmos proprietários permitem analisar, cruzar e prever as condições territoriais com maior precisão do que qualquer fonte individual." },
+      { q: "O TIF é gratuito?", a: "Sim, o TIF é completamente gratuito para todos os utilizadores. Não é necessário registo para consultar o mapa e os dados em tempo real. Uma conta permite aceder a funcionalidades adicionais como favoritos e alertas personalizados." },
+      { q: "Os dados são fiáveis?", a: "O TIF cruza fontes oficiais certificadas com os seus próprios algoritmos internos personalizados. Em caso de divergência entre fontes, o nosso sistema de validação prioriza o dado mais recente e mais coerente com o contexto territorial. A disponibilidade da plataforma é de 100% desde o seu lançamento." },
+      { q: "Quem pode usar o TIF?", a: "O TIF foi concebido para todos: residentes da Grande Genebra, visitantes, trabalhadores transfronteiriços, organizadores de eventos e serviços públicos. A versão pública é gratuita e sem registo. Acessos profissionais com dados enriquecidos estão disponíveis mediante pedido para parceiros institucionais." },
+      { q: "Como são protegidos os meus dados?", a: "O TIF aplica o princípio Privacy by Design. Não são armazenadas coordenadas GPS exatas. Os dados de utilização são anonimizados e agregados. O alojamento é exclusivamente na Europa, em conformidade com a nLPD suíça e o RGPD europeu." },
     ],
   },
 
@@ -2208,6 +2383,32 @@ export const T: Record<Lang, HomeT> = {
       { label: 'Info',     text: '47 000 punëtorë kufitarë në ditë në Gjenevën e Madhe të prekur nga kufizimet G7' },
       { label: 'Burimet',  text: 'OFROU, Policia Kantonale GE, TPG, FFS, MeteoZvicra, SITG, BAZG' },
     ],
+    shareText: 'TIF centralizon në kohë reale të gjitha ndërhyrjet e G7 në Gjenevin e Madhe. Rrugë, kufij, TPG, mot: falas dhe pa regjistrim.',
+    agenda: {
+      navLink: 'Ngjarje',
+      sectionLabel: 'Agjenda · Gjeneva e Madhe · Verë 2026',
+      h2a: 'Gjithçka që ndodh', h2b: 'në rajonin tuaj.',
+      sub: 'Ngjarje të verifikuara · Burime zyrtare · Përditësuar vazhdimisht',
+      fullLabel: 'Agjenda e plotë',
+      fullH2a: 'Të gjitha ngjarjet', fullH2b: 'të Gjenevisë së Madhe.',
+      free: 'FALAS', freeLower: 'Falas',
+      seeMap: 'Shiko në hartë →', ticket: 'Bileta →',
+      showMore: 'Shiko më shumë', eventsLabel: 'ngjarje',
+      filterAll: 'Të gjitha', filterMusic: 'Muzikë', filterSport: 'Sport',
+      filterCulture: 'Kulturë', filterFootball: 'Futboll 🇨🇭', filterCinema: 'Kinema',
+    },
+    app: {
+      sub: 'Tërë inteligjenca territoriale e Gjenevisë së Madhe, e optimizuar për celular. Lëvizshmëri, agjenda e ngjarjeve dhe alarme në kohë reale, kudo që jeni.',
+      launch: 'Lansim i planifikuar fund të qershorit 2026 · iOS & Android',
+    },
+    faq2: [
+      { q: "A ka një aplikacion celular?", a: "Po, aplikacioni TIF do të jetë i disponueshëm në fund të qershorit 2026 në App Store dhe Google Play Store. Do të ofrojë të gjitha funksionalitetet e versionit web, të optimizuara për celular, me njoftime në kohë reale." },
+      { q: "Si funksionon TIF?", a: "TIF agreson 6 burime të dhënash zyrtare (HERE, CFF, TPG, MeteoSwiss, OFDF, OpenStreetMap) dhe i pasuron ato me algoritmet e veta të përpunimit të zhvilluara në shtëpi. Këto algoritme pronësore analizojnë, kryqëzojnë dhe parashikojnë kushtet territoriale me saktësi më të lartë se çdo burim individual." },
+      { q: "A është TIF falas?", a: "Po, TIF është plotësisht falas për të gjithë përdoruesit. Nuk kërkohet regjistrim për të parë hartën dhe të dhënat në kohë reale. Një llogari jep qasje në funksionalitete shtesë si të preferuarat dhe alarmet e personalizuara." },
+      { q: "A janë të dhënat të besueshme?", a: "TIF kryqëzon burime zyrtare të certifikuara me algoritmet e veta të brendshme të personalizuara. Në rast mospajtuese mes burimeve, sistemi ynë i validimit jep prioritet të dhënës më të re dhe më koherente me kontekstin territorial. Disponueshmëria e platformës është 100% që nga lansimi." },
+      { q: "Kush mund ta përdorë TIF-in?", a: "TIF është projektuar për të gjithë: banorët e Gjenevisë së Madhe, vizitorët, punëtorët ndërkufitarë, organizatorët e ngjarjeve dhe shërbimet publike. Versioni publik është falas dhe pa regjistrim. Qasjet profesionale me të dhëna të pasura janë të disponueshme me kërkesë për partnerët institucionalë." },
+      { q: "Si mbrohen të dhënat e mia?", a: "TIF aplikon parimin Privacy by Design. Nuk ruhen koordinata të sakta GPS. Të dhënat e përdorimit janë anonimizuara dhe agreguara. Hostimi është ekskluzivisht në Evropë, në përputhje me nLPD zvicerane dhe GDPR-in europian." },
+    ],
   },
 
   ja: {
@@ -2497,6 +2698,32 @@ export const T: Record<Lang, HomeT> = {
       { label: 'Info',   text: 'グラン・ジュネーヴの越境労働者1日4万7000人がG7制限の影響を受ける' },
       { label: 'ソース', text: 'OFROU、ジュネーヴ州警察、TPG、SBB、MeteoSwiss、SITG、BAZG' },
     ],
+    shareText: 'TIFはG7グラン・ジュネーヴの全混乱をリアルタイムで集約。道路、国境、TPG、天気：無料、登録不要。',
+    agenda: {
+      navLink: 'イベント',
+      sectionLabel: 'アジェンダ · グラン・ジュネーヴ · 2026年夏',
+      h2a: '地域で起きている', h2b: 'すべてのこと。',
+      sub: '認証済みイベント · 公式情報源 · 継続的に更新',
+      fullLabel: '全イベント一覧',
+      fullH2a: 'グラン・ジュネーヴの', fullH2b: 'すべてのイベント。',
+      free: '無料', freeLower: '無料',
+      seeMap: '地図で見る →', ticket: 'チケット →',
+      showMore: 'もっと見る', eventsLabel: 'イベント',
+      filterAll: 'すべて', filterMusic: '音楽', filterSport: 'スポーツ',
+      filterCulture: '文化', filterFootball: 'サッカー 🇨🇭', filterCinema: '映画',
+    },
+    app: {
+      sub: 'グラン・ジュネーヴの全領域インテリジェンスをモバイルに最適化。移動情報、イベントカレンダー、リアルタイムアラートを、どこにいても。',
+      launch: '2026年6月末リリース予定 · iOS & Android',
+    },
+    faq2: [
+      { q: "モバイルアプリはありますか？", a: "はい、TIFアプリは2026年6月末にApp StoreとGoogle Play Storeで公開予定です。モバイルに最適化されたすべてのWeb機能に加え、リアルタイム通知も提供します。" },
+      { q: "TIFはどのように機能しますか？", a: "TIFは6つの公式データソース（HERE、SBB、TPG、MeteoSwiss、OFDF、OpenStreetMap）を集約し、独自開発アルゴリズムで処理します。この専有アルゴリズムにより、各ソース単独よりも高精度で領域状況を分析・クロスリファレンス・予測します。" },
+      { q: "TIFは無料ですか？", a: "はい、全ユーザー向けに完全無料です。地図とリアルタイムデータの閲覧に登録は不要です。アカウントを作成するとお気に入りやカスタムアラートなど追加機能をご利用いただけます。" },
+      { q: "データの信頼性は？", a: "TIFは認証済み公式ソースと独自のカスタムアルゴリズムをクロスリファレンスします。ソース間で相違がある場合、バリデーションシステムは最新かつ領域コンテキストと最も整合するデータを優先します。プラットフォームの稼働率はリリース以来100%です。" },
+      { q: "TIFは誰が利用できますか？", a: "TIFはすべての方向けに設計されています：グラン・ジュネーヴ住民、訪問者、越境通勤者、イベント主催者、公共サービス。一般版は無料・登録不要。機関パートナー向けには豊富なデータを含むプロフェッショナルアクセスをご用意しています。" },
+      { q: "私のデータはどのように保護されますか？", a: "TIFはPrivacy by Designの原則を適用しています。正確なGPS座標は保存されません。使用データは匿名化・集計されます。ホスティングはEU内のみで、スイスnLPDおよびEU GDPRに準拠しています。" },
+    ],
   },
 
   zh: {
@@ -2785,6 +3012,32 @@ export const T: Record<Lang, HomeT> = {
       { label: 'CEVA', text: '莱蒙快铁4条监控线路：L1、L2、L3、L4' },
       { label: '信息', text: '大日内瓦地区每日4.7万名跨境工作者受G7限制影响' },
       { label: '来源', text: 'OFROU、日内瓦州警察局、TPG、SBB、瑞士气象局、SITG、BAZG' },
+    ],
+    shareText: 'TIF实时汇聚G7大日内瓦地区所有干扰信息。道路、边境、TPG、天气：完全免费，无需注册。',
+    agenda: {
+      navLink: '活动',
+      sectionLabel: '日程 · 大日内瓦地区 · 2026年夏',
+      h2a: '您所在地区', h2b: '正在发生的一切。',
+      sub: '经过核实的活动 · 官方来源 · 持续更新',
+      fullLabel: '全部活动',
+      fullH2a: '大日内瓦地区', fullH2b: '所有活动。',
+      free: '免费', freeLower: '免费',
+      seeMap: '在地图上查看 →', ticket: '购票 →',
+      showMore: '查看更多', eventsLabel: '项活动',
+      filterAll: '全部', filterMusic: '音乐', filterSport: '体育',
+      filterCulture: '文化', filterFootball: '足球 🇨🇭', filterCinema: '电影',
+    },
+    app: {
+      sub: '大日内瓦地区全面的领土智能，为移动端量身优化。随时随地掌握出行资讯、活动日历及实时预警。',
+      launch: '预计2026年6月底上线 · iOS & Android',
+    },
+    faq2: [
+      { q: "有移动应用程序吗？", a: "是的，TIF应用将于2026年6月底在App Store和Google Play Store上架。它将提供所有网页版功能，针对移动端优化，并支持实时通知。" },
+      { q: "TIF是如何运作的？", a: "TIF汇聚6个官方数据源（HERE、SBB、TPG、MeteoSwiss、OFDF、OpenStreetMap），并通过自主研发的处理算法对其进行增强。这些专有算法能够分析、交叉核实和预测领土状况，其精度优于任何单一数据源。" },
+      { q: "TIF是免费的吗？", a: "是的，TIF对所有用户完全免费。无需注册即可查看地图和实时数据。注册账户后可使用收藏和个性化警报等附加功能。" },
+      { q: "数据可靠吗？", a: "TIF将经认证的官方来源与自定义内部算法进行交叉核实。当来源之间存在分歧时，我们的验证系统优先采用最新且与领土背景最为吻合的数据。平台自上线以来的可用率为100%。" },
+      { q: "谁可以使用TIF？", a: "TIF面向所有人设计：大日内瓦地区居民、访客、跨境通勤者、活动组织者及公共服务机构。公共版本免费且无需注册。面向机构合作伙伴的专业访问权限（含丰富数据）可按需申请。" },
+      { q: "我的数据如何被保护？", a: "TIF遵循隐私设计原则（Privacy by Design）。不存储任何精确GPS坐标。使用数据经过匿名化和聚合处理。托管服务仅在欧洲进行，符合瑞士nLPD和欧盟GDPR的规定。" },
     ],
   },
 }

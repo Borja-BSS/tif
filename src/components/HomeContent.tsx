@@ -461,7 +461,7 @@ export function HomeContent() {
   }
 
   const shareUrl = 'https://tif.borja-swiss-solutions.ch'
-  const shareText = 'TIF centralise toutes les perturbations du G7 Grand Genève en temps réel. Routes, frontières, TPG, météo : gratuit et sans inscription.'
+  const shareText = t.shareText
   function copyLink() {
     navigator.clipboard.writeText(shareUrl).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000) })
   }
@@ -596,9 +596,9 @@ export function HomeContent() {
 
       {/* ÉVÉNEMENTS TICKER */}
       <section className="s s-alt" id="evenements">
-        <div className="s-label reveal">Agenda · Grand Genève · Été 2026</div>
-        <h2 className="s-h reveal">Tout ce qui se passe<br /><span style={{ fontStyle: 'italic', color: 'var(--text-secondary)' }}>dans votre région.</span></h2>
-        <p className="s-sub reveal" style={{ marginBottom: '32px' }}>Événements vérifiés · Sources officielles · Mis à jour en continu</p>
+        <div className="s-label reveal">{t.agenda.sectionLabel}</div>
+        <h2 className="s-h reveal">{t.agenda.h2a}<br /><span style={{ fontStyle: 'italic', color: 'var(--text-secondary)' }}>{t.agenda.h2b}</span></h2>
+        <p className="s-sub reveal" style={{ marginBottom: '32px' }}>{t.agenda.sub}</p>
         <div className="reveal" style={{ overflowX: 'auto', display: 'flex', gap: '12px', padding: '4px 0 20px', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
           {EVENTS_DATA
             .filter(ev => (ev.endDate ?? ev.date) >= new Date().toISOString().split('T')[0])
@@ -610,7 +610,7 @@ export function HomeContent() {
                 style={{ textDecoration: 'none', flexShrink: 0, width: '200px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '18px 16px', display: 'flex', flexDirection: 'column', gap: '8px', transition: 'border-color 0.2s', cursor: 'pointer' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'space-between' }}>
                   <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color, background: `${color}18`, padding: '3px 8px', borderRadius: '100px' }}>{ev.cat}</span>
-                  {ev.free && <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--green)', letterSpacing: '0.06em' }}>GRATUIT</span>}
+                  {ev.free && <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--green)', letterSpacing: '0.06em' }}>{t.agenda.free.toUpperCase()}</span>}
                 </div>
                 <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.25 }}>{ev.title}</div>
                 <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.4 }}>{ev.desc}</div>
@@ -619,25 +619,32 @@ export function HomeContent() {
                   <div style={{ fontSize: '11px', fontWeight: 700, color, marginTop: '2px' }}>{fmtEventDate(ev.date)}{ev.endDate ? ` au ${fmtEventDate(ev.endDate)}` : ''}</div>
                 </div>
                 <div style={{ fontSize: '11px', color: 'var(--blue)', fontWeight: 600, marginTop: '4px' }}>
-                  {ev.url.startsWith('/') ? 'Voir sur la carte →' : 'Billetterie →'}
+                  {ev.url.startsWith('/') ? t.agenda.seeMap : t.agenda.ticket}
                 </div>
               </a>
             )
           })}
         </div>
         <div style={{ textAlign: 'center', marginTop: '8px' }}>
-          <a href="#agenda" style={{ fontSize: '13px', color: 'var(--blue)', fontWeight: 600, textDecoration: 'none' }}>Voir l'agenda complet →</a>
+          <a href="#agenda" style={{ fontSize: '13px', color: 'var(--blue)', fontWeight: 600, textDecoration: 'none' }}>{t.agenda.fullLabel} →</a>
         </div>
       </section>
 
       {/* AGENDA COMPLET */}
       <section className="s reveal" id="agenda">
-        <div className="s-label">Agenda complet</div>
-        <h2 className="s-h" style={{ marginBottom: '24px' }}>Tous les événements<br /><span style={{ fontStyle: 'italic', color: 'var(--text-secondary)' }}>du Grand Genève.</span></h2>
+        <div className="s-label">{t.agenda.fullLabel}</div>
+        <h2 className="s-h" style={{ marginBottom: '24px' }}>{t.agenda.fullH2a}<br /><span style={{ fontStyle: 'italic', color: 'var(--text-secondary)' }}>{t.agenda.fullH2b}</span></h2>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '28px', justifyContent: 'center' }}>
-          {['Tout', 'Musique', 'Sport', 'Culture', 'Football', 'Cinéma'].map(cat => (
-            <button key={cat} onClick={() => { setAgendaFilter(cat); setAgendaShowAll(false) }} style={{ padding: '8px 18px', borderRadius: '100px', border: `1px solid ${agendaFilter === cat ? (CAT_COLORS[cat] ?? 'var(--border)') : 'var(--border)'}`, background: agendaFilter === cat ? `${CAT_COLORS[cat] ?? 'var(--blue)'}18` : 'transparent', color: agendaFilter === cat ? (CAT_COLORS[cat] ?? 'var(--blue)') : 'var(--text-secondary)', fontWeight: agendaFilter === cat ? 700 : 500, fontSize: '13px', cursor: 'pointer', transition: 'all 0.18s', letterSpacing: '-0.01em' }}>
-              {cat === 'Football' ? 'Football 🇨🇭' : cat}
+          {[
+            { key: 'Tout', label: t.agenda.filterAll },
+            { key: 'Musique', label: t.agenda.filterMusic },
+            { key: 'Sport', label: t.agenda.filterSport },
+            { key: 'Culture', label: t.agenda.filterCulture },
+            { key: 'Football', label: t.agenda.filterFootball },
+            { key: 'Cinéma', label: t.agenda.filterCinema },
+          ].map(({ key, label }) => (
+            <button key={key} onClick={() => { setAgendaFilter(key); setAgendaShowAll(false) }} style={{ padding: '8px 18px', borderRadius: '100px', border: `1px solid ${agendaFilter === key ? (CAT_COLORS[key] ?? 'var(--border)') : 'var(--border)'}`, background: agendaFilter === key ? `${CAT_COLORS[key] ?? 'var(--blue)'}18` : 'transparent', color: agendaFilter === key ? (CAT_COLORS[key] ?? 'var(--blue)') : 'var(--text-secondary)', fontWeight: agendaFilter === key ? 700 : 500, fontSize: '13px', cursor: 'pointer', transition: 'all 0.18s', letterSpacing: '-0.01em' }}>
+              {label}
             </button>
           ))}
         </div>
@@ -668,7 +675,7 @@ export function HomeContent() {
                       </div>
                       <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
                         <span style={{ fontSize: '10px', fontWeight: 700, color, background: `${color}18`, padding: '3px 8px', borderRadius: '100px', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{ev.cat}</span>
-                        {ev.free && <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--green)' }}>Gratuit</span>}
+                        {ev.free && <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--green)' }}>{t.agenda.freeLower}</span>}
                       </div>
                       <div style={{ flexShrink: 0, fontSize: '12px', color: 'var(--text-tertiary)' }}>→</div>
                     </a>
@@ -678,7 +685,7 @@ export function HomeContent() {
               {!agendaShowAll && filtered.length > 4 && (
                 <div style={{ textAlign: 'center', marginTop: '20px' }}>
                   <button onClick={() => setAgendaShowAll(true)} style={{ padding: '12px 28px', borderRadius: '100px', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontWeight: 600, fontSize: '14px', cursor: 'pointer', transition: 'all 0.18s', letterSpacing: '-0.01em' }}>
-                    Voir plus · {filtered.length - 4} événements →
+                    {t.agenda.showMore} · {filtered.length - 4} {t.agenda.eventsLabel} →
                   </button>
                 </div>
               )}
@@ -904,14 +911,7 @@ export function HomeContent() {
               <div className="faq-body"><p>{item.a}</p></div>
             </div>
           ))}
-          {[
-            { q: "Y a-t-il une application mobile ?", a: "Oui, l'application TIF sera disponible fin juin 2026 sur l'App Store et le Google Play Store. Elle offrira toutes les fonctionnalités de la version web, optimisées pour mobile, avec des notifications en temps réel." },
-            { q: "Comment TIF fonctionne-t-il ?", a: "TIF agrège 6 sources de données officielles (HERE, CFF, TPG, MétéoSuisse, OFDF, OpenStreetMap) et les enrichit avec ses propres algorithmes de traitement développés en interne. Ces algorithmes propriétaires permettent d'analyser, croiser et prédire les conditions territoriales avec une précision supérieure à chaque source prise individuellement." },
-            { q: "TIF est-il gratuit ?", a: "Oui, TIF est entièrement gratuit pour tous les utilisateurs. Aucune inscription n'est requise pour consulter la carte et les données en temps réel. Un compte permet d'accéder à des fonctionnalités supplémentaires comme les favoris et les alertes personnalisées." },
-            { q: "Les données sont-elles fiables ?", a: "TIF croise des sources officielles certifiées avec ses propres algorithmes internes sur mesure. En cas de divergence entre sources, notre système de validation prioritise la donnée la plus récente et la plus cohérente avec le contexte territorial. La disponibilité de la plateforme est de 100% depuis son lancement." },
-            { q: "Qui peut utiliser TIF ?", a: "TIF est conçu pour tous : résidents du Grand Genève, visiteurs, navetteurs transfrontaliers, organisateurs d'événements et services publics. La version grand public est gratuite et sans inscription. Des accès professionnels avec données enrichies sont disponibles sur demande pour les partenaires institutionnels." },
-            { q: "Comment mes données sont-elles protégées ?", a: "TIF applique le principe Privacy by Design. Aucune coordonnée GPS exacte n'est stockée. Les données d'usage sont anonymisées et agrégées. L'hébergement est exclusivement en Europe, conforme à la nLPD suisse et au RGPD européen." },
-          ].map((item, i) => (
+          {t.faq2.map((item, i) => (
             <div key={100 + i} className={`faq-item${openFaq === 100 + i ? ' open' : ''}`}>
               <button className="faq-q" onClick={() => setOpenFaq(openFaq === 100 + i ? null : 100 + i)}>{item.q}<span className="faq-icon">+</span></button>
               <div className="faq-body"><p>{item.a}</p></div>
@@ -1031,7 +1031,7 @@ export function HomeContent() {
       <section className="s reveal" id="app">
         <div className="s-label reveal">Application mobile</div>
         <h2 className="s-h reveal">TIF dans votre poche.<br /><span style={{ fontStyle: 'italic', color: 'var(--text-secondary)' }}>Disponible la semaine prochaine.</span></h2>
-        <p className="s-sub reveal">Toute l'intelligence territoriale du Grand Genève, optimisée pour mobile. Mobilité, agenda événementiel et alertes en temps réel, où que vous soyez.</p>
+        <p className="s-sub reveal">{t.app.sub}</p>
         <div className="reveal" style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center', marginTop: '32px' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '14px', background: 'var(--text-primary)', color: 'var(--bg)', borderRadius: '16px', padding: '16px 28px', minWidth: '200px', cursor: 'not-allowed', opacity: 0.85 }}>
             <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
@@ -1051,7 +1051,7 @@ export function HomeContent() {
         <div style={{ marginTop: '20px', textAlign: 'center' }}>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--text-tertiary)', fontWeight: 600, background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '100px', padding: '7px 16px' }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--green)', boxShadow: '0 0 8px var(--green)', display: 'inline-block', flexShrink: 0 }} />
-            Lancement prévu fin juin 2026 · iOS & Android
+            {t.app.launch}
           </span>
         </div>
       </section>
