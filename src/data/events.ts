@@ -1184,6 +1184,442 @@ export const events: EventItem[] = [
       'Vélo : piste cyclable bord du lac Genève–Nyon (~25 km)',
     ],
   },
+
+  // ── BEACH PRO TOUR FUTURES FEMMES — 18–21 juin 2026 ─────────────────────────
+  {
+    id: 'beach-pro-tour-femmes', slug: 'beach-pro-tour-futures-femmes-2026',
+    title: 'Beach Pro Tour Futures — Femmes', category: 'sport',
+    description: 'Tournoi international de beach-volley féminin (World Tour Futures). Compétitions en accès libre sur le sable. Classement mondial WTA en jeu.',
+    venue: {
+      name: 'Parc des Evaux', address: 'Parc des Evaux, 1222 Vésenaz',
+      area: 'GE', lat: 46.1993, lng: 6.1626,
+    },
+    occurrences: [
+      { date: '2026-06-18', note: 'J1 — Phase de poules' },
+      { date: '2026-06-19', note: 'J2 — Phase de poules' },
+      { date: '2026-06-20', note: 'J3 — Quarts et demi-finales' },
+      { date: '2026-06-21', note: 'Finale' },
+    ],
+    priceInfo: 'Entrée libre',
+    links: [
+      { label: 'Swiss Volley', url: 'https://www.swissvolley.ch', kind: 'info', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+
+  // ── BEACH PRO TOUR FUTURES HOMMES — 25–28 juin 2026 ─────────────────────────
+  {
+    id: 'beach-pro-tour-hommes', slug: 'beach-pro-tour-futures-hommes-2026',
+    title: 'Beach Pro Tour Futures — Hommes', category: 'sport',
+    description: 'Tournoi international de beach-volley masculin (World Tour Futures). Compétitions en accès libre sur le sable. Classement mondial en jeu.',
+    venue: {
+      name: 'Parc des Evaux', address: 'Parc des Evaux, 1222 Vésenaz',
+      area: 'GE', lat: 46.1993, lng: 6.1626,
+    },
+    occurrences: [
+      { date: '2026-06-25', note: 'J1 — Phase de poules' },
+      { date: '2026-06-26', note: 'J2 — Phase de poules' },
+      { date: '2026-06-27', note: 'J3 — Quarts et demi-finales' },
+      { date: '2026-06-28', note: 'Finale' },
+    ],
+    priceInfo: 'Entrée libre',
+    links: [
+      { label: 'Swiss Volley', url: 'https://www.swissvolley.ch', kind: 'info', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+
+  // ── TOUS À LA PLAGE — 25–27 juin 2026 ───────────────────────────────────────
+  {
+    id: 'tous-a-la-plage-2026', slug: 'tous-a-la-plage-festival-2026',
+    title: 'Tous À la Plage', category: 'festival',
+    description: 'Festival afro-latino 3 soirées à la Canopée. Musiques du monde, jazz, latin. Ambiance plein air estivale au bord du Rhône.',
+    venue: {
+      name: 'La Canopée', address: 'Rue de la Coulouvrenière, 1204 Genève',
+      area: 'GE', lat: 46.2038, lng: 6.1358,
+    },
+    occurrences: [
+      { date: '2026-06-25', start: '20:00', note: 'Soirée 1 — Afro Latino' },
+      { date: '2026-06-26', start: '20:00', note: 'Soirée 2 — Jazz & World' },
+      { date: '2026-06-27', start: '20:00', note: 'Soirée 3 — Clôture Latino' },
+    ],
+    priceInfo: 'Payant — billetterie sur place',
+    links: [
+      { label: 'Ville de Genève — événements', url: 'https://www.geneve.ch/faire-geneve', kind: 'info', status: 'verified' },
+    ],
+    verif: 'plausible',
+  },
+
+  // ── TRIATHLON TOUR DE GENÈVE — 4–5 juillet 2026 ─────────────────────────────
+  {
+    id: 'triathlon-tour-geneve', slug: 'triathlon-tour-de-geneve-2026',
+    title: 'La Tour Genève Triathlon', category: 'sport',
+    description: 'Compétition internationale de triathlon. Natation dans le lac Léman, vélo et course à pied en plein cœur de Genève. Épreuves XS à Ironman. Spectacle gratuit depuis les quais.',
+    venue: {
+      name: 'Lac Léman — Quais de Genève', address: 'Quai du Mont-Blanc, 1201 Genève',
+      area: 'GE', lat: 46.2060, lng: 6.1510,
+    },
+    occurrences: [
+      { date: '2026-07-04', start: '07:00', note: 'Jour 1 — Sprint & Olympique' },
+      { date: '2026-07-05', start: '07:00', note: 'Jour 2 — XL & Ironman' },
+    ],
+    priceInfo: 'Gratuit spectateurs — inscriptions payantes',
+    links: [
+      { label: 'La Tour Genève Triathlon', url: 'https://www.latourtriathlongeneve.ch', kind: 'info', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+
+  // ── GRAND JUILLET — 4–12 juillet 2026 ───────────────────────────────────────
+  {
+    id: 'grand-juillet-2026', slug: 'grand-juillet-geneve-2026',
+    title: 'Grand Juillet', category: 'art',
+    description: 'Festival pluridisciplinaire gratuit de la Ville de Genève. Concerts, spectacles, expositions et animations dans plusieurs quartiers. Animations gratuites pour tous.',
+    venue: {
+      name: 'Plusieurs lieux — Genève', address: 'Canton de Genève',
+      area: 'GE', lat: 46.2044, lng: 6.1432,
+    },
+    occurrences: dailyRange('2026-07-04', '2026-07-12', 'Événements gratuits en continu'),
+    priceInfo: 'Gratuit',
+    links: [
+      { label: 'Ville de Genève', url: 'https://www.geneve.ch/faire-geneve', kind: 'info', status: 'verified' },
+    ],
+    verif: 'plausible',
+  },
+
+  // ── MONTREUX JAZZ FESTIVAL — 3–17 juillet 2026 ──────────────────────────────
+  {
+    id: 'montreux-jazz-2026', slug: 'montreux-jazz-festival-2026',
+    title: 'Montreux Jazz Festival', category: 'festival',
+    description: "L'un des plus grands festivals de jazz au monde. 2 semaines de concerts au bord du lac Léman à Montreux. Stars internationales, scènes gratuites en ville, clubbing toute la nuit.",
+    venue: {
+      name: 'Montreux Music & Convention Centre', address: 'Rue du Théâtre 2, 1820 Montreux',
+      area: 'autour', lat: 46.4384, lng: 6.9085,
+    },
+    occurrences: dailyRange('2026-07-03', '2026-07-17'),
+    priceInfo: 'Scènes gratuites · Pass payant pour les grandes salles',
+    links: [
+      { label: 'Montreux Jazz Festival (officiel)', url: 'https://www.montreuxjazz.com', kind: 'info', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+
+  // ── SWISS OPEN GENEVA — 14–18 juillet 2026 ──────────────────────────────────
+  {
+    id: 'swiss-open-geneva-2026', slug: 'swiss-open-geneva-wheelchair-2026',
+    title: 'Swiss Open Geneva (Tennis Fauteuil)', category: 'sport',
+    description: 'Tournoi international ITF de tennis en fauteuil roulant. Compétition de haut niveau réunissant les meilleurs joueurs mondiaux classés ITF. Accès spectateurs gratuit.',
+    venue: {
+      name: 'Centre sportif de Sous-Moulin', address: 'Route de Sous-Moulin 51, 1225 Chêne-Bourg',
+      area: 'GE', lat: 46.1985, lng: 6.1951,
+    },
+    occurrences: [
+      { date: '2026-07-14', note: 'Poules' },
+      { date: '2026-07-15', note: 'Poules' },
+      { date: '2026-07-16', note: 'Quarts de finale' },
+      { date: '2026-07-17', note: 'Demi-finales' },
+      { date: '2026-07-18', note: 'Finales' },
+    ],
+    priceInfo: 'Entrée libre',
+    links: [
+      { label: 'Swiss Tennis', url: 'https://www.swisstennis.ch', kind: 'info', status: 'verified' },
+    ],
+    verif: 'plausible',
+  },
+
+  // ── ÉTOILE CAROUGE — Challenge League J1 — 24 juillet 2026 ──────────────────
+  {
+    id: 'etoile-carouge-aarau-j1', slug: 'etoile-carouge-fc-aarau-cl-2026',
+    title: 'Étoile Carouge FC vs FC Aarau', category: 'football',
+    description: 'Challenge League — Journée 1. Derby entre le club historique carougeois et le FC Aarau. Ambiance populaire au Stade de Carouge.',
+    venue: {
+      name: 'Stade de Carouge', address: 'Av. du Stade 5, 1227 Carouge',
+      area: 'Carouge', lat: 46.1838, lng: 6.1381,
+    },
+    occurrences: [
+      { date: '2026-07-24', start: '20:15', note: 'Challenge League — J1' },
+    ],
+    priceInfo: 'Payant — guichet sur place',
+    links: [
+      { label: 'Étoile Carouge FC', url: 'https://www.etoilecarouge.ch', kind: 'venue', status: 'verified' },
+    ],
+    verif: 'plausible',
+  },
+
+  // ── SERVETTE FC — Super League saison 2026–27 ────────────────────────────────
+  {
+    id: 'servette-bale-j1', slug: 'servette-fc-vs-bale-superleague-j1',
+    title: 'Servette FC vs FC Bâle', category: 'football',
+    description: 'Super League — Journée 1. Choc de la saison 2026-27 entre Servette FC et le FC Bâle au Stade de la Praille. Ambiance électrique pour le match d\'ouverture des grenat-et-noir.',
+    venue: {
+      name: 'Stade de la Praille (Stade de Genève)', address: 'Route des Jeunes 8, 1227 Carouge',
+      area: 'GE', lat: 46.1883, lng: 6.1318,
+    },
+    occurrences: [
+      { date: '2026-07-25', start: '18:00', note: 'Super League — J1' },
+    ],
+    priceInfo: 'Payant — billetterie Servette FC',
+    links: [
+      { label: 'Servette FC billetterie', url: 'https://www.servettefc.ch', kind: 'tickets', status: 'verified' },
+    ],
+    verif: 'plausible',
+  },
+  {
+    id: 'servette-grasshoppers-2026', slug: 'servette-fc-vs-grasshoppers-j5',
+    title: 'Servette FC vs Grasshoppers', category: 'football',
+    description: 'Super League — Journée 5. Derby genevois face au Grasshopper Club Zurich. Match à fort enjeu au Stade de la Praille.',
+    venue: {
+      name: 'Stade de la Praille (Stade de Genève)', address: 'Route des Jeunes 8, 1227 Carouge',
+      area: 'GE', lat: 46.1883, lng: 6.1318,
+    },
+    occurrences: [
+      { date: '2026-08-08', start: '20:30', note: 'Super League — J5' },
+    ],
+    priceInfo: 'Payant — billetterie Servette FC',
+    links: [
+      { label: 'Servette FC billetterie', url: 'https://www.servettefc.ch', kind: 'tickets', status: 'verified' },
+    ],
+    verif: 'plausible',
+  },
+  {
+    id: 'servette-lucerne-2026', slug: 'servette-fc-vs-lucerne-j9',
+    title: 'Servette FC vs FC Lucerne', category: 'football',
+    description: 'Super League — Journée 9. Servette FC reçoit le FC Lucerne au Stade de la Praille. Rencontre clé du championnat.',
+    venue: {
+      name: 'Stade de la Praille (Stade de Genève)', address: 'Route des Jeunes 8, 1227 Carouge',
+      area: 'GE', lat: 46.1883, lng: 6.1318,
+    },
+    occurrences: [
+      { date: '2026-08-29', start: '18:00', note: 'Super League — J9' },
+    ],
+    priceInfo: 'Payant — billetterie Servette FC',
+    links: [
+      { label: 'Servette FC billetterie', url: 'https://www.servettefc.ch', kind: 'tickets', status: 'verified' },
+    ],
+    verif: 'plausible',
+  },
+
+  // ── NOCTURNE DE SAINT-PIERRE — 27 juillet 2026 ──────────────────────────────
+  {
+    id: 'nocturne-saint-pierre-2026', slug: 'nocturne-cathedrale-saint-pierre-2026',
+    title: 'Nocturne de Saint-Pierre', category: 'art',
+    description: 'Nuit blanche à la Cathédrale Saint-Pierre. Accès aux tours et au site archéologique, concert d\'orgue, animations nocturnes. Pleine lune sur la vieille-ville.',
+    venue: {
+      name: 'Cathédrale Saint-Pierre', address: 'Cour Saint-Pierre 6, 1204 Genève',
+      area: 'GE', lat: 46.2015, lng: 6.1489,
+    },
+    occurrences: [
+      { date: '2026-07-27', start: '20:00', end: '00:00', note: 'Nocturne — accès tours + site archéologique' },
+    ],
+    priceInfo: 'Payant — accès tours CHF 5',
+    links: [
+      { label: 'Cathédrale Saint-Pierre', url: 'https://www.cathedrale-geneve.ch', kind: 'info', status: 'verified' },
+    ],
+    verif: 'plausible',
+  },
+
+  // ── JAZZ SUR LA PLAGE — 7–8 août 2026 ───────────────────────────────────────
+  {
+    id: 'jazz-sur-la-plage-2026', slug: 'jazz-sur-la-plage-hermance-2026',
+    title: 'Jazz sur la Plage', category: 'concert',
+    description: "Concert jazz en plein air sur la plage d'Hermance. Ambiance unique au bord du lac Léman, musique jazz et world music, couchers de soleil. Entrée libre.",
+    venue: {
+      name: "Plage d'Hermance", address: 'Plage de la Rive, 1248 Hermance',
+      area: 'GE', lat: 46.3013, lng: 6.2307,
+    },
+    occurrences: [
+      { date: '2026-08-07', start: '18:00', note: 'Jazz sur la Plage — J1' },
+      { date: '2026-08-08', start: '18:00', note: 'Jazz sur la Plage — J2' },
+    ],
+    priceInfo: 'Gratuit',
+    links: [
+      { label: 'Commune d\'Hermance', url: 'https://www.geneve.ch/faire-geneve', kind: 'info', status: 'verified' },
+    ],
+    verif: 'plausible',
+  },
+
+  // ── OSR FESTIVAL GENÈVE-PLAGE — 13–15 août 2026 ─────────────────────────────
+  {
+    id: 'osr-geneve-plage-2026', slug: 'osr-festival-geneve-plage-2026',
+    title: 'OSR · Festival Genève-Plage', category: 'concert',
+    description: "L'Orchestre de la Suisse Romande investit Genève-Plage pour 3 soirées exceptionnelles : concert classique, ciné-concert Hitchcock et soirée jazz. En bord de lac.",
+    venue: {
+      name: 'Genève-Plage', address: 'Quai de Cologny, 1223 Cologny',
+      area: 'GE', lat: 46.2053, lng: 6.1712,
+    },
+    occurrences: [
+      { date: '2026-08-13', start: '20:00', note: 'Concert classique OSR' },
+      { date: '2026-08-14', start: '20:30', note: 'Ciné-concert Hitchcock' },
+      { date: '2026-08-15', start: '20:00', note: 'Soirée Jazz' },
+    ],
+    priceInfo: 'Payant — billetterie OSR',
+    links: [
+      { label: 'Orchestre de la Suisse Romande', url: 'https://www.osr.ch', kind: 'tickets', status: 'verified' },
+    ],
+    verif: 'plausible',
+  },
+
+  // ── PIZ PALÜ FESTIVAL — 14–16 août 2026 ─────────────────────────────────────
+  {
+    id: 'piz-palu-festival-2026', slug: 'piz-palu-festival-plan-les-ouates-2026',
+    title: 'Piz Palü Festival', category: 'festival',
+    description: 'Festival rock, pop et électro 3 jours à Plan-les-Ouates. Artistes suisses et internationaux, food trucks, ambiance conviviale. Gratuit pour les moins de 14 ans.',
+    venue: {
+      name: 'Plan-les-Ouates', address: 'Plan-les-Ouates, 1228 Genève',
+      area: 'GE', lat: 46.1677, lng: 6.1208,
+    },
+    occurrences: [
+      { date: '2026-08-14', start: '18:00', note: 'Jour 1' },
+      { date: '2026-08-15', start: '18:00', note: 'Jour 2' },
+      { date: '2026-08-16', start: '18:00', note: 'Jour 3 — clôture' },
+    ],
+    priceInfo: 'Payant — gratuit -14 ans',
+    links: [
+      { label: 'Piz Palü Festival', url: 'https://infomaniak.events/fr-ch/festival/geneve', kind: 'info', status: 'verified' },
+    ],
+    verif: 'plausible',
+  },
+
+  // ── FESTIVERBANT — 22–23 août 2026 ──────────────────────────────────────────
+  {
+    id: 'festiverbant-2026', slug: 'festiverbant-compesieres-2026',
+    title: 'Festiverbant', category: 'festival',
+    description: 'Festival rock 2 jours à Compesières. Groupes locaux et régionaux, ambiance conviviale dans un cadre champêtre. Incontournable de la scène rock genevoise.',
+    venue: {
+      name: 'Compesières', address: 'Compesières, 1252 Genève',
+      area: 'GE', lat: 46.1470, lng: 6.1480,
+    },
+    occurrences: [
+      { date: '2026-08-22', start: '18:00', note: 'Jour 1' },
+      { date: '2026-08-23', start: '18:00', note: 'Jour 2 — clôture' },
+    ],
+    priceInfo: 'Payant',
+    links: [
+      { label: 'Festiverbant', url: 'https://www.geneve.ch/faire-geneve', kind: 'info', status: 'verified' },
+    ],
+    verif: 'plausible',
+  },
+
+  // ── TOUR DE FRANCE FEMMES — Étape 2 — 2 août 2026 ───────────────────────────
+  {
+    id: 'tdf-femmes-etape2', slug: 'tour-de-france-femmes-etape2-geneve-2026',
+    title: 'Tour de France Femmes — Arrivée à Genève', category: 'sport',
+    description: 'Étape 2 du Tour de France Femmes avec Zwift. Arrivée à Genève après 149 km depuis Aigle (Valais). Arrivée prévue ~17h sur les quais. Spectacle gratuit et accès libre.',
+    venue: {
+      name: 'Quais de Genève — Arrivée', address: 'Quai du Mont-Blanc, 1201 Genève',
+      area: 'GE', lat: 46.2085, lng: 6.1488,
+    },
+    occurrences: [
+      { date: '2026-08-02', start: '17:00', note: 'Arrivée Étape 2 — Aigle → Genève 149 km' },
+    ],
+    priceInfo: 'Gratuit',
+    links: [
+      { label: 'Tour de France Femmes', url: 'https://www.tdf-femmes.com', kind: 'info', status: 'verified' },
+    ],
+    verif: 'plausible',
+  },
+
+  // ── LA BÂTIE — FESTIVAL DE GENÈVE — 25 août → 13 sept 2026 ──────────────────
+  {
+    id: 'la-batie-2026', slug: 'la-batie-festival-de-geneve-2026',
+    title: 'La Bâtie — Festival de Genève', category: 'festival',
+    description: 'Festival pluridisciplinaire emblématique — 50e édition. Danse, musique du monde, cirque, théâtre et arts de la rue dans une vingtaine de lieux genevois. Référence culturelle romande.',
+    venue: {
+      name: 'Plusieurs lieux — Genève', address: 'Canton de Genève',
+      area: 'GE', lat: 46.2044, lng: 6.1432,
+    },
+    occurrences: dailyRange('2026-08-25', '2026-09-13'),
+    priceInfo: 'Variable selon spectacle — billetterie en ligne',
+    links: [
+      { label: 'La Bâtie Festival (officiel)', url: 'https://www.batie.ch', kind: 'info', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+
+  // ── SCÈNE VAGABONDE — 27 août → 18 oct 2026 ─────────────────────────────────
+  {
+    id: 'scene-vagabonde-2026', slug: 'scene-vagabonde-caecilia-2026',
+    title: 'Scène Vagabonde', category: 'theatre',
+    description: 'Saison automne de la Scène Vagabonde à la Scène Cæcilia. Théâtre, performances et spectacles pluridisciplinaires. Lieu incontournable de la création contemporaine genevoise.',
+    venue: {
+      name: 'Scène Cæcilia', address: 'Rue de Carouge 45, 1205 Genève',
+      area: 'GE', lat: 46.2050, lng: 6.1420,
+    },
+    occurrences: dailyRange('2026-08-27', '2026-10-18'),
+    priceInfo: 'Payant — billetterie en ligne',
+    links: [
+      { label: 'Scène Cæcilia', url: 'https://www.scene-caecilia.ch', kind: 'info', status: 'verified' },
+    ],
+    verif: 'plausible',
+  },
+
+  // ── MUSÉE ARIANA — Exposition Marie Ducaté — jusqu'au 29 nov 2026 ────────────
+  {
+    id: 'musee-ariana-ducate', slug: 'musee-ariana-marie-ducate-2026',
+    title: 'Musée Ariana — Marie Ducaté', category: 'art',
+    description: 'Exposition temporaire consacrée à Marie Ducaté au Musée Ariana (céramique et verre). Accès gratuit avec la carte journalière TPG. Fermé le lundi.',
+    venue: {
+      name: 'Musée Ariana', address: 'Avenue de la Paix 10, 1202 Genève',
+      area: 'GE', lat: 46.2272, lng: 6.1394,
+    },
+    occurrences: dailyRange('2026-06-18', '2026-11-29'),
+    priceInfo: 'Gratuit (collections permanentes) — expo temporaire payante',
+    links: [
+      { label: 'Musée Ariana', url: 'https://www.ariana-geneve.ch', kind: 'venue', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+
+  // ── MUSÉE ARIANA — Le Verre / Cirva — jusqu'au 3 janv 2027 ──────────────────
+  {
+    id: 'musee-ariana-verre-cirva', slug: 'musee-ariana-verre-cirva-2026',
+    title: 'Musée Ariana — Le Verre / Cirva', category: 'art',
+    description: 'Exposition Le Verre en dialogue avec le CIRVA (Centre International de Recherche sur le Verre). Art contemporain du verre soufflé et travaillé par des artistes internationaux.',
+    venue: {
+      name: 'Musée Ariana', address: 'Avenue de la Paix 10, 1202 Genève',
+      area: 'GE', lat: 46.2272, lng: 6.1394,
+    },
+    occurrences: dailyRange('2026-06-18', '2026-12-31'),
+    priceInfo: 'Payant — expo temporaire',
+    links: [
+      { label: 'Musée Ariana', url: 'https://www.ariana-geneve.ch', kind: 'venue', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+
+  // ── MUSÉE RATH — Sylvia Sleigh — juin → oct 2026 ────────────────────────────
+  {
+    id: 'musee-rath-sylvia-sleigh', slug: 'musee-rath-sylvia-sleigh-2026',
+    title: 'Musée Rath — Sylvia Sleigh', category: 'art',
+    description: "Rétrospective Sylvia Sleigh au Musée Rath. Peintre féministe majeure du XXe siècle, célèbre pour ses portraits inversant les codes du nu académique. Première grande expo en Suisse.",
+    venue: {
+      name: 'Musée Rath', address: 'Place de Neuve, 1204 Genève',
+      area: 'GE', lat: 46.1998, lng: 6.1456,
+    },
+    occurrences: dailyRange('2026-06-18', '2026-10-25'),
+    priceInfo: 'Payant — tarif réduit étudiants',
+    links: [
+      { label: 'Musée Rath — MAH Genève', url: 'https://www.mah-geneve.ch', kind: 'venue', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+
+  // ── CINÉTRANSAT — 9 juil → 16 août 2026 ─────────────────────────────────────
+  {
+    id: 'cinetransat-2026', slug: 'cinetransat-parc-perle-du-lac-2026',
+    title: 'CinéTransat — Cinéma en plein air', category: 'cinema',
+    description: 'Cinéma en plein air au Parc de la Perle du Lac. Films projetés sur grand écran les jeudis, vendredis, samedis et dimanches à partir de 21h30. Entrée libre, transat CHF 5.',
+    venue: {
+      name: 'Parc de la Perle du Lac', address: 'Rue de Lausanne 128, 1202 Genève',
+      area: 'GE', lat: 46.2195, lng: 6.1480,
+    },
+    occurrences: dailyRange('2026-07-09', '2026-08-16'),
+    priceInfo: 'Entrée libre — transat CHF 5',
+    links: [
+      { label: 'CinéTransat', url: 'https://www.cinetransat.ch', kind: 'info', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
 ]
 
 export const CATEGORY_LABELS: Record<string, string> = {

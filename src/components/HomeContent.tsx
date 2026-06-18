@@ -7,6 +7,7 @@ import { T, LANGUAGES } from '@/i18n/home'
 import type { Lang } from '@/i18n/home'
 import { LangSelector } from '@/components/LangSelector'
 import { computeInstantStatus, ALL_CROSSINGS } from '@/lib/territory/border-crossings-client'
+import { events as allEvents } from '@/data/events'
 
 interface DashData {
   alerts: Array<{ id: string; icon: string; title: string; severity: string; timeAgo: string }>
@@ -136,32 +137,54 @@ const TC2_ICONS  = ['❓', '📚', '🎯', '🏗️']
 
 const BORDER_HOME_IDS = ['bardonnex', 'thonex-vallard', 'moillesulaz', 'meyrin', 'ferney-voltaire']
 
-const EVENTS_DATA = [
-  { date: '2026-06-18', title: 'Suisse 🇨🇭 vs Bosnie', cat: 'Football', desc: 'Coupe du Monde · Groupe B · 21h00 CEST', loc: 'FanZone Gradi24, Plan-les-Ouates', free: true, url: '/map' },
-  { date: '2026-06-19', endDate: '2026-08-21', title: 'Scène Ella Fitzgerald', cat: 'Musique', desc: 'Concerts gratuits plein air · lun, mer, ven', loc: 'Genève', free: true, url: 'https://www.geneve.ch/faire-geneve' },
-  { date: '2026-06-24', title: 'Suisse 🇨🇭 vs Canada', cat: 'Football', desc: 'Coupe du Monde · Groupe B · 21h00 CEST', loc: 'FanZone Gradi24, Plan-les-Ouates', free: true, url: '/map' },
-  { date: '2026-06-25', endDate: '2026-06-27', title: 'Tous À la Plage', cat: 'Musique', desc: 'Afro-Latino, Jazz, Latino · 3 soirées', loc: 'Canopée, Genève', free: false, url: 'https://www.geneve.ch/faire-geneve' },
-  { date: '2026-07-03', endDate: '2026-07-18', title: 'Montreux Jazz Festival', cat: 'Musique', desc: 'Festival international de renommée mondiale', loc: 'Montreux', free: false, url: 'https://www.montreuxjazz.com' },
-  { date: '2026-07-04', endDate: '2026-07-12', title: 'Grand Juillet', cat: 'Culture', desc: 'Festival littéraire · Plusieurs lieux', loc: 'Canton de Genève', free: true, url: 'https://www.geneve.ch/faire-geneve' },
-  { date: '2026-07-05', endDate: '2026-07-06', title: 'La Tour Genève Triathlon', cat: 'Sport', desc: 'Compétition internationale de triathlon', loc: 'Genève', free: false, url: '/map' },
-  { date: '2026-07-09', endDate: '2026-07-11', title: 'Plein-les-Watts Festival', cat: 'Musique', desc: 'Concerts live, street art, food trucks', loc: 'Parc Navazza, Genève', free: false, url: 'https://infomaniak.events/fr-ch/festival/geneve' },
-  { date: '2026-07-14', endDate: '2026-07-18', title: 'Guitare en Scène', cat: 'Musique', desc: 'Festival rock international', loc: 'Saint-Julien-en-Genevois', free: false, url: '/map' },
-  { date: '2026-07-14', endDate: '2026-07-18', title: 'Swiss Open Geneva', cat: 'Sport', desc: 'Compétition tennis en fauteuil roulant', loc: 'Genève', free: false, url: '/map' },
-  { date: '2026-07-19', title: 'Finale Coupe du Monde', cat: 'Football', desc: 'FIFA World Cup 2026 · MetLife Stadium · 21h00', loc: 'FanZone Saint-Genis-Pouilly', free: true, url: '/map' },
-  { date: '2026-07-21', endDate: '2026-07-26', title: 'Paléo Festival Nyon', cat: 'Musique', desc: 'Le festival phare de la région', loc: 'Nyon', free: false, url: 'https://www.paleo.ch' },
-  { date: '2026-07-27', title: 'Nocturne de Saint-Pierre', cat: 'Culture', desc: 'Accès aux tours · Pleine lune', loc: 'Cathédrale Saint-Pierre', free: false, url: '/map' },
-  { date: '2026-08-07', endDate: '2026-08-08', title: 'Jazz sur la Plage', cat: 'Musique', desc: 'Concert jazz en plein air', loc: "Plage d'Hermance", free: true, url: 'https://www.geneve.ch/faire-geneve' },
-  { date: '2026-08-13', endDate: '2026-08-15', title: 'OSR · Festival Genève-Plage', cat: 'Musique', desc: 'Classique · Ciné-concert Hitchcock · Jazz', loc: 'Genève-Plage', free: false, url: 'https://www.osr.ch' },
-  { date: '2026-08-14', endDate: '2026-08-16', title: 'Piz Palü Festival', cat: 'Musique', desc: 'Rock, pop, électro · Gratuit -14 ans', loc: 'Plan-les-Ouates', free: false, url: 'https://infomaniak.events/fr-ch/festival/geneve' },
-  { date: '2026-08-22', endDate: '2026-08-23', title: 'Festiverbant', cat: 'Musique', desc: 'Festival rock', loc: 'Compesières', free: false, url: '/map' },
-  { date: '2026-08-25', endDate: '2026-09-13', title: 'La Bâtie — Festival de Genève', cat: 'Culture', desc: 'Danse, musique, cirque, théâtre · 50e édition', loc: 'Genève', free: false, url: 'https://www.batie.ch' },
-]
+const CATEGORY_MAP: Record<string, string> = {
+  football: 'Football',
+  festival: 'Musique',
+  concert: 'Musique',
+  classique: 'Musique',
+  nightlife: 'Musique',
+  cinema: 'Cinéma',
+  theatre: 'Culture',
+  comedie: 'Culture',
+  danse: 'Culture',
+  art: 'Culture',
+  sport: 'Sport',
+}
+
+const EVENTS_DATA = allEvents
+  .filter(ev => ev.occurrences.length > 0)
+  .map(ev => {
+    const dates = [...new Set(ev.occurrences.map(o => o.date))].sort()
+    const cat = CATEGORY_MAP[ev.category] ?? 'Culture'
+    const isFree = !!ev.priceInfo && (
+      ev.priceInfo.toLowerCase().includes('gratuit') ||
+      ev.priceInfo.toLowerCase().includes('libre')
+    )
+    const ticketLink = ev.links?.find(l => l.kind === 'tickets')
+    const infoLink   = ev.links?.find(l => l.kind === 'info')
+    const venueLink  = ev.links?.find(l => l.kind === 'venue')
+    const url = (cat === 'Cinéma' ? (venueLink?.url ?? infoLink?.url) : ticketLink?.url)
+      ?? infoLink?.url ?? venueLink?.url ?? ev.links?.[0]?.url ?? '/map'
+    const desc = ev.description.length > 90 ? ev.description.slice(0, 88) + '…' : ev.description
+    const lastDate = dates[dates.length - 1]
+    return {
+      date: dates[0],
+      endDate: lastDate !== dates[0] ? lastDate : undefined,
+      title: ev.title,
+      cat,
+      desc,
+      loc: ev.venue.name,
+      free: isFree,
+      url,
+    }
+  })
 
 const CAT_COLORS: Record<string, string> = {
   Football: '#FF9F0A',
   Musique: '#0A84FF',
   Sport: '#30D158',
   Culture: '#BF5AF2',
+  Cinéma: '#FF375F',
 }
 
 const MONTHS_FR = ['jan', 'fév', 'mar', 'avr', 'mai', 'juin', 'juil', 'août', 'sep', 'oct', 'nov', 'déc']
@@ -519,7 +542,7 @@ export function HomeContent() {
 
       {/* HERO */}
       <section className="hero">
-        <h1 className="hero-h1">Intelligence<br />Territoriale <span className="accent">Grand Genève</span></h1>
+        <h1 className="hero-h1">Intelligence Territoriale<br /><span className="accent">Grand Genève</span></h1>
         <p className="hero-p">
           Mobilité en temps réel, agenda événementiel complet, gestion de foule.<br />
           <strong>Comprendre et anticiper votre territoire.</strong><br />
@@ -579,7 +602,7 @@ export function HomeContent() {
         <div className="s-label">Agenda complet</div>
         <h2 className="s-h" style={{ marginBottom: '24px' }}>Tous les événements<br /><span style={{ fontStyle: 'italic', color: 'var(--text-secondary)' }}>du Grand Genève.</span></h2>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '28px', justifyContent: 'center' }}>
-          {['Tout', 'Musique', 'Sport', 'Culture', 'Football'].map(cat => (
+          {['Tout', 'Musique', 'Sport', 'Culture', 'Football', 'Cinéma'].map(cat => (
             <button key={cat} onClick={() => setAgendaFilter(cat)} style={{ padding: '8px 18px', borderRadius: '100px', border: `1px solid ${agendaFilter === cat ? (CAT_COLORS[cat] ?? 'var(--border)') : 'var(--border)'}`, background: agendaFilter === cat ? `${CAT_COLORS[cat] ?? 'var(--blue)'}18` : 'transparent', color: agendaFilter === cat ? (CAT_COLORS[cat] ?? 'var(--blue)') : 'var(--text-secondary)', fontWeight: agendaFilter === cat ? 700 : 500, fontSize: '13px', cursor: 'pointer', transition: 'all 0.18s', letterSpacing: '-0.01em' }}>
               {cat === 'Football' ? 'Football 🇨🇭' : cat}
             </button>
