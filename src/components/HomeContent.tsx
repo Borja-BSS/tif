@@ -285,6 +285,7 @@ export function HomeContent() {
   const [auditForm, setAuditForm] = useState({ name: '', email: '', expertise: '', loading: false, success: false, error: '' })
   const [partnerForm, setPartnerForm] = useState({ institution: '', email: '', expertise: '', loading: false, success: false, error: '' })
   const [agendaFilter, setAgendaFilter] = useState<string>('Tout')
+  const [agendaShowAll, setAgendaShowAll] = useState(false)
   const [statsEmail, setStatsEmail] = useState('')
   const lastFocus = useRef<HTMLElement | null>(null)
   const { user } = useAuth()
@@ -635,40 +636,55 @@ export function HomeContent() {
         <h2 className="s-h" style={{ marginBottom: '24px' }}>Tous les événements<br /><span style={{ fontStyle: 'italic', color: 'var(--text-secondary)' }}>du Grand Genève.</span></h2>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '28px', justifyContent: 'center' }}>
           {['Tout', 'Musique', 'Sport', 'Culture', 'Football', 'Cinéma'].map(cat => (
-            <button key={cat} onClick={() => setAgendaFilter(cat)} style={{ padding: '8px 18px', borderRadius: '100px', border: `1px solid ${agendaFilter === cat ? (CAT_COLORS[cat] ?? 'var(--border)') : 'var(--border)'}`, background: agendaFilter === cat ? `${CAT_COLORS[cat] ?? 'var(--blue)'}18` : 'transparent', color: agendaFilter === cat ? (CAT_COLORS[cat] ?? 'var(--blue)') : 'var(--text-secondary)', fontWeight: agendaFilter === cat ? 700 : 500, fontSize: '13px', cursor: 'pointer', transition: 'all 0.18s', letterSpacing: '-0.01em' }}>
+            <button key={cat} onClick={() => { setAgendaFilter(cat); setAgendaShowAll(false) }} style={{ padding: '8px 18px', borderRadius: '100px', border: `1px solid ${agendaFilter === cat ? (CAT_COLORS[cat] ?? 'var(--border)') : 'var(--border)'}`, background: agendaFilter === cat ? `${CAT_COLORS[cat] ?? 'var(--blue)'}18` : 'transparent', color: agendaFilter === cat ? (CAT_COLORS[cat] ?? 'var(--blue)') : 'var(--text-secondary)', fontWeight: agendaFilter === cat ? 700 : 500, fontSize: '13px', cursor: 'pointer', transition: 'all 0.18s', letterSpacing: '-0.01em' }}>
               {cat === 'Football' ? 'Football 🇨🇭' : cat}
             </button>
           ))}
         </div>
-        <div style={{ maxWidth: '760px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-          {EVENTS_DATA
-            .filter(ev => (agendaFilter === 'Tout' || ev.cat === agendaFilter) && (ev.endDate ?? ev.date) >= new Date().toISOString().split('T')[0])
+        {(() => {
+          const today = new Date().toISOString().split('T')[0]
+          const filtered = EVENTS_DATA
+            .filter(ev => (agendaFilter === 'Tout' || ev.cat === agendaFilter) && (ev.endDate ?? ev.date) >= today)
             .sort((a, b) => a.date.localeCompare(b.date))
-            .map((ev, i) => {
-              const color = CAT_COLORS[ev.cat] ?? '#636366'
-              return (
-                <a key={i} href={ev.url} target={ev.url.startsWith('http') ? '_blank' : undefined} rel="noreferrer"
-                  style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '16px', padding: '14px 16px', borderRadius: '12px', border: '1px solid transparent', transition: 'background 0.15s, border-color 0.15s', cursor: 'pointer' }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-card)'; (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)' }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.borderColor = 'transparent' }}>
-                  <div style={{ flexShrink: 0, textAlign: 'center', minWidth: '44px' }}>
-                    <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1 }}>{new Date(ev.date).getDate()}</div>
-                    <div style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{MONTHS_FR[new Date(ev.date).getMonth()]}</div>
-                  </div>
-                  <div style={{ width: '3px', height: '36px', borderRadius: '4px', background: color, flexShrink: 0 }} />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ev.title}</div>
-                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{ev.desc} · {ev.loc}</div>
-                  </div>
-                  <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
-                    <span style={{ fontSize: '10px', fontWeight: 700, color, background: `${color}18`, padding: '3px 8px', borderRadius: '100px', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{ev.cat}</span>
-                    {ev.free && <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--green)' }}>Gratuit</span>}
-                  </div>
-                  <div style={{ flexShrink: 0, fontSize: '12px', color: 'var(--text-tertiary)' }}>→</div>
-                </a>
-              )
-            })}
-        </div>
+          const visible = agendaShowAll ? filtered : filtered.slice(0, 4)
+          return (
+            <>
+              <div style={{ maxWidth: '760px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                {visible.map((ev, i) => {
+                  const color = CAT_COLORS[ev.cat] ?? '#636366'
+                  return (
+                    <a key={i} href={ev.url} target={ev.url.startsWith('http') ? '_blank' : undefined} rel="noreferrer"
+                      style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '16px', padding: '14px 16px', borderRadius: '12px', border: '1px solid transparent', transition: 'background 0.15s, border-color 0.15s', cursor: 'pointer' }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-card)'; (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)' }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.borderColor = 'transparent' }}>
+                      <div style={{ flexShrink: 0, textAlign: 'center', minWidth: '44px' }}>
+                        <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1 }}>{new Date(ev.date).getDate()}</div>
+                        <div style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{MONTHS_FR[new Date(ev.date).getMonth()]}</div>
+                      </div>
+                      <div style={{ width: '3px', height: '36px', borderRadius: '4px', background: color, flexShrink: 0 }} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ev.title}</div>
+                        <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{ev.desc} · {ev.loc}</div>
+                      </div>
+                      <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                        <span style={{ fontSize: '10px', fontWeight: 700, color, background: `${color}18`, padding: '3px 8px', borderRadius: '100px', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{ev.cat}</span>
+                        {ev.free && <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--green)' }}>Gratuit</span>}
+                      </div>
+                      <div style={{ flexShrink: 0, fontSize: '12px', color: 'var(--text-tertiary)' }}>→</div>
+                    </a>
+                  )
+                })}
+              </div>
+              {!agendaShowAll && filtered.length > 4 && (
+                <div style={{ textAlign: 'center', marginTop: '20px' }}>
+                  <button onClick={() => setAgendaShowAll(true)} style={{ padding: '12px 28px', borderRadius: '100px', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontWeight: 600, fontSize: '14px', cursor: 'pointer', transition: 'all 0.18s', letterSpacing: '-0.01em' }}>
+                    Voir plus · {filtered.length - 4} événements →
+                  </button>
+                </div>
+              )}
+            </>
+          )
+        })()}
         <div className="live-cta reveal" style={{ marginTop: '32px' }}>
           <div className="lct"><strong>Accéder aux événements en temps réel</strong><br />Conditions de mobilité, foule estimée et accès recommandés directement sur la carte.</div>
           <div className="lcb">
