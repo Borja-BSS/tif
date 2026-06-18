@@ -639,7 +639,7 @@ const CROSSINGS: Crossing[] = [
 
 // ── Directives G7 ─────────────────────────────────────────────────────────────
 const G7_START_UTC = new Date('2026-06-11T22:01:00Z')
-const G7_END_UTC   = new Date('2026-06-18T21:59:00Z')
+const G7_END_UTC   = new Date('2026-06-18T05:00:00Z') // Retour à la normale 18 juin 7h CEST
 
 // Synchronized with border-crossings-client.ts G7_OPEN set
 const G7_AUTHORIZED = new Set([
@@ -841,7 +841,7 @@ export function computeCrossingStatus(
   return                                       { status: 'CLEAR',    jamFactor: 0 }
 }
 
-const CACHE_KEY = 'tif:layer:border-crossings:v15'
+const CACHE_KEY = 'tif:layer:border-crossings:v16'
 const CACHE_TTL = 120
 
 export async function getBorderCrossings(): Promise<BorderFeatureCollection> {

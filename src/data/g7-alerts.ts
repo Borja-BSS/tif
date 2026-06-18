@@ -9,17 +9,17 @@ export const g7Alerts: G7Alert[] = [
     source: 'https://www.eda.admin.ch/fr/sommet-du-g7-a-evian',
   },
   {
-    id: 'frontiere-controles', category: 'frontiere', severity: 'warning',
-    title: 'Contrôles rétablis à la frontière franco-suisse',
-    detail: "Contrôles temporaires sur tous les passages. Pièce d'identité requise.",
-    activeFrom: '2026-06-10T00:00:00', activeTo: '2026-06-19T04:00:00',
+    id: 'frontiere-controles', category: 'frontiere', severity: 'info',
+    title: 'Contrôles normaux rétablis à la frontière',
+    detail: "Les contrôles renforcés G7 ont pris fin le 18 juin au matin. Contrôles douaniers standard. Pièce d'identité recommandée.",
+    activeFrom: '2026-06-18T05:00:00', activeTo: '2026-06-21T23:59:00',
     source: 'https://www.ge.ch/dossier/sommet-du-g7-evian-2026',
   },
   {
     id: 'frontiere-fermeture', category: 'frontiere', severity: 'critical',
     title: '28 passages fermés (sur 35) — 7 douanes seulement ouvertes',
     detail: "Fermeture physique dès le 11 juin après-midi. Ouverts 12–18 : Anières, Moillesulaz, Thônex-Vallard, Bardonnex, Perly, Meyrin, Ferney-Voltaire. Également ouverts : gares de Cornavin et d'Annemasse, aéroport de Genève. Pièce d'identité obligatoire. Interdit hors passages dédiés, même à pied ou à vélo. Des temps d'attente sont à prévoir.",
-    activeFrom: '2026-06-11T15:00:00', activeTo: '2026-06-19T04:00:00',
+    activeFrom: '2026-06-11T15:00:00', activeTo: '2026-06-18T05:00:00',
     source: 'https://www.ge.ch/document/sommet-du-g7-2026-evian-faq',
   },
   {

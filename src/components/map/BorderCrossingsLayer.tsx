@@ -296,7 +296,8 @@ function mergeWithClientStatus(apiData: FeatureCollection): FeatureCollection {
     const p = f.properties as Record<string, unknown>
     if (p.type !== 'border') return f
 
-    if (p.dataQuality === 'live' || p.dataQuality === 'g7-directive') {
+    const isStillG7 = now >= new Date('2026-06-11T22:01:00Z') && now <= new Date('2026-06-18T05:00:00Z')
+    if (p.dataQuality === 'live' || (p.dataQuality === 'g7-directive' && isStillG7)) {
       return { ...f, properties: { ...p, waitMinutes: p.waitTimeMinutes ?? 0 } }
     }
 
