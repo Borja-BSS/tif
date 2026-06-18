@@ -136,6 +136,41 @@ const TC2_ICONS  = ['❓', '📚', '🎯', '🏗️']
 
 const BORDER_HOME_IDS = ['bardonnex', 'thonex-vallard', 'moillesulaz', 'meyrin', 'ferney-voltaire']
 
+const EVENTS_DATA = [
+  { date: '2026-06-18', title: 'Suisse 🇨🇭 vs Bosnie', cat: 'Football', desc: 'Coupe du Monde · Groupe B · 21h00 CEST', loc: 'FanZone Gradi24, Plan-les-Ouates', free: true, url: 'https://tif.borja-swiss-solutions.ch/map' },
+  { date: '2026-06-19', endDate: '2026-08-21', title: 'Scène Ella Fitzgerald', cat: 'Musique', desc: 'Concerts gratuits plein air · lun, mer, ven', loc: 'Genève', free: true, url: 'https://www.geneve.ch/faire-geneve' },
+  { date: '2026-06-24', title: 'Suisse 🇨🇭 vs Canada', cat: 'Football', desc: 'Coupe du Monde · Groupe B · 21h00 CEST', loc: 'FanZone Gradi24, Plan-les-Ouates', free: true, url: 'https://tif.borja-swiss-solutions.ch/map' },
+  { date: '2026-06-25', endDate: '2026-06-27', title: 'Tous À la Plage', cat: 'Musique', desc: 'Afro-Latino, Jazz, Latino · 3 soirées', loc: 'Canopée, Genève', free: false, url: 'https://www.geneve.ch/faire-geneve' },
+  { date: '2026-07-03', endDate: '2026-07-18', title: 'Montreux Jazz Festival', cat: 'Musique', desc: 'Festival international de renommée mondiale', loc: 'Montreux', free: false, url: 'https://www.montreuxjazz.com' },
+  { date: '2026-07-04', endDate: '2026-07-12', title: 'Grand Juillet', cat: 'Culture', desc: 'Festival littéraire · Plusieurs lieux', loc: 'Canton de Genève', free: true, url: 'https://www.geneve.ch/faire-geneve' },
+  { date: '2026-07-05', endDate: '2026-07-06', title: 'La Tour Genève Triathlon', cat: 'Sport', desc: 'Compétition internationale de triathlon', loc: 'Genève', free: false, url: 'https://tif.borja-swiss-solutions.ch/map' },
+  { date: '2026-07-09', endDate: '2026-07-11', title: 'Plein-les-Watts Festival', cat: 'Musique', desc: 'Concerts live, street art, food trucks', loc: 'Parc Navazza, Genève', free: false, url: 'https://infomaniak.events/fr-ch/festival/geneve' },
+  { date: '2026-07-14', endDate: '2026-07-18', title: 'Guitare en Scène', cat: 'Musique', desc: 'Festival rock international', loc: 'Saint-Julien-en-Genevois', free: false, url: 'https://tif.borja-swiss-solutions.ch/map' },
+  { date: '2026-07-14', endDate: '2026-07-18', title: 'Swiss Open Geneva', cat: 'Sport', desc: 'Compétition tennis en fauteuil roulant', loc: 'Genève', free: false, url: 'https://tif.borja-swiss-solutions.ch/map' },
+  { date: '2026-07-19', title: 'Finale Coupe du Monde', cat: 'Football', desc: 'FIFA World Cup 2026 · MetLife Stadium · 21h00', loc: 'FanZone Saint-Genis-Pouilly', free: true, url: 'https://tif.borja-swiss-solutions.ch/map' },
+  { date: '2026-07-21', endDate: '2026-07-26', title: 'Paléo Festival Nyon', cat: 'Musique', desc: 'Le festival phare de la région', loc: 'Nyon', free: false, url: 'https://www.paleo.ch' },
+  { date: '2026-07-27', title: 'Nocturne de Saint-Pierre', cat: 'Culture', desc: 'Accès aux tours · Pleine lune', loc: 'Cathédrale Saint-Pierre', free: false, url: 'https://tif.borja-swiss-solutions.ch/map' },
+  { date: '2026-08-07', endDate: '2026-08-08', title: 'Jazz sur la Plage', cat: 'Musique', desc: 'Concert jazz en plein air', loc: "Plage d'Hermance", free: true, url: 'https://www.geneve.ch/faire-geneve' },
+  { date: '2026-08-13', endDate: '2026-08-15', title: 'OSR · Festival Genève-Plage', cat: 'Musique', desc: 'Classique · Ciné-concert Hitchcock · Jazz', loc: 'Genève-Plage', free: false, url: 'https://www.osr.ch' },
+  { date: '2026-08-14', endDate: '2026-08-16', title: 'Piz Palü Festival', cat: 'Musique', desc: 'Rock, pop, électro · Gratuit -14 ans', loc: 'Plan-les-Ouates', free: false, url: 'https://infomaniak.events/fr-ch/festival/geneve' },
+  { date: '2026-08-22', endDate: '2026-08-23', title: 'Festiverbant', cat: 'Musique', desc: 'Festival rock', loc: 'Compesières', free: false, url: 'https://tif.borja-swiss-solutions.ch/map' },
+  { date: '2026-08-25', endDate: '2026-09-13', title: 'La Bâtie — Festival de Genève', cat: 'Culture', desc: 'Danse, musique, cirque, théâtre · 50e édition', loc: 'Genève', free: false, url: 'https://www.batie.ch' },
+]
+
+const CAT_COLORS: Record<string, string> = {
+  Football: '#FF9F0A',
+  Musique: '#0A84FF',
+  Sport: '#30D158',
+  Culture: '#BF5AF2',
+}
+
+const MONTHS_FR = ['jan', 'fév', 'mar', 'avr', 'mai', 'juin', 'juil', 'août', 'sep', 'oct', 'nov', 'déc']
+
+function fmtEventDate(dateStr: string) {
+  const d = new Date(dateStr)
+  return `${d.getDate()} ${MONTHS_FR[d.getMonth()]}`
+}
+
 function getInitialBorders(): BorderRow[] {
   const now = new Date()
   return BORDER_HOME_IDS.map(id => {
@@ -194,6 +229,8 @@ export function HomeContent() {
   const [contactForm, setContactForm] = useState({ name: '', email: '', subject: '', message: '', loading: false, success: false, error: '' })
   const [auditForm, setAuditForm] = useState({ name: '', email: '', expertise: '', loading: false, success: false, error: '' })
   const [partnerForm, setPartnerForm] = useState({ institution: '', email: '', expertise: '', loading: false, success: false, error: '' })
+  const [agendaFilter, setAgendaFilter] = useState<string>('Tout')
+  const [statsEmail, setStatsEmail] = useState('')
   const lastFocus = useRef<HTMLElement | null>(null)
   const { user } = useAuth()
   const router = useRouter()
@@ -450,9 +487,9 @@ export function HomeContent() {
       <nav id="nav">
         <a className="n-logo" href="#">TIF</a>
         <div className="n-links">
-          <a className="n-link" href="#live">{t.nav.live}</a>
-          <a className="n-link" href="#sources">{t.nav.sources}</a>
-          <a className="n-link" href="#soutien">{t.nav.support}</a>
+          <a className="n-link" href="#evenements">Événements</a>
+          <a className="n-link" href="#live">Live</a>
+          <a className="n-link" href="#pro">Professionnels</a>
           <a className="n-link" href="#confiance">{t.nav.transparency}</a>
         </div>
         <div className="n-right">
@@ -482,29 +519,153 @@ export function HomeContent() {
 
       {/* HERO */}
       <section className="hero">
-        <h1 className="hero-h1">{t.hero.h1a}<br />{t.hero.h1b} <span className="accent">{t.hero.accent}</span></h1>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', border: '1px solid var(--border)', borderRadius: '100px', padding: '7px 16px', fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '36px', background: 'var(--bg-card)' }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--green)', boxShadow: '0 0 8px var(--green)', display: 'inline-block', flexShrink: 0 }} />
+          Plateforme live · Grand Genève · Été 2026
+        </div>
+        <h1 className="hero-h1">Intelligence<br />Territoriale <span className="accent">Grand Genève</span></h1>
         <p className="hero-p">
-          {t.hero.p1}<br />
-          <strong>{t.hero.p2}</strong><br />
-          {t.hero.p3}
+          Mobilité en temps réel, agenda événementiel complet, gestion de foule.<br />
+          <strong>Comprendre et anticiper votre territoire — avant les autres.</strong><br />
+          10 000 utilisateurs quotidiens · 6 sources live · mise à jour toutes les 30s
         </p>
         <div className="hero-btns">
           <a className="btn-p" href={user ? '/map' : '/login'} onClick={handleOpenMap}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="2.5" fill="white" /><circle cx="7" cy="7" r="5.5" stroke="white" strokeWidth="1.5" /></svg>
-            {t.hero.btn}
+            Ouvrir la carte
           </a>
+          <a className="btn-s" href="#evenements">Voir les événements</a>
         </div>
         <div className="scroll-cue" aria-hidden="true">
-          <span>{t.hero.scrollCue}</span>
+          <span>Découvrir</span>
           <div className="scroll-arrow"><svg viewBox="0 0 14 14"><polyline points="2,5 7,10 12,5" /></svg></div>
+        </div>
+      </section>
+
+      {/* MÉTRIQUES */}
+      <section className="s reveal">
+        <div className="dash reveal">
+          <div className="dash-row dash-row-4">
+            <div className="dc" style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 'clamp(36px,6vw,52px)', fontWeight: 800, letterSpacing: '-0.04em', color: 'var(--text-primary)', lineHeight: 1, marginBottom: '6px' }}>10K</div>
+              <div className="dc-label" style={{ marginBottom: '4px' }}>Utilisateurs uniques / jour</div>
+              <div className="dc-desc">Mesurés sur les 7 derniers jours</div>
+            </div>
+            <div className="dc" style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 'clamp(36px,6vw,52px)', fontWeight: 800, letterSpacing: '-0.04em', color: 'var(--text-primary)', lineHeight: 1, marginBottom: '6px' }}>150K+</div>
+              <div className="dc-label" style={{ marginBottom: '4px' }}>Connexions sur 7 jours</div>
+              <div className="dc-desc">+15 sessions par utilisateur en moyenne</div>
+            </div>
+            <div className="dc" style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 'clamp(36px,6vw,52px)', fontWeight: 800, letterSpacing: '-0.04em', color: 'var(--text-primary)', lineHeight: 1, marginBottom: '6px' }}>6</div>
+              <div className="dc-label" style={{ marginBottom: '4px' }}>Sources de données live</div>
+              <div className="dc-desc">HERE · CFF · TPG · Météo · OFDF · OSM</div>
+            </div>
+            <div className="dc" style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 'clamp(36px,6vw,52px)', fontWeight: 800, letterSpacing: '-0.04em', color: 'var(--text-primary)', lineHeight: 1, marginBottom: '6px' }}>30s</div>
+              <div className="dc-label" style={{ marginBottom: '4px' }}>Fréquence de mise à jour</div>
+              <div className="dc-desc">Trafic, transports, alertes</div>
+            </div>
+          </div>
+          <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginTop: '4px' }}>
+            <span style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>
+              Données d'engagement détaillées disponibles sur demande pour les partenaires institutionnels.
+            </span>
+            <a href="#stats-request" style={{ fontSize: '12px', color: 'var(--blue)', fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}>
+              Recevoir le rapport complet →
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* ÉVÉNEMENTS TICKER */}
+      <section className="s s-alt" id="evenements">
+        <div className="s-label reveal">Agenda · Grand Genève · Été 2026</div>
+        <h2 className="s-h reveal">Tout ce qui se passe<br /><span style={{ fontStyle: 'italic', color: 'var(--text-secondary)' }}>dans votre région.</span></h2>
+        <p className="s-sub reveal" style={{ marginBottom: '32px' }}>Événements vérifiés · Sources officielles · Mis à jour en continu</p>
+        <div className="reveal" style={{ overflowX: 'auto', display: 'flex', gap: '12px', padding: '4px 0 20px', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+          {EVENTS_DATA.filter(ev => new Date(ev.date) >= new Date(Date.now() - 86400000 * 3)).map((ev, i) => {
+            const color = CAT_COLORS[ev.cat] ?? '#636366'
+            return (
+              <a key={i} href={ev.url} target={ev.url.startsWith('http') && !ev.url.includes('tif.borja') ? '_blank' : undefined} rel="noreferrer"
+                style={{ textDecoration: 'none', flexShrink: 0, width: '200px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '18px 16px', display: 'flex', flexDirection: 'column', gap: '8px', transition: 'border-color 0.2s', cursor: 'pointer' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color, background: `${color}18`, padding: '3px 8px', borderRadius: '100px' }}>{ev.cat}</span>
+                  {ev.free && <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--green)', letterSpacing: '0.06em' }}>GRATUIT</span>}
+                </div>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.25 }}>{ev.title}</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.4 }}>{ev.desc}</div>
+                <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>📍 {ev.loc}</div>
+                  <div style={{ fontSize: '11px', fontWeight: 700, color, marginTop: '2px' }}>{fmtEventDate(ev.date)}{ev.endDate ? ` — ${fmtEventDate(ev.endDate)}` : ''}</div>
+                </div>
+                <div style={{ fontSize: '11px', color: 'var(--blue)', fontWeight: 600, marginTop: '4px' }}>
+                  {ev.url.includes('tif.borja') ? 'Voir sur la carte →' : 'Billetterie →'}
+                </div>
+              </a>
+            )
+          })}
+        </div>
+        <div style={{ textAlign: 'center', marginTop: '8px' }}>
+          <a href="#agenda" style={{ fontSize: '13px', color: 'var(--blue)', fontWeight: 600, textDecoration: 'none' }}>Voir l'agenda complet →</a>
+        </div>
+      </section>
+
+      {/* AGENDA COMPLET */}
+      <section className="s reveal" id="agenda">
+        <div className="s-label">Agenda complet</div>
+        <h2 className="s-h" style={{ marginBottom: '24px' }}>Tous les événements<br /><span style={{ fontStyle: 'italic', color: 'var(--text-secondary)' }}>du Grand Genève.</span></h2>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '28px', justifyContent: 'center' }}>
+          {['Tout', 'Musique', 'Sport', 'Culture', 'Football'].map(cat => (
+            <button key={cat} onClick={() => setAgendaFilter(cat)} style={{ padding: '8px 18px', borderRadius: '100px', border: `1px solid ${agendaFilter === cat ? (CAT_COLORS[cat] ?? 'var(--border)') : 'var(--border)'}`, background: agendaFilter === cat ? `${CAT_COLORS[cat] ?? 'var(--blue)'}18` : 'transparent', color: agendaFilter === cat ? (CAT_COLORS[cat] ?? 'var(--blue)') : 'var(--text-secondary)', fontWeight: agendaFilter === cat ? 700 : 500, fontSize: '13px', cursor: 'pointer', transition: 'all 0.18s', letterSpacing: '-0.01em' }}>
+              {cat === 'Football' ? 'Football 🇨🇭' : cat}
+            </button>
+          ))}
+        </div>
+        <div style={{ maxWidth: '760px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          {EVENTS_DATA
+            .filter(ev => agendaFilter === 'Tout' || ev.cat === agendaFilter)
+            .map((ev, i) => {
+              const color = CAT_COLORS[ev.cat] ?? '#636366'
+              return (
+                <a key={i} href={ev.url} target={ev.url.startsWith('http') && !ev.url.includes('tif.borja') ? '_blank' : undefined} rel="noreferrer"
+                  style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '16px', padding: '14px 16px', borderRadius: '12px', border: '1px solid transparent', transition: 'background 0.15s, border-color 0.15s', cursor: 'pointer' }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-card)'; (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)' }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.borderColor = 'transparent' }}>
+                  <div style={{ flexShrink: 0, textAlign: 'center', minWidth: '44px' }}>
+                    <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1 }}>{new Date(ev.date).getDate()}</div>
+                    <div style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{MONTHS_FR[new Date(ev.date).getMonth()]}</div>
+                  </div>
+                  <div style={{ width: '3px', height: '36px', borderRadius: '4px', background: color, flexShrink: 0 }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ev.title}</div>
+                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{ev.desc} · {ev.loc}</div>
+                  </div>
+                  <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                    <span style={{ fontSize: '10px', fontWeight: 700, color, background: `${color}18`, padding: '3px 8px', borderRadius: '100px', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{ev.cat}</span>
+                    {ev.free && <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--green)' }}>Gratuit</span>}
+                  </div>
+                  <div style={{ flexShrink: 0, fontSize: '12px', color: 'var(--text-tertiary)' }}>→</div>
+                </a>
+              )
+            })}
+        </div>
+        <div className="live-cta reveal" style={{ marginTop: '32px' }}>
+          <div className="lct"><strong>Accéder aux événements en temps réel</strong><br />Conditions de mobilité, foule estimée et accès recommandés directement sur la carte.</div>
+          <div className="lcb">
+            <a className="lc-a" href={user ? '/map' : '/login'} onClick={handleOpenMap}>
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="2.2" fill="currentColor" /><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" strokeWidth="1.4" /></svg>
+              Ouvrir la carte
+            </a>
+          </div>
         </div>
       </section>
 
       {/* DASHBOARD LIVE */}
       <section className="s s-alt" id="live">
-        <div className="s-label">{t.dash.sectionLabel}</div>
-        <h2 className="s-h">{t.dash.h2a}<br />{t.dash.h2b}</h2>
-        <p className="s-sub" style={{ marginBottom: lastRefresh ? '8px' : undefined }}>{t.dash.sub}</p>
+        <div className="s-label">Mobilité temps réel</div>
+        <h2 className="s-h">Conditions en direct<br /><span style={{ fontStyle: 'italic', color: 'var(--text-secondary)' }}>sur le territoire.</span></h2>
+        <p className="s-sub" style={{ marginBottom: lastRefresh ? '8px' : undefined }}>Trafic, transports publics, frontières — agrégés depuis 6 sources officielles, mis à jour toutes les 30 secondes.</p>
         {lastRefresh && (
           <div className="live-refresh-block" style={{ marginBottom: '40px' }}>
             {t.dash.updatedAt} {lastRefresh.toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
@@ -602,58 +763,62 @@ export function HomeContent() {
         </div>
       </section>
 
-      {/* SOCIAL SHARING */}
-      <section className="s reveal">
-        <div className="s-label">{t.share.sectionLabel}</div>
-        <h2 className="s-h">{t.share.h2a}<br />{t.share.h2b}</h2>
-        <p className="s-sub">{t.share.sub}</p>
-        <div className="share-btns">
-          <a className="share-btn share-tw" href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`} target="_blank" rel="noreferrer">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
-            {t.share.xBtn}
-          </a>
-          <a className="share-btn share-li" href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`} target="_blank" rel="noreferrer">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" /></svg>
-            {t.share.liBtn}
-          </a>
-          <a className="share-btn share-wa" href={`https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`} target="_blank" rel="noreferrer">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z" /></svg>
-            {t.share.waBtn}
-          </a>
-          <button className="share-btn share-copy" onClick={copyLink}>
-            {copied ? t.share.copiedBtn : t.share.copyBtn}
-          </button>
-        </div>
-      </section>
 
-      {/* POURQUOI G7 */}
-      <section className="s reveal">
-        <div className="s-label">{t.why.sectionLabel}</div>
-        <h2 className="s-h">{t.why.h2a}<br />{t.why.h2b}</h2>
-        <p className="s-sub">{t.why.sub}</p>
-        <div className="car-outer" style={{ maxWidth: '960px', margin: '0 auto' }}>
-          <div className="car-head">
-            <span className="car-head-t">{t.why.carHead}</span>
-            <div className="car-arrows">
-              <button className="c-arr" onClick={() => carMove('why', -1)} aria-label="Précédent"><svg viewBox="0 0 11 11"><polyline points="7.5,1.5 3,5.5 7.5,9.5" /></svg></button>
-              <button className="c-arr" onClick={() => carMove('why', 1)} aria-label="Suivant"><svg viewBox="0 0 11 11"><polyline points="3.5,1.5 8,5.5 3.5,9.5" /></svg></button>
+      {/* TRACK RECORD G7 */}
+      <section className="s reveal" id="track">
+        <div className="contrib-wrap reveal">
+          <div className="cc" style={{ flex: '1 1 420px' }}>
+            <div className="s-label" style={{ marginBottom: '12px' }}>G7 Évian · 8–17 juin 2026</div>
+            <div className="cc-h">Notre savoir-faire,<br /><span style={{ fontStyle: 'italic', color: 'var(--text-secondary)', fontWeight: 400 }}>éprouvé sous pression.</span></div>
+            <div className="cc-p" style={{ marginTop: '16px' }}>
+              Le Sommet du G7 à Évian a constitué pour TIF un test opérationnel d'envergure internationale. Durant dix jours, la plateforme a assuré une couverture temps réel du territoire genevois sous dispositif sécuritaire maximal — passages frontière renforcés, restrictions de circulation, perturbations TPG majeures, manifestations en centre-ville.
+            </div>
+            <div className="cc-p">
+              Résultat : zéro incident technique, adoption immédiate par la population, couverture presse nationale. Le G7 a démontré qu'une intelligence territoriale réellement distribuée peut absorber les crises sans délai de latence.
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
+              <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700 }}>Couverts par</span>
+              {[
+                { name: 'Blick', url: 'https://www.blick.ch/fr/suisse/romande/g7-un-site-gratuit-pour-aider-les-genevois-a-circuler-id22023083.html' },
+                { name: 'Léman Bleu', url: 'https://www.lemanbleu.ch/fr/Accueil/G7/Un-Genevois-centralise-les-perturbations-sur-une-seule-plateforme.html' },
+                { name: 'Entreprise Romande', url: 'https://www.entrepriseromande.ch/web/er/w/g7-un-site-signalera-les-perturbations-en-temps-réel' },
+                { name: 'Radio Lac', url: 'https://www.radiolac.ch/podcasts/le-meilleur-des-reveils-12-06-2026-0836/' },
+              ].map(m => (
+                <a key={m.name} href={m.url} target="_blank" rel="noreferrer"
+                  style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)', padding: '5px 12px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '100px', textDecoration: 'none', transition: 'border-color 0.2s' }}>
+                  {m.name}
+                </a>
+              ))}
             </div>
           </div>
-          <div className="ctrack" id="ctr-why" ref={el => { carRefs.current['why'] = el }} onScroll={() => csync('why')}>
-            {[...t.why.slides, ...t.why.slides, ...t.why.slides].map((s, i) => (
-              <div key={i} className="cslide" style={{ cursor: 'pointer' }} onClick={() => setDetail(WHY_DETAILS[i % t.why.slides.length])}>
-                <div className="why-card">
-                  <div className="why-num">{String(i % t.why.slides.length + 1).padStart(2, '0')}{'  '}{s.numLabel}</div>
-                  <div className="why-title">{s.title}</div>
-                  <div className="why-body">
-                    <span className="before">{t.why.withoutTIF}</span>{' '}{s.withoutText}{' '}<span className="after">{t.why.withTIF}</span>{' '}{s.withText}
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'var(--blue)', marginTop: '10px' }}>{t.why.analyzeLink}</div>
-                </div>
+          <div className="cc" style={{ flex: '0 0 300px' }}>
+            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '20px', padding: '24px', boxShadow: 'var(--shadow-lg)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--green)', boxShadow: '0 0 8px var(--green)', display: 'inline-block' }} />
+                <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Rapport opérationnel G7</span>
+                <span style={{ fontSize: '10px', color: 'var(--text-tertiary)', marginLeft: 'auto' }}>8–17 juin 2026</span>
               </div>
-            ))}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
+                {[
+                  { val: '0', key: 'Incident technique', sub: 'Sur 10 jours de déploiement' },
+                  { val: '10K', key: 'Utilisateurs / jour', sub: 'Pic atteint dès J+2' },
+                  { val: '150K+', key: 'Sessions · 7 jours', sub: 'Engagement quotidien soutenu' },
+                  { val: '6', key: 'Sources fusionnées', sub: 'Synchronisées toutes les 30s' },
+                ].map((s, i) => (
+                  <div key={i} style={{ padding: '12px', background: 'var(--off)', borderRadius: '12px' }}>
+                    <div style={{ fontSize: 'clamp(22px,4vw,28px)', fontWeight: 800, letterSpacing: '-0.04em', color: 'var(--text-primary)', lineHeight: 1, marginBottom: '4px' }}>{s.val}</div>
+                    <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '2px' }}>{s.key}</div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-tertiary)', lineHeight: 1.4 }}>{s.sub}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ borderTop: '1px solid var(--border)', paddingTop: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--green)', display: 'inline-block' }} />
+                <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--green)' }}>Disponibilité plateforme : 100%</span>
+                <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginLeft: '2px' }}>— aucune interruption</span>
+              </div>
+            </div>
           </div>
-          <Dots id="why" logical={t.why.slides.length} />
         </div>
       </section>
 
@@ -674,9 +839,9 @@ export function HomeContent() {
 
       {/* PARKINGS */}
       <section className="s reveal" id="parkings">
-        <div className="s-label">{t.prk.sectionLabel}</div>
-        <h2 className="s-h">{t.prk.h2a}<br />{t.prk.h2b}</h2>
-        <p className="s-sub">{t.prk.sub}</p>
+        <div className="s-label">Se déplacer malin</div>
+        <h2 className="s-h">Parkings P+Rail<br /><span style={{ fontStyle: 'italic', color: 'var(--text-secondary)' }}>pour rejoindre vos événements.</span></h2>
+        <p className="s-sub">Garez-vous en périphérie et rejoignez le cœur de Genève en transports publics — rapide, sans stress, sans chercher une place.</p>
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
           <div className="car-outer">
             <div className="car-head">
@@ -719,79 +884,6 @@ export function HomeContent() {
         </div>
       </section>
 
-      {/* LIGNE VERTE G7 */}
-      <section className="s reveal" id="ligne-verte">
-        <div className="s-label reveal">{t.lgv.sectionLabel}</div>
-        <h2 className="s-h reveal">{t.lgv.h2}</h2>
-        <p className="s-sub reveal">{t.lgv.sub}</p>
-        <div className="reveal" style={{ maxWidth: '560px', margin: '0 auto' }}>
-          {/* Card principale — numéro vert */}
-          <div style={{
-            background:   'var(--bg-card)',
-            border:       '1px solid var(--border)',
-            borderRadius: '20px',
-            padding:      '32px 28px',
-            boxShadow:    'var(--shadow-lg)',
-            textAlign:    'center',
-            marginBottom: '16px',
-          }}>
-            <div style={{ fontSize: '13px', fontWeight: 600, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--green)', marginBottom: '12px' }}>
-              {t.lgv.freeNumberLabel}
-            </div>
-            <a
-              href="tel:0800902456"
-              style={{
-                display:       'block',
-                fontSize:      'clamp(32px, 8vw, 48px)',
-                fontWeight:    800,
-                letterSpacing: '-0.03em',
-                color:         'var(--green)',
-                textDecoration:'none',
-                lineHeight:    1,
-                marginBottom:  '8px',
-              }}
-            >
-              0800 902 456
-            </a>
-            <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '24px' }}>
-              {t.lgv.freeCallLabel}
-            </div>
-            <div style={{ borderTop: '1px solid var(--border)', paddingTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px', textAlign: 'left' }}>
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                <span style={{ fontSize: '16px', flexShrink: 0, marginTop: '1px' }}>🕐</span>
-                <div>
-                  <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-tertiary)', letterSpacing: '.05em', textTransform: 'uppercase', marginBottom: '3px' }}>{t.lgv.hoursLabel}</div>
-                  <div style={{ fontSize: '14px', color: 'var(--text-primary)', lineHeight: 1.5 }}>
-                    Lun 1er – ven 5 juin 2026<br />
-                    Lun 8 – jeu 18 juin 2026<br />
-                    <span style={{ color: 'var(--text-secondary)' }}>11h – 19h</span>
-                  </div>
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                <span style={{ fontSize: '16px', flexShrink: 0, marginTop: '1px' }}>🚨</span>
-                <div>
-                  <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-tertiary)', letterSpacing: '.05em', textTransform: 'uppercase', marginBottom: '3px' }}>{t.lgv.emergencyLabel}</div>
-                  <a href="tel:117" style={{ fontSize: '18px', fontWeight: 700, color: 'var(--red)', textDecoration: 'none', letterSpacing: '-0.01em' }}>117</a>
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                <span style={{ fontSize: '16px', flexShrink: 0, marginTop: '1px' }}>📧</span>
-                <div>
-                  <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-tertiary)', letterSpacing: '.05em', textTransform: 'uppercase', marginBottom: '3px' }}>{t.lgv.pressLabel}</div>
-                  <div style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                    <a href="tel:+41224275600" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>+41 (0)22 427 56 00</a><br />
-                    <a href="mailto:communication@police.ge.ch" style={{ color: 'var(--blue-d)', textDecoration: 'none' }}>communication@police.ge.ch</a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div style={{ fontSize: '12px', color: 'var(--text-tertiary)', textAlign: 'center', lineHeight: 1.6 }}>
-            {t.lgv.sourceText}
-          </div>
-        </div>
-      </section>
 
       {/* SOURCES */}
       <section className="s s-alt" id="sources">
@@ -863,48 +955,91 @@ export function HomeContent() {
           </a>
         </div>
         <div className="cta-stats">
-          <div className="cta-stat"><div className="cta-stat-v">7</div><div className="cta-stat-l">{t.ctaDark.stat1l}</div></div>
-          <div className="cta-stat"><div className="cta-stat-v">30s</div><div className="cta-stat-l">{t.ctaDark.stat2l}</div></div>
-          <div className="cta-stat"><div className="cta-stat-v">1M+</div><div className="cta-stat-l">{t.ctaDark.stat3l}</div></div>
+          <div className="cta-stat"><div className="cta-stat-v">10K</div><div className="cta-stat-l">Utilisateurs / jour</div></div>
+          <div className="cta-stat"><div className="cta-stat-v">30s</div><div className="cta-stat-l">Mise à jour</div></div>
+          <div className="cta-stat"><div className="cta-stat-v">150K+</div><div className="cta-stat-l">Sessions · 7 jours</div></div>
         </div>
       </div>
 
-      {/* CONTRIBUTION */}
-      <section className="s s-alt" id="soutien">
-        <div className="s-label reveal">{t.contrib.sectionLabel}</div>
-        <h2 className="s-h reveal">{t.contrib.h2a}<br />{t.contrib.h2b}</h2>
-        <p className="s-sub reveal">{t.contrib.sub}</p>
+      {/* PRO — ORGANISATEURS */}
+      <section className="s s-alt" id="pro">
+        <div className="s-label reveal">Pour les organisateurs</div>
         <div className="contrib-wrap reveal">
-          <div className="cc">
-            <span className="cc-tag pub">{t.contrib.citizenTag}</span>
-            <div className="cc-h">{t.contrib.citizenH1}<br />{t.contrib.citizenH2}</div>
-            <div className="cc-p">{t.contrib.citizenP}</div>
-            <div className="amts">
-              {[5, 10, 20, 50].map(v => (<button key={v} className={`amt${selectedAmt === v && !customAmt ? ' sel' : ''}`} onClick={() => { setSelectedAmt(v); setCustomAmt('') }}>CHF {v}</button>))}
+          <div className="cc" style={{ flex: '1 1 420px' }}>
+            <div className="cc-h">Votre événement mérite<br /><span style={{ fontStyle: 'italic', color: 'var(--text-secondary)', fontWeight: 400 }}>une infrastructure à sa hauteur.</span></div>
+            <div className="cc-p" style={{ marginTop: '16px' }}>
+              TIF accompagne les organisateurs qui visent l'excellence opérationnelle. Nous intégrons l'intelligence territoriale au cœur de vos dispositifs — de la phase de planification jusqu'à l'heure de fermeture.
             </div>
-            <input className="m-input" type="number" min="1" placeholder="Autre montant (CHF)" value={customAmt} onChange={e => { setCustomAmt(e.target.value); setSelectedAmt(null) }} style={{ marginBottom: '12px' }} />
-            <button className="btn-full green" onClick={() => openM('m-don')}>{t.contrib.citizenBtn}</button>
-            <p className="cc-note">{t.contrib.citizenNote}</p>
-          </div>
-          <div className="cc">
-            <span className="cc-tag pro">{t.contrib.proTag}</span>
-            <div className="cc-h">{t.contrib.proH1}<br />{t.contrib.proH2}</div>
-            <div className="cc-p">{t.contrib.proP}</div>
-            <ul className="pro-list">
-              {t.contrib.proFeatures.map((item, idx) => (
-                <li key={idx}><span className="check-icon"><svg viewBox="0 0 9 9"><polyline points="1.5,4.5 3.5,6.5 7.5,2.5" /></svg></span>{item}</li>
+            <ul className="pro-list" style={{ marginTop: '24px' }}>
+              {[
+                { icon: '📊', title: 'Analyse prédictive des flux', desc: "Modélisation des comportements de foule et des impacts trafic avant l'événement, sur la base des données historiques du territoire." },
+                { icon: '🛡️', title: 'Sécurité et anticipation', desc: "Détection d'anomalies en temps réel, alertes configurables, coordination avec les services compétents." },
+                { icon: '🚦', title: 'Gestion de la mobilité', desc: 'Optimisation des accès, signalement dynamique, coordination avec les réseaux TPG et CFF.' },
+                { icon: '📡', title: 'Tableau de bord opérationnel', desc: "Vue temps réel dédiée à votre équipe, reporting post-événement, métriques de performance." },
+                { icon: '🌐', title: 'Visibilité territoriale', desc: "Intégration de votre événement dans la plateforme TIF — accès à 10 000 utilisateurs quotidiens du Grand Genève." },
+              ].map((c, i) => (
+                <li key={i} style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', padding: '14px 0', borderBottom: i < 4 ? '1px solid var(--border)' : 'none' }}>
+                  <span style={{ fontSize: '20px', flexShrink: 0, marginTop: '2px' }}>{c.icon}</span>
+                  <div>
+                    <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>{c.title}</div>
+                    <div style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.55 }}>{c.desc}</div>
+                  </div>
+                </li>
               ))}
             </ul>
-            <button className="btn-full dark" onClick={() => openM('m-pro')}>{t.contrib.proBtn}</button>
-            <p className="cc-note">{t.contrib.proNote}</p>
+          </div>
+          <div className="cc" style={{ flex: '0 0 320px' }}>
+            <div style={{ position: 'sticky', top: '80px' }}>
+              <div className="cc-h" style={{ marginBottom: '16px' }}>
+                <span className="cc-tag pro" style={{ display: 'inline-block', marginBottom: '12px' }}>Partenariat · Accès prioritaire</span><br />
+                Rejoignez le top 1% des organisateurs.
+              </div>
+              <div className="cc-p">
+                Présentez-nous votre événement. Nous évaluerons ensemble comment TIF peut en faire une référence d'organisation, de sécurité et d'expérience utilisateur dans le Grand Genève.
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', margin: '16px 0' }}>
+                {['Paléo Festival', 'Fêtes de Genève', 'Événements sportifs', 'Sommets institutionnels', 'Concerts & festivals', 'Manifestations publiques'].map(tag => (
+                  <span key={tag} style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)', background: 'var(--off)', border: '1px solid var(--border)', borderRadius: '100px', padding: '4px 10px' }}>{tag}</span>
+                ))}
+              </div>
+              <a href="mailto:contact@borja-swiss-solutions.ch?subject=TIF%20—%20Partenariat%20Événementiel&body=Bonjour%2C%0A%0AJe%20suis%20organisateur%20de%20[nom%20événement]%20et%20souhaite%20en%20savoir%20plus%20sur%20un%20partenariat%20avec%20TIF.%0A%0ACordialement"
+                className="btn-full dark" style={{ textDecoration: 'none', display: 'block', textAlign: 'center', marginBottom: '8px' }}>
+                Nous contacter →
+              </a>
+              <p className="cc-note">Réponse sous 24 heures · Genève, Suisse</p>
+              <div id="stats-request" style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid var(--border)' }}>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '6px' }}>Accès aux statistiques détaillées</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '14px', lineHeight: 1.5 }}>
+                  Données d'engagement, démographie utilisateurs, zones de couverture — sur demande et sous NDA.
+                </div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <input
+                    type="email"
+                    placeholder="votre@email.ch"
+                    value={statsEmail}
+                    onChange={e => setStatsEmail(e.target.value)}
+                    className="m-input"
+                    style={{ margin: 0, flex: 1, fontSize: '13px' }}
+                  />
+                  <button
+                    onClick={() => {
+                      if (!statsEmail) return
+                      window.location.href = `mailto:contact@borja-swiss-solutions.ch?subject=TIF%20—%20Demande%20statistiques%20détaillées&body=Bonjour%2C%0A%0AJe%20souhaite%20recevoir%20le%20rapport%20statistiques%20TIF%20complet.%0A%0AEmail%20de%20contact%20%3A%20${encodeURIComponent(statsEmail)}%0A%0ACordialement`
+                    }}
+                    style={{ flexShrink: 0, padding: '0 16px', background: 'var(--blue)', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 700, fontSize: '13px', cursor: 'pointer', height: '42px' }}>
+                    Recevoir
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* CONTACT BAND */}
       <div className="contact-band reveal">
-        <p>{t.contactBand.text} <strong>{t.contactBand.strong}</strong></p>
-        <button className="btn-p" style={{ fontSize: '14px', padding: '11px 22px', cursor: 'pointer', border: 'none', whiteSpace: 'nowrap' }} onClick={() => openM('m-contact')}>{t.contactBand.btn}</button>
+        <p>Une question, un partenariat ? <strong>Contactez l'équipe TIF.</strong></p>
+        <button className="btn-p" style={{ fontSize: '14px', padding: '11px 22px', cursor: 'pointer', border: 'none', whiteSpace: 'nowrap' }} onClick={() => openM('m-contact')}>Nous écrire</button>
       </div>
 
       {/* TRANSPARENCE */}
@@ -969,7 +1104,7 @@ export function HomeContent() {
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="2.5" fill="white" /><circle cx="7" cy="7" r="5.5" stroke="white" strokeWidth="1.5" /></svg>
             {t.final.mapBtn}
           </a>
-          <a className="btn-s" href="#soutien">{t.final.supportBtn}</a>
+          <a className="btn-s" href="#pro">Collaborer →</a>
         </div>
       </section>
 
@@ -977,12 +1112,14 @@ export function HomeContent() {
       <footer>
         <div className="ft">
           <div className="ft-top">
-            <div className="ft-brand"><p>TIF</p><span>{t.footer.tagline}</span></div>
+            <div className="ft-brand"><p>TIF</p><span>Intelligence Territoriale · Grand Genève</span></div>
             <div className="ft-links">
-              <a href="#live">{t.footer.live}</a><a href="#sources">{t.footer.sources}</a>
-              <a href="#soutien">{t.footer.support}</a><a href="#confiance">{t.footer.transparency}</a>
-              <a href="#" onClick={e => { e.preventDefault(); openM('m-contact') }}>{t.footer.contact}</a>
-              <a href="#" onClick={e => { e.preventDefault(); openM('m-privacy') }}>{t.footer.privacy}</a>
+              <a href="#evenements">Événements</a>
+              <a href="#live">Live</a>
+              <a href="#pro">Professionnels</a>
+              <a href="#confiance">{t.footer.transparency}</a>
+              <a href="#" onClick={e => { e.preventDefault(); openM('m-contact') }}>Contact</a>
+              <a href="#" onClick={e => { e.preventDefault(); openM('m-privacy') }}>Confidentialité</a>
             </div>
           </div>
           <div className="ft-bottom">
