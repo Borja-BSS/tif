@@ -142,17 +142,49 @@ const CATEGORY_MAP: Record<string, string> = {
   festival: 'Musique',
   concert: 'Musique',
   classique: 'Musique',
-  nightlife: 'Musique',
   cinema: 'Cinéma',
-  theatre: 'Culture',
-  comedie: 'Culture',
-  danse: 'Culture',
   art: 'Culture',
   sport: 'Sport',
+  theatre: 'Culture',
+  danse: 'Culture',
 }
 
+// Seuls les événements publics à grande échelle (pas les spectacles de petite salle)
+const HOMEPAGE_IDS = new Set([
+  'worldcup-2026','nati-qatar-suisse','nati-suisse-bosnie','nati-suisse-canada',
+  'fanzone-gradi24','fanzone-nyon','fanzone-saint-genis','fanzone-crowne-plaza',
+  'etoile-carouge-aarau-j1',
+  'servette-bale-j1','servette-grasshoppers-2026','servette-lucerne-2026',
+  'caribana-17','caribana-18','caribana-19','caribana-20',
+  'fete-musique',
+  'scene-ella',
+  'beach-pro-tour-femmes','beach-pro-tour-hommes',
+  'tous-a-la-plage-2026',
+  'amr-cropettes',
+  'plein-les-watts',
+  'triathlon-tour-geneve',
+  'guitare-en-scene',
+  'swiss-open-geneva-2026',
+  'montreux-jazz-2026',
+  'grand-juillet-2026',
+  'paleo-2026',
+  'nocturne-saint-pierre-2026',
+  'allianz-cinema',
+  'cinetransat-2026',
+  'pathe-balexert','arena-la-praille','grutli','spoutnik','cinema-bio',
+  'les-scala','le-city','nord-sud','cinema-voltaire-ferney','pathe-archamps',
+  'jazz-sur-la-plage-2026',
+  'tdf-femmes-etape2',
+  'osr-geneve-plage-2026',
+  'piz-palu-festival-2026',
+  'festiverbant-2026',
+  'la-batie-2026',
+  'scene-vagabonde-2026',
+  'musee-ariana-ducate','musee-ariana-verre-cirva','musee-rath-sylvia-sleigh',
+])
+
 const EVENTS_DATA = allEvents
-  .filter(ev => ev.occurrences.length > 0)
+  .filter(ev => ev.occurrences.length > 0 && HOMEPAGE_IDS.has(ev.id))
   .map(ev => {
     const dates = [...new Set(ev.occurrences.map(o => o.date))].sort()
     const cat = CATEGORY_MAP[ev.category] ?? 'Culture'
