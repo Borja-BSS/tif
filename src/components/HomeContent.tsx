@@ -1066,11 +1066,6 @@ export function HomeContent() {
             {t.ctaDark.btn}
           </a>
         </div>
-        <div className="cta-stats">
-          <div className="cta-stat"><div className="cta-stat-v">10K</div><div className="cta-stat-l">Utilisateurs / jour</div></div>
-          <div className="cta-stat"><div className="cta-stat-v">30s</div><div className="cta-stat-l">Mise à jour</div></div>
-          <div className="cta-stat"><div className="cta-stat-v">150K+</div><div className="cta-stat-l">Sessions · 7 jours</div></div>
-        </div>
       </div>
 
       {/* PRO — ORGANISATEURS */}
@@ -1147,6 +1142,13 @@ export function HomeContent() {
           </div>
         </div>
       </section>
+
+      {/* BANDEAU STATISTIQUES */}
+      <div className="cta-stats reveal" style={{ display: 'flex', justifyContent: 'center', gap: '48px', padding: '40px 24px', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', background: 'var(--bg-card)' }}>
+        <div className="cta-stat"><div className="cta-stat-v">10K</div><div className="cta-stat-l">Utilisateurs / jour</div></div>
+        <div className="cta-stat"><div className="cta-stat-v">30s</div><div className="cta-stat-l">Mise à jour</div></div>
+        <div className="cta-stat"><div className="cta-stat-v">150K+</div><div className="cta-stat-l">Sessions · 7 jours</div></div>
+      </div>
 
       {/* CONTACT BAND */}
       <div className="contact-band reveal">
