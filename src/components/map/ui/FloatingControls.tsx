@@ -39,6 +39,7 @@ export function FloatingControls({ map }: FloatingControlsProps) {
   const router = useRouter()
   const [active,       setActive]       = useState(false)
   const [following,    setFollowing]    = useState(false)
+  const [gpsLoading,   setGpsLoading]   = useState(false)
   const [showReportModal, setShowReportModal] = useState(false)
   const followRef      = useRef(false)
   const watchIdRef     = useRef<number | null>(null)
@@ -46,7 +47,7 @@ export function FloatingControls({ map }: FloatingControlsProps) {
   const flyingRef      = useRef(false)
   const lastPosRef     = useRef<[number, number] | null>(null)
   const bearingRef     = useRef<number>(0)
-  const gpsActivatedAt = useRef<number>(0)   // timestamp de la dernière activation GPS
+  const gpsActivatedAt = useRef<number>(0)
 
   // ── Zoom +/− — desktop only ──────────────────────────────────────────────
   const handleZoomIn  = useCallback(() => map?.zoomIn({ duration: 200 }),  [map])
@@ -75,9 +76,11 @@ export function FloatingControls({ map }: FloatingControlsProps) {
       followRef.current  = true
       setActive(true)
       setFollowing(true)
+      setGpsLoading(true)
 
       const id = navigator.geolocation.watchPosition(
         pos => {
+          setGpsLoading(false)
           const { latitude: lat, longitude: lng, accuracy } = pos.coords
 
           // Émettre position pour le point bleu
@@ -107,7 +110,7 @@ export function FloatingControls({ map }: FloatingControlsProps) {
               pitch:    55,
               zoom:     16,
               bearing:  bearingRef.current,
-              duration: 1300,
+              duration: 900,
               essential: true,
               padding:  { top: topPad, bottom: 0, left: 0, right: 0 },
             })
@@ -117,13 +120,13 @@ export function FloatingControls({ map }: FloatingControlsProps) {
             map.easeTo({
               center:   [lng, lat],
               bearing:  bearingRef.current,
-              duration: 1000,
+              duration: 700,
               padding:  { top: topPad, bottom: 0, left: 0, right: 0 },
             })
           }
         },
         () => {},
-        { enableHighAccuracy: true, maximumAge: 2000 },
+        { enableHighAccuracy: true, maximumAge: 5000 },
       )
       watchIdRef.current = id
 
@@ -142,7 +145,7 @@ export function FloatingControls({ map }: FloatingControlsProps) {
           pitch:    55,
           zoom:     16,
           bearing:  bearingRef.current,
-          duration: 1300,
+          duration: 900,
           essential: true,
           padding:  { top: topPad, bottom: 0, left: 0, right: 0 },
         })
@@ -159,11 +162,10 @@ export function FloatingControls({ map }: FloatingControlsProps) {
 
     const doStop = () => {
       if (!followRef.current) return
-      // Grace period de 600ms après activation GPS — empêche le touch event du bouton
-      // de propager au canvas Mapbox et d'annuler le suivi immédiatement
-      if (Date.now() - gpsActivatedAt.current < 600) return
+      if (Date.now() - gpsActivatedAt.current < 300) return
       followRef.current = false
       setFollowing(false)
+      setGpsLoading(false)
     }
 
     // dragstart = toujours user-initiated
@@ -190,9 +192,9 @@ export function FloatingControls({ map }: FloatingControlsProps) {
     }
   }, [])
 
-  const color  = following ? '#0A84FF' : active ? 'rgba(10,132,255,0.55)' : 'rgba(255,255,255,0.75)'
-  const bg     = following ? 'rgba(10,132,255,0.18)' : 'rgba(255,255,255,0.07)'
-  const border = following ? '0.5px solid #0A84FF' : '0.5px solid rgba(255,255,255,0.22)'
+  const color  = following ? '#0A84FF' : (gpsLoading || active) ? 'rgba(10,132,255,0.65)' : 'rgba(255,255,255,0.75)'
+  const bg     = following ? 'rgba(10,132,255,0.18)' : gpsLoading ? 'rgba(10,132,255,0.10)' : 'rgba(255,255,255,0.07)'
+  const border = following ? '0.5px solid #0A84FF' : gpsLoading ? '0.5px solid rgba(10,132,255,0.45)' : '0.5px solid rgba(255,255,255,0.22)'
 
   return (
     <>
@@ -326,7 +328,13 @@ export function FloatingControls({ map }: FloatingControlsProps) {
         style={{ ...BTN_BASE, background: bg, border, color }}
         aria-label="Se localiser"
       >
-        {following ? (
+        {gpsLoading ? (
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="12" cy="12" r="4"/>
+            <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.5"
+              style={{ animation: 'pulseStatus 1s ease-in-out infinite', opacity: 0.45 }}/>
+          </svg>
+        ) : following ? (
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
             <circle cx="12" cy="12" r="5"/>
             <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.5"/>
