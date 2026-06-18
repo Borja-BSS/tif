@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import mapboxgl from 'mapbox-gl'
 import type { FilterId } from './ui/QuickFilters'
-import { IMPACT_ZONES, getImpactZoneGeoJSON, getImpactRoadGeoJSON } from '@/data/impact-zones'
+import { IMPACT_ZONES, getImpactZoneGeoJSON, getImpactRoadGeoJSON, getActiveImpactZones } from '@/data/impact-zones'
 import type { ImpactZone } from '@/data/impact-zones'
 
 interface Props {
@@ -116,7 +116,8 @@ export default function ImpactZonesLayer({ map, activeFilter }: Props) {
     if (map.getSource(SRC_ID)) return   // déjà initialisé
 
     // ── Zones polygonales ────────────────────────────────────────────────────
-    const geojson = getImpactZoneGeoJSON(IMPACT_ZONES.filter(z => z.renderOnMap !== false))
+    const activeZones = getActiveImpactZones()
+    const geojson = getImpactZoneGeoJSON(activeZones.filter(z => z.renderOnMap !== false))
     map.addSource(SRC_ID, { type: 'geojson', data: geojson })
 
     map.addLayer({
@@ -144,7 +145,7 @@ export default function ImpactZonesLayer({ map, activeFilter }: Props) {
     map.on('mouseleave', FILL_ID, () => { map.getCanvas().style.cursor = '' })
 
     // ── Ligne A1 (LineString) ────────────────────────────────────────────────
-    const roadGeo = getImpactRoadGeoJSON(IMPACT_ZONES)
+    const roadGeo = getImpactRoadGeoJSON(activeZones)
     map.addSource(ROAD_SRC, { type: 'geojson', data: roadGeo })
 
     // Halo large rouge (effet glow)
