@@ -40,12 +40,13 @@ export function FloatingControls({ map }: FloatingControlsProps) {
   const [active,       setActive]       = useState(false)
   const [following,    setFollowing]    = useState(false)
   const [showReportModal, setShowReportModal] = useState(false)
-  const followRef  = useRef(false)
-  const watchIdRef = useRef<number | null>(null)
-  const flyDoneRef = useRef(false)
-  const flyingRef  = useRef(false)
-  const lastPosRef = useRef<[number, number] | null>(null)  // [lng, lat]
-  const bearingRef = useRef<number>(0)                      // bearing calculé depuis le mouvement
+  const followRef      = useRef(false)
+  const watchIdRef     = useRef<number | null>(null)
+  const flyDoneRef     = useRef(false)
+  const flyingRef      = useRef(false)
+  const lastPosRef     = useRef<[number, number] | null>(null)
+  const bearingRef     = useRef<number>(0)
+  const gpsActivatedAt = useRef<number>(0)   // timestamp de la dernière activation GPS
 
   // ── Zoom +/− — desktop only ──────────────────────────────────────────────
   const handleZoomIn  = useCallback(() => map?.zoomIn({ duration: 200 }),  [map])
@@ -69,6 +70,7 @@ export function FloatingControls({ map }: FloatingControlsProps) {
 
     if (watchIdRef.current === null) {
       // Première activation
+      gpsActivatedAt.current = Date.now()
       flyDoneRef.current = false
       followRef.current  = true
       setActive(true)
@@ -127,6 +129,7 @@ export function FloatingControls({ map }: FloatingControlsProps) {
 
     } else {
       // Re-clic : re-centrer et ré-activer le suivi
+      gpsActivatedAt.current = Date.now()
       followRef.current = true
       setFollowing(true)
 
@@ -156,6 +159,9 @@ export function FloatingControls({ map }: FloatingControlsProps) {
 
     const doStop = () => {
       if (!followRef.current) return
+      // Grace period de 600ms après activation GPS — empêche le touch event du bouton
+      // de propager au canvas Mapbox et d'annuler le suivi immédiatement
+      if (Date.now() - gpsActivatedAt.current < 600) return
       followRef.current = false
       setFollowing(false)
     }
@@ -314,6 +320,8 @@ export function FloatingControls({ map }: FloatingControlsProps) {
       <div className="fixed z-20" style={{ right: 16, bottom: 'calc(env(safe-area-inset-bottom, 0px) + 56px + 24px)' }}>
       <button
         onClick={handleGPS}
+        onPointerDown={e => e.stopPropagation()}
+        onTouchStart={e => e.stopPropagation()}
         data-onboarding="gps-btn"
         style={{ ...BTN_BASE, background: bg, border, color }}
         aria-label="Se localiser"
