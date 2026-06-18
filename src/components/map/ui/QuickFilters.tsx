@@ -32,7 +32,6 @@ export function QuickFilters({ active, onChange, showJourney = false }: QuickFil
     { id: 'transit', icon: '🚌',  label: t.filters.transit  },
     { id: 'parking', icon: '🅿️', label: t.filters.parking  },
     { id: 'borders', icon: '🛂',  label: t.filters.borders  },
-    { id: 'g7',      icon: '🏛️', label: t.filters.g7       },
     { id: 'journey', icon: '⭐',  label: t.filters.journey  },
   ]
 

@@ -105,9 +105,9 @@ function RetourNormaleModal({
   onClose:    () => void
 }) {
   const events = [
-    { icon: '🎪', label: 'Caribana Festival — Niska · KeBlack', desc: 'Ce soir · Crans-près-Céligny (Vaud)' },
-    { icon: '🎭', label: 'Fête de la Musique',                  desc: '19–21 juin · Parc des Bastions · Gratuit' },
-    { icon: '⚽', label: 'Mondial FIFA 2026 — Nati Suisse',     desc: 'FanZone Gradi24 · tous les matchs' },
+    { icon: '⚽', label: '🇨🇭 Suisse vs Bosnie — ce soir 21h',  desc: 'FanZone Gradi24 · Nyon · Saint-Genis' },
+    { icon: '🎭', label: 'Fête de la Musique',                   desc: '19–21 juin · Parc des Bastions · Gratuit' },
+    { icon: '🎬', label: 'Cinémas Grand Genève',                 desc: 'Retrouvez tous les cinémas sur la carte' },
   ]
 
   const active = hover || stars
@@ -130,10 +130,10 @@ function RetourNormaleModal({
       <div className="text-center mb-4">
         <div className="text-5xl mb-3">✅</div>
         <h2 className="text-[18px] font-bold text-white mb-1.5 leading-snug">
-          Début du retour à la normale
+          Bienvenue sur TIF — Été 2026
         </h2>
         <p className="text-[12px] font-medium" style={{ color: 'rgba(255,255,255,0.45)' }}>
-          Merci d&apos;avoir utilisé TIF pendant le G7
+          Mobilité · Sorties · FIFA World Cup jusqu&apos;au 19 juillet
         </p>
       </div>
 
