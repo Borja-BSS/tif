@@ -19,7 +19,7 @@ import type { MapT } from '@/i18n/map'
 import { events, CATEGORY_LABELS, CATEGORY_ICONS } from '@/data/events'
 import type { EventItem } from '@/data/types'
 import { getAlertsForDay } from '@/data/g7-alerts'
-import { IMPACT_ZONES } from '@/data/impact-zones'
+import { IMPACT_ZONES, getActiveImpactZones } from '@/data/impact-zones'
 import type { ImpactZone } from '@/data/impact-zones'
 
 type DetailView = 'overview' | 'douanes' | 'transport' | 'alertes' | 'g7' | 'meteo' | 'parking' | 'journey' | 'events' | 'impact-zone'
@@ -164,7 +164,7 @@ function CrossingDetail({ crossing, onBack: _onBack, onLocate, waitDirection, wa
   const live     = liveData[crossing.id]
 
   const G7_START   = new Date('2026-06-08T00:00:00Z')
-  const G7_END     = new Date('2026-06-19T04:00:00Z') // 06h00 heure genevoise (CEST = UTC+2)
+  const G7_END     = new Date('2026-06-18T05:00:00Z') // 07h00 heure genevoise — retour à la normale
   const isG7Period = now >= G7_START && now < G7_END
 
   const sources = getCrossingSources(crossing.id, isG7Period)
@@ -628,8 +628,8 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
         </div>
       )}
 
-      {/* ── Zones d'impact TPG ───────────────────────────────────────── */}
-      {IMPACT_ZONES.filter(z => z.type === 'TRANSPORT_DISRUPTION').map(zone => {
+      {/* ── Zones d'impact TPG (actives uniquement) ─────────────────── */}
+      {getActiveImpactZones().filter(z => z.type === 'TRANSPORT_DISRUPTION').map(zone => {
         const color = zone.strokeColor
         return (
           <div key={zone.id} className="rounded-2xl p-4 space-y-3"
@@ -1051,7 +1051,7 @@ function AlertesDetail({ map, onAlertSelect }: { map: mapboxgl.Map | null; onAle
   }
 
   const nowAlert  = new Date()
-  const isG7Alert = nowAlert >= new Date('2026-06-11T22:01:00Z') && nowAlert <= new Date('2026-06-18T21:59:00Z')
+  const isG7Alert = nowAlert >= new Date('2026-06-11T22:01:00Z') && nowAlert <= new Date('2026-06-18T05:00:00Z')
   const blockedCrossings = isG7Alert
     ? ALL_CROSSINGS
         .filter(c => computeInstantStatus(c, nowAlert).status === 'BLOCKED' && c.nearestOpen != null)
@@ -1200,12 +1200,13 @@ function AlertesDetail({ map, onAlertSelect }: { map: mapboxgl.Map | null; onAle
         <G7BulletinsPanel categories={['route']} title={t.alertsSection.g7RouteTpg} />
       </div>
 
-      {/* ══ ZONES D'IMPACT ════════════════════════════════════════════════ */}
+      {/* ══ ZONES D'IMPACT (actives uniquement) ══════════════════════════ */}
+      {getActiveImpactZones().length > 0 && (
       <div className="space-y-2 pt-1">
         <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>
-          ⚠️ Zones d&apos;impact — NO-G7 · 14.06.2026
+          ⚠️ Zones d&apos;impact actives
         </p>
-        {IMPACT_ZONES.map(zone => {
+        {getActiveImpactZones().map(zone => {
           const color = zone.strokeColor
           const zoneIcon = zone.type === 'DEMONSTRATION' ? '🔴'
             : zone.type === 'TRANSPORT_DISRUPTION' ? '🟠'
@@ -1283,6 +1284,7 @@ function AlertesDetail({ map, onAlertSelect }: { map: mapboxgl.Map | null; onAle
           )
         })}
       </div>
+      )}
 
       {/* ══ SOURCES ═══════════════════════════════════════════════════════ */}
       <div className="pt-1 space-y-2">
