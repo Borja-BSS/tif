@@ -40,9 +40,9 @@ const getFullH  = () => {
   return window.innerHeight - _sat - _sab - 120
 }
 // Spring iOS-like pour les snaps automatiques
-const SPRING    = 'height 0.42s cubic-bezier(0.34, 1.56, 0.64, 1)'
+const SPRING    = 'height 0.18s cubic-bezier(0.34, 1.30, 0.64, 1)'
 // Transition douce pour les repositionnements libres
-const EASE      = 'height 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+const EASE      = 'height 0.10s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
 
 const LG: React.CSSProperties = {
   background:           'rgba(255,255,255,0.04)',
@@ -764,7 +764,7 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
           const termA    = lineCfg?.terminusA ?? '—'
           const termB    = lineCfg?.terminusB ?? '—'
           return (
-            <div key={selectedLine} className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${c}30`, animation: 'fadeUp 0.18s cubic-bezier(0.23, 1, 0.32, 1)' }}>
+            <div key={selectedLine} className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${c}30`, animation: 'fadeUp 0.08s cubic-bezier(0.23, 1, 0.32, 1)' }}>
               {/* Header */}
               <div className="flex items-center justify-between px-4 pt-3 pb-2" style={{ background: `${c}12` }}>
                 <div className="flex items-center gap-2 min-w-0">
@@ -833,7 +833,7 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
 
         {/* Arrêt sélectionné — prochains départs */}
         {selectedStop && (
-          <div key={`${selectedStop.name}|${selectedStop.line}`} style={{ animation: 'fadeUp 0.18s cubic-bezier(0.23, 1, 0.32, 1)' }}>
+          <div key={`${selectedStop.name}|${selectedStop.line}`} style={{ animation: 'fadeUp 0.08s cubic-bezier(0.23, 1, 0.32, 1)' }}>
             <StopDeparturesPanel
               name={selectedStop.name}
               line={selectedStop.line}
@@ -1156,7 +1156,7 @@ function AlertesDetail({ map, onAlertSelect }: { map: mapboxgl.Map | null; onAle
       {/* ── Incidents temps réel (HERE / OFROU) ──────────────────────── */}
       {showBanner && (
         <div className="flex items-center gap-3 rounded-2xl px-4 py-3"
-          style={{ background: 'rgba(52,199,89,0.12)', border: '0.5px solid rgba(52,199,89,0.40)', backdropFilter: 'blur(20px)', animation: 'slideDown 0.28s ease forwards' }}>
+          style={{ background: 'rgba(52,199,89,0.12)', border: '0.5px solid rgba(52,199,89,0.40)', backdropFilter: 'blur(20px)', animation: 'slideDown 0.10s ease forwards' }}>
           <span className="text-xl flex-shrink-0">✅</span>
           <div>
             <p className="text-sm font-semibold" style={{ color: '#34C759' }}>{t.alertsSection.noAlertTitle}</p>
@@ -2984,7 +2984,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
       {/* Expanded content — always rendered, height+overflow-hidden masque quand compact */}
       <div ref={contentRef} className="flex-1 overflow-y-auto px-4 pb-6" style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
         <div key={`${detailView}|${selectedCrossing?.id ?? ''}|${selectedAlertItem?.id ?? ''}|${selectedEvent ?? ''}|${selectedImpactZone?.id ?? ''}`}
-             style={{ animation: 'fadeUp 0.18s cubic-bezier(0.23, 1, 0.32, 1)' }}>
+             style={{ animation: 'fadeUp 0.08s cubic-bezier(0.23, 1, 0.32, 1)' }}>
 
           {/* Bouton retour */}
           {showBack && (
