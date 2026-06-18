@@ -195,8 +195,6 @@ const EVENTS_DATA = allEvents
     const ticketLink = ev.links?.find(l => l.kind === 'tickets')
     const infoLink   = ev.links?.find(l => l.kind === 'info')
     const venueLink  = ev.links?.find(l => l.kind === 'venue')
-    const url = (cat === 'Cinéma' ? (venueLink?.url ?? infoLink?.url) : ticketLink?.url)
-      ?? infoLink?.url ?? venueLink?.url ?? ev.links?.[0]?.url ?? '/map'
     const desc = ev.description.length > 90 ? ev.description.slice(0, 88) + '…' : ev.description
     const lastDate = dates[dates.length - 1]
     return {
@@ -207,7 +205,7 @@ const EVENTS_DATA = allEvents
       desc,
       loc: ev.venue.name,
       free: isFree,
-      url,
+      url: `/evenements/${ev.slug}`,
     }
   })
 
@@ -692,7 +690,12 @@ export function HomeContent() {
             </>
           )
         })()}
-        <div className="live-cta reveal" style={{ marginTop: '32px' }}>
+        <div style={{ textAlign: 'center', marginTop: '16px' }}>
+          <a href="/evenements" style={{ fontSize: '13px', color: 'var(--blue)', fontWeight: 600, textDecoration: 'none', opacity: 0.8 }}>
+            Agenda complet Grand Genève 2026 →
+          </a>
+        </div>
+        <div className="live-cta reveal" style={{ marginTop: '24px' }}>
           <div className="lct"><strong>Accéder aux événements en temps réel</strong><br />Conditions de mobilité, foule estimée et accès recommandés directement sur la carte.</div>
           <div className="lcb">
             <a className="lc-a" href={user ? '/map' : '/login'} onClick={handleOpenMap}>
