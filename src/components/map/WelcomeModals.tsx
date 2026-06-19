@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { fireConfetti } from './OnboardingTour'
+import { events as ALL_EVENTS, CATEGORY_ICONS } from '../../data/events'
+import type { EventItem, Occurrence } from '../../data/types'
 
 const DISMISS_KEY  = 'tif:popup:dismiss-ts'
 const EIGHT_HOURS  = 8 * 60 * 60 * 1000
@@ -88,6 +90,47 @@ export function WelcomeModals({ onOpenEvents }: WelcomeModalsProps) {
   )
 }
 
+function todayStr(): string {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+function getUpcomingEvents(max = 3): Array<{ icon: string; label: string; desc: string }> {
+  const today = todayStr()
+  const todayMs = new Date(today + 'T12:00:00Z').getTime()
+
+  type Hit = { ev: EventItem; occ: Occurrence; daysAhead: number }
+  const hits: Hit[] = []
+  const seen = new Set<string>()
+
+  for (const ev of ALL_EVENTS) {
+    for (const occ of ev.occurrences) {
+      const daysAhead = Math.round(
+        (new Date(occ.date + 'T12:00:00Z').getTime() - todayMs) / 86_400_000
+      )
+      if (daysAhead >= 0 && daysAhead <= 7 && !seen.has(ev.id)) {
+        seen.add(ev.id)
+        hits.push({ ev, occ, daysAhead })
+        break
+      }
+    }
+  }
+
+  hits.sort((a, b) => a.daysAhead - b.daysAhead)
+
+  return hits.slice(0, max).map(({ ev, occ, daysAhead }) => {
+    const icon = CATEGORY_ICONS[ev.category] ?? '📅'
+    const when = daysAhead === 0 ? "Aujourd'hui" : daysAhead === 1 ? 'Demain' : `Dans ${daysAhead}j`
+    const time = occ.start ? ` · ${occ.start}` : ''
+    const note = occ.note ? ` · ${occ.note}` : ''
+    return {
+      icon,
+      label: ev.title,
+      desc: `${when}${time}${note} · ${ev.venue.name}`,
+    }
+  })
+}
+
 function RetourNormaleModal({
   stars, setStars, hover, setHover,
   comment, setComment, submitted,
@@ -104,11 +147,7 @@ function RetourNormaleModal({
   onEvents:   () => void
   onClose:    () => void
 }) {
-  const events = [
-    { icon: '⚽', label: '🇨🇭 Suisse vs Bosnie — ce soir 21h',  desc: 'FanZone Gradi24 · Nyon · Saint-Genis' },
-    { icon: '🎭', label: 'Fête de la Musique',                   desc: '19–21 juin · Parc des Bastions · Gratuit' },
-    { icon: '🎬', label: 'Cinémas Grand Genève',                 desc: 'Retrouvez tous les cinémas sur la carte' },
-  ]
+  const upcomingEvents = getUpcomingEvents(3)
 
   const active = hover || stars
 
@@ -207,30 +246,15 @@ function RetourNormaleModal({
         )}
       </div>
 
-      {/* Status bloc */}
-      <div className="rounded-2xl p-4 mb-4 space-y-2.5"
-        style={{ background: 'rgba(52,199,89,0.07)', border: '1px solid rgba(52,199,89,0.28)' }}>
-        <div className="flex items-start gap-2.5">
-          <span className="text-base mt-0.5">🛂</span>
-          <p className="text-[13px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.88)' }}>
-            Les douanes actuellement fermées sont <strong style={{ color: '#34C759' }}>réouvertes</strong> — retrouvez-les sur la carte.
-          </p>
-        </div>
-        <div className="flex items-start gap-2.5">
-          <span className="text-base mt-0.5">🛣️</span>
-          <p className="text-[13px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.88)' }}>
-            L&apos;autoroute A1 entre Vernier et Bardonnex (direction France) est également <strong style={{ color: '#34C759' }}>réouverte</strong>.
-          </p>
-        </div>
-      </div>
-
       {/* Events bloc */}
       <div className="mb-4">
         <p className="text-[12px] font-semibold mb-2.5" style={{ color: 'rgba(255,255,255,0.55)' }}>
-          Retrouvez maintenant tous les événements proches de vous
+          {upcomingEvents.length > 0
+            ? 'À venir dans le Grand Genève'
+            : 'Retrouvez tous les événements sur la carte'}
         </p>
         <div className="space-y-2">
-          {events.map(e => (
+          {upcomingEvents.map(e => (
             <div
               key={e.label}
               className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
