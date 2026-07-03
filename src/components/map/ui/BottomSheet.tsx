@@ -1090,6 +1090,93 @@ function AlertesDetail({ map, onAlertSelect }: { map: mapboxgl.Map | null; onAle
   return (
     <div className="space-y-3">
 
+      {/* ══ ZONES D'IMPACT (actives uniquement) — en premier ═════════════ */}
+      {getActiveImpactZones().length > 0 && (
+      <div className="space-y-2">
+        <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>
+          ⚠️ Zones d&apos;impact actives
+        </p>
+        {getActiveImpactZones().map(zone => {
+          const color = zone.strokeColor
+          const zoneIcon = zone.type === 'DEMONSTRATION' ? '🔴'
+            : zone.type === 'TRANSPORT_DISRUPTION' ? '🟠'
+            : zone.type === 'ROAD_CLOSURE' ? '🛑'
+            : '⚠️'
+          const zoneLabel = zone.label
+            ?? (zone.type === 'DEMONSTRATION' ? 'Manifestation · Périmètre'
+            : zone.type === 'TRANSPORT_DISRUPTION' ? 'Réseau TPG · Perturbations'
+            : zone.type === 'ROAD_CLOSURE' ? 'Route · Fermeture'
+            : zone.type)
+          return (
+            <div key={zone.id} className="rounded-2xl p-4 space-y-3"
+              style={{ background: `${color}12`, border: `1px solid ${color}35` }}>
+              {/* Header */}
+              <div className="flex items-start gap-3">
+                <span className="text-2xl flex-shrink-0">{zoneIcon}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color }}>
+                    {zoneLabel}
+                  </p>
+                  <p className="text-sm font-bold leading-snug mt-0.5" style={{ color: 'var(--text-primary)' }}>
+                    {zone.title}
+                  </p>
+                </div>
+                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 text-center"
+                  style={{ background: `${color}20`, color, minWidth: 60 }}>
+                  {fmtPeriod(zone.activeFrom, zone.activeTo)}
+                </span>
+              </div>
+
+              {/* Lignes */}
+              {zone.lines && zone.lines.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {zone.lines.map(l => (
+                    <span key={l}
+                      className="text-[11px] font-bold px-2 py-0.5 rounded-lg"
+                      style={{ background: `${color}22`, color, border: `1px solid ${color}40` }}>
+                      {l}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Description */}
+              <div className="space-y-1">
+                {zone.description.split('\n').map((line, i) => {
+                  if (!line.trim()) return null
+                  const isBullet = line.startsWith('*')
+                  const isHeader = !isBullet && /[A-ZÉÈÊÀÙÂÎÛÔ]{3,}/.test(line)
+                  if (isBullet) return (
+                    <p key={i} className="pl-3 text-[12px]"
+                      style={{ color: 'var(--text-secondary)' }}>
+                      {line.replace(/^\*\s*/, '· ')}
+                    </p>
+                  )
+                  if (isHeader) return (
+                    <p key={i} className="text-[10px] font-bold uppercase tracking-wider pt-1.5"
+                      style={{ color: `${color}CC` }}>
+                      {line}
+                    </p>
+                  )
+                  return (
+                    <p key={i} className="text-[12px] font-semibold"
+                      style={{ color: 'var(--text-primary)' }}>
+                      {line}
+                    </p>
+                  )
+                })}
+              </div>
+
+              {/* Source */}
+              <p className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>
+                {zone.source} · {zone.sourceRef}
+              </p>
+            </div>
+          )
+        })}
+      </div>
+      )}
+
       {/* ══ ALERTES ACTIVES ═══════════════════════════════════════════════ */}
       <div className="flex items-center gap-2 mb-1">
         <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 animate-pulse" style={{ background: '#FF453A' }} />
@@ -1199,93 +1286,6 @@ function AlertesDetail({ map, onAlertSelect }: { map: mapboxgl.Map | null; onAle
       <div className="pt-1">
         <G7BulletinsPanel categories={['route']} title={t.alertsSection.g7RouteTpg} />
       </div>
-
-      {/* ══ ZONES D'IMPACT (actives uniquement) ══════════════════════════ */}
-      {getActiveImpactZones().length > 0 && (
-      <div className="space-y-2 pt-1">
-        <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>
-          ⚠️ Zones d&apos;impact actives
-        </p>
-        {getActiveImpactZones().map(zone => {
-          const color = zone.strokeColor
-          const zoneIcon = zone.type === 'DEMONSTRATION' ? '🔴'
-            : zone.type === 'TRANSPORT_DISRUPTION' ? '🟠'
-            : zone.type === 'ROAD_CLOSURE' ? '🛑'
-            : '⚠️'
-          const zoneLabel = zone.label
-            ?? (zone.type === 'DEMONSTRATION' ? 'Manifestation · Périmètre'
-            : zone.type === 'TRANSPORT_DISRUPTION' ? 'Réseau TPG · Perturbations'
-            : zone.type === 'ROAD_CLOSURE' ? 'Route · Fermeture'
-            : zone.type)
-          return (
-            <div key={zone.id} className="rounded-2xl p-4 space-y-3"
-              style={{ background: `${color}12`, border: `1px solid ${color}35` }}>
-              {/* Header */}
-              <div className="flex items-start gap-3">
-                <span className="text-2xl flex-shrink-0">{zoneIcon}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color }}>
-                    {zoneLabel}
-                  </p>
-                  <p className="text-sm font-bold leading-snug mt-0.5" style={{ color: 'var(--text-primary)' }}>
-                    {zone.title}
-                  </p>
-                </div>
-                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 text-center"
-                  style={{ background: `${color}20`, color, minWidth: 60 }}>
-                  {fmtPeriod(zone.activeFrom, zone.activeTo)}
-                </span>
-              </div>
-
-              {/* Lignes */}
-              {zone.lines && zone.lines.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
-                  {zone.lines.map(l => (
-                    <span key={l}
-                      className="text-[11px] font-bold px-2 py-0.5 rounded-lg"
-                      style={{ background: `${color}22`, color, border: `1px solid ${color}40` }}>
-                      {l}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              {/* Description */}
-              <div className="space-y-1">
-                {zone.description.split('\n').map((line, i) => {
-                  if (!line.trim()) return null
-                  const isBullet = line.startsWith('*')
-                  const isHeader = !isBullet && /[A-ZÉÈÊÀÙÂÎÛÔ]{3,}/.test(line)
-                  if (isBullet) return (
-                    <p key={i} className="pl-3 text-[12px]"
-                      style={{ color: 'var(--text-secondary)' }}>
-                      {line.replace(/^\*\s*/, '· ')}
-                    </p>
-                  )
-                  if (isHeader) return (
-                    <p key={i} className="text-[10px] font-bold uppercase tracking-wider pt-1.5"
-                      style={{ color: `${color}CC` }}>
-                      {line}
-                    </p>
-                  )
-                  return (
-                    <p key={i} className="text-[12px] font-semibold"
-                      style={{ color: 'var(--text-primary)' }}>
-                      {line}
-                    </p>
-                  )
-                })}
-              </div>
-
-              {/* Source */}
-              <p className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>
-                {zone.source} · {zone.sourceRef}
-              </p>
-            </div>
-          )
-        })}
-      </div>
-      )}
 
       {/* ══ SOURCES ═══════════════════════════════════════════════════════ */}
       <div className="pt-1 space-y-2">
