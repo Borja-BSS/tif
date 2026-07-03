@@ -17,8 +17,8 @@ function formatMsg(text: string): string {
 
 const SUGGESTIONS = [
   "Quelle douane est la moins encombrée en ce moment ?",
-  "A1 fermée vers Bardonnex : quelle alternative ?",
-  "Comment aller à Annemasse sans voiture ?",
+  "Genève Triathlon ce week-end : quelles routes sont fermées ?",
+  "Où voir un match de la Coupe du monde à Genève ?",
   "Quels événements à Genève ce week-end ?",
 ]
 
@@ -166,7 +166,7 @@ export function AiAssistant() {
               <p className="text-sm font-bold text-gray-900 dark:text-white">Assistant TIF</p>
               <div className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                <p className="text-[11px] text-gray-500 dark:text-white/50">Données live · Mobilité G7</p>
+                <p className="text-[11px] text-gray-500 dark:text-white/50">Données live · Mobilité Grand Genève</p>
               </div>
             </div>
             <button
@@ -187,7 +187,7 @@ export function AiAssistant() {
             {messages.length === 0 && (
               <div className="space-y-3">
                 <p className="text-sm text-center py-4 text-gray-500 dark:text-white/50">
-                  Pose une question sur la mobilité G7
+                  Pose une question sur la mobilité du Grand Genève
                 </p>
                 <p className="text-[11px] text-center text-gray-400 dark:text-white/30 -mt-2 mb-1">
                   Douanes, transports, itinéraires, événements — périmètre Grand Genève uniquement

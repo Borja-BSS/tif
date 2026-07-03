@@ -100,8 +100,8 @@ PASS CINÉMA : Ciné Pass CHF 10.– valable dans tous les cinémas indépendant
 ━━━ AGENDA CULTUREL ÉTÉ 2026 ━━━
 
 ÉVÉNEMENTS MAJEURS :
-* Caribana Festival — Crans-près-Céligny (Vaud) · jusqu'au 22 juin · Niska, KeBlack et autres · accès train CFF
-* Fête de la Musique — 19–21 juin · Parc des Bastions, Plainpalais, Carouge · GRATUIT · accès tram/bus normal
+* La Tour Genève Triathlon (36e éd.) — 4–5 juillet · départ/arrivée Plage des Eaux-Vives, village Quai Gustave-Ador · natation lac, vélo et course sur quais fermés · formats Half/Standard/Short/Découverte/Youth League/enfants · spectateurs gratuit
+  MOBILITÉ (samedi) : fermées deux sens Rampe de Cologny, Ch. du Petray, Quai de Cologny · accès Parking Genève-Plage par la contre-allée du Quai Gustave-Ador · secteurs perturbés Cologny/Vandœuvres 6h–11h15 et 13h–21h, Vésenaz/Collonge-Bellerive 6h15–11h et 13h–16h, Anières/Corsier/Meinier 6h30–11h et 13h15–16h · perturbations TPG (tpg.ch) · secours accès prioritaire · dimanche = dispositif différent · infos: genevetriathlon.ch/infosriverains
 * Paléo Festival Nyon — 21–26 juillet · Plaine de l'Asse, Nyon · ~200 000 spectateurs · Katy Perry, Gorillaz, The Cure, Lorde, Gims · ~CHF 95/j · train GE→Nyon 18 min puis navette
 
 COUPE DU MONDE FIFA 2026 (en cours jusqu'au 19 juillet) :
