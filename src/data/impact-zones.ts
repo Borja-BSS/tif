@@ -73,19 +73,27 @@ const ZONE_A1: [number, number][] = [
   [6.1001037, 46.2189987], // Fin — Genève-Aéroport / Meyrin
 ]
 
-// ── Zone — Genève Triathlon (rive gauche : Eaux-Vives → Cologny) ────────────
-// Emprise INDICATIVE de la zone perturbée (village/départ + routes fermées de
-// Cologny : Rampe de Cologny, Quai de Cologny, Ch. du Petray). Les fermetures
-// exactes par commune et par heure sont sur la carte officielle (infos riverains).
+// ── Zone — Genève Triathlon (rive gauche : Eaux-Vives → Corsier/Meinier) ────
+// Emprise INDICATIVE du corridor perturbé (carte officielle du samedi) : de la
+// Plage des Eaux-Vives jusqu'à Corsier/Meinier, via Cologny, Vésenaz, Collonge
+// et les rtes de la Capite / d'Hermance / de Thonon / de Compois. Fermetures et
+// horaires exacts par commune sur la carte officielle (infos riverains).
 const ZONE_TRIATHLON: [number, number][] = [
-  [6.1545, 46.2048], // Quai Gustave-Ador (côté Jardin Anglais)
-  [6.1665, 46.2052], // Plage des Eaux-Vives (départ / arrivée)
-  [6.1770, 46.2110], // Quai de Cologny / Port de la Nautique
-  [6.1830, 46.2175], // Cologny bord du lac (Rampe de Cologny)
-  [6.1740, 46.2180], // Cologny village (Chemin du Petray)
-  [6.1650, 46.2110], // Cologny intérieur
-  [6.1585, 46.2065], // Retour vers les Eaux-Vives
-  [6.1545, 46.2048], // Fermeture
+  // Bord du lac (SW), du sud au nord
+  [6.1545, 46.2035], // Plage des Eaux-Vives (départ / arrivée)
+  [6.1720, 46.2120], // Cologny (bord du lac)
+  [6.1850, 46.2300], // Vésenaz
+  [6.1950, 46.2500], // Collonge-Bellerive
+  [6.2050, 46.2700], // approche Corsier (bord du lac)
+  [6.2120, 46.2790], // Corsier (nord de la zone)
+  // Retour intérieur (NE → SW)
+  [6.2250, 46.2610], // Meinier (nord-est)
+  [6.2270, 46.2450], // Meinier
+  [6.2110, 46.2320], // Rte de Compois (intérieur)
+  [6.1970, 46.2170], // Vandœuvres
+  [6.1810, 46.2040], // intérieur Cologny / Vandœuvres
+  [6.1670, 46.1965], // retour vers les Eaux-Vives (intérieur)
+  [6.1545, 46.2035], // fermeture
 ]
 
 export const IMPACT_ZONES: ImpactZone[] = [
