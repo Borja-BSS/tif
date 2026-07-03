@@ -11,6 +11,7 @@ export interface ImpactZone {
   id:            string
   title:         string
   description:   string
+  label?:        string           // libellé court affiché sur la carte-alerte (sinon fallback par type)
   lines?:        string[]
   type:          ImpactZoneType
   severity:      'HIGH' | 'MEDIUM'
@@ -72,7 +73,50 @@ const ZONE_A1: [number, number][] = [
   [6.1001037, 46.2189987], // Fin — Genève-Aéroport / Meyrin
 ]
 
+// ── Zone — Genève Triathlon (rive gauche, Quai Gustave-Ador) ────────────────
+// Corridor village/départ le long du lac : Jardin Anglais → Plage des Eaux-Vives → Port-Noir.
+// Emprise indicative (renderOnMap: false) — les fermetures exactes par commune sont sur la carte officielle.
+const ZONE_TRIATHLON: [number, number][] = [
+  [6.1530, 46.2046], // Quai Gustave-Ador (côté Jardin Anglais)
+  [6.1600, 46.2041], // Quai Gustave-Ador (milieu)
+  [6.1660, 46.2050], // Plage des Eaux-Vives
+  [6.1686, 46.2016], // Place du Port-Noir
+  [6.1600, 46.2020], // Retour intérieur
+  [6.1530, 46.2046], // Fermeture
+]
+
 export const IMPACT_ZONES: ImpactZone[] = [
+  {
+    id:          'triathlon-2026-mobilite',
+    renderOnMap: false,
+    label:       'Mobilité · Genève Triathlon',
+    title:       'Genève Triathlon — circulation perturbée · 4–5 juillet',
+    description:
+      'Week-end du Genève Triathlon (36e édition), samedi 4 et dimanche 5 juillet 2026.\n' +
+      'Départs / arrivées : Plage des Eaux-Vives. Zone de départ perturbée du samedi 4h00 au dimanche 17h00.\n\n' +
+      'ROUTES FERMÉES DANS LES DEUX SENS (samedi)\n' +
+      '* Rampe de Cologny\n' +
+      '* Chemin du Petray\n' +
+      '* Quai de Cologny\n' +
+      'Accès au Parking de Genève-Plage par la contre-allée du Quai Gustave-Ador.\n\n' +
+      'SECTEURS PERTURBÉS · SAMEDI 4 JUILLET\n' +
+      '* Rive gauche / Cologny / Vandœuvres (rte de la Capite, rte de Vandœuvres) : 6h00–11h15 et 13h00–21h00\n' +
+      '* Vésenaz / Collonge-Bellerive : 6h15–11h00 et 13h00–16h00\n' +
+      '* Anières / Corsier / Meinier (rte d\'Hermance, rte de Thonon, rte de Compois) : 6h30–11h00 et 13h15–16h00\n\n' +
+      'TRANSPORTS · Perturbations à prévoir sur les lignes TPG (détails et suivi en direct sur tpg.ch).\n' +
+      'Secours (144, ambulances, police) : accès permanent et prioritaire.\n\n' +
+      'Le dispositif du dimanche 5 juillet diffère — carte détaillée par commune sur les infos riverains officielles.',
+    type:        'TRANSPORT_DISRUPTION',
+    severity:    'HIGH',
+    coordinates: ZONE_TRIATHLON,
+    activeFrom:  new Date('2026-07-03T00:00:00+02:00'),
+    activeTo:    new Date('2026-07-05T23:59:00+02:00'),
+    fillColor:   '#FF9F0A',
+    fillOpacity: 0.10,
+    strokeColor: '#FF9F0A',
+    source:      'https://www.genevetriathlon.ch/infosriverains',
+    sourceRef:   'Genève Triathlon — infos riverains',
+  },
   {
     id:          'no-g7-tpg-disruption',
     renderOnMap: false,

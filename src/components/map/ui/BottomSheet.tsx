@@ -638,7 +638,7 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
               <span className="text-2xl flex-shrink-0">🟠</span>
               <div className="flex-1 min-w-0">
                 <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color }}>
-                  Réseau TPG · Perturbations G7
+                  {zone.label ?? 'Réseau TPG · Perturbations'}
                 </p>
                 <p className="text-sm font-bold leading-snug mt-0.5" style={{ color: 'var(--text-primary)' }}>
                   {zone.title}
@@ -1212,10 +1212,11 @@ function AlertesDetail({ map, onAlertSelect }: { map: mapboxgl.Map | null; onAle
             : zone.type === 'TRANSPORT_DISRUPTION' ? '🟠'
             : zone.type === 'ROAD_CLOSURE' ? '🛑'
             : '⚠️'
-          const zoneLabel = zone.type === 'DEMONSTRATION' ? 'Manifestation · Périmètre'
-            : zone.type === 'TRANSPORT_DISRUPTION' ? 'Réseau TPG · Perturbations G7'
-            : zone.type === 'ROAD_CLOSURE' ? 'A1 — Fermeture totale'
-            : zone.type
+          const zoneLabel = zone.label
+            ?? (zone.type === 'DEMONSTRATION' ? 'Manifestation · Périmètre'
+            : zone.type === 'TRANSPORT_DISRUPTION' ? 'Réseau TPG · Perturbations'
+            : zone.type === 'ROAD_CLOSURE' ? 'Route · Fermeture'
+            : zone.type)
           return (
             <div key={zone.id} className="rounded-2xl p-4 space-y-3"
               style={{ background: `${color}12`, border: `1px solid ${color}35` }}>
@@ -2451,7 +2452,7 @@ function ImpactZoneDetail({ zone, map, onClose }: { zone: ImpactZone; map: mapbo
   }
 
   const color   = typeColor[zone.type]   ?? '#FF9F0A'
-  const label   = typeLabel[zone.type]   ?? zone.type
+  const label   = zone.label ?? typeLabel[zone.type] ?? zone.type
 
   const fmt = (d: Date) => d.toLocaleTimeString('fr-CH', {
     hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Zurich',
