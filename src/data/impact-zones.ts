@@ -73,139 +73,57 @@ const ZONE_A1: [number, number][] = [
   [6.1001037, 46.2189987], // Fin — Genève-Aéroport / Meyrin
 ]
 
-// ── Genève Triathlon — secteurs perturbés (carte officielle du samedi) ──────
-// Chaque secteur = une zone délimitée avec ses horaires propres. Emprises
-// INDICATIVES ; fermetures/horaires exacts par commune sur les infos riverains.
-
-// Secteur 1 — Départ / arrivée (Plage des Eaux-Vives + routes fermées Cologny)
-const ZONE_TRI_DEPART: [number, number][] = [
-  [6.1500, 46.2015], // Genève-Cité / Eaux-Vives (sud)
-  [6.1590, 46.2050], // Plage des Eaux-Vives (départ)
-  [6.1710, 46.2110], // Quai / Rampe de Cologny
-  [6.1775, 46.2155], // Cologny bas
-  [6.1690, 46.2170], // Cologny village (Ch. du Petray)
-  [6.1580, 46.2095], // retour intérieur
-  [6.1500, 46.2015], // fermeture
-]
-
-// Secteur 2 — Cologny · Vésenaz (Rte de la Capite) · 6h00–11h15 / 13h00–21h00
-const ZONE_TRI_CAPITE: [number, number][] = [
-  [6.1700, 46.2170], // haut de Cologny
-  [6.1845, 46.2290], // Vésenaz (Rte de la Capite)
-  [6.1925, 46.2405], // approche Collonge
-  [6.1830, 46.2425], // limite nord
-  [6.1715, 46.2300], //
-  [6.1645, 46.2185], //
-  [6.1700, 46.2170], // fermeture
-]
-
-// Secteur 3 — Vandœuvres (Rte de Vandœuvres) · 6h15–11h00 / 13h00–16h00
-const ZONE_TRI_VANDOEUVRES: [number, number][] = [
-  [6.1850, 46.2185], //
-  [6.1995, 46.2205], //
-  [6.2045, 46.2295], //
-  [6.1930, 46.2335], //
-  [6.1830, 46.2270], //
-  [6.1850, 46.2185], // fermeture
-]
-
-// Secteur 4 — Collonge · Corsier · Meinier (Thonon/Compois) · 6h30–11h / 13h15–16h
-const ZONE_TRI_CORSIER: [number, number][] = [
-  [6.1920, 46.2470], // Collonge-Bellerive
-  [6.2050, 46.2685], // approche Corsier (bord du lac)
-  [6.2155, 46.2790], // Corsier (nord)
-  [6.2295, 46.2610], // Meinier (nord-est)
-  [6.2305, 46.2420], // Meinier
-  [6.2120, 46.2400], // Rte de Compois
-  [6.1975, 46.2470], //
-  [6.1920, 46.2470], // fermeture
+// ── Zone — Genève Triathlon (rive gauche : Eaux-Vives → Corsier/Meinier) ────
+// Emprise INDICATIVE du corridor perturbé (carte officielle du samedi) : de la
+// Plage des Eaux-Vives jusqu'à Corsier/Meinier, via Cologny, Vésenaz, Collonge
+// et les rtes de la Capite / d'Hermance / de Thonon / de Compois. Fermetures et
+// horaires exacts par commune sur la carte officielle (infos riverains).
+const ZONE_TRIATHLON: [number, number][] = [
+  // Bord du lac (SW), du sud au nord
+  [6.1545, 46.2035], // Plage des Eaux-Vives (départ / arrivée)
+  [6.1720, 46.2120], // Cologny (bord du lac)
+  [6.1850, 46.2300], // Vésenaz
+  [6.1950, 46.2500], // Collonge-Bellerive
+  [6.2050, 46.2700], // approche Corsier (bord du lac)
+  [6.2120, 46.2790], // Corsier (nord de la zone)
+  // Retour intérieur (NE → SW)
+  [6.2250, 46.2610], // Meinier (nord-est)
+  [6.2270, 46.2450], // Meinier
+  [6.2110, 46.2320], // Rte de Compois (intérieur)
+  [6.1970, 46.2170], // Vandœuvres
+  [6.1810, 46.2040], // intérieur Cologny / Vandœuvres
+  [6.1670, 46.1965], // retour vers les Eaux-Vives (intérieur)
+  [6.1545, 46.2035], // fermeture
 ]
 
 export const IMPACT_ZONES: ImpactZone[] = [
   {
-    id:          'triathlon-2026-depart',
+    id:          'triathlon-2026-mobilite',
     renderOnMap: true,
-    label:       'Triathlon · Départ',
-    title:       'Départ / arrivée — Plage des Eaux-Vives',
+    label:       'Mobilité · Genève Triathlon',
+    title:       'Genève Triathlon — circulation perturbée · 4–5 juillet',
     description:
-      'Genève Triathlon (36e éd.). Zone de départ et d\'arrivée.\n' +
-      'Perturbée du samedi 4 juillet 4h00 au dimanche 5 juillet 17h00.\n\n' +
-      'ROUTES FERMÉES DANS LES DEUX SENS\n' +
+      'Week-end du Genève Triathlon (36e édition), samedi 4 et dimanche 5 juillet 2026.\n' +
+      'Départs / arrivées : Plage des Eaux-Vives. Zone de départ perturbée du samedi 4h00 au dimanche 17h00.\n\n' +
+      'ROUTES FERMÉES DANS LES DEUX SENS (samedi)\n' +
       '* Rampe de Cologny\n' +
       '* Chemin du Petray\n' +
       '* Quai de Cologny\n' +
-      'Accès au Parking de Genève-Plage par la contre-allée du Quai Gustave-Ador.\n' +
-      'Secours (144, ambulances, police) : accès prioritaire.',
+      'Accès au Parking de Genève-Plage par la contre-allée du Quai Gustave-Ador.\n\n' +
+      'SECTEURS PERTURBÉS · SAMEDI 4 JUILLET\n' +
+      '* Rive gauche / Cologny / Vandœuvres (rte de la Capite, rte de Vandœuvres) : 6h00–11h15 et 13h00–21h00\n' +
+      '* Vésenaz / Collonge-Bellerive : 6h15–11h00 et 13h00–16h00\n' +
+      '* Anières / Corsier / Meinier (rte d\'Hermance, rte de Thonon, rte de Compois) : 6h30–11h00 et 13h15–16h00\n\n' +
+      'TRANSPORTS · Perturbations à prévoir sur les lignes TPG (détails et suivi en direct sur tpg.ch).\n' +
+      'Secours (144, ambulances, police) : accès permanent et prioritaire.\n\n' +
+      'Le dispositif du dimanche 5 juillet diffère — carte détaillée par commune sur les infos riverains officielles.',
     type:        'TRANSPORT_DISRUPTION',
     severity:    'HIGH',
-    coordinates: ZONE_TRI_DEPART,
-    activeFrom:  new Date('2026-07-03T00:00:00+02:00'),
-    activeTo:    new Date('2026-07-05T23:59:00+02:00'),
-    fillColor:   '#FF453A',
-    fillOpacity: 0.16,
-    strokeColor: '#FF453A',
-    source:      'https://www.genevetriathlon.ch/infosriverains',
-    sourceRef:   'Genève Triathlon — infos riverains',
-  },
-  {
-    id:          'triathlon-2026-capite',
-    renderOnMap: true,
-    label:       'Triathlon · Cologny–Vésenaz',
-    title:       'Cologny · Vésenaz — Rte de la Capite',
-    description:
-      'Genève Triathlon — circulation perturbée le samedi 4 juillet.\n' +
-      'Horaires : 6h00–11h15 et 13h00–21h00.\n' +
-      'Axe Rte de la Capite. Perturbations TPG à prévoir (tpg.ch).\n' +
-      'Dispositif du dimanche différent — voir infos riverains.',
-    type:        'TRANSPORT_DISRUPTION',
-    severity:    'MEDIUM',
-    coordinates: ZONE_TRI_CAPITE,
+    coordinates: ZONE_TRIATHLON,
     activeFrom:  new Date('2026-07-03T00:00:00+02:00'),
     activeTo:    new Date('2026-07-05T23:59:00+02:00'),
     fillColor:   '#FF9F0A',
-    fillOpacity: 0.14,
-    strokeColor: '#FF9F0A',
-    source:      'https://www.genevetriathlon.ch/infosriverains',
-    sourceRef:   'Genève Triathlon — infos riverains',
-  },
-  {
-    id:          'triathlon-2026-vandoeuvres',
-    renderOnMap: true,
-    label:       'Triathlon · Vandœuvres',
-    title:       'Vandœuvres — Rte de Vandœuvres',
-    description:
-      'Genève Triathlon — circulation perturbée le samedi 4 juillet.\n' +
-      'Horaires : 6h15–11h00 et 13h00–16h00.\n' +
-      'Axe Rte de Vandœuvres. Perturbations TPG à prévoir (tpg.ch).\n' +
-      'Dispositif du dimanche différent — voir infos riverains.',
-    type:        'TRANSPORT_DISRUPTION',
-    severity:    'MEDIUM',
-    coordinates: ZONE_TRI_VANDOEUVRES,
-    activeFrom:  new Date('2026-07-03T00:00:00+02:00'),
-    activeTo:    new Date('2026-07-05T23:59:00+02:00'),
-    fillColor:   '#FF9F0A',
-    fillOpacity: 0.14,
-    strokeColor: '#FF9F0A',
-    source:      'https://www.genevetriathlon.ch/infosriverains',
-    sourceRef:   'Genève Triathlon — infos riverains',
-  },
-  {
-    id:          'triathlon-2026-corsier',
-    renderOnMap: true,
-    label:       'Triathlon · Collonge–Corsier–Meinier',
-    title:       'Collonge · Corsier · Meinier — Rtes de Thonon / Compois',
-    description:
-      'Genève Triathlon — circulation perturbée le samedi 4 juillet.\n' +
-      'Horaires : 6h30–11h00 et 13h15–16h00.\n' +
-      'Axes Rte d\'Hermance, Rte de Thonon, Rte de Compois. Perturbations TPG à prévoir (tpg.ch).\n' +
-      'Dispositif du dimanche différent — voir infos riverains.',
-    type:        'TRANSPORT_DISRUPTION',
-    severity:    'MEDIUM',
-    coordinates: ZONE_TRI_CORSIER,
-    activeFrom:  new Date('2026-07-03T00:00:00+02:00'),
-    activeTo:    new Date('2026-07-05T23:59:00+02:00'),
-    fillColor:   '#FF9F0A',
-    fillOpacity: 0.14,
+    fillOpacity: 0.15,
     strokeColor: '#FF9F0A',
     source:      'https://www.genevetriathlon.ch/infosriverains',
     sourceRef:   'Genève Triathlon — infos riverains',
