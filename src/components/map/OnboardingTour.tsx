@@ -29,7 +29,7 @@ const STEPS: TourStep[] = [
   {
     target: '[data-onboarding="filter-alerts"]',
     title:  '⚠️ Alertes & Incidents',
-    body:   'Alertes en direct : incidents de trafic, perturbations TPG/CFF, zones G7 actives. Chaque alerte est partageable en un tap.',
+    body:   'Alertes en direct : incidents de trafic, perturbations TPG/CFF, zones d\'impact actives. Chaque alerte est partageable en un tap.',
   },
   {
     target:        '[data-onboarding="filter-journey"]',

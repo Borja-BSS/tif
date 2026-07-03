@@ -92,7 +92,7 @@ const PRELOAD_MARKERS = [
   { color: '#FF9500', strokeColor: '#FFFFFF', emoji: '🛂', slug: 'ctrl' },  // MODERATE
   { color: '#FF3B30', strokeColor: '#FF3B30', emoji: '🛂', slug: 'ctrl' },  // HEAVY
   { color: '#34C759', strokeColor: '#5AC8FA', emoji: '🛂', slug: 'ctrl' },  // CLEAR macaron
-  { color: '#FF9500', strokeColor: '#FFFFFF', emoji: '🚂', slug: 'train' }, // MODERATE rail (G7)
+  { color: '#FF9500', strokeColor: '#FFFFFF', emoji: '🚂', slug: 'train' }, // MODERATE rail
   { color: '#30D158', strokeColor: '#FFFFFF', emoji: '🚂', slug: 'train' }, // LIGHT rail
 ]
 
@@ -204,13 +204,9 @@ function buildPopupHTML(props: Record<string, unknown>): string {
   const status      = String(props.status ?? 'CLEAR')
   const color       = String(props.color ?? '#8E8E93')
   const wait        = Number(props.waitTimeMinutes ?? 0)
-  const g7Period    = Boolean(props.g7Period)
-  const g7Status    = props.g7Status ? String(props.g7Status) : null
   const hours       = String(props.hours ?? '—')
   const vehicles    = parseArr(props.vehicles)
   const vignettes   = parseArr(props.vignettes)
-  const g7Info      = String(props.g7Info ?? '')
-  const nearest     = String(props.nearestOpen ?? '')
   const dataQuality = String(props.dataQuality ?? 'synthetic')
   const confidence  = Number(props.confidence ?? 0.3)
   const updated     = props.lastUpdated
@@ -220,29 +216,11 @@ function buildPopupHTML(props: Record<string, unknown>): string {
   const statusLabel = STATUS_LABEL[status] ?? status
   const isClosed    = status === 'BLOCKED'
 
-  const headerBg = isClosed ? 'rgba(255,59,48,0.12)'
-    : g7Status === 'macaron' ? 'rgba(90,200,250,0.08)'
-    : 'rgba(255,255,255,0.04)'
+  const headerBg = isClosed ? 'rgba(255,59,48,0.12)' : 'rgba(255,255,255,0.04)'
 
   const waitLine = wait > 0 && !isClosed
     ? `<span style="color:rgba(255,255,255,0.4);font-size:11px">· ~${wait} min d'attente</span>`
     : ''
-
-  let g7Section = ''
-  if (g7Period && g7Info) {
-    const g7Bg    = g7Status === 'closed'  ? 'rgba(255,59,48,0.12)' : 'rgba(255,149,0,0.08)'
-    const g7Color = g7Status === 'closed'  ? '#FF3B30'
-                  : g7Status === 'macaron' ? '#5AC8FA' : '#FF9500'
-    const altRow  = nearest
-      ? `<div class="tif-popup-row" style="margin-top:5px;color:rgba(255,255,255,0.5);font-size:11px">Alternative : ${nearest}</div>`
-      : ''
-    g7Section = `
-      <div class="tif-popup-section" style="background:${g7Bg}">
-        <div class="tif-popup-label" style="color:${g7Color}">G7 — 12 au 18 juin 2026</div>
-        <div class="tif-popup-row"   style="color:${g7Color}">${g7Info}</div>
-        ${altRow}
-      </div>`
-  }
 
   const vignetteRows = vignettes.map(v => `<div class="tif-popup-row">· ${v}</div>`).join('')
   const vehicleList  = vehicles.join(' · ')
@@ -260,8 +238,6 @@ function buildPopupHTML(props: Record<string, unknown>): string {
           <span style="font-size:11px;color:rgba(255,255,255,0.3)">CH ⇄ FR · ${updated}</span>
           ${dataQuality === 'live'
             ? `<span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;background:rgba(52,199,89,0.15);color:#34C759">● Live HERE · ${Math.round(confidence * 100)}%</span>`
-            : dataQuality === 'g7-directive'
-            ? `<span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;background:rgba(90,200,250,0.15);color:#5AC8FA">● Directive G7</span>`
             : `<span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;background:rgba(255,204,0,0.12);color:#FFCC00">● Estimé</span>`
           }
         </div>
@@ -273,18 +249,15 @@ function buildPopupHTML(props: Record<string, unknown>): string {
       </div>
       ${vignetteRows ? `<div class="tif-popup-section"><div class="tif-popup-label">Documents & Vignettes requis</div>${vignetteRows}</div>` : ''}
       <div class="tif-popup-section" style="background:rgba(255,255,255,0.02)">
-        <div class="tif-popup-label">Macarons obligatoires</div>
-        <div class="tif-popup-row"><span class="tif-popup-badge" style="background:rgba(90,200,250,0.15);color:#5AC8FA">Macaron G7</span><span style="color:rgba(255,255,255,0.5);font-size:11px;margin-left:5px">Personnel indispensable uniquement</span></div>
-        <div class="tif-popup-row" style="margin-top:4px"><span class="tif-popup-badge" style="background:rgba(52,199,89,0.15);color:#34C759">Vignette CH</span><span style="color:rgba(255,255,255,0.5);font-size:11px;margin-left:5px">CHF 40/an — autoroutes A1/A40</span></div>
+        <div class="tif-popup-label">Vignettes routières</div>
+        <div class="tif-popup-row"><span class="tif-popup-badge" style="background:rgba(52,199,89,0.15);color:#34C759">Vignette CH</span><span style="color:rgba(255,255,255,0.5);font-size:11px;margin-left:5px">CHF 40/an — autoroutes A1/A40</span></div>
         <div class="tif-popup-row" style="margin-top:4px"><span class="tif-popup-badge" style="background:rgba(255,149,0,0.15);color:#FF9500">Stick'AIR</span><span style="color:rgba(255,255,255,0.5);font-size:11px;margin-left:5px">CHF 5 · Crit'Air FR reconnu (pics pollution)</span></div>
-        <div class="tif-popup-row" style="margin-top:4px"><span class="tif-popup-badge" style="background:rgba(175,82,222,0.15);color:#AF52DE">Pass G7</span><span style="color:rgba(255,255,255,0.5);font-size:11px;margin-left:5px">QR code — périmètre Évian uniquement</span></div>
       </div>
-      ${g7Section}
     </div>`
 }
 
 // ── Merge API data with client-side fallback ──────────────────────────────────
-// Trust server (HERE live) when dataQuality is 'live' or 'g7-directive'.
+// Trust server (HERE live) when dataQuality is 'live'.
 // Fall back to time-based client computation only for 'synthetic' data.
 function mergeWithClientStatus(apiData: FeatureCollection): FeatureCollection {
   const now    = new Date()
@@ -296,8 +269,7 @@ function mergeWithClientStatus(apiData: FeatureCollection): FeatureCollection {
     const p = f.properties as Record<string, unknown>
     if (p.type !== 'border') return f
 
-    const isStillG7 = now >= new Date('2026-06-11T22:01:00Z') && now <= new Date('2026-06-18T05:00:00Z')
-    if (p.dataQuality === 'live' || (p.dataQuality === 'g7-directive' && isStillG7)) {
+    if (p.dataQuality === 'live') {
       return { ...f, properties: { ...p, waitMinutes: p.waitTimeMinutes ?? 0 } }
     }
 
@@ -308,7 +280,6 @@ function mergeWithClientStatus(apiData: FeatureCollection): FeatureCollection {
   })
 
   // Ajouter les crossings client-only absents de l'API (ex: rail — pas de données HERE)
-  const isG7 = now >= new Date('2026-06-11T22:01:00Z') && now <= new Date('2026-06-18T21:59:00Z')
   const clientOnly = ALL_CROSSINGS
     .filter(c => !apiIds.has(c.id))
     .map(c => {
@@ -320,8 +291,8 @@ function mergeWithClientStatus(apiData: FeatureCollection): FeatureCollection {
           id: c.id, name: c.name, type: 'border',
           status, color, icon, waitMinutes,
           hours: c.hours, vehicles: c.vehicles.join(' · '),
-          g7Info: c.g7Info, nearestOpen: c.nearestOpen ?? '',
-          pedestrian: c.pedestrian, dataQuality: 'synthetic', g7Period: isG7,
+          nearestOpen: c.nearestOpen ?? '',
+          pedestrian: c.pedestrian, dataQuality: 'synthetic',
         },
       }
     })
@@ -334,7 +305,7 @@ function dispatchLiveUpdate(geojson: FeatureCollection): void {
   for (const f of geojson.features) {
     const p = f.properties as Record<string, unknown>
     if (p.type !== 'border' || !p.id) continue
-    if (p.dataQuality !== 'live' && p.dataQuality !== 'g7-directive') continue
+    if (p.dataQuality !== 'live') continue
     liveMap[String(p.id)] = {
       status:      String(p.status ?? ''),
       waitMinutes: Number(p.waitTimeMinutes ?? 0),
@@ -348,10 +319,9 @@ function dispatchLiveUpdate(geojson: FeatureCollection): void {
 function featureImgProps(f: { properties: unknown }) {
   const p           = f.properties as Record<string, unknown>
   const isClosed    = p.status === 'BLOCKED'
-  const g7Status    = p.g7Status ? String(p.g7Status) : null
   const color       = String(p.color ?? '#8E8E93')
   const emoji       = String(p.icon ?? '🛂')
-  const strokeColor = isClosed ? '#FF3B30' : g7Status === 'macaron' ? '#5AC8FA' : '#FFFFFF'
+  const strokeColor = isClosed ? '#FF3B30' : '#FFFFFF'
   const slug        = emoji === '🔒' ? 'lock' : emoji === '🚂' ? 'train' : 'ctrl'
   const imgId       = `tif-bc-${color.replace('#', '')}-${strokeColor.replace('#', '')}-${slug}`
   return { color, strokeColor, emoji, imgId }

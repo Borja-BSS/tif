@@ -1,6 +1,5 @@
 // Transport public routing via transport.opendata.ch (CFF/TPG/Léman Express)
 // https://transport.opendata.ch — gratuit, pas de clé API
-import { getG7Impact } from '../../transport/g7-impact'
 
 const OTD_BASE = 'https://transport.opendata.ch/v1'
 
@@ -36,8 +35,8 @@ export interface TransportRoute {
     disrupted:    boolean
   }
   alternative: boolean
-  warnings:    string[]   // avertissements G7 et perturbations
-  g7Affected:  boolean    // true si G7 actif au moment du calcul
+  warnings:    string[]   // avertissements de perturbation
+  g7Affected:  boolean    // conservé pour compat — toujours false (G7 terminé)
 }
 
 export async function calculateTransportRoute(
@@ -63,7 +62,6 @@ export async function calculateTransportRoute(
   if (!res.ok) return []
 
   const data = await res.json() as OtdResponse
-  const g7   = getG7Impact()
 
   const routes = (data.connections ?? []).map((conn, idx) => {
     const legs         = parseLegs(conn.sections ?? [])
@@ -83,36 +81,12 @@ export async function calculateTransportRoute(
         disrupted:    anyDisrupted,
       },
       alternative: idx > 0,
-      warnings:    [] as string[],
-      g7Affected:  g7.isActive,
+      warnings:    anyDisrupted ? ['Retard signalé — vérifier avant départ'] : [],
+      g7Affected:  false,
     }
   })
 
-  if (!g7.isActive) return routes
-
-  // G7 active — filter and annotate
   return routes
-    .filter(route => {
-      // Éliminer tout itinéraire passant par une ligne suspendue
-      if (g7.suspendedLines.length === 0) return true
-      return !route.legs.some(leg => leg.line && g7.suspendedLines.includes(leg.line))
-    })
-    .map(route => {
-      const warnings: string[] = []
-
-      const hasSuspectedLeg = route.legs.some(l => l.disrupted)
-      if (hasSuspectedLeg) {
-        warnings.push('Retard signalé — vérifier avant départ')
-      }
-
-      if (g7.suspendedLines.length > 0) {
-        warnings.push(`Ligne${g7.suspendedLines.length > 1 ? 's' : ''} ${g7.suspendedLines.join(', ')} suspendue${g7.suspendedLines.length > 1 ? 's' : ''} jusqu'au 14 juin — itinéraire alternatif`)
-      }
-
-      warnings.push('Réseau TPG modifié G7 jusqu\'au 17 juin — horaires susceptibles de changer')
-
-      return { ...route, warnings }
-    })
 }
 
 // ── Résolution d'arrêt ───────────────────────────────────────────────────────

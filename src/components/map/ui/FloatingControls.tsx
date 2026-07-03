@@ -224,7 +224,7 @@ export function FloatingControls({ map }: FloatingControlsProps) {
               </div>
               <div className="flex-1">
                 <p className="text-[14px] font-bold" style={{ color: 'var(--text-primary)' }}>Signaler en direct</p>
-                <p className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>Remontée communautaire · G7 2026</p>
+                <p className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>Remontée communautaire</p>
               </div>
               <button onClick={() => setShowReportModal(false)}
                 className="w-7 h-7 flex items-center justify-center rounded-full text-[16px] leading-none"

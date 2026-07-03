@@ -12,17 +12,15 @@ import type { JourneyStatusResult } from '@/lib/my-journey/types'
 import type mapboxgl from 'mapbox-gl'
 import { JourneySetup } from '@/components/my-journey/JourneySetup'
 import { firebaseAuth } from '@/lib/firebase'
-import { G7BulletinsPanel } from './G7Bulletins'
 import { useTheme } from '@/lib/theme/ThemeProvider'
 import { useMapT } from '@/i18n/map'
 import type { MapT } from '@/i18n/map'
 import { events, CATEGORY_LABELS, CATEGORY_ICONS } from '@/data/events'
 import type { EventItem } from '@/data/types'
-import { getAlertsForDay } from '@/data/g7-alerts'
 import { IMPACT_ZONES, getActiveImpactZones } from '@/data/impact-zones'
 import type { ImpactZone } from '@/data/impact-zones'
 
-type DetailView = 'overview' | 'douanes' | 'transport' | 'alertes' | 'g7' | 'meteo' | 'parking' | 'journey' | 'events' | 'impact-zone'
+type DetailView = 'overview' | 'douanes' | 'transport' | 'alertes' | 'meteo' | 'parking' | 'journey' | 'events' | 'impact-zone'
 
 // Type partagé entre AlertesDetail et le composant parent (navigation hiérarchique)
 type AlertDetailItem = {
@@ -109,7 +107,7 @@ const JURA_IDS = new Set(['bois-d-amont','saint-Laurent'])
 
 interface OfficialSource { label: string; url: string }
 
-function getCrossingSources(id: string, isG7: boolean): OfficialSource[] {
+function getCrossingSources(id: string): OfficialSource[] {
   const sources: OfficialSource[] = [
     { label: 'TIF · Börja Swiss Solutions', url: 'https://borja-swiss-solutions.ch' },
     { label: 'Douanes suisses (BAZG)', url: 'https://www.bazg.admin.ch' },
@@ -131,10 +129,6 @@ function getCrossingSources(id: string, isG7: boolean): OfficialSource[] {
     sources.push({ label: 'Préfecture du Jura', url: 'https://www.jura.gouv.fr' })
   }
   sources.push({ label: 'TCS — Info trafic Suisse', url: 'https://www.tcs.ch/fr/routes-voyages/info-trafic/' })
-  if (isG7) {
-    sources.push({ label: 'G7 Évian 2026 — Élysée', url: 'https://www.elysee.fr' })
-    sources.push({ label: 'Confédération suisse', url: 'https://www.admin.ch' })
-  }
   return sources
 }
 
@@ -163,11 +157,7 @@ function CrossingDetail({ crossing, onBack: _onBack, onLocate, waitDirection, wa
   const liveData = useLiveCrossings()
   const live     = liveData[crossing.id]
 
-  const G7_START   = new Date('2026-06-08T00:00:00Z')
-  const G7_END     = new Date('2026-06-18T05:00:00Z') // 07h00 heure genevoise — retour à la normale
-  const isG7Period = now >= G7_START && now < G7_END
-
-  const sources = getCrossingSources(crossing.id, isG7Period)
+  const sources = getCrossingSources(crossing.id)
 
   // Utilise le statut live (HERE/dispatch) s'il est disponible, sinon le calcul synthétique
   const displayStatus   = liveStatus      ?? live?.status      ?? s.status
@@ -175,7 +165,7 @@ function CrossingDetail({ crossing, onBack: _onBack, onLocate, waitDirection, wa
   const displayColor    = LIVE_STATUS_COLOR[displayStatus]     ?? s.color
 
   const statusLabel = crossing.type === 'rail'
-    ? (isG7Period ? 'Arrivez 45 min avant le départ' : 'Arrivez 30 min avant le départ')
+    ? 'Arrivez 30 min avant le départ'
     : displayStatus === 'BLOCKED'  ? t.crossing.closed
     : displayStatus === 'HEAVY'    ? t.crossing.heavy.replace('{n}', String(displayWait))
     : displayStatus === 'MODERATE' ? t.crossing.moderate.replace('{n}', String(displayWait))
@@ -213,7 +203,7 @@ function CrossingDetail({ crossing, onBack: _onBack, onLocate, waitDirection, wa
                 <div className="flex items-center justify-between pl-4 pr-1">
                   <span className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>🚂 Départ CH → FR</span>
                   <span className="text-[12px] font-semibold" style={{ color: displayColor }}>
-                    {isG7Period ? '45 min avant' : '30 min avant'}
+                    30 min avant
                   </span>
                 </div>
                 <div className="flex items-center justify-between pl-4 pr-1">
@@ -293,7 +283,7 @@ function CrossingDetail({ crossing, onBack: _onBack, onLocate, waitDirection, wa
             <div>
               <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Départ Genève → Paris / Lyon</p>
               <p className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
-                Présentez-vous au quai {isG7Period ? '45' : '30'} min avant le départ · Contrôle Douane CH + PAF France à quai · Pièce d&apos;identité obligatoire
+                Présentez-vous au quai 30 min avant le départ · Contrôle Douane CH + PAF France à quai · Pièce d&apos;identité obligatoire
               </p>
             </div>
           </div>
@@ -308,31 +298,6 @@ function CrossingDetail({ crossing, onBack: _onBack, onLocate, waitDirection, wa
           </div>
         </>)}
       </div>
-
-      {/* Info G7 — masqué automatiquement après la fin du G7 */}
-      {isG7Period && crossing.g7Info && (
-        <div className="rounded-2xl p-4 mb-3"
-          style={{
-            background: displayStatus === 'BLOCKED' ? 'rgba(255,69,58,0.08)' : 'rgba(255,149,0,0.08)',
-            border:     displayStatus === 'BLOCKED' ? '1px solid rgba(255,69,58,0.25)' : '1px solid rgba(255,149,0,0.25)',
-          }}>
-          <p className="text-[10px] font-semibold uppercase tracking-wider mb-2"
-            style={{ color: displayStatus === 'BLOCKED' ? 'var(--red)' : '#FF9F0A' }}>
-            🏛️ G7 · 12 au 18 juin 2026
-          </p>
-          <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-            {crossing.g7Info}
-          </p>
-          {crossing.nearestOpen && displayStatus === 'BLOCKED' && (
-            <div className="mt-2 pt-2" style={{ borderTop: '1px solid rgba(255,69,58,0.15)' }}>
-              <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>
-                <span style={{ color: '#30D158' }}>{t.crossing.alternative}</span>
-                {crossing.nearestOpen}
-              </p>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Sources officielles — liens cliquables */}
       <div className="rounded-2xl p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
@@ -422,7 +387,7 @@ function DouanesDetail({ onSelect, map }: {
     <div className="space-y-2">
       <p className="text-[10px] font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-tertiary)' }}>
         {crossings.length} {t.crossing.crossings} · {open24} {t.crossing.open24}
-        {blocked > 0 ? ` · ${blocked} ${t.crossing.closedG7}` : ''}
+        {blocked > 0 ? ` · ${blocked} ${t.crossing.closed}` : ''}
       </p>
       {crossings.map(({ c, s }) => (
         <button
@@ -597,37 +562,8 @@ function TransportDetail({ onExpand }: { onExpand?: () => void }) {
     travaux: '🚧', deviation: '🔀', suppression: '🚫', retard: '⏱️', perturbation: '⚠️',
   }
 
-  const d = new Date().toLocaleDateString('fr-CH', { timeZone: 'Europe/Zurich' })
-  const isNOG7Day = ['14.06.2026','15.06.2026','16.06.2026','17.06.2026'].includes(d)
-
   return (
     <div className="space-y-3">
-      {/* ── Bannière A1 fermée ────────────────────────────────────────── */}
-      {isNOG7Day && (
-        <div className="rounded-2xl p-4" style={{ background: 'rgba(255,69,58,0.12)', border: '1px solid rgba(255,69,58,0.40)' }}>
-          <div className="flex items-start gap-3">
-            <span className="text-2xl flex-shrink-0">🛑</span>
-            <div className="flex-1">
-              <p className="text-[11px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--red)' }}>
-                ⛔ A1 FERMÉE — 14 AU 17 JUIN 2026
-              </p>
-              <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
-                Autoroute A1 bloquée jusqu&apos;à Bardonnex
-              </p>
-              <p className="text-[12px] mt-1.5" style={{ color: 'var(--text-secondary)' }}>
-                Douane de Bardonnex inaccessible · Évitez la A1 dans les deux sens
-              </p>
-              <div className="mt-2.5 space-y-1">
-                <p className="text-[11px] font-semibold" style={{ color: 'var(--text-secondary)' }}>Alternatives :</p>
-                <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>✓ Ferney-Voltaire (D1005)</p>
-                <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>✓ Thônex-Vallard (N201)</p>
-                <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>✓ Moillesulaz (N205)</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* ── Zones d'impact TPG (actives uniquement) ─────────────────── */}
       {getActiveImpactZones().filter(z => z.type === 'TRANSPORT_DISRUPTION').map(zone => {
         const color = zone.strokeColor
@@ -1050,14 +986,6 @@ function AlertesDetail({ map, onAlertSelect }: { map: mapboxgl.Map | null; onAle
     map.flyTo({ center: [lng, lat], zoom: 14, duration: 900, essential: true })
   }
 
-  const nowAlert  = new Date()
-  const isG7Alert = nowAlert >= new Date('2026-06-11T22:01:00Z') && nowAlert <= new Date('2026-06-18T05:00:00Z')
-  const blockedCrossings = isG7Alert
-    ? ALL_CROSSINGS
-        .filter(c => computeInstantStatus(c, nowAlert).status === 'BLOCKED' && c.nearestOpen != null)
-        .sort((a, b) => a.name.localeCompare(b.name))
-    : []
-
   const customAlerts = (customAlertsGeo?.features ?? []).map(f => ({
     id:          f.properties.id,
     type:        f.properties.type,
@@ -1085,7 +1013,7 @@ function AlertesDetail({ map, onAlertSelect }: { map: mapboxgl.Map | null; onAle
     }
   }, [isLoading, alerts.length])
 
-  const totalActive = customAlerts.length + blockedCrossings.length + alerts.length
+  const totalActive = customAlerts.length + alerts.length
 
   return (
     <div className="space-y-3">
@@ -1217,29 +1145,6 @@ function AlertesDetail({ map, onAlertSelect }: { map: mapboxgl.Map | null; onAle
         </button>
       ))}
 
-      {/* ── Passages fermés G7 ────────────────────────────────────────── */}
-      {blockedCrossings.map(c => (
-        <button
-          key={c.id}
-          className="w-full flex items-center gap-3 rounded-2xl px-3 py-2 text-left active:scale-[0.98] transition-transform"
-          style={{ background: 'rgba(255,59,48,0.10)', border: '0.5px solid rgba(255,59,48,0.35)', backdropFilter: 'blur(20px)' }}
-          onClick={() => c.lng != null && c.lat != null && flyTo(c.lng!, c.lat!)}
-        >
-          <span className="text-base flex-shrink-0">🚫</span>
-          <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{c.name}</p>
-            {c.nearestOpen && (
-              <p className="text-[11px] truncate mt-0.5" style={{ color: 'var(--text-tertiary)' }}>
-                {t.alertsSection.nearestOpen}: {c.nearestOpen}
-              </p>
-            )}
-          </div>
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="flex-shrink-0">
-            <path d="M5 3l4 4-4 4" stroke="var(--text-tertiary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-      ))}
-
       {/* ── Incidents temps réel (HERE / OFROU) ──────────────────────── */}
       {showBanner && (
         <div className="flex items-center gap-3 rounded-2xl px-4 py-3"
@@ -1251,7 +1156,7 @@ function AlertesDetail({ map, onAlertSelect }: { map: mapboxgl.Map | null; onAle
           </div>
         </div>
       )}
-      {!isLoading && alerts.length === 0 && !showBanner && customAlerts.length === 0 && blockedCrossings.length === 0 && (
+      {!isLoading && alerts.length === 0 && !showBanner && customAlerts.length === 0 && (
         <div className="rounded-2xl p-6 text-center" style={{ background: 'var(--bg-card)' }}>
           <p className="text-2xl mb-2">✅</p>
           <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{t.alertsSection.noIncidentTitle}</p>
@@ -1281,11 +1186,6 @@ function AlertesDetail({ map, onAlertSelect }: { map: mapboxgl.Map | null; onAle
           )}
         </button>
       ))}
-
-      {/* ══ BULLETINS G7 ══════════════════════════════════════════════════ */}
-      <div className="pt-1">
-        <G7BulletinsPanel categories={['route']} title={t.alertsSection.g7RouteTpg} />
-      </div>
 
       {/* ══ SOURCES ═══════════════════════════════════════════════════════ */}
       <div className="pt-1 space-y-2">
@@ -1583,43 +1483,6 @@ function MonTrajetDetail() {
   )
 }
 
-// ── G7 ────────────────────────────────────────────────────────────────────────
-function G7Detail() {
-  const t        = useMapT()
-  const now      = new Date()
-  const isActive = now >= new Date('2026-06-08') && now <= new Date('2026-06-18')
-
-  return (
-    <div className="space-y-4">
-      {/* Statut sommet */}
-      <div
-        className="rounded-2xl p-4"
-        style={isActive
-          ? { background: 'rgba(255,69,58,0.08)', border: '1px solid rgba(255,69,58,0.25)' }
-          : { background: 'var(--bg-card)', border: '1px solid var(--border)' }
-        }
-      >
-        <p className="text-sm font-bold mb-1" style={{ color: isActive ? 'var(--red)' : 'var(--text-primary)' }}>
-          {isActive ? t.g7Section.activeBadge : t.g7Section.upcomingBadge}
-        </p>
-        <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-          {isActive ? t.g7Section.activeDesc : t.g7Section.upcomingDesc}
-        </p>
-        {isActive && (
-          <div className="mt-2 rounded-xl p-2.5" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border)' }}>
-            <p className="text-[11px] font-semibold mb-0.5" style={{ color: 'var(--text-tertiary)' }}>{t.g7Section.macaronPosts}</p>
-            <p className="text-[12px]" style={{ color: 'var(--text-primary)' }}>Bardonnex · Thônex-Vallard</p>
-            <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>{t.g7Section.macaronSub}</p>
-          </div>
-        )}
-      </div>
-
-      {/* Tous les bulletins G7 — route, TPG, accès */}
-      <G7BulletinsPanel title={t.g7Section.bulletinsTitle} />
-    </div>
-  )
-}
-
 // ── Météo : helpers + banner + détail ────────────────────────────────────────
 function wmoIcon(c: number) {
   if (c === 0)   return '☀️'
@@ -1815,7 +1678,7 @@ function ToutOverview({ data, onSelect }: {
     <div className="space-y-2.5 pt-1">
       <WeatherBanner onPress={() => onSelect('meteo')} />
       <CategoryCard icon="🛂" title={t.overview.douanes}
-        subtitle={heavy ? `⚠️ ${heavy.name} · ${t.overview.trafficHeavy}` : `${ALL_CROSSINGS.length} postes · ${blocked > 0 ? `${blocked} ${t.overview.closedG7}` : t.overview.allOpen}`}
+        subtitle={heavy ? `⚠️ ${heavy.name} · ${t.overview.trafficHeavy}` : `${ALL_CROSSINGS.length} postes · ${t.overview.allOpen}`}
         onPress={() => onSelect('douanes')} />
       <CategoryCard icon="🚌" title={t.overview.transport}
         subtitle={t.overview.transportSub}
@@ -1835,9 +1698,6 @@ function ToutOverview({ data, onSelect }: {
       <CategoryCard icon="🛤️" title={t.overview.journey}
         subtitle={t.overview.journeySub}
         onPress={() => onSelect('journey')} />
-      <CategoryCard icon="🏛️" title={t.overview.g7Title}
-        subtitle={t.overview.g7Sub}
-        onPress={() => onSelect('g7')} />
 
       {/* Carte Borja Swiss Solutions */}
       <a
@@ -1874,58 +1734,6 @@ function ToutOverview({ data, onSelect }: {
 function formatDate(iso: string): string {
   const d = new Date(iso + 'T12:00:00')
   return d.toLocaleDateString('fr-CH', { weekday: 'short', day: 'numeric', month: 'short' })
-}
-
-function G7AccessPanel({ item }: { item: EventItem }) {
-  const t = useMapT()
-  const G7_START = '2026-06-11'
-  const G7_END   = '2026-06-18'
-
-  const g7Dates = item.occurrences.filter(o => o.date >= G7_START && o.date <= G7_END)
-  if (g7Dates.length === 0) return null
-
-  const allAlerts = g7Dates.flatMap(o => getAlertsForDay(o.date))
-  const seen      = new Set<string>()
-  const unique    = allAlerts.filter(a => { if (seen.has(a.id)) return false; seen.add(a.id); return true })
-  const mobilityAlerts = unique.filter(a =>
-    ['frontiere', 'route', 'transport', 'aerien', 'manifestation'].includes(a.category)
-  )
-
-  const sevColor = (s: string) =>
-    s === 'critical' ? 'var(--red)' : s === 'warning' ? '#FF9F0A' : 'var(--text-tertiary)'
-
-  const areaNote = () => {
-    if (item.venue.area === 'Grand-Saconnex')
-      return "⚠️ Lieu proche de l'aéroport et du périmètre G7 : prévoir du temps supplémentaire. Restriction espace aérien active."
-    if (item.occurrences.some(o => o.date === '2026-06-14'))
-      return "⚠️ 14 juin : manifestation No-G7 rive droite, Pont du Mont-Blanc interdit. Prévoir un itinéraire alternatif."
-    return null
-  }
-
-  const note = areaNote()
-
-  return (
-    <div className="rounded-2xl p-3 mb-4" style={{ background: 'rgba(255,149,0,0.08)', border: '1px solid rgba(255,149,0,0.25)' }}>
-      <p className="text-[12px] font-bold mb-2" style={{ color: '#FF9F0A' }}>{t.eventsSection.g7AccessTitle}</p>
-      {note && (
-        <p className="text-[11px] mb-2" style={{ color: 'var(--text-primary)' }}>{note}</p>
-      )}
-      {mobilityAlerts.map(a => (
-        <div key={a.id} className="flex items-start gap-2 mb-1.5">
-          <span className="text-[10px] font-bold mt-0.5 flex-shrink-0" style={{ color: sevColor(a.severity) }}>
-            {a.severity === 'critical' ? '🔴' : a.severity === 'warning' ? '🟠' : 'ℹ️'}
-          </span>
-          <div>
-            <p className="text-[11px] font-semibold" style={{ color: 'var(--text-primary)' }}>{a.title}</p>
-            <p className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{a.detail}</p>
-          </div>
-        </div>
-      ))}
-      {mobilityAlerts.length === 0 && (
-        <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{t.eventsSection.g7Lifted}</p>
-      )}
-    </div>
-  )
 }
 
 function EventDetail({ slug, onBack }: { slug: string; onBack: () => void }) {
@@ -1985,21 +1793,11 @@ function EventDetail({ slug, onBack }: { slug: string; onBack: () => void }) {
               🚌 En transport
             </button>
           </div>
-          {item.g7AccessNotes && item.g7AccessNotes.length > 0 && (
-            <div className="space-y-1 mt-2.5">
-              {item.g7AccessNotes.map((note, i) => (
-                <p key={i} className="text-[11px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>· {note}</p>
-              ))}
-            </div>
-          )}
         </div>
       )}
 
       {/* Description */}
       <p className="text-[13px] mb-4 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{item.description}</p>
-
-      {/* Encart G7 */}
-      <G7AccessPanel item={item} />
 
       {/* Lieu */}
       <div className="rounded-2xl p-3 mb-3" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
@@ -2870,7 +2668,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
     return () => window.removeEventListener('tif:event-click', handler)
   }, [animateTo])
 
-  // Écoute les clics sur les zones d'impact (polygones NO-G7)
+  // Écoute les clics sur les zones d'impact (polygones)
   useEffect(() => {
     const handler = (e: Event) => {
       const zone = (e as CustomEvent<ImpactZone>).detail
@@ -3037,7 +2835,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
                   map.flyTo({ center: [ev.venue.lng, ev.venue.lat], zoom: 15, duration: 800, essential: true })
                 }
               }} />
-            : <G7Detail />
+            : null
           }
         </div>
       </div>

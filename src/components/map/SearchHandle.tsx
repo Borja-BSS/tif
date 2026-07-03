@@ -522,12 +522,6 @@ export default function SearchHandle({ map }: SearchHandleProps) {
                 <span className="text-sm font-bold" style={{ color: activeTab === 'transport' ? '#34C759' : 'rgba(255,255,255,0.75)' }}>
                   {fmt(transRoutes[0].summary.duration)}
                 </span>
-                {transRoutes[0].g7Affected && (
-                  <span className="text-[8px] font-bold px-1 py-0.5 rounded-full leading-none"
-                    style={{ background: 'rgba(255,159,10,0.20)', color: '#FF9F0A' }}>
-                    G7
-                  </span>
-                )}
               </div>
             ) : <span className="text-xs text-white/35">—</span>}
             <div className="text-[10px] text-white/30">
@@ -546,17 +540,13 @@ export default function SearchHandle({ map }: SearchHandleProps) {
           {activeTab === 'car' && carRoutes.map((route, i) => {
             const isSelected = i === selectedCarIdx
             const openCrossing = route.warnings.find((w: string) => w.startsWith('Via ') && w !== 'Via centre-ville')
-            const hasManifestationWarning = route.warnings.some((w: string) => w.includes('manifestation'))
-            const hasA1Warning = route.warnings.some((w: string) => w.includes('A1 fermée'))
             const slower = i > 0 ? Math.ceil((route.summary.durationInTraffic - carRoutes[0].summary.durationInTraffic) / 60) : 0
             const reasons = i === 0
               ? ['Itinéraire le plus rapide', route.trafficDelay === 0 ? 'Trafic fluide' : null].filter(Boolean) as string[]
               : openCrossing
                 ? (slower > 0 ? [`+${slower} min vs le plus rapide`] : [])
-                : route.warnings.includes('Évite les zones G7')
-                  ? ['Évite périmètres G7', 'Recommandé 12-18 juin']
-                  : [`Via centre-ville`, `+${slower} min`]
-            const routeColor = route.warnings.includes('Évite les zones G7') ? '#34C759' : isSelected ? '#0A84FF' : 'rgba(255,255,255,0.45)'
+                : [`Via centre-ville`, `+${slower} min`]
+            const routeColor = isSelected ? '#0A84FF' : 'rgba(255,255,255,0.45)'
             return (
               <button
                 key={route.id}
@@ -595,29 +585,8 @@ export default function SearchHandle({ map }: SearchHandleProps) {
                       <p className="text-[10px] font-semibold leading-tight" style={{ color: '#34C759' }}>
                         Douane ouverte vérifiée — {openCrossing.replace('Via ', '')}
                       </p>
-                      <p className="text-[9px] mt-0.5" style={{ color: 'rgba(52,199,89,0.6)' }}>
-                        Itinéraire optimisé G7
-                      </p>
                     </div>
                   </div>
-                )}
-
-                {/* ── Zone manifestation warning ── */}
-                {hasManifestationWarning && (
-                  <div className="mb-2 rounded-xl px-2 py-1.5 flex items-center gap-1.5"
-                    style={{ background: 'rgba(255,159,10,0.10)', border: '1px solid rgba(255,159,10,0.30)' }}>
-                    <span className="text-[10px]">⚠️</span>
-                    <p className="text-[10px] font-semibold leading-tight" style={{ color: '#FF9F0A' }}>
-                      Zone de manifestation NO-G7 — perturbations importantes
-                    </p>
-                  </div>
-                )}
-
-                {/* ── A1 notice (sans badge douane) ── */}
-                {hasA1Warning && !openCrossing && (
-                  <p className="mb-2 text-[9px]" style={{ color: 'rgba(255,69,58,0.7)' }}>
-                    ⛔ A1 fermée — itinéraire sans autoroute
-                  </p>
                 )}
 
                 {isSelected && destination && (
@@ -648,23 +617,6 @@ export default function SearchHandle({ map }: SearchHandleProps) {
           })}
           {activeTab === 'transport' && (
             <>
-              {/* Bannière G7 TPG — affichée si les routes signalent g7Affected */}
-              {transRoutes.some(r => r.g7Affected) && (
-                <div className="mb-3 rounded-2xl px-3 py-2.5 flex items-start gap-2"
-                  style={{ background: 'rgba(255,159,10,0.10)', border: '1px solid rgba(255,159,10,0.30)' }}>
-                  <span className="text-sm flex-shrink-0 mt-0.5">⚠️</span>
-                  <div>
-                    <p className="text-[11px] font-semibold leading-tight" style={{ color: '#FF9F0A' }}>
-                      Réseau TPG perturbé — G7 Grand Genève
-                    </p>
-                    <p className="text-[9px] mt-0.5 leading-snug" style={{ color: 'rgba(255,159,10,0.65)' }}>
-                      Horaires modifiés jusqu'au 17 juin. Vérifiez avant départ.
-                      Hotline TPG : 0800 858 900
-                    </p>
-                  </div>
-                </div>
-              )}
-
               {transRoutes.slice(0, 3).map((route, i) => (
                 <div key={route.id} className="mb-3 rounded-2xl p-3"
                   style={{
@@ -678,12 +630,6 @@ export default function SearchHandle({ map }: SearchHandleProps) {
                       <span className="text-sm font-bold text-white/80">{fmtTime(route.summary.arrival)}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      {route.g7Affected && (
-                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
-                          style={{ background: 'rgba(255,159,10,0.15)', color: '#FF9F0A' }}>
-                          G7
-                        </span>
-                      )}
                       <span className="text-xs font-semibold" style={{ color: route.summary.disrupted ? 'var(--red)' : '#34C759' }}>
                         {fmt(route.summary.duration)}
                       </span>
@@ -705,7 +651,7 @@ export default function SearchHandle({ map }: SearchHandleProps) {
                     )}
                   </div>
 
-                  {/* Avertissements G7 par itinéraire */}
+                  {/* Avertissements par itinéraire */}
                   {route.warnings.length > 0 && (
                     <div className="mb-2 space-y-0.5">
                       {route.warnings.map((w, wi) => (

@@ -34,7 +34,7 @@ export async function searchPlaces(query: string): Promise<SearchResult[]> {
   console.log('[search-engine] fetching:', finalUrl)
 
   const res = await fetch(finalUrl, {
-    headers: { 'User-Agent': 'TIF-G7-LiveView/1.0' },
+    headers: { 'User-Agent': 'TIF-App/1.0' },
     cache:   'no-store',
   })
 

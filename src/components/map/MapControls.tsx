@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import type { FilterState } from './FilterPanel'
 import { useMapT } from '@/i18n/map'
 
@@ -23,8 +23,6 @@ interface MapControlsProps {
 export default function MapControls({ filters, onChange }: MapControlsProps) {
   const t = useMapT()
   const [tooltip,          setTooltip]          = useState<string | null>(null)
-  const [territoryTooltip, setTerritoryTooltip] = useState(false)
-  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [expanded, setExpanded] = useState(true)
 
   const LAYERS = [
@@ -74,19 +72,12 @@ export default function MapControls({ filters, onChange }: MapControlsProps) {
           {/* Layer toggles */}
           {LAYERS.map(({ key, icon, label, accent }) => {
             const active = filters[key]
-            const isTerritory = key === 'territory'
             return (
               <button
                 key={key}
                 onClick={() => toggle(key)}
                 onMouseEnter={() => setTooltip(label)}
-                onMouseLeave={() => { setTooltip(null); if (isTerritory) setTerritoryTooltip(false) }}
-                onTouchStart={() => {
-                  if (isTerritory) longPressTimer.current = setTimeout(() => setTerritoryTooltip(true), 500)
-                }}
-                onTouchEnd={() => {
-                  if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null }
-                }}
+                onMouseLeave={() => setTooltip(null)}
                 className="relative w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90"
                 style={{ background: active ? 'rgba(255,255,255,0.10)' : 'transparent' }}
                 aria-label={label}
@@ -119,17 +110,6 @@ export default function MapControls({ filters, onChange }: MapControlsProps) {
             </div>
           )}
 
-          {/* Territory tooltip */}
-          {territoryTooltip && (
-            <div
-              className="absolute left-full ml-2 bottom-0 w-56 p-3 rounded-2xl z-50 text-[11px] leading-relaxed"
-              style={{ ...LG_STYLE, color: 'var(--text-secondary)' }}
-              onClick={() => setTerritoryTooltip(false)}
-            >
-              <div className="font-semibold text-amber-400 mb-1">{t.layers.zonesG7Title}</div>
-              {t.layers.zonesG7Desc}
-            </div>
-          )}
         </div>
       )}
     </div>

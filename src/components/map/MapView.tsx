@@ -15,7 +15,7 @@ const MapGL                = dynamic(() => import('./MapGL'),                { s
 const RealtimeLayer        = dynamic(() => import('./RealtimeLayer'),        { ssr: false })
 const AlertLayer           = dynamic(() => import('./AlertLayer'),           { ssr: false })
 const TerritoryLayer       = dynamic(() => import('./TerritoryLayer'),       { ssr: false })
-// Éléments G7 retirés (G7Overlay, G7ClosuresLayer) — sommet terminé le 17 juin 2026
+// Anciennes couches événementielles retirées (overlay/fermetures)
 const ImpactZonesLayer     = dynamic(() => import('./ImpactZonesLayer'),     { ssr: false })
 const FilterPanel          = dynamic(() => import('./FilterPanel'),          { ssr: false })
 const BorderCrossingsLayer = dynamic(() => import('./BorderCrossingsLayer'), { ssr: false })

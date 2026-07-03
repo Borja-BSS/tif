@@ -242,11 +242,6 @@ function applyDisruptions(
   const alertSrc = map.getSource(SRC_ALERTS) as mapboxgl.GeoJSONSource | undefined
   alertSrc?.setData(buildAlertFC(tpg, cff))
 
-  // Dispatch G7 warning
-  if (data.g7.isActive || data.g7.isWarningPeriod) {
-    window.dispatchEvent(new CustomEvent('tif:g7-warning', { detail: data.g7 }))
-  }
-
   // Dispatch disruptions list for side panel
   window.dispatchEvent(new CustomEvent('tif:disruptions', {
     detail: { tpg, cff, total: tpg.length + cff.length },

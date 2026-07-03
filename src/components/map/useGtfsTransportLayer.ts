@@ -224,10 +224,6 @@ function applyData(map: mapboxgl.Map, data: TransportLayerResponse) {
   cffSrc?.setData((data.vehicles.cff ?? EMPTY_FC) as FeatureCollection)
   tAlertSrc?.setData(buildTpgAlertFC(data.disruptions.tpg))
   cAlertSrc?.setData(buildCffAlertFC(data.disruptions.cff))
-
-  if (data.g7.isActive || data.g7.isWarningPeriod) {
-    window.dispatchEvent(new CustomEvent('tif:g7-warning', { detail: data.g7 }))
-  }
 }
 
 export function useGtfsTransportLayer(map: mapboxgl.Map | null) {
