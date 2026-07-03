@@ -14,7 +14,6 @@ import { QuickFilters }           from '@/components/map/ui/QuickFilters'
 import { FloatingControls }       from '@/components/map/ui/FloatingControls'
 import { BottomSheet }            from '@/components/map/ui/BottomSheet'
 import { SmartAlertManager }      from '@/components/map/ui/SmartAlert'
-import { G7Mode, useG7Active }    from '@/components/map/modes/G7Mode'
 import type { FilterId }          from '@/components/map/ui/QuickFilters'
 import type { FilterState }       from '@/components/map/FilterPanel'
 import { useGuest }           from '@/context/GuestContext'
@@ -31,7 +30,7 @@ function toFilterState(active: FilterId): FilterState {
     heatmap:   active === 'all' || active === 'traffic' || active === 'parking',
     alerts:    active === 'all' || active === 'alerts',
     transport: active === 'transit',
-    territory: active === 'all' || active === 'borders' || active === 'g7',
+    territory: active === 'all' || active === 'borders',
     parking:   active === 'all' || active === 'parking',
   }
 }
@@ -73,7 +72,6 @@ export default function MapPage() {
   const [showThanks,   setShowThanks]     = useState(false)
   const sessionResult                     = useSession()
   const session                           = sessionResult?.data ?? null
-  const isG7Active                        = useG7Active()
   const router                            = useRouter()
   const { isGuest, endGuest }             = useGuest()
 
@@ -139,9 +137,6 @@ export default function MapPage() {
 
       {/* Layer 5b: AI Assistant — bouton flottant gauche */}
       <AiAssistant />
-
-      {/* Layer 6: G7Mode overlay */}
-      {isG7Active && <G7Mode map={mapRef} />}
 
       {/* Layer 7: BottomSheet */}
       <BottomSheet session={session ?? null} activeFilter={activeFilter} map={mapRef} onFilterChange={setActiveFilter} />

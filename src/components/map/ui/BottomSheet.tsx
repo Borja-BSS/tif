@@ -2825,7 +2825,6 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
       'douanes':   'borders',
       'transport': 'transit',
       'alertes':   'alerts',
-      'g7':        'g7',
       'parking':   'parking',
       'journey':   'journey',
       'events':    'events',
@@ -2923,7 +2922,6 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
     : activeFilter === 'traffic'  ? t.compact.traffic
     : activeFilter === 'alerts'   ? t.compact.alertsFilter
     : activeFilter === 'borders'  ? t.compact.borders
-    : activeFilter === 'g7'       ? t.compact.g7
     : activeFilter === 'journey'  ? t.compact.journey
     : activeFilter === 'parking'  ? t.compact.parkingFilter
     : activeFilter === 'events'   ? t.eventsSection.filterLabel

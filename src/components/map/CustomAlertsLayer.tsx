@@ -44,7 +44,7 @@ function injectStyles() {
   document.head.appendChild(s)
 }
 
-// Réutilise le même style que ParkingLayer / G7ClosuresLayer
+// Réutilise le même style de popup que ParkingLayer / SignalementsLayer
 function injectPopupStyle() {
   if (document.getElementById('tif-popup-style')) return
   const s = document.createElement('style')

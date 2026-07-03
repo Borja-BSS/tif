@@ -3,7 +3,7 @@
 import { springs } from '@/lib/animations/springs'
 import { useMapT } from '@/i18n/map'
 
-export type FilterId = 'all' | 'transit' | 'traffic' | 'alerts' | 'borders' | 'g7' | 'journey' | 'parking' | 'events'
+export type FilterId = 'all' | 'transit' | 'traffic' | 'alerts' | 'borders' | 'journey' | 'parking' | 'events'
 
 interface FilterDef { id: FilterId; icon: string; label: string }
 
