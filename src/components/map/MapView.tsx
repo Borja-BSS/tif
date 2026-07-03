@@ -15,7 +15,8 @@ const MapGL                = dynamic(() => import('./MapGL'),                { s
 const RealtimeLayer        = dynamic(() => import('./RealtimeLayer'),        { ssr: false })
 const AlertLayer           = dynamic(() => import('./AlertLayer'),           { ssr: false })
 const TerritoryLayer       = dynamic(() => import('./TerritoryLayer'),       { ssr: false })
-// Éléments G7 retirés (G7Overlay, G7ClosuresLayer, ImpactZonesLayer) — sommet terminé le 17 juin 2026
+// Éléments G7 retirés (G7Overlay, G7ClosuresLayer) — sommet terminé le 17 juin 2026
+const ImpactZonesLayer     = dynamic(() => import('./ImpactZonesLayer'),     { ssr: false })
 const FilterPanel          = dynamic(() => import('./FilterPanel'),          { ssr: false })
 const BorderCrossingsLayer = dynamic(() => import('./BorderCrossingsLayer'), { ssr: false })
 const RoadClosuresLayer    = dynamic(() => import('./RoadClosuresLayer'),    { ssr: false })
@@ -100,6 +101,7 @@ export default function MapView({ filters: externalFilters, activeFilter = 'all'
           <HereIncidentsLayer map={filters.alerts && !filters.transport ? map : null} />
           <ParkingLayer       map={filters.parking ? map : null} />
           <EventsLayer        map={activeFilter === 'events' ? map : null} />
+          <ImpactZonesLayer   map={map} activeFilter={activeFilter} />
 
           {/* Transport legend — compact Liquid Glass badge, bottom-right */}
           {filters.transport && (

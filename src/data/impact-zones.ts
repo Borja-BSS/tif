@@ -73,22 +73,25 @@ const ZONE_A1: [number, number][] = [
   [6.1001037, 46.2189987], // Fin — Genève-Aéroport / Meyrin
 ]
 
-// ── Zone — Genève Triathlon (rive gauche, Quai Gustave-Ador) ────────────────
-// Corridor village/départ le long du lac : Jardin Anglais → Plage des Eaux-Vives → Port-Noir.
-// Emprise indicative (renderOnMap: false) — les fermetures exactes par commune sont sur la carte officielle.
+// ── Zone — Genève Triathlon (rive gauche : Eaux-Vives → Cologny) ────────────
+// Emprise INDICATIVE de la zone perturbée (village/départ + routes fermées de
+// Cologny : Rampe de Cologny, Quai de Cologny, Ch. du Petray). Les fermetures
+// exactes par commune et par heure sont sur la carte officielle (infos riverains).
 const ZONE_TRIATHLON: [number, number][] = [
-  [6.1530, 46.2046], // Quai Gustave-Ador (côté Jardin Anglais)
-  [6.1600, 46.2041], // Quai Gustave-Ador (milieu)
-  [6.1660, 46.2050], // Plage des Eaux-Vives
-  [6.1686, 46.2016], // Place du Port-Noir
-  [6.1600, 46.2020], // Retour intérieur
-  [6.1530, 46.2046], // Fermeture
+  [6.1545, 46.2048], // Quai Gustave-Ador (côté Jardin Anglais)
+  [6.1665, 46.2052], // Plage des Eaux-Vives (départ / arrivée)
+  [6.1770, 46.2110], // Quai de Cologny / Port de la Nautique
+  [6.1830, 46.2175], // Cologny bord du lac (Rampe de Cologny)
+  [6.1740, 46.2180], // Cologny village (Chemin du Petray)
+  [6.1650, 46.2110], // Cologny intérieur
+  [6.1585, 46.2065], // Retour vers les Eaux-Vives
+  [6.1545, 46.2048], // Fermeture
 ]
 
 export const IMPACT_ZONES: ImpactZone[] = [
   {
     id:          'triathlon-2026-mobilite',
-    renderOnMap: false,
+    renderOnMap: true,
     label:       'Mobilité · Genève Triathlon',
     title:       'Genève Triathlon — circulation perturbée · 4–5 juillet',
     description:
@@ -112,7 +115,7 @@ export const IMPACT_ZONES: ImpactZone[] = [
     activeFrom:  new Date('2026-07-03T00:00:00+02:00'),
     activeTo:    new Date('2026-07-05T23:59:00+02:00'),
     fillColor:   '#FF9F0A',
-    fillOpacity: 0.10,
+    fillOpacity: 0.15,
     strokeColor: '#FF9F0A',
     source:      'https://www.genevetriathlon.ch/infosriverains',
     sourceRef:   'Genève Triathlon — infos riverains',
