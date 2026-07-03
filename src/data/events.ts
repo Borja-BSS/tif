@@ -1250,22 +1250,23 @@ export const events: EventItem[] = [
     verif: 'plausible',
   },
 
-  // ── TRIATHLON TOUR DE GENÈVE — 4–5 juillet 2026 ─────────────────────────────
+  // ── LA TOUR GENÈVE TRIATHLON — 4–5 juillet 2026 ─────────────────────────────
   {
     id: 'triathlon-tour-geneve', slug: 'triathlon-tour-de-geneve-2026',
     title: 'La Tour Genève Triathlon', category: 'sport',
-    description: 'Compétition internationale de triathlon. Natation dans le lac Léman, vélo et course à pied en plein cœur de Genève. Épreuves XS à Ironman. Spectacle gratuit depuis les quais.',
+    description: 'Genève Triathlon, 36e édition. Natation dans le lac Léman face au Jet d\'eau, vélo et course à pied sur parcours fermés le long des quais. Formats Half, Standard, Short, Découverte, Youth League et courses enfants (relais possible). Village et zone de départ sur le Quai Gustave-Ador. Spectacle gratuit depuis les quais. Fermetures de routes et perturbations TPG à prévoir sur le week-end.',
     venue: {
-      name: 'Lac Léman — Quais de Genève', address: 'Quai du Mont-Blanc, 1201 Genève',
-      area: 'GE', lat: 46.2060, lng: 6.1510,
+      name: 'Plage des Eaux-Vives — Quai Gustave-Ador', address: 'Quai Gustave-Ador, 1207 Genève',
+      area: 'GE', lat: 46.2049, lng: 6.1645,
     },
     occurrences: [
-      { date: '2026-07-04', start: '07:00', note: 'Jour 1 — Sprint & Olympique' },
-      { date: '2026-07-05', start: '07:00', note: 'Jour 2 — XL & Ironman' },
+      { date: '2026-07-04', note: 'Samedi — épreuves sur parcours fermés' },
+      { date: '2026-07-05', note: 'Dimanche — épreuves sur parcours fermés' },
     ],
-    priceInfo: 'Gratuit spectateurs — inscriptions payantes',
+    priceInfo: 'Gratuit spectateurs — inscriptions dès CHF 29',
     links: [
-      { label: 'La Tour Genève Triathlon', url: 'https://www.latourtriathlongeneve.ch', kind: 'info', status: 'verified' },
+      { label: 'Genève Triathlon — site officiel', url: 'https://www.genevetriathlon.ch', kind: 'info', status: 'verified' },
+      { label: 'Infos circulation riverains', url: 'https://www.genevetriathlon.ch/infosriverains', kind: 'info', status: 'verified' },
     ],
     verif: 'confirmed',
   },
