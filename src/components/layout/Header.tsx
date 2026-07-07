@@ -8,7 +8,6 @@ const NAV_LINKS = [
   { href: '/',        label: 'Accueil' },
   { href: '/map',     label: 'Carte Live' },
   { href: '/infos',   label: 'Flash Infos' },
-  { href: '/veille',  label: 'Veille G7' },
 ]
 
 export function Header() {

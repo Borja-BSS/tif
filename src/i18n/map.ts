@@ -9,17 +9,16 @@ export type { Lang }
 export interface MapT {
   filters: {
     all: string; traffic: string; alerts: string; transit: string
-    parking: string; borders: string; g7: string; journey: string
+    parking: string; borders: string; journey: string
   }
   layers: {
     traffic: string; tpg: string; zones: string; alerts: string
-    zonesG7Title: string; zonesG7Desc: string
   }
   search: { ph1: string; ph2: string; ph3: string; ph4: string; recent: string }
   compact: {
     alertPrefix: string; alertSuffixS: string; alertSuffixP: string
     all: string; transit: string; traffic: string; alertsFilter: string
-    borders: string; g7: string; journey: string; parkingFilter: string; default: string
+    borders: string; journey: string; parkingFilter: string; default: string
   }
   back: { allBorders: string; back: string }
   crossing: {
@@ -28,7 +27,7 @@ export interface MapT {
     motorway: string; main: string; secondary: string; local: string; rail: string
     viewOnMap: string; practicalInfo: string; schedule: string
     vehicles: string; pedestrian: string; officialSources: string; alternative: string
-    crossings: string; open24: string; closedG7: string
+    crossings: string; open24: string
   }
   transport: {
     networkStatus: string; tpgLines: string; statusNormal: string; statusDelays: string
@@ -36,12 +35,12 @@ export interface MapT {
     rtFooter: string; depPrefix: string; stopLine: string; noDeparts: string
   }
   alertsSection: {
-    g7RouteTpg: string; incidents: string
+    incidents: string
     noAlertTitle: string; noAlertSub: string; noIncidentTitle: string; noIncidentSub: string
     sources: string
     accident: string; construction: string; congestion: string; roadClosure: string
     tpgDisruption: string; weather: string; incident: string
-    closedCrossingsTitle: string; nearestOpen: string
+    nearestOpen: string
     adminAlertsTitle: string; barrage: string; restriction: string
   }
   parkingSection: {
@@ -59,22 +58,16 @@ export interface MapT {
     thankyouTitle: string; thankyouBody: string; supportBtn: string
     viewJourney: string; deleteLabel: string
   }
-  g7Section: {
-    activeBadge: string; upcomingBadge: string; activeDesc: string; upcomingDesc: string
-    macaronPosts: string; macaronSub: string; bulletinsTitle: string
-  }
   donation: { title: string; subtitle: string; chooseCTA: string; donateCTA: string }
   overview: {
-    douanes: string; trafficHeavy: string; allOpen: string; closedG7: string
+    douanes: string; trafficHeavy: string; allOpen: string
     transport: string; transportSub: string; disruption: string
     parking: string; parcRelais: string; placesUnit: string
     alertsTitle: string; incidentSingular: string; incidentPlural: string; noIncident: string
-    journey: string; journeySub: string; g7Title: string; g7Sub: string
+    journey: string; journeySub: string
     borjaDesc: string; borjaSub: string; borjaLink: string
   }
-  bulletins: { active: string; upcoming: string; past: string; sourcePrefix: string; defaultTitle: string }
   banner: {
-    activeTitle: string; upcomingTitle: string; activeBody: string; upcomingBody: string
     lineSuppPrefixS: string; lineSuppPrefixP: string
     lineSuppSuffixS: string; lineSuppSuffixP: string; infoPrefix: string
   }
@@ -86,10 +79,10 @@ export interface MapT {
   car: {
     title: string; origin: string; destination: string; calculating: string
     noRoute: string; calcError: string; footer: string; arrival: string
-    alternative: string; trafficSuffix: string; g7SafeLabel: string
+    alternative: string; trafficSuffix: string
     fastest: string; fluidTraffic: string; noRestriction: string
     viaCentre: string; distReduced: string; slowerVs: string
-    avoidsG7: string; bypassesZones: string; recommended: string
+    bypassesZones: string
   }
   transit: {
     title: string; origin: string; destination: string; searching: string
@@ -116,8 +109,6 @@ export interface MapT {
     priceUnknown: string
     dates: string
     links: string
-    g7AccessTitle: string
-    g7Lifted: string
     verifConfirmed: string
     verifPlausible: string
     verifUnverified: string
@@ -128,8 +119,6 @@ export interface MapT {
     noEvents: string
   }
   welcome: {
-    g7Title: string; g7Date: string
-    g7Body1: string; g7Body2: string; g7Warn: string; g7Btn: string
     featTitle: string; featSub: string; featBtn: string; newBadge: string
     feat1L: string; feat1D: string
     feat2L: string; feat2D: string
@@ -148,12 +137,10 @@ export interface MapT {
 const FR: MapT = {
   filters: {
     all: 'Tout', traffic: 'Trafic', alerts: 'Alertes', transit: 'Transport',
-    parking: 'Parking', borders: 'Frontières', g7: 'Info G7', journey: 'Mon Trajet',
+    parking: 'Parking', borders: 'Frontières', journey: 'Mon Trajet',
   },
   layers: {
     traffic: 'Trafic', tpg: 'TPG', zones: 'Zones', alerts: 'Alertes',
-    zonesG7Title: '🗺️ Zones G7',
-    zonesG7Desc: "Périmètres G7, zones de restriction et conditions d'accès — 8 au 18 juin 2026",
   },
   search: {
     ph1: 'Où allez-vous ?', ph2: 'Bardonnex, Cornavin, Rive...',
@@ -167,7 +154,6 @@ const FR: MapT = {
     traffic: 'Trafic routier · Grand Genève',
     alertsFilter: 'Alertes & Incidents routes',
     borders: 'Douanes · 47 passages frontière',
-    g7: 'G7 · 8–18 juin 2026 · Évian',
     journey: 'Mon Trajet · Favoris · Alertes email',
     parkingFilter: 'Parkings P+R · Grand Genève',
     default: 'Grand Genève',
@@ -189,7 +175,7 @@ const FR: MapT = {
     pedestrian: 'Passage piétons / vélos autorisé',
     officialSources: 'Sources officielles',
     alternative: '✓ Alternative : ',
-    crossings: 'passages', open24: 'ouverts 24h/24', closedG7: 'fermés G7',
+    crossings: 'passages', open24: 'ouverts 24h/24',
   },
   transport: {
     networkStatus: 'Statut réseau temps réel',
@@ -205,7 +191,6 @@ const FR: MapT = {
     noDeparts: 'Aucun départ trouvé',
   },
   alertsSection: {
-    g7RouteTpg: 'Avis G7 · Route & Transport',
     incidents: 'Incidents · Accidents · Travaux · Grand Genève',
     noAlertTitle: 'Aucune alerte détectée',
     noAlertSub: 'Grand Genève · Trafic normal en ce moment',
@@ -215,7 +200,7 @@ const FR: MapT = {
     accident: '🚗 Accident', construction: '🚧 Travaux', congestion: '🚦 Bouchon',
     roadClosure: '🚫 Route fermée', tpgDisruption: '🚌 Perturbation TPG',
     weather: '⛈️ Météo', incident: '⚠️ Incident',
-    closedCrossingsTitle: 'Passages fermés G7', nearestOpen: 'Plus proche ouvert',
+    nearestOpen: 'Plus proche ouvert',
     adminAlertsTitle: 'Alertes actives', barrage: '🚧 Barrage', restriction: '🚫 Zone de restriction',
   },
   parkingSection: {
@@ -243,15 +228,6 @@ const FR: MapT = {
     viewJourney: 'Voir mon trajet',
     deleteLabel: 'Supprimer',
   },
-  g7Section: {
-    activeBadge: '🏛️ G7 EN COURS · 8–18 juin 2026',
-    upcomingBadge: '🏛️ G7 Évian-les-Bains · 15–17 juin 2026',
-    activeDesc: 'Restrictions de circulation en vigueur dans le Grand Genève. Consultez les bulletins ci-dessous.',
-    upcomingDesc: 'Consultez les bulletins ci-dessous pour anticiper vos déplacements. Restrictions, TPG, macaron.',
-    macaronPosts: 'Postes macaron',
-    macaronSub: 'Voie rapide · Personnel indispensable uniquement',
-    bulletinsTitle: 'Bulletins officiels G7',
-  },
   donation: {
     title: 'Soutenir TIF',
     subtitle: 'Gratuit, sans pub · Financé par la communauté',
@@ -260,7 +236,7 @@ const FR: MapT = {
   },
   overview: {
     douanes: 'Douanes', trafficHeavy: 'trafic chargé',
-    allOpen: 'tous ouverts', closedG7: 'fermés G7',
+    allOpen: 'tous ouverts',
     transport: 'Transport public',
     transportSub: 'TPG · CFF · Léman Express · CEVA',
     disruption: 'Perturbation',
@@ -271,22 +247,11 @@ const FR: MapT = {
     noIncident: 'Aucun incident · Trafic normal',
     journey: 'Mon Trajet',
     journeySub: 'Itinéraires favoris · Alertes email avant départ',
-    g7Title: 'G7 — 8 au 18 juin 2026',
-    g7Sub: "Directives officielles · Restrictions d'accès",
-    borjaDesc: "Cette application a été conçue par notre équipe d'ingénieurs pour aider les habitant·e·s du Grand Genève à se déplacer sereinement durant le G7 d'Évian 2026 — douanes, trafic, transports publics et alertes en temps réel, tout en un seul endroit.",
+    borjaDesc: "Cette application a été conçue par notre équipe d'ingénieurs pour aider les habitant·e·s du Grand Genève à se déplacer sereinement : douanes, trafic, transports publics et alertes en temps réel, tout en un seul endroit.",
     borjaSub: 'Ingénieurs informatiques · Genève',
     borjaLink: 'En savoir plus → borja-swiss-solutions.ch',
   },
-  bulletins: {
-    active: 'EN COURS', upcoming: 'À VENIR', past: 'TERMINÉ',
-    sourcePrefix: 'Source : ',
-    defaultTitle: 'Bulletins G7',
-  },
   banner: {
-    activeTitle: 'G7 en cours — Perturbations TPG',
-    upcomingTitle: 'G7 Évian — À venir',
-    activeBody: 'Horaire vacances en vigueur sur la plupart des lignes TPG.',
-    upcomingBody: 'Perturbations TPG prévues du 8 au 17 juin. Anticipez vos déplacements.',
     lineSuppPrefixS: 'Ligne', lineSuppPrefixP: 'Lignes',
     lineSuppSuffixS: 'supprimée.', lineSuppSuffixP: 'supprimées.',
     infoPrefix: 'Info TPG : ',
@@ -305,16 +270,14 @@ const FR: MapT = {
     calcError: 'Calcul indisponible. Vérifiez votre connexion.',
     footer: 'Recalcul auto · 2 min · Trafic temps réel HERE',
     arrival: 'Arrivée', alternative: 'Alternative',
-    trafficSuffix: 'trafic', g7SafeLabel: 'G7 safe',
+    trafficSuffix: 'trafic',
     fastest: 'Itinéraire le plus rapide',
     fluidTraffic: 'Trafic fluide',
     noRestriction: 'Aucune restriction active',
     viaCentre: 'Trajet via centre-ville',
     distReduced: 'Distance légèrement réduite',
     slowerVs: 'min vs le plus rapide',
-    avoidsG7: 'Évite les périmètres G7',
     bypassesZones: 'Contourne les zones de restriction',
-    recommended: 'Recommandé 12-18 juin 2026',
   },
   transit: {
     title: 'Itinéraire transports',
@@ -365,8 +328,6 @@ const FR: MapT = {
     priceUnknown: 'Prix inconnu',
     dates: 'Dates',
     links: 'Liens',
-    g7AccessTitle: '🏛️ Accès pendant le G7',
-    g7Lifted: 'Dispositif G7 levé — accès normal.',
     verifConfirmed: 'Confirmé',
     verifPlausible: 'À confirmer',
     verifUnverified: 'Non vérifié',
@@ -377,25 +338,19 @@ const FR: MapT = {
     noEvents: 'Aucun événement trouvé.',
   },
   welcome: {
-    g7Title: 'Zone G7 — Grand Genève',
-    g7Date: "Sommet d'Évian-les-Bains · 15–17 juin 2026",
-    g7Body1: 'Des <strong style="color:white;font-weight:600">contrôles frontaliers renforcés</strong> sont en place du 10 au 19 juin 2026 dans toute la région du Grand Genève.',
-    g7Body2: 'Certains passages sont <strong style="color:white;font-weight:600">fermés ou soumis à macaron</strong>. Consultez la carte avant tout déplacement transfrontalier.',
-    g7Warn: '⚠️ Prévoir du temps supplémentaire aux douanes actives.',
-    g7Btn: "✓ Oui, j'ai bien lu",
     featTitle: 'Bienvenue sur TIF',
     featSub: 'Toutes les fonctionnalités disponibles',
     featBtn: "C'est parti ! →",
     newBadge: 'NOUVEAU',
-    feat1L: 'Douanes G7',        feat1D: '47 postes avec statut en temps réel',
+    feat1L: 'Douanes',        feat1D: '47 postes avec statut en temps réel',
     feat2L: 'Trafic & travaux',  feat2D: 'Heatmap live + chantiers OSM',
     feat3L: 'Transports publics',feat3D: 'TPG, CFF, CEVA en direct',
-    feat4L: 'Alertes officielles',feat4D: 'Météo + incidents G7',
+    feat4L: 'Alertes officielles',feat4D: 'Météo + incidents',
     feat5L: 'Parkings P+R',      feat5D: 'Disponibilités en temps réel',
     feat6L: 'Mon trajet',        feat6D: 'Itinéraire personnalisé sauvegardé',
     feat7L: 'Événements',        feat7D: '34 événements culturels à Genève',
     surveyTitle: 'Une app mobile TIF vous intéresserait-elle ?',
-    surveySub: '📱 Gratuit · Douanes & trafic · Notifications G7',
+    surveySub: '📱 Gratuit · Douanes & trafic · Notifications en temps réel',
     surveyYes: '✓ Oui, clairement !', surveyNo: '✗ Non merci',
     surveyFeedbackPh: 'Vos idées ou suggestions (optionnel)…',
     surveyBtn: 'Continuer →',
@@ -406,12 +361,10 @@ const FR: MapT = {
 const EN: MapT = {
   filters: {
     all: 'All', traffic: 'Traffic', alerts: 'Alerts', transit: 'Transit',
-    parking: 'Parking', borders: 'Borders', g7: 'G7 Info', journey: 'My Trip',
+    parking: 'Parking', borders: 'Borders', journey: 'My Trip',
   },
   layers: {
     traffic: 'Traffic', tpg: 'TPG', zones: 'Zones', alerts: 'Alerts',
-    zonesG7Title: '🗺️ G7 Zones',
-    zonesG7Desc: 'G7 perimeters, restricted zones and access conditions — 8 to 18 June 2026',
   },
   search: {
     ph1: 'Where are you going?', ph2: 'Bardonnex, Cornavin, Rive...',
@@ -425,7 +378,6 @@ const EN: MapT = {
     traffic: 'Road Traffic · Greater Geneva',
     alertsFilter: 'Alerts & Road Incidents',
     borders: 'Borders · 47 crossings',
-    g7: 'G7 · 8–18 June 2026 · Évian',
     journey: 'My Trip · Saved · Email Alerts',
     parkingFilter: 'P+R Car Parks · Greater Geneva',
     default: 'Greater Geneva',
@@ -447,7 +399,7 @@ const EN: MapT = {
     pedestrian: 'Pedestrian / cycling crossing allowed',
     officialSources: 'Official sources',
     alternative: '✓ Alternative: ',
-    crossings: 'crossings', open24: 'open 24h', closedG7: 'closed G7',
+    crossings: 'crossings', open24: 'open 24h',
   },
   transport: {
     networkStatus: 'Real-time network status',
@@ -463,7 +415,6 @@ const EN: MapT = {
     noDeparts: 'No departures found',
   },
   alertsSection: {
-    g7RouteTpg: 'G7 Notices · Road & Transport',
     incidents: 'Incidents · Accidents · Works · Greater Geneva',
     noAlertTitle: 'No alerts detected',
     noAlertSub: 'Greater Geneva · Traffic normal right now',
@@ -473,7 +424,7 @@ const EN: MapT = {
     accident: '🚗 Accident', construction: '🚧 Roadworks', congestion: '🚦 Congestion',
     roadClosure: '🚫 Road closed', tpgDisruption: '🚌 TPG disruption',
     weather: '⛈️ Weather', incident: '⚠️ Incident',
-    closedCrossingsTitle: 'G7 Closed Crossings', nearestOpen: 'Nearest open',
+    nearestOpen: 'Nearest open',
     adminAlertsTitle: 'Active Alerts', barrage: '🚧 Roadblock', restriction: '🚫 Restriction zone',
   },
   parkingSection: {
@@ -501,15 +452,6 @@ const EN: MapT = {
     viewJourney: 'View my trip',
     deleteLabel: 'Delete',
   },
-  g7Section: {
-    activeBadge: '🏛️ G7 IN PROGRESS · 8–18 June 2026',
-    upcomingBadge: '🏛️ G7 Évian-les-Bains · 15–17 June 2026',
-    activeDesc: 'Traffic restrictions in effect across Grand Geneva. See bulletins below.',
-    upcomingDesc: 'Check the bulletins below to plan your journeys. Restrictions, TPG, macaron pass.',
-    macaronPosts: 'Macaron checkpoints',
-    macaronSub: 'Fast lane · Essential personnel only',
-    bulletinsTitle: 'Official G7 bulletins',
-  },
   donation: {
     title: 'Support TIF',
     subtitle: 'Free, no ads · Community-funded',
@@ -518,7 +460,7 @@ const EN: MapT = {
   },
   overview: {
     douanes: 'Borders', trafficHeavy: 'heavy traffic',
-    allOpen: 'all open', closedG7: 'closed G7',
+    allOpen: 'all open',
     transport: 'Public Transport',
     transportSub: 'TPG · CFF · Léman Express · CEVA',
     disruption: 'Disruption',
@@ -529,22 +471,11 @@ const EN: MapT = {
     noIncident: 'No incident · Traffic normal',
     journey: 'My Trip',
     journeySub: 'Saved routes · Email alerts before departure',
-    g7Title: 'G7 — 8 to 18 June 2026',
-    g7Sub: 'Official directives · Access restrictions',
-    borjaDesc: 'This app was designed by our engineering team to help Greater Geneva residents travel smoothly during the G7 Évian 2026 — borders, traffic, public transport and real-time alerts, all in one place.',
+    borjaDesc: 'This app was designed by our engineering team to help Greater Geneva residents travel smoothly: borders, traffic, public transport and real-time alerts, all in one place.',
     borjaSub: 'Software engineers · Geneva',
     borjaLink: 'Learn more → borja-swiss-solutions.ch',
   },
-  bulletins: {
-    active: 'ONGOING', upcoming: 'UPCOMING', past: 'ENDED',
-    sourcePrefix: 'Source: ',
-    defaultTitle: 'G7 Bulletins',
-  },
   banner: {
-    activeTitle: 'G7 underway — TPG disruptions',
-    upcomingTitle: 'G7 Évian — Upcoming',
-    activeBody: 'Holiday timetable in effect on most TPG lines.',
-    upcomingBody: 'TPG disruptions expected 8–17 June. Plan your travel in advance.',
     lineSuppPrefixS: 'Line', lineSuppPrefixP: 'Lines',
     lineSuppSuffixS: 'suspended.', lineSuppSuffixP: 'suspended.',
     infoPrefix: 'TPG info: ',
@@ -563,16 +494,14 @@ const EN: MapT = {
     calcError: 'Calculation unavailable. Check your connection.',
     footer: 'Auto-refresh · 2 min · Live traffic HERE',
     arrival: 'Arrival', alternative: 'Alternative',
-    trafficSuffix: 'traffic', g7SafeLabel: 'G7 safe',
+    trafficSuffix: 'traffic',
     fastest: 'Fastest route',
     fluidTraffic: 'Smooth traffic',
     noRestriction: 'No active restrictions',
     viaCentre: 'Via city centre',
     distReduced: 'Slightly shorter distance',
     slowerVs: 'min vs fastest',
-    avoidsG7: 'Avoids G7 perimeters',
     bypassesZones: 'Bypasses restricted zones',
-    recommended: 'Recommended 12–18 June 2026',
   },
   transit: {
     title: 'Transit route',
@@ -623,8 +552,6 @@ const EN: MapT = {
     priceUnknown: 'Price unknown',
     dates: 'Dates',
     links: 'Links',
-    g7AccessTitle: '🏛️ G7 Access',
-    g7Lifted: 'G7 measures lifted — normal access.',
     verifConfirmed: 'Confirmed',
     verifPlausible: 'To confirm',
     verifUnverified: 'Unverified',
@@ -635,25 +562,19 @@ const EN: MapT = {
     noEvents: 'No events found.',
   },
   welcome: {
-    g7Title: 'G7 Zone — Greater Geneva',
-    g7Date: 'Évian-les-Bains Summit · 15–17 June 2026',
-    g7Body1: '<strong style="color:white;font-weight:600">Enhanced border controls</strong> are in place from 10 to 19 June 2026 across the entire Grand Geneva region.',
-    g7Body2: 'Some crossings are <strong style="color:white;font-weight:600">closed or require a macaron pass</strong>. Check the map before any cross-border journey.',
-    g7Warn: '⚠️ Allow extra time at active border crossings.',
-    g7Btn: '✓ Yes, I understand',
     featTitle: 'Welcome to TIF',
     featSub: 'All features available',
     featBtn: "Let's go! →",
     newBadge: 'NEW',
-    feat1L: 'G7 Borders',        feat1D: '47 checkpoints with live status',
+    feat1L: 'Borders',        feat1D: '47 checkpoints with live status',
     feat2L: 'Traffic & roadworks',   feat2D: 'Live heatmap + OSM roadworks',
     feat3L: 'Public transport',  feat3D: 'TPG, CFF, CEVA live',
-    feat4L: 'Official alerts',   feat4D: 'Weather + G7 incidents',
+    feat4L: 'Official alerts',   feat4D: 'Weather + incidents',
     feat5L: 'P+R Car parks',     feat5D: 'Real-time availability',
     feat6L: 'My trip',           feat6D: 'Saved personalised itinerary',
     feat7L: 'Events',            feat7D: '34 cultural events in Geneva',
     surveyTitle: 'Would a TIF mobile app interest you?',
-    surveySub: '📱 Free · Borders & traffic · G7 notifications',
+    surveySub: '📱 Free · Borders & traffic · Real-time notifications',
     surveyYes: '✓ Yes, definitely!', surveyNo: '✗ No thanks',
     surveyFeedbackPh: 'Your ideas or suggestions (optional)…',
     surveyBtn: 'Continue →',
@@ -664,12 +585,10 @@ const EN: MapT = {
 const DE: MapT = {
   filters: {
     all: 'Alle', traffic: 'Verkehr', alerts: 'Warnungen', transit: 'Öffentlich',
-    parking: 'Parkplätze', borders: 'Grenzen', g7: 'G7-Info', journey: 'Meine Route',
+    parking: 'Parkplätze', borders: 'Grenzen', journey: 'Meine Route',
   },
   layers: {
     traffic: 'Verkehr', tpg: 'TPG', zones: 'Zonen', alerts: 'Warnungen',
-    zonesG7Title: '🗺️ G7-Zonen',
-    zonesG7Desc: 'G7-Sicherheitsbereiche, Sperrzonen und Zugangsbedingungen — 8. bis 18. Juni 2026',
   },
   search: {
     ph1: 'Wohin möchten Sie?', ph2: 'Bardonnex, Cornavin, Rive...',
@@ -683,7 +602,6 @@ const DE: MapT = {
     traffic: 'Strassenverkehr · Grossraum Genf',
     alertsFilter: 'Warnungen & Strassenvorfälle',
     borders: 'Grenzen · 47 Übergänge',
-    g7: 'G7 · 8.–18. Juni 2026 · Évian',
     journey: 'Meine Route · Favoriten · E-Mail-Alerts',
     parkingFilter: 'P+R-Parkplätze · Grossraum Genf',
     default: 'Grossraum Genf',
@@ -705,7 +623,7 @@ const DE: MapT = {
     pedestrian: 'Fussgänger- / Fahrradübergang erlaubt',
     officialSources: 'Offizielle Quellen',
     alternative: '✓ Alternative: ',
-    crossings: 'Übergänge', open24: '24h geöffnet', closedG7: 'G7-gesperrt',
+    crossings: 'Übergänge', open24: '24h geöffnet',
   },
   transport: {
     networkStatus: 'Netzstatus in Echtzeit',
@@ -721,7 +639,6 @@ const DE: MapT = {
     noDeparts: 'Keine Abfahrten gefunden',
   },
   alertsSection: {
-    g7RouteTpg: 'G7-Hinweise · Strasse & Verkehr',
     incidents: 'Vorfälle · Unfälle · Baustellen · Grossraum Genf',
     noAlertTitle: 'Keine Warnungen erkannt',
     noAlertSub: 'Grossraum Genf · Verkehr normal',
@@ -731,7 +648,7 @@ const DE: MapT = {
     accident: '🚗 Unfall', construction: '🚧 Baustelle', congestion: '🚦 Stau',
     roadClosure: '🚫 Strasse gesperrt', tpgDisruption: '🚌 TPG-Störung',
     weather: '⛈️ Wetter', incident: '⚠️ Vorfall',
-    closedCrossingsTitle: 'G7-Gesperrte Übergänge', nearestOpen: 'Nächster geöffnet',
+    nearestOpen: 'Nächster geöffnet',
     adminAlertsTitle: 'Aktive Warnungen', barrage: '🚧 Sperre', restriction: '🚫 Sperrzone',
   },
   parkingSection: {
@@ -759,15 +676,6 @@ const DE: MapT = {
     viewJourney: 'Meine Route anzeigen',
     deleteLabel: 'Löschen',
   },
-  g7Section: {
-    activeBadge: '🏛️ G7 LÄUFT · 8.–18. Juni 2026',
-    upcomingBadge: '🏛️ G7 Évian-les-Bains · 15.–17. Juni 2026',
-    activeDesc: 'Verkehrsbeschränkungen im Grossraum Genf in Kraft. Siehe Bulletins unten.',
-    upcomingDesc: 'Bulletins unten für Reiseplanung prüfen. Beschränkungen, TPG, Macaron-Ausweis.',
-    macaronPosts: 'Macaron-Kontrollpunkte',
-    macaronSub: 'Schnellspur · Nur unentbehrliches Personal',
-    bulletinsTitle: 'Offizielle G7-Bulletins',
-  },
   donation: {
     title: 'TIF unterstützen',
     subtitle: 'Kostenlos, werbefrei · Von der Community finanziert',
@@ -776,7 +684,7 @@ const DE: MapT = {
   },
   overview: {
     douanes: 'Grenzen', trafficHeavy: 'dichter Verkehr',
-    allOpen: 'alle offen', closedG7: 'G7-gesperrt',
+    allOpen: 'alle offen',
     transport: 'Öffentlicher Verkehr',
     transportSub: 'TPG · CFF · Léman Express · CEVA',
     disruption: 'Störung',
@@ -787,22 +695,11 @@ const DE: MapT = {
     noIncident: 'Kein Vorfall · Verkehr normal',
     journey: 'Meine Route',
     journeySub: 'Gespeicherte Routen · E-Mail-Alerts vor Abfahrt',
-    g7Title: 'G7 — 8. bis 18. Juni 2026',
-    g7Sub: 'Offizielle Direktiven · Zugangsbeschränkungen',
-    borjaDesc: 'Diese App wurde von unserem Ingenieurteam entwickelt, um den Bewohnern des Grossraums Genf eine reibungslose Mobilität während des G7-Gipfels Évian 2026 zu ermöglichen — Grenzen, Verkehr, öffentlicher Verkehr und Echtzeit-Warnungen, alles an einem Ort.',
+    borjaDesc: 'Diese App wurde von unserem Ingenieurteam entwickelt, um den Bewohnern des Grossraums Genf eine reibungslose Mobilität zu ermöglichen: Grenzen, Verkehr, öffentlicher Verkehr und Echtzeit-Warnungen, alles an einem Ort.',
     borjaSub: 'Softwareingenieure · Genf',
     borjaLink: 'Mehr erfahren → borja-swiss-solutions.ch',
   },
-  bulletins: {
-    active: 'LAUFEND', upcoming: 'BEVORSTEHEND', past: 'BEENDET',
-    sourcePrefix: 'Quelle: ',
-    defaultTitle: 'G7-Bulletins',
-  },
   banner: {
-    activeTitle: 'G7 läuft — TPG-Störungen',
-    upcomingTitle: 'G7 Évian — Bevorstehend',
-    activeBody: 'Ferienfahrplan auf den meisten TPG-Linien.',
-    upcomingBody: 'TPG-Störungen vom 8. bis 17. Juni erwartet. Reise im Voraus planen.',
     lineSuppPrefixS: 'Linie', lineSuppPrefixP: 'Linien',
     lineSuppSuffixS: 'eingestellt.', lineSuppSuffixP: 'eingestellt.',
     infoPrefix: 'TPG-Info: ',
@@ -821,16 +718,14 @@ const DE: MapT = {
     calcError: 'Berechnung nicht verfügbar. Verbindung prüfen.',
     footer: 'Auto-Aktualisierung · 2 min · Live-Verkehr HERE',
     arrival: 'Ankunft', alternative: 'Alternative',
-    trafficSuffix: 'Verkehr', g7SafeLabel: 'G7-sicher',
+    trafficSuffix: 'Verkehr',
     fastest: 'Schnellste Route',
     fluidTraffic: 'Flüssiger Verkehr',
     noRestriction: 'Keine aktiven Beschränkungen',
     viaCentre: 'Via Stadtzentrum',
     distReduced: 'Leicht kürzere Strecke',
     slowerVs: 'min vs. schnellste',
-    avoidsG7: 'Umgeht G7-Bereiche',
     bypassesZones: 'Umgeht Sperrzonen',
-    recommended: 'Empfohlen 12.–18. Juni 2026',
   },
   transit: {
     title: 'ÖV-Route',
@@ -881,8 +776,6 @@ const DE: MapT = {
     priceUnknown: 'Preis unbekannt',
     dates: 'Termine',
     links: 'Links',
-    g7AccessTitle: '🏛️ Zugang während G7',
-    g7Lifted: 'G7-Massnahmen aufgehoben — normaler Zugang.',
     verifConfirmed: 'Bestätigt',
     verifPlausible: 'Zu bestätigen',
     verifUnverified: 'Nicht verifiziert',
@@ -893,25 +786,19 @@ const DE: MapT = {
     noEvents: 'Keine Veranstaltungen gefunden.',
   },
   welcome: {
-    g7Title: 'G7-Zone — Grossraum Genf',
-    g7Date: 'Gipfel Évian-les-Bains · 15.–17. Juni 2026',
-    g7Body1: '<strong style="color:white;font-weight:600">Verstärkte Grenzkontrollen</strong> sind vom 10. bis 19. Juni 2026 im gesamten Grossraum Genf in Kraft.',
-    g7Body2: 'Einige Übergänge sind <strong style="color:white;font-weight:600">geschlossen oder erfordern einen Macaron-Ausweis</strong>. Karte vor grenzüberschreitenden Fahrten prüfen.',
-    g7Warn: '⚠️ Zusätzliche Zeit an aktiven Grenzübergängen einplanen.',
-    g7Btn: '✓ Ja, ich habe verstanden',
     featTitle: 'Willkommen bei TIF',
     featSub: 'Alle Funktionen verfügbar',
     featBtn: "Los geht's! →",
     newBadge: 'NEU',
-    feat1L: 'G7-Grenzen',          feat1D: '47 Kontrollpunkte mit Live-Status',
+    feat1L: 'Grenzen',          feat1D: '47 Kontrollpunkte mit Live-Status',
     feat2L: 'Verkehr & Baustellen', feat2D: 'Live-Heatmap + OSM-Baustellen',
     feat3L: 'Öffentlicher Verkehr', feat3D: 'TPG, CFF, CEVA live',
-    feat4L: 'Offizielle Warnungen',     feat4D: 'Wetter + G7-Vorfälle',
+    feat4L: 'Offizielle Warnungen',     feat4D: 'Wetter + Vorfälle',
     feat5L: 'P+R-Parkplätze',       feat5D: 'Verfügbarkeit in Echtzeit',
     feat6L: 'Meine Route',          feat6D: 'Gespeicherter persönlicher Weg',
     feat7L: 'Veranstaltungen',      feat7D: '34 Kulturveranstaltungen in Genf',
     surveyTitle: 'Würde Sie eine TIF-App interessieren?',
-    surveySub: '📱 Kostenlos · Grenzen & Verkehr · G7-Benachrichtigungen',
+    surveySub: '📱 Kostenlos · Grenzen & Verkehr · Echtzeit-Benachrichtigungen',
     surveyYes: '✓ Ja, auf jeden Fall!', surveyNo: '✗ Nein danke',
     surveyFeedbackPh: 'Ihre Ideen oder Vorschläge (optional)…',
     surveyBtn: 'Weiter →',
@@ -922,12 +809,10 @@ const DE: MapT = {
 const IT: MapT = {
   filters: {
     all: 'Tutto', traffic: 'Traffico', alerts: 'Avvisi', transit: 'Trasporti',
-    parking: 'Parcheggi', borders: 'Frontiere', g7: 'Info G7', journey: 'Il mio percorso',
+    parking: 'Parcheggi', borders: 'Frontiere', journey: 'Il mio percorso',
   },
   layers: {
     traffic: 'Traffico', tpg: 'TPG', zones: 'Zone', alerts: 'Avvisi',
-    zonesG7Title: '🗺️ Zone G7',
-    zonesG7Desc: 'Perimetri G7, zone di restrizione e condizioni di accesso — 8–18 giugno 2026',
   },
   search: {
     ph1: 'Dove vuole andare?', ph2: 'Bardonnex, Cornavin, Rive...',
@@ -941,7 +826,6 @@ const IT: MapT = {
     traffic: 'Traffico stradale · Grande Ginevra',
     alertsFilter: 'Avvisi & Incidenti stradali',
     borders: 'Frontiere · 47 valichi',
-    g7: 'G7 · 8–18 giugno 2026 · Évian',
     journey: 'Il mio percorso · Preferiti · Avvisi email',
     parkingFilter: 'Parcheggi P+R · Grande Ginevra',
     default: 'Grande Ginevra',
@@ -963,7 +847,7 @@ const IT: MapT = {
     pedestrian: 'Passaggio pedonale / ciclabile consentito',
     officialSources: 'Fonti ufficiali',
     alternative: '✓ Alternativa: ',
-    crossings: 'valichi', open24: 'aperti 24h', closedG7: 'chiusi G7',
+    crossings: 'valichi', open24: 'aperti 24h',
   },
   transport: {
     networkStatus: 'Stato rete in tempo reale',
@@ -979,7 +863,6 @@ const IT: MapT = {
     noDeparts: 'Nessuna partenza trovata',
   },
   alertsSection: {
-    g7RouteTpg: 'Avvisi G7 · Strade & Trasporti',
     incidents: 'Incidenti · Sinistri · Cantieri · Grande Ginevra',
     noAlertTitle: 'Nessun avviso rilevato',
     noAlertSub: 'Grande Ginevra · Traffico normale',
@@ -989,7 +872,7 @@ const IT: MapT = {
     accident: '🚗 Incidente', construction: '🚧 Cantiere', congestion: '🚦 Ingorgo',
     roadClosure: '🚫 Strada chiusa', tpgDisruption: '🚌 Perturbazione TPG',
     weather: '⛈️ Meteo', incident: '⚠️ Incidente',
-    closedCrossingsTitle: 'Valichi chiusi G7', nearestOpen: 'Più vicino aperto',
+    nearestOpen: 'Più vicino aperto',
     adminAlertsTitle: 'Avvisi attivi', barrage: '🚧 Blocco stradale', restriction: '🚫 Zona di restrizione',
   },
   parkingSection: {
@@ -1017,15 +900,6 @@ const IT: MapT = {
     viewJourney: 'Vedi il mio percorso',
     deleteLabel: 'Elimina',
   },
-  g7Section: {
-    activeBadge: '🏛️ G7 IN CORSO · 8–18 giugno 2026',
-    upcomingBadge: '🏛️ G7 Évian-les-Bains · 15–17 giugno 2026',
-    activeDesc: 'Restrizioni alla circolazione in vigore nella Grande Ginevra. Consultare i bollettini sotto.',
-    upcomingDesc: 'Consultare i bollettini per pianificare gli spostamenti. Restrizioni, TPG, macaron.',
-    macaronPosts: 'Posti macaron',
-    macaronSub: 'Corsia rapida · Solo personale indispensabile',
-    bulletinsTitle: 'Bollettini ufficiali G7',
-  },
   donation: {
     title: 'Supporta TIF',
     subtitle: 'Gratuito, senza pubblicità · Finanziato dalla comunità',
@@ -1034,7 +908,7 @@ const IT: MapT = {
   },
   overview: {
     douanes: 'Frontiere', trafficHeavy: 'traffico intenso',
-    allOpen: 'tutti aperti', closedG7: 'chiusi G7',
+    allOpen: 'tutti aperti',
     transport: 'Trasporti pubblici',
     transportSub: 'TPG · CFF · Léman Express · CEVA',
     disruption: 'Perturbazione',
@@ -1045,22 +919,11 @@ const IT: MapT = {
     noIncident: 'Nessun incidente · Traffico normale',
     journey: 'Il mio percorso',
     journeySub: 'Percorsi preferiti · Avvisi email prima della partenza',
-    g7Title: 'G7 — 8–18 giugno 2026',
-    g7Sub: 'Direttive ufficiali · Restrizioni di accesso',
-    borjaDesc: "Questa applicazione è stata progettata dal nostro team di ingegneri per aiutare gli abitanti della Grande Ginevra a spostarsi serenamente durante il G7 di Évian 2026 — frontiere, traffico, trasporti pubblici e avvisi in tempo reale, tutto in un unico posto.",
+    borjaDesc: "Questa applicazione è stata progettata dal nostro team di ingegneri per aiutare gli abitanti della Grande Ginevra a spostarsi serenamente: frontiere, traffico, trasporti pubblici e avvisi in tempo reale, tutto in un unico posto.",
     borjaSub: 'Ingegneri informatici · Ginevra',
     borjaLink: 'Scopri di più → borja-swiss-solutions.ch',
   },
-  bulletins: {
-    active: 'IN CORSO', upcoming: 'IN ARRIVO', past: 'TERMINATO',
-    sourcePrefix: 'Fonte: ',
-    defaultTitle: 'Bollettini G7',
-  },
   banner: {
-    activeTitle: 'G7 in corso — Perturbazioni TPG',
-    upcomingTitle: 'G7 Évian — In arrivo',
-    activeBody: 'Orario vacanze in vigore sulla maggior parte delle linee TPG.',
-    upcomingBody: 'Perturbazioni TPG previste dall\'8 al 17 giugno. Pianificare gli spostamenti in anticipo.',
     lineSuppPrefixS: 'Linea', lineSuppPrefixP: 'Linee',
     lineSuppSuffixS: 'soppressa.', lineSuppSuffixP: 'soppresse.',
     infoPrefix: 'Info TPG: ',
@@ -1079,16 +942,14 @@ const IT: MapT = {
     calcError: 'Calcolo non disponibile. Verificare la connessione.',
     footer: 'Ricalcolo auto · 2 min · Traffico in tempo reale HERE',
     arrival: 'Arrivo', alternative: 'Alternativa',
-    trafficSuffix: 'traffico', g7SafeLabel: 'G7 sicuro',
+    trafficSuffix: 'traffico',
     fastest: 'Itinerario più rapido',
     fluidTraffic: 'Traffico scorrevole',
     noRestriction: 'Nessuna restrizione attiva',
     viaCentre: 'Via centro città',
     distReduced: 'Distanza leggermente ridotta',
     slowerVs: 'min vs. il più rapido',
-    avoidsG7: 'Evita i perimetri G7',
     bypassesZones: 'Aggira le zone di restrizione',
-    recommended: 'Consigliato 12–18 giugno 2026',
   },
   transit: {
     title: 'Itinerario trasporti',
@@ -1139,8 +1000,6 @@ const IT: MapT = {
     priceUnknown: 'Prezzo sconosciuto',
     dates: 'Date',
     links: 'Link',
-    g7AccessTitle: '🏛️ Accesso durante il G7',
-    g7Lifted: 'Dispositivo G7 revocato — accesso normale.',
     verifConfirmed: 'Confermato',
     verifPlausible: 'Da confermare',
     verifUnverified: 'Non verificato',
@@ -1151,25 +1010,19 @@ const IT: MapT = {
     noEvents: 'Nessun evento trovato.',
   },
   welcome: {
-    g7Title: 'Zona G7 — Grande Ginevra',
-    g7Date: 'Vertice di Évian-les-Bains · 15–17 giugno 2026',
-    g7Body1: '<strong style="color:white;font-weight:600">Controlli frontalieri intensificati</strong> sono in vigore dal 10 al 19 giugno 2026 nell\'intera regione del Grande Ginevra.',
-    g7Body2: 'Alcuni valichi sono <strong style="color:white;font-weight:600">chiusi o richiedono un macaron</strong>. Consultare la mappa prima di ogni spostamento transfrontaliero.',
-    g7Warn: '⚠️ Prevedere tempo aggiuntivo ai valichi attivi.',
-    g7Btn: '✓ Sì, ho capito',
     featTitle: 'Benvenuto su TIF',
     featSub: 'Tutte le funzionalità disponibili',
     featBtn: 'Iniziamo! →',
     newBadge: 'NUOVO',
-    feat1L: 'Frontiere G7',        feat1D: '47 posti di controllo con stato live',
+    feat1L: 'Frontiere',        feat1D: '47 posti di controllo con stato live',
     feat2L: 'Traffico & cantieri', feat2D: 'Heatmap live + cantieri OSM',
     feat3L: 'Trasporti pubblici',  feat3D: 'TPG, CFF, CEVA in diretta',
-    feat4L: 'Allerte ufficiali',   feat4D: 'Meteo + incidenti G7',
+    feat4L: 'Allerte ufficiali',   feat4D: 'Meteo + incidenti',
     feat5L: 'Parcheggi P+R',       feat5D: 'Disponibilità in tempo reale',
     feat6L: 'Il mio percorso',     feat6D: 'Itinerario personale salvato',
     feat7L: 'Eventi',              feat7D: '34 eventi culturali a Ginevra',
     surveyTitle: "Le interesserebbe un'app mobile TIF?",
-    surveySub: '📱 Gratuita · Frontiere & traffico · Notifiche G7',
+    surveySub: '📱 Gratuita · Frontiere & traffico · Notifiche in tempo reale',
     surveyYes: '✓ Sì, certamente!', surveyNo: '✗ No grazie',
     surveyFeedbackPh: 'Le sue idee o suggerimenti (facoltativo)…',
     surveyBtn: 'Continua →',
@@ -1180,12 +1033,10 @@ const IT: MapT = {
 const ES: MapT = {
   filters: {
     all: 'Todo', traffic: 'Tráfico', alerts: 'Alertas', transit: 'Transporte',
-    parking: 'Aparcamiento', borders: 'Fronteras', g7: 'Info G7', journey: 'Mi ruta',
+    parking: 'Aparcamiento', borders: 'Fronteras', journey: 'Mi ruta',
   },
   layers: {
     traffic: 'Tráfico', tpg: 'TPG', zones: 'Zonas', alerts: 'Alertas',
-    zonesG7Title: '🗺️ Zonas G7',
-    zonesG7Desc: 'Perímetros G7, zonas restringidas y condiciones de acceso — 8 al 18 de junio de 2026',
   },
   search: {
     ph1: '¿A dónde va?', ph2: 'Bardonnex, Cornavin, Rive...',
@@ -1199,7 +1050,6 @@ const ES: MapT = {
     traffic: 'Tráfico rodado · Gran Ginebra',
     alertsFilter: 'Alertas e Incidentes viales',
     borders: 'Fronteras · 47 pasos',
-    g7: 'G7 · 8–18 junio 2026 · Évian',
     journey: 'Mi ruta · Favoritos · Alertas email',
     parkingFilter: 'Aparcamientos P+R · Gran Ginebra',
     default: 'Gran Ginebra',
@@ -1221,7 +1071,7 @@ const ES: MapT = {
     pedestrian: 'Paso peatonal / ciclista permitido',
     officialSources: 'Fuentes oficiales',
     alternative: '✓ Alternativa: ',
-    crossings: 'pasos', open24: 'abiertos 24h', closedG7: 'cerrados G7',
+    crossings: 'pasos', open24: 'abiertos 24h',
   },
   transport: {
     networkStatus: 'Estado de la red en tiempo real',
@@ -1237,7 +1087,6 @@ const ES: MapT = {
     noDeparts: 'No se encontraron salidas',
   },
   alertsSection: {
-    g7RouteTpg: 'Avisos G7 · Carretera y Transporte',
     incidents: 'Incidentes · Accidentes · Obras · Gran Ginebra',
     noAlertTitle: 'No se detectaron alertas',
     noAlertSub: 'Gran Ginebra · Tráfico normal',
@@ -1247,7 +1096,7 @@ const ES: MapT = {
     accident: '🚗 Accidente', construction: '🚧 Obras', congestion: '🚦 Atasco',
     roadClosure: '🚫 Carretera cortada', tpgDisruption: '🚌 Perturbación TPG',
     weather: '⛈️ Tiempo', incident: '⚠️ Incidente',
-    closedCrossingsTitle: 'Pasos cerrados G7', nearestOpen: 'Más cercano abierto',
+    nearestOpen: 'Más cercano abierto',
     adminAlertsTitle: 'Alertas activas', barrage: '🚧 Bloqueo', restriction: '🚫 Zona de restricción',
   },
   parkingSection: {
@@ -1275,15 +1124,6 @@ const ES: MapT = {
     viewJourney: 'Ver mi ruta',
     deleteLabel: 'Eliminar',
   },
-  g7Section: {
-    activeBadge: '🏛️ G7 EN CURSO · 8–18 junio 2026',
-    upcomingBadge: '🏛️ G7 Évian-les-Bains · 15–17 junio 2026',
-    activeDesc: 'Restricciones de circulación en vigor en el Gran Ginebra. Consulte los boletines abajo.',
-    upcomingDesc: 'Consulte los boletines para planificar sus desplazamientos. Restricciones, TPG, macaron.',
-    macaronPosts: 'Puestos macaron',
-    macaronSub: 'Carril rápido · Solo personal indispensable',
-    bulletinsTitle: 'Boletines oficiales G7',
-  },
   donation: {
     title: 'Apoyar TIF',
     subtitle: 'Gratuito, sin publicidad · Financiado por la comunidad',
@@ -1292,7 +1132,7 @@ const ES: MapT = {
   },
   overview: {
     douanes: 'Fronteras', trafficHeavy: 'tráfico denso',
-    allOpen: 'todos abiertos', closedG7: 'cerrados G7',
+    allOpen: 'todos abiertos',
     transport: 'Transporte público',
     transportSub: 'TPG · CFF · Léman Express · CEVA',
     disruption: 'Perturbación',
@@ -1303,22 +1143,11 @@ const ES: MapT = {
     noIncident: 'Ningún incidente · Tráfico normal',
     journey: 'Mi ruta',
     journeySub: 'Rutas guardadas · Alertas email antes de salir',
-    g7Title: 'G7 — 8 al 18 de junio de 2026',
-    g7Sub: 'Directivas oficiales · Restricciones de acceso',
-    borjaDesc: 'Esta aplicación fue diseñada por nuestro equipo de ingenieros para ayudar a los habitantes del Gran Ginebra a desplazarse tranquilamente durante el G7 de Évian 2026 — fronteras, tráfico, transporte público y alertas en tiempo real, todo en un solo lugar.',
+    borjaDesc: 'Esta aplicación fue diseñada por nuestro equipo de ingenieros para ayudar a los habitantes del Gran Ginebra a desplazarse tranquilamente: fronteras, tráfico, transporte público y alertas en tiempo real, todo en un solo lugar.',
     borjaSub: 'Ingenieros informáticos · Ginebra',
     borjaLink: 'Más información → borja-swiss-solutions.ch',
   },
-  bulletins: {
-    active: 'EN CURSO', upcoming: 'PRÓXIMO', past: 'FINALIZADO',
-    sourcePrefix: 'Fuente: ',
-    defaultTitle: 'Boletines G7',
-  },
   banner: {
-    activeTitle: 'G7 en curso — Perturbaciones TPG',
-    upcomingTitle: 'G7 Évian — Próximo',
-    activeBody: 'Horario de vacaciones en vigor en la mayoría de líneas TPG.',
-    upcomingBody: 'Perturbaciones TPG previstas del 8 al 17 de junio. Planifique con antelación.',
     lineSuppPrefixS: 'Línea', lineSuppPrefixP: 'Líneas',
     lineSuppSuffixS: 'suprimida.', lineSuppSuffixP: 'suprimidas.',
     infoPrefix: 'Info TPG: ',
@@ -1337,16 +1166,14 @@ const ES: MapT = {
     calcError: 'Cálculo no disponible. Verifique su conexión.',
     footer: 'Recálculo auto · 2 min · Tráfico en tiempo real HERE',
     arrival: 'Llegada', alternative: 'Alternativa',
-    trafficSuffix: 'tráfico', g7SafeLabel: 'G7 seguro',
+    trafficSuffix: 'tráfico',
     fastest: 'Ruta más rápida',
     fluidTraffic: 'Tráfico fluido',
     noRestriction: 'Sin restricciones activas',
     viaCentre: 'Por el centro de la ciudad',
     distReduced: 'Distancia ligeramente reducida',
     slowerVs: 'min vs. la más rápida',
-    avoidsG7: 'Evita los perímetros G7',
     bypassesZones: 'Rodea las zonas restringidas',
-    recommended: 'Recomendado 12–18 junio 2026',
   },
   transit: {
     title: 'Ruta en transporte',
@@ -1397,8 +1224,6 @@ const ES: MapT = {
     priceUnknown: 'Precio desconocido',
     dates: 'Fechas',
     links: 'Enlaces',
-    g7AccessTitle: '🏛️ Acceso durante el G7',
-    g7Lifted: 'Dispositivo G7 levantado — acceso normal.',
     verifConfirmed: 'Confirmado',
     verifPlausible: 'Por confirmar',
     verifUnverified: 'No verificado',
@@ -1409,25 +1234,19 @@ const ES: MapT = {
     noEvents: 'No se encontraron eventos.',
   },
   welcome: {
-    g7Title: 'Zona G7 — Gran Ginebra',
-    g7Date: 'Cumbre de Évian-les-Bains · 15–17 de junio de 2026',
-    g7Body1: '<strong style="color:white;font-weight:600">Controles fronterizos reforzados</strong> están en vigor del 10 al 19 de junio de 2026 en toda la región del Gran Ginebra.',
-    g7Body2: 'Algunos pasos están <strong style="color:white;font-weight:600">cerrados o requieren un macaron</strong>. Consulte el mapa antes de cualquier desplazamiento transfronterizo.',
-    g7Warn: '⚠️ Prever tiempo adicional en los pasos activos.',
-    g7Btn: '✓ Sí, he entendido',
     featTitle: 'Bienvenido a TIF',
     featSub: 'Todas las funcionalidades disponibles',
     featBtn: '¡Empezamos! →',
     newBadge: 'NUEVO',
-    feat1L: 'Fronteras G7',        feat1D: '47 puestos de control con estado en tiempo real',
+    feat1L: 'Fronteras',        feat1D: '47 puestos de control con estado en tiempo real',
     feat2L: 'Tráfico & obras',     feat2D: 'Heatmap live + obras OSM',
     feat3L: 'Transporte público',  feat3D: 'TPG, CFF, CEVA en directo',
-    feat4L: 'Alertas oficiales',   feat4D: 'Tiempo + incidentes G7',
+    feat4L: 'Alertas oficiales',   feat4D: 'Tiempo + incidentes',
     feat5L: 'Parkings P+R',        feat5D: 'Disponibilidad en tiempo real',
     feat6L: 'Mi ruta',             feat6D: 'Itinerario personal guardado',
     feat7L: 'Eventos',             feat7D: '34 eventos culturales en Ginebra',
     surveyTitle: '¿Le interesaría una app móvil TIF?',
-    surveySub: '📱 Gratis · Fronteras & tráfico · Notificaciones G7',
+    surveySub: '📱 Gratis · Fronteras & tráfico · Notificaciones en tiempo real',
     surveyYes: '✓ ¡Sí, claramente!', surveyNo: '✗ No gracias',
     surveyFeedbackPh: 'Sus ideas o sugerencias (opcional)…',
     surveyBtn: 'Continuar →',
@@ -1438,12 +1257,10 @@ const ES: MapT = {
 const PT: MapT = {
   filters: {
     all: 'Tudo', traffic: 'Tráfego', alerts: 'Alertas', transit: 'Transportes',
-    parking: 'Estacionamento', borders: 'Fronteiras', g7: 'Info G7', journey: 'Meu percurso',
+    parking: 'Estacionamento', borders: 'Fronteiras', journey: 'Meu percurso',
   },
   layers: {
     traffic: 'Tráfego', tpg: 'TPG', zones: 'Zonas', alerts: 'Alertas',
-    zonesG7Title: '🗺️ Zonas G7',
-    zonesG7Desc: 'Perímetros G7, zonas de restrição e condições de acesso — 8 a 18 de junho de 2026',
   },
   search: {
     ph1: 'Para onde vai?', ph2: 'Bardonnex, Cornavin, Rive...',
@@ -1457,7 +1274,6 @@ const PT: MapT = {
     traffic: 'Tráfego rodoviário · Grande Genebra',
     alertsFilter: 'Alertas e Incidentes rodoviários',
     borders: 'Fronteiras · 47 passagens',
-    g7: 'G7 · 8–18 junho 2026 · Évian',
     journey: 'Meu percurso · Favoritos · Alertas email',
     parkingFilter: 'Parques P+R · Grande Genebra',
     default: 'Grande Genebra',
@@ -1479,7 +1295,7 @@ const PT: MapT = {
     pedestrian: 'Passagem pedonal / ciclável permitida',
     officialSources: 'Fontes oficiais',
     alternative: '✓ Alternativa: ',
-    crossings: 'passagens', open24: 'abertas 24h', closedG7: 'fechadas G7',
+    crossings: 'passagens', open24: 'abertas 24h',
   },
   transport: {
     networkStatus: 'Estado da rede em tempo real',
@@ -1495,7 +1311,6 @@ const PT: MapT = {
     noDeparts: 'Nenhuma partida encontrada',
   },
   alertsSection: {
-    g7RouteTpg: 'Avisos G7 · Estradas e Transportes',
     incidents: 'Incidentes · Acidentes · Obras · Grande Genebra',
     noAlertTitle: 'Nenhum alerta detetado',
     noAlertSub: 'Grande Genebra · Tráfego normal',
@@ -1505,7 +1320,7 @@ const PT: MapT = {
     accident: '🚗 Acidente', construction: '🚧 Obras', congestion: '🚦 Congestionamento',
     roadClosure: '🚫 Estrada fechada', tpgDisruption: '🚌 Perturbação TPG',
     weather: '⛈️ Tempo', incident: '⚠️ Incidente',
-    closedCrossingsTitle: 'Postos fechados G7', nearestOpen: 'Mais próximo aberto',
+    nearestOpen: 'Mais próximo aberto',
     adminAlertsTitle: 'Alertas ativas', barrage: '🚧 Bloqueio', restriction: '🚫 Zona de restrição',
   },
   parkingSection: {
@@ -1533,15 +1348,6 @@ const PT: MapT = {
     viewJourney: 'Ver o meu percurso',
     deleteLabel: 'Eliminar',
   },
-  g7Section: {
-    activeBadge: '🏛️ G7 EM CURSO · 8–18 junho 2026',
-    upcomingBadge: '🏛️ G7 Évian-les-Bains · 15–17 junho 2026',
-    activeDesc: 'Restrições de circulação em vigor na Grande Genebra. Consulte os boletins abaixo.',
-    upcomingDesc: 'Consulte os boletins para planear as suas deslocações. Restrições, TPG, macaron.',
-    macaronPosts: 'Postos macaron',
-    macaronSub: 'Via rápida · Apenas pessoal indispensável',
-    bulletinsTitle: 'Boletins oficiais G7',
-  },
   donation: {
     title: 'Apoiar o TIF',
     subtitle: 'Gratuito, sem publicidade · Financiado pela comunidade',
@@ -1550,7 +1356,7 @@ const PT: MapT = {
   },
   overview: {
     douanes: 'Fronteiras', trafficHeavy: 'tráfego intenso',
-    allOpen: 'todas abertas', closedG7: 'fechadas G7',
+    allOpen: 'todas abertas',
     transport: 'Transporte público',
     transportSub: 'TPG · CFF · Léman Express · CEVA',
     disruption: 'Perturbação',
@@ -1561,22 +1367,11 @@ const PT: MapT = {
     noIncident: 'Nenhum incidente · Tráfego normal',
     journey: 'Meu percurso',
     journeySub: 'Percursos guardados · Alertas email antes de partir',
-    g7Title: 'G7 — 8 a 18 de junho de 2026',
-    g7Sub: 'Diretivas oficiais · Restrições de acesso',
-    borjaDesc: 'Esta aplicação foi concebida pela nossa equipa de engenheiros para ajudar os habitantes da Grande Genebra a deslocar-se tranquilamente durante o G7 de Évian 2026 — fronteiras, tráfego, transportes públicos e alertas em tempo real, tudo num só lugar.',
+    borjaDesc: 'Esta aplicação foi concebida pela nossa equipa de engenheiros para ajudar os habitantes da Grande Genebra a deslocar-se tranquilamente: fronteiras, tráfego, transportes públicos e alertas em tempo real, tudo num só lugar.',
     borjaSub: 'Engenheiros informáticos · Genebra',
     borjaLink: 'Saber mais → borja-swiss-solutions.ch',
   },
-  bulletins: {
-    active: 'EM CURSO', upcoming: 'PRÓXIMO', past: 'TERMINADO',
-    sourcePrefix: 'Fonte: ',
-    defaultTitle: 'Boletins G7',
-  },
   banner: {
-    activeTitle: 'G7 em curso — Perturbações TPG',
-    upcomingTitle: 'G7 Évian — Próximo',
-    activeBody: 'Horário de férias em vigor na maioria das linhas TPG.',
-    upcomingBody: 'Perturbações TPG previstas de 8 a 17 de junho. Planeie com antecedência.',
     lineSuppPrefixS: 'Linha', lineSuppPrefixP: 'Linhas',
     lineSuppSuffixS: 'suprimida.', lineSuppSuffixP: 'suprimidas.',
     infoPrefix: 'Info TPG: ',
@@ -1595,16 +1390,14 @@ const PT: MapT = {
     calcError: 'Cálculo indisponível. Verifique a sua ligação.',
     footer: 'Recálculo auto · 2 min · Tráfego em tempo real HERE',
     arrival: 'Chegada', alternative: 'Alternativa',
-    trafficSuffix: 'tráfego', g7SafeLabel: 'G7 seguro',
+    trafficSuffix: 'tráfego',
     fastest: 'Rota mais rápida',
     fluidTraffic: 'Tráfego fluido',
     noRestriction: 'Sem restrições ativas',
     viaCentre: 'Pelo centro da cidade',
     distReduced: 'Distância ligeiramente reduzida',
     slowerVs: 'min vs. a mais rápida',
-    avoidsG7: 'Evita os perímetros G7',
     bypassesZones: 'Contorna as zonas de restrição',
-    recommended: 'Recomendado 12–18 junho 2026',
   },
   transit: {
     title: 'Rota de transportes',
@@ -1655,8 +1448,6 @@ const PT: MapT = {
     priceUnknown: 'Preço desconhecido',
     dates: 'Datas',
     links: 'Links',
-    g7AccessTitle: '🏛️ Acesso durante o G7',
-    g7Lifted: 'Dispositivo G7 levantado — acesso normal.',
     verifConfirmed: 'Confirmado',
     verifPlausible: 'A confirmar',
     verifUnverified: 'Não verificado',
@@ -1667,25 +1458,19 @@ const PT: MapT = {
     noEvents: 'Nenhum evento encontrado.',
   },
   welcome: {
-    g7Title: 'Zona G7 — Grande Genebra',
-    g7Date: 'Cimeira de Évian-les-Bains · 15–17 de junho de 2026',
-    g7Body1: '<strong style="color:white;font-weight:600">Controlos fronteiriços reforçados</strong> estão em vigor de 10 a 19 de junho de 2026 em toda a região da Grande Genebra.',
-    g7Body2: 'Algumas passagens estão <strong style="color:white;font-weight:600">fechadas ou requerem um macaron</strong>. Consulte o mapa antes de qualquer deslocação transfronteiriça.',
-    g7Warn: '⚠️ Prever tempo adicional nas passagens ativas.',
-    g7Btn: '✓ Sim, compreendi',
     featTitle: 'Bem-vindo ao TIF',
     featSub: 'Todas as funcionalidades disponíveis',
     featBtn: 'Vamos lá! →',
     newBadge: 'NOVO',
-    feat1L: 'Fronteiras G7',        feat1D: '47 postos de controlo com estado live',
+    feat1L: 'Fronteiras',        feat1D: '47 postos de controlo com estado live',
     feat2L: 'Tráfego & obras',      feat2D: 'Heatmap live + obras OSM',
     feat3L: 'Transportes públicos', feat3D: 'TPG, CFF, CEVA em direto',
-    feat4L: 'Alertas oficiais',     feat4D: 'Meteorologia + incidentes G7',
+    feat4L: 'Alertas oficiais',     feat4D: 'Meteorologia + incidentes',
     feat5L: 'Parques P+R',          feat5D: 'Disponibilidade em tempo real',
     feat6L: 'O meu percurso',       feat6D: 'Itinerário pessoal guardado',
     feat7L: 'Eventos',              feat7D: '34 eventos culturais em Genebra',
     surveyTitle: 'Teria interesse numa app móvel TIF?',
-    surveySub: '📱 Gratuita · Fronteiras & tráfego · Notificações G7',
+    surveySub: '📱 Gratuita · Fronteiras & tráfego · Notificações em tempo real',
     surveyYes: '✓ Sim, com certeza!', surveyNo: '✗ Não, obrigado',
     surveyFeedbackPh: 'As suas ideias ou sugestões (opcional)…',
     surveyBtn: 'Continuar →',
@@ -1696,12 +1481,10 @@ const PT: MapT = {
 const SQ: MapT = {
   filters: {
     all: 'Gjithçka', traffic: 'Trafiku', alerts: 'Alarmet', transit: 'Transport',
-    parking: 'Parkingu', borders: 'Kufijtë', g7: 'Info G7', journey: 'Udhëtimi im',
+    parking: 'Parkingu', borders: 'Kufijtë', journey: 'Udhëtimi im',
   },
   layers: {
     traffic: 'Trafiku', tpg: 'TPG', zones: 'Zonat', alerts: 'Alarmet',
-    zonesG7Title: '🗺️ Zonat G7',
-    zonesG7Desc: 'Perimetrat G7, zonat e kufizuara dhe kushtet e aksesit — 8–18 qershor 2026',
   },
   search: {
     ph1: 'Ku dëshironi të shkoni?', ph2: 'Bardonnex, Cornavin, Rive...',
@@ -1715,7 +1498,6 @@ const SQ: MapT = {
     traffic: 'Trafiku rrugor · Gjeneva e Madhe',
     alertsFilter: 'Alarme & Incidente rrugore',
     borders: 'Kufijtë · 47 vendkalime',
-    g7: 'G7 · 8–18 qershor 2026 · Évian',
     journey: 'Udhëtimi im · Të preferuarat · Alarme email',
     parkingFilter: 'Parkingjet P+R · Gjeneva e Madhe',
     default: 'Gjeneva e Madhe',
@@ -1737,7 +1519,7 @@ const SQ: MapT = {
     pedestrian: 'Kalim këmbësorësh / çiklisti i lejuar',
     officialSources: 'Burime zyrtare',
     alternative: '✓ Alternativë: ',
-    crossings: 'vendkalime', open24: 'të hapura 24h', closedG7: 'të mbyllura G7',
+    crossings: 'vendkalime', open24: 'të hapura 24h',
   },
   transport: {
     networkStatus: 'Gjendja e rrjetit në kohë reale',
@@ -1753,7 +1535,6 @@ const SQ: MapT = {
     noDeparts: 'Asnjë nisje e gjetur',
   },
   alertsSection: {
-    g7RouteTpg: 'Njoftime G7 · Rrugë & Transport',
     incidents: 'Incidente · Aksidente · Punime · Gjeneva e Madhe',
     noAlertTitle: 'Asnjë alarm i zbuluar',
     noAlertSub: 'Gjeneva e Madhe · Trafiku normal',
@@ -1763,7 +1544,7 @@ const SQ: MapT = {
     accident: '🚗 Aksident', construction: '🚧 Punime', congestion: '🚦 Bllokadë',
     roadClosure: '🚫 Rrugë e mbyllur', tpgDisruption: '🚌 Ndërprerje TPG',
     weather: '⛈️ Mot', incident: '⚠️ Incident',
-    closedCrossingsTitle: 'Kalime kufitare të mbyllura G7', nearestOpen: 'Më i afërt i hapur',
+    nearestOpen: 'Më i afërt i hapur',
     adminAlertsTitle: 'Alarme aktive', barrage: '🚧 Bllokadë rrugore', restriction: '🚫 Zonë kufizimi',
   },
   parkingSection: {
@@ -1791,15 +1572,6 @@ const SQ: MapT = {
     viewJourney: 'Shiko udhëtimin tim',
     deleteLabel: 'Fshi',
   },
-  g7Section: {
-    activeBadge: '🏛️ G7 NË ZHVILLIM · 8–18 qershor 2026',
-    upcomingBadge: '🏛️ G7 Évian-les-Bains · 15–17 qershor 2026',
-    activeDesc: 'Kufizimet e qarkullimit në fuqi në Gjenevën e Madhe. Shikoni buletinet më poshtë.',
-    upcomingDesc: 'Shikoni buletinet për të planifikuar lëvizjet tuaja. Kufizime, TPG, macaron.',
-    macaronPosts: 'Pikat e kontrollit macaron',
-    macaronSub: 'Korsia e shpejtë · Vetëm personeli i domosdoshëm',
-    bulletinsTitle: 'Buletine zyrtare G7',
-  },
   donation: {
     title: 'Mbështetni TIF',
     subtitle: 'Falas, pa reklama · I financuar nga komuniteti',
@@ -1808,7 +1580,7 @@ const SQ: MapT = {
   },
   overview: {
     douanes: 'Kufijtë', trafficHeavy: 'trafik i dendur',
-    allOpen: 'të gjitha të hapura', closedG7: 'të mbyllura G7',
+    allOpen: 'të gjitha të hapura',
     transport: 'Transport publik',
     transportSub: 'TPG · CFF · Léman Express · CEVA',
     disruption: 'Ndërprerje',
@@ -1819,22 +1591,11 @@ const SQ: MapT = {
     noIncident: 'Asnjë incident · Trafiku normal',
     journey: 'Udhëtimi im',
     journeySub: 'Udhëtime të ruajtura · Alarme email para nisjes',
-    g7Title: 'G7 — 8–18 qershor 2026',
-    g7Sub: 'Direktiva zyrtare · Kufizime aksesi',
-    borjaDesc: 'Ky aplikacion u projektua nga ekipi ynë i inxhinierëve për të ndihmuar banorët e Gjenevës së Madhe të lëvizin pa probleme gjatë samitit G7 të Évian 2026 — kufijtë, trafiku, transporti publik dhe alarmet në kohë reale, gjithçka në një vend.',
+    borjaDesc: 'Ky aplikacion u projektua nga ekipi ynë i inxhinierëve për të ndihmuar banorët e Gjenevës së Madhe të lëvizin pa probleme: kufijtë, trafiku, transporti publik dhe alarmet në kohë reale, gjithçka në një vend.',
     borjaSub: 'Inxhinierë informatikë · Gjenevë',
     borjaLink: 'Mëso më shumë → borja-swiss-solutions.ch',
   },
-  bulletins: {
-    active: 'NË ZHVILLIM', upcoming: 'I ARDHSHËM', past: 'I PËRFUNDUAR',
-    sourcePrefix: 'Burimi: ',
-    defaultTitle: 'Buletine G7',
-  },
   banner: {
-    activeTitle: 'G7 në zhvillim — Ndërprerje TPG',
-    upcomingTitle: 'G7 Évian — I ardhshëm',
-    activeBody: 'Orari i pushimeve në fuqi në shumicën e linjave TPG.',
-    upcomingBody: 'Ndërprerje TPG të parashikuara 8–17 qershor. Planifikoni paraprakisht.',
     lineSuppPrefixS: 'Linja', lineSuppPrefixP: 'Linjat',
     lineSuppSuffixS: 'e pezulluar.', lineSuppSuffixP: 'të pezulluara.',
     infoPrefix: 'Info TPG: ',
@@ -1853,16 +1614,14 @@ const SQ: MapT = {
     calcError: 'Llogaritja e padisponueshme. Kontrolloni lidhjen.',
     footer: 'Rillogaritje auto · 2 min · Trafiku në kohë reale HERE',
     arrival: 'Mbërritja', alternative: 'Alternativë',
-    trafficSuffix: 'trafik', g7SafeLabel: 'G7 i sigurt',
+    trafficSuffix: 'trafik',
     fastest: 'Itinerari më i shpejtë',
     fluidTraffic: 'Trafiku i rrjedhshëm',
     noRestriction: 'Asnjë kufizim aktiv',
     viaCentre: 'Nëpërmjet qendrës së qytetit',
     distReduced: 'Distancë paksa e reduktuar',
     slowerVs: 'min kundrejt më të shpejtit',
-    avoidsG7: 'Shmang perimetrat G7',
     bypassesZones: 'Anashkalon zonat e kufizuara',
-    recommended: 'Rekomanduar 12–18 qershor 2026',
   },
   transit: {
     title: 'Itinerari me transport',
@@ -1913,8 +1672,6 @@ const SQ: MapT = {
     priceUnknown: 'Çmim i panjohur',
     dates: 'Datat',
     links: 'Lidhjet',
-    g7AccessTitle: '🏛️ Aksesi gjatë G7',
-    g7Lifted: 'Masa G7 u hoq — akses normal.',
     verifConfirmed: 'Konfirmuar',
     verifPlausible: 'Për t\'u konfirmuar',
     verifUnverified: 'E paverifikuar',
@@ -1925,25 +1682,19 @@ const SQ: MapT = {
     noEvents: 'Asnjë ngjarje u gjet.',
   },
   welcome: {
-    g7Title: 'Zona G7 — Gjeneva e Madhe',
-    g7Date: 'Samiti i Évian-les-Bains · 15–17 qershor 2026',
-    g7Body1: '<strong style="color:white;font-weight:600">Kontrolle kufitare të intensifikuara</strong> janë në fuqi nga 10 deri më 19 qershor 2026 në të gjithë rajonin e Gjenevës së Madhe.',
-    g7Body2: 'Disa vendkalime janë <strong style="color:white;font-weight:600">të mbyllura ose kërkojnë një macaron</strong>. Konsultoni hartën para çdo udhëtimi ndërkufitar.',
-    g7Warn: '⚠️ Parashikoni kohë shtesë në vendkalimet aktive.',
-    g7Btn: '✓ Po, kuptova',
     featTitle: 'Mirë se vini në TIF',
     featSub: 'Të gjitha funksionalitetet janë të disponueshme',
     featBtn: 'Fillojmë! →',
     newBadge: 'I RI',
-    feat1L: 'Kufijtë G7',           feat1D: '47 pika kontrolli me status live',
+    feat1L: 'Kufijtë',           feat1D: '47 pika kontrolli me status live',
     feat2L: 'Trafiku & ndërtimet',  feat2D: 'Heatmap live + kantiere OSM',
     feat3L: 'Transporti publik',    feat3D: 'TPG, CFF, CEVA live',
-    feat4L: 'Alarme zyrtare',       feat4D: 'Moti + incidente G7',
+    feat4L: 'Alarme zyrtare',       feat4D: 'Moti + incidente',
     feat5L: 'Parking P+R',          feat5D: 'Disponueshmëria në kohë reale',
     feat6L: 'Rruga ime',            feat6D: 'Itinerar personal i ruajtur',
     feat7L: 'Ngjarje',              feat7D: '34 ngjarje kulturore në Gjenevë',
     surveyTitle: 'Do t\'ju interesonte një aplikacion TIF?',
-    surveySub: '📱 Falas · Kufijtë & trafiku · Njoftime G7',
+    surveySub: '📱 Falas · Kufijtë & trafiku · Njoftime në kohë reale',
     surveyYes: '✓ Po, patjetër!', surveyNo: '✗ Jo, faleminderit',
     surveyFeedbackPh: 'Idetë ose sugjerimet tuaja (opsionale)…',
     surveyBtn: 'Vazhdo →',
@@ -1954,12 +1705,10 @@ const SQ: MapT = {
 const JA: MapT = {
   filters: {
     all: 'すべて', traffic: '交通', alerts: '警報', transit: '交通機関',
-    parking: '駐車場', borders: '国境', g7: 'G7情報', journey: 'マイルート',
+    parking: '駐車場', borders: '国境', journey: 'マイルート',
   },
   layers: {
     traffic: '交通情報', tpg: 'TPG', zones: 'ゾーン', alerts: '警報',
-    zonesG7Title: '🗺️ G7ゾーン',
-    zonesG7Desc: 'G7境界、制限区域、アクセス条件 — 2026年6月8〜18日',
   },
   search: {
     ph1: 'どこへ行きますか？', ph2: 'バルドネックス、コルナヴァン、リーヴ...',
@@ -1973,7 +1722,6 @@ const JA: MapT = {
     traffic: '道路交通 · グラン・ジュネーヴ',
     alertsFilter: '警報 & 交通事故',
     borders: '国境 · 47か所の越境ポイント',
-    g7: 'G7 · 2026年6月8〜18日 · エヴィアン',
     journey: 'マイルート · お気に入り · メールアラート',
     parkingFilter: 'P+R駐車場 · グラン・ジュネーヴ',
     default: 'グラン・ジュネーヴ',
@@ -1995,7 +1743,7 @@ const JA: MapT = {
     pedestrian: '歩行者 / 自転車通行可',
     officialSources: '公式情報源',
     alternative: '✓ 代替ルート: ',
-    crossings: 'か所', open24: '24時間営業', closedG7: 'G7閉鎖',
+    crossings: 'か所', open24: '24時間営業',
   },
   transport: {
     networkStatus: 'リアルタイムネットワーク状況',
@@ -2011,7 +1759,6 @@ const JA: MapT = {
     noDeparts: '出発便なし',
   },
   alertsSection: {
-    g7RouteTpg: 'G7通知 · ルート & 交通機関',
     incidents: '事故 · 交通事故 · 工事 · グラン・ジュネーヴ',
     noAlertTitle: '警報なし',
     noAlertSub: 'グラン・ジュネーヴ · 交通正常',
@@ -2021,7 +1768,7 @@ const JA: MapT = {
     accident: '🚗 交通事故', construction: '🚧 工事', congestion: '🚦 渋滞',
     roadClosure: '🚫 道路閉鎖', tpgDisruption: '🚌 TPG運休',
     weather: '⛈️ 天気', incident: '⚠️ インシデント',
-    closedCrossingsTitle: 'G7閉鎖口', nearestOpen: '最寄の開放口',
+    nearestOpen: '最寄の開放口',
     adminAlertsTitle: 'アクティブ警報', barrage: '🚧 通行止め', restriction: '🚫 制限区域',
   },
   parkingSection: {
@@ -2049,15 +1796,6 @@ const JA: MapT = {
     viewJourney: 'マイルートを見る',
     deleteLabel: '削除',
   },
-  g7Section: {
-    activeBadge: '🏛️ G7開催中 · 2026年6月8〜18日',
-    upcomingBadge: '🏛️ G7エヴィアン＝レ＝バン · 2026年6月15〜17日',
-    activeDesc: 'グラン・ジュネーヴで交通規制が実施中です。以下の情報をご確認ください。',
-    upcomingDesc: '移動計画のために情報をご確認ください。規制、TPG、マカロン。',
-    macaronPosts: 'マカロン検問所',
-    macaronSub: '優先レーン · 必要な担当者のみ',
-    bulletinsTitle: 'G7公式情報',
-  },
   donation: {
     title: 'TIFをサポート',
     subtitle: '無料・広告なし · コミュニティで運営',
@@ -2066,7 +1804,7 @@ const JA: MapT = {
   },
   overview: {
     douanes: '国境', trafficHeavy: '渋滞',
-    allOpen: 'すべて開放', closedG7: 'G7閉鎖',
+    allOpen: 'すべて開放',
     transport: '公共交通機関',
     transportSub: 'TPG · CFF · レマン・エクスプレス · CEVA',
     disruption: '運休',
@@ -2077,22 +1815,11 @@ const JA: MapT = {
     noIncident: '事故なし · 交通正常',
     journey: 'マイルート',
     journeySub: '保存済みルート · 出発前メールアラート',
-    g7Title: 'G7 — 2026年6月8〜18日',
-    g7Sub: '公式指令 · アクセス制限',
-    borjaDesc: 'このアプリは、G7エヴィアン・サミット2026の間、グラン・ジュネーヴの住民が円滑に移動できるよう、エンジニアチームが設計しました。',
+    borjaDesc: 'このアプリは、グラン・ジュネーヴの住民が円滑に移動できるよう、エンジニアチームが設計しました。国境、交通、公共交通機関、リアルタイムアラートをすべて一箇所に集約しています。',
     borjaSub: 'ソフトウェアエンジニア · ジュネーヴ',
     borjaLink: '詳しく → borja-swiss-solutions.ch',
   },
-  bulletins: {
-    active: '開催中', upcoming: '予定', past: '終了',
-    sourcePrefix: '情報源: ',
-    defaultTitle: 'G7情報',
-  },
   banner: {
-    activeTitle: 'G7開催中 — TPG運休',
-    upcomingTitle: 'G7エヴィアン — 予定',
-    activeBody: 'ほとんどのTPG路線で休日ダイヤを実施中。',
-    upcomingBody: '6月8〜17日にTPG運休が予定されています。事前に計画してください。',
     lineSuppPrefixS: '路線', lineSuppPrefixP: '路線',
     lineSuppSuffixS: '運休中。', lineSuppSuffixP: '運休中。',
     infoPrefix: 'TPG情報: ',
@@ -2111,16 +1838,14 @@ const JA: MapT = {
     calcError: '計算できません。接続を確認してください。',
     footer: '2分ごとに再計算 · HEREリアルタイム交通情報',
     arrival: '到着', alternative: '代替',
-    trafficSuffix: '交通', g7SafeLabel: 'G7安全',
+    trafficSuffix: '交通',
     fastest: '最速ルート',
     fluidTraffic: '交通スムーズ',
     noRestriction: 'アクティブな制限なし',
     viaCentre: '市街地経由',
     distReduced: '距離がわずかに短縮',
     slowerVs: '分　最速比',
-    avoidsG7: 'G7境界を回避',
     bypassesZones: '制限区域を迂回',
-    recommended: '2026年6月12〜18日推奨',
   },
   transit: {
     title: '公共交通ルート',
@@ -2171,8 +1896,6 @@ const JA: MapT = {
     priceUnknown: '料金不明',
     dates: '日程',
     links: 'リンク',
-    g7AccessTitle: '🏛️ G7期間中のアクセス',
-    g7Lifted: 'G7措置解除 — 通常アクセス。',
     verifConfirmed: '確認済み',
     verifPlausible: '要確認',
     verifUnverified: '未確認',
@@ -2183,25 +1906,19 @@ const JA: MapT = {
     noEvents: 'イベントが見つかりません。',
   },
   welcome: {
-    g7Title: 'G7ゾーン — グラン・ジュネーヴ',
-    g7Date: 'エヴィアン＝レ＝バン首脳会議 · 2026年6月15〜17日',
-    g7Body1: '2026年6月10日〜19日、グラン・ジュネーヴ全域で<strong style="color:white;font-weight:600">強化された国境管理</strong>が実施されています。',
-    g7Body2: '一部の越境ポイントは<strong style="color:white;font-weight:600">閉鎖またはマカロン証明書が必要</strong>です。越境前に地図をご確認ください。',
-    g7Warn: '⚠️ 稼働中の国境では追加の待ち時間を見込んでください。',
-    g7Btn: '✓ 了解しました',
     featTitle: 'TIFへようこそ',
     featSub: 'すべての機能が利用可能です',
     featBtn: 'はじめる →',
     newBadge: '新機能',
-    feat1L: 'G7国境',           feat1D: 'ライブステータス付き47チェックポイント',
+    feat1L: '国境',           feat1D: 'ライブステータス付き47チェックポイント',
     feat2L: '交通と工事',       feat2D: 'ライブヒートマップ＋OSM工事情報',
     feat3L: '公共交通機関',     feat3D: 'TPG、CFF、CEVAライブ',
-    feat4L: '公式アラート',     feat4D: '天気＋G7インシデント',
+    feat4L: '公式アラート',     feat4D: '天気＋インシデント',
     feat5L: 'P+R駐車場',        feat5D: 'リアルタイム空き状況',
     feat6L: 'マイルート',       feat6D: '保存済みの個人ルート',
     feat7L: 'イベント',         feat7D: 'ジュネーヴの文化イベント34件',
     surveyTitle: 'TIFモバイルアプリに興味がありますか？',
-    surveySub: '📱 無料 · 国境＆交通 · G7通知',
+    surveySub: '📱 無料 · 国境＆交通 · リアルタイム通知',
     surveyYes: '✓ はい、ぜひ！', surveyNo: '✗ いいえ、結構です',
     surveyFeedbackPh: 'アイデアやご意見（任意）…',
     surveyBtn: '続ける →',
@@ -2212,12 +1929,10 @@ const JA: MapT = {
 const ZH: MapT = {
   filters: {
     all: '全部', traffic: '交通', alerts: '警报', transit: '公共交通',
-    parking: '停车场', borders: '边境', g7: 'G7资讯', journey: '我的路线',
+    parking: '停车场', borders: '边境', journey: '我的路线',
   },
   layers: {
     traffic: '交通信息', tpg: 'TPG', zones: '区域', alerts: '警报',
-    zonesG7Title: '🗺️ G7区域',
-    zonesG7Desc: 'G7边界、限制区域及通行条件 — 2026年6月8日至18日',
   },
   search: {
     ph1: '您要去哪里？', ph2: '巴尔多内、科尔纳万、里夫...',
@@ -2231,7 +1946,6 @@ const ZH: MapT = {
     traffic: '道路交通 · 大日内瓦',
     alertsFilter: '警报 & 交通事故',
     borders: '边境 · 47个过境点',
-    g7: 'G7 · 2026年6月8日至18日 · 埃维昂',
     journey: '我的路线 · 收藏 · 邮件提醒',
     parkingFilter: 'P+R停车场 · 大日内瓦',
     default: '大日内瓦',
@@ -2253,7 +1967,7 @@ const ZH: MapT = {
     pedestrian: '行人 / 自行车可通行',
     officialSources: '官方信息来源',
     alternative: '✓ 备选路线: ',
-    crossings: '个过境点', open24: '24小时开放', closedG7: 'G7关闭',
+    crossings: '个过境点', open24: '24小时开放',
   },
   transport: {
     networkStatus: '实时网络状态',
@@ -2269,7 +1983,6 @@ const ZH: MapT = {
     noDeparts: '未找到发车信息',
   },
   alertsSection: {
-    g7RouteTpg: 'G7通知 · 路线 & 公共交通',
     incidents: '事件 · 交通事故 · 施工 · 大日内瓦',
     noAlertTitle: '无警报',
     noAlertSub: '大日内瓦 · 交通正常',
@@ -2279,7 +1992,7 @@ const ZH: MapT = {
     accident: '🚗 交通事故', construction: '🚧 施工', congestion: '🚦 拥堵',
     roadClosure: '🚫 道路关闭', tpgDisruption: '🚌 TPG中断',
     weather: '⛈️ 天气', incident: '⚠️ 事件',
-    closedCrossingsTitle: 'G7关闭口岸', nearestOpen: '最近开放口岸',
+    nearestOpen: '最近开放口岸',
     adminAlertsTitle: '当前警报', barrage: '🚧 路障', restriction: '🚫 限制区',
   },
   parkingSection: {
@@ -2307,15 +2020,6 @@ const ZH: MapT = {
     viewJourney: '查看我的路线',
     deleteLabel: '删除',
   },
-  g7Section: {
-    activeBadge: '🏛️ G7进行中 · 2026年6月8日至18日',
-    upcomingBadge: '🏛️ G7埃维昂莱班 · 2026年6月15日至17日',
-    activeDesc: '大日内瓦交通管制正在实施。请查看以下公告。',
-    upcomingDesc: '请查看公告以规划出行。管制、TPG、通行证。',
-    macaronPosts: '通行证检查站',
-    macaronSub: '快速通道 · 仅限必要人员',
-    bulletinsTitle: 'G7官方公告',
-  },
   donation: {
     title: '支持TIF',
     subtitle: '免费、无广告 · 社区资助',
@@ -2324,7 +2028,7 @@ const ZH: MapT = {
   },
   overview: {
     douanes: '边境', trafficHeavy: '交通拥堵',
-    allOpen: '全部开放', closedG7: 'G7关闭',
+    allOpen: '全部开放',
     transport: '公共交通',
     transportSub: 'TPG · CFF · 莱蒙特快 · CEVA',
     disruption: '中断',
@@ -2335,22 +2039,11 @@ const ZH: MapT = {
     noIncident: '无事故 · 交通正常',
     journey: '我的路线',
     journeySub: '已保存路线 · 出发前邮件提醒',
-    g7Title: 'G7 — 2026年6月8日至18日',
-    g7Sub: '官方指令 · 通行限制',
-    borjaDesc: '本应用由我们的工程师团队专为大日内瓦居民设计，帮助他们在G7埃维昂峰会2026期间顺畅出行——边境、交通、公共交通和实时警报，一站式服务。',
+    borjaDesc: '本应用由我们的工程师团队专为大日内瓦居民设计，帮助他们顺畅出行：边境、交通、公共交通和实时警报，一站式服务。',
     borjaSub: '软件工程师 · 日内瓦',
     borjaLink: '了解更多 → borja-swiss-solutions.ch',
   },
-  bulletins: {
-    active: '进行中', upcoming: '即将', past: '已结束',
-    sourcePrefix: '来源: ',
-    defaultTitle: 'G7公告',
-  },
   banner: {
-    activeTitle: 'G7进行中 — TPG中断',
-    upcomingTitle: 'G7埃维昂 — 即将',
-    activeBody: '大多数TPG线路正在执行节假日时刻表。',
-    upcomingBody: '6月8日至17日预计TPG中断。请提前规划。',
     lineSuppPrefixS: '线路', lineSuppPrefixP: '线路',
     lineSuppSuffixS: '已暂停。', lineSuppSuffixP: '已暂停。',
     infoPrefix: 'TPG信息: ',
@@ -2369,16 +2062,14 @@ const ZH: MapT = {
     calcError: '无法计算。请检查网络连接。',
     footer: '每2分钟重新计算 · HERE实时交通信息',
     arrival: '到达', alternative: '备选',
-    trafficSuffix: '交通', g7SafeLabel: 'G7安全',
+    trafficSuffix: '交通',
     fastest: '最快路线',
     fluidTraffic: '交通顺畅',
     noRestriction: '无活跃限制',
     viaCentre: '途经市中心',
     distReduced: '距离略有缩短',
     slowerVs: '分钟　对比最快',
-    avoidsG7: '绕避G7边界',
     bypassesZones: '绕过限制区域',
-    recommended: '2026年6月12日至18日推荐',
   },
   transit: {
     title: '公共交通路线',
@@ -2429,8 +2120,6 @@ const ZH: MapT = {
     priceUnknown: '价格未知',
     dates: '日期',
     links: '链接',
-    g7AccessTitle: '🏛️ G7期间通行',
-    g7Lifted: 'G7措施已解除 — 正常通行。',
     verifConfirmed: '已确认',
     verifPlausible: '待确认',
     verifUnverified: '未核实',
@@ -2441,25 +2130,19 @@ const ZH: MapT = {
     noEvents: '未找到活动。',
   },
   welcome: {
-    g7Title: 'G7区域 — 大日内瓦地区',
-    g7Date: '埃维昂-莱班峰会 · 2026年6月15–17日',
-    g7Body1: '2026年6月10日至19日，大日内瓦地区全境实施<strong style="color:white;font-weight:600">加强边境管控</strong>。',
-    g7Body2: '部分口岸<strong style="color:white;font-weight:600">关闭或需要马卡龙通行证</strong>。越境前请查看地图。',
-    g7Warn: '⚠️ 请在开放口岸预留额外等待时间。',
-    g7Btn: '✓ 我已了解',
     featTitle: '欢迎使用 TIF',
     featSub: '所有功能均已开放',
     featBtn: '开始使用 →',
     newBadge: '新功能',
-    feat1L: 'G7边境',     feat1D: '47个检查站实时状态',
+    feat1L: '边境',     feat1D: '47个检查站实时状态',
     feat2L: '交通与施工', feat2D: '实时热力图 + OSM施工信息',
     feat3L: '公共交通',   feat3D: 'TPG、CFF、CEVA实时数据',
-    feat4L: '官方预警',   feat4D: '天气 + G7事件',
+    feat4L: '官方预警',   feat4D: '天气 + 事件',
     feat5L: 'P+R停车场',  feat5D: '实时车位信息',
     feat6L: '我的路线',   feat6D: '保存的个人行程',
     feat7L: '活动',       feat7D: '日内瓦34场文化活动',
     surveyTitle: '您有兴趣使用TIF手机应用吗？',
-    surveySub: '📱 免费 · 边境及交通 · G7通知',
+    surveySub: '📱 免费 · 边境及交通 · 实时通知',
     surveyYes: '✓ 是的，当然！', surveyNo: '✗ 不，谢谢',
     surveyFeedbackPh: '您的想法或建议（可选）…',
     surveyBtn: '继续 →',

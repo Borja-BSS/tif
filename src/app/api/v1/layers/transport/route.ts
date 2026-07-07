@@ -3,7 +3,6 @@ import { redis }               from '@/lib/redis'
 import { getVehiclePositions } from '@/lib/transport/vehicle-positions'
 import { getTpgDisruptions }   from '@/lib/transport/tpg-disruptions'
 import { getCffDisruptions }   from '@/lib/transport/cff-disruptions'
-import { getG7Impact }         from '@/lib/transport/g7-impact'
 import { withMetrics }         from '@/lib/route-utils'
 import type { NextRequest }    from 'next/server'
 import type { TransportLayerResponse } from '@/lib/transport/types'
@@ -44,7 +43,6 @@ async function handler(_req: NextRequest): Promise<NextResponse> {
       tpg: tpgResult.status === 'fulfilled' ? tpgResult.value : [],
       cff: cffResult.status === 'fulfilled' ? cffResult.value : [],
     },
-    g7: getG7Impact(),
     generatedAt: new Date().toISOString(),
     sources: {
       vehicles: vehiclesResult.status,

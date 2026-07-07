@@ -4,7 +4,6 @@ import { inngest }          from '@/lib/inngest'
 import { db }               from '@/lib/db'
 import { redis }            from '@/lib/redis'
 import { sendJourneyAlert } from '@/lib/email'
-import { getAlertsForDay }  from '@/data/g7-alerts'
 import {
   calculateImpactScore,
   buildHeadline,
@@ -65,8 +64,6 @@ export const morningBriefingJob = inngest.createFunction(
     const dd    = String(now.getDate()).padStart(2, '0')
     const today = `${yyyy}-${mm}-${dd}`
 
-    const g7Alerts = getAlertsForDay(today)
-
     const nowMin = now.getHours() * 60 + now.getMinutes()
 
     let sent = 0
@@ -117,7 +114,6 @@ export const morningBriefingJob = inngest.createFunction(
             delayMinutes,
             departureHour: journey.departureHour,
             departureMin:  journey.departureMinute,
-            g7Alerts,
           })
           sent++
         } catch {

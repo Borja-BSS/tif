@@ -53,11 +53,6 @@ export interface HomeT {
       label: string; normal: string; descNormal: string
       red: string; orange: string
     }
-    g7: {
-      label: string
-      zonesLabel: string; roadsLabel: string; tpgLabel: string; alertsLabel: string
-      zonesDesc: string; roadsDesc: string; tpgDesc: string; alertsFrom: string
-    }
     borders: { label: string }
     ceva: { label: string }
     ctaStrong: string; ctaDesc: string; ctaBtn: string
@@ -99,18 +94,6 @@ export interface HomeT {
     rt: string
     viewMap: string
     ctaStrong: string; ctaDesc: string; ctaBtn: string
-  }
-  lgv: {
-    sectionLabel: string
-    h2: string
-    sub: string
-    freeNumberLabel: string
-    freeCallLabel: string
-    hoursLabel: string
-    hoursLine1: string; hoursLine2: string; hoursLine3: string
-    emergencyLabel: string
-    pressLabel: string
-    sourceText: string
   }
   src: {
     sectionLabel: string
@@ -220,7 +203,7 @@ export const T: Record<Lang, HomeT> = {
       h1a: 'Le Grand Genève,',
       h1b: 'en',
       accent: 'temps réel.',
-      p1: 'Un accident. Une route fermée. Une alerte G7.',
+      p1: 'Un accident. Une route fermée. Une alerte en direct.',
       p2: 'Ces informations existent. Elles sont dispersées.',
       p3: 'TIF les centralise. Avant qu\'il soit trop tard.',
       btn: 'Ouvrir la carte live',
@@ -251,25 +234,16 @@ export const T: Record<Lang, HomeT> = {
         normal: 'Normal', descNormal: 'Conditions normales, pas d\'alerte active',
         red: 'Rouge', orange: 'Orange',
       },
-      g7: {
-        label: 'Veille G7, Restrictions actives',
-        zonesLabel: 'Zones rouge', roadsLabel: 'Routes fermées',
-        tpgLabel: 'Lignes TPG impactées', alertsLabel: 'Alertes diffusées',
-        zonesDesc: 'Palais Nations, Quai Wilson, Rue de Lausanne, IATA',
-        roadsDesc: 'Rive gauche et accès aéroport réglementés',
-        tpgDesc: 'Selon dispositif G7 en vigueur',
-        alertsFrom: 'Depuis 06h00 ce matin',
-      },
       borders: { label: 'Frontières CH-FR' },
       ceva: { label: 'Léman Express CEVA' },
       ctaStrong: 'Vous venez de voir la situation en direct.',
-      ctaDesc: 'La carte live regroupe tout ça en une seule vue : routes, TPG, G7, météo, frontières.',
+      ctaDesc: 'La carte live regroupe tout ça en une seule vue : routes, TPG, météo, frontières.',
       ctaBtn: 'Ouvrir la carte live',
     },
     share: {
       sectionLabel: 'Partagez TIF',
       h2a: 'Informez votre', h2b: 'entourage',
-      sub: 'Plus les gens connaissent TIF avant le G7, moins il y a de blocages inutiles. Chaque partage peut éviter une heure perdue à quelqu\'un.',
+      sub: 'Plus les gens connaissent TIF, moins il y a de blocages inutiles. Chaque partage peut éviter une heure perdue à quelqu\'un.',
       xBtn: 'Partager sur X',
       liBtn: 'Partager sur LinkedIn',
       waBtn: 'WhatsApp',
@@ -277,9 +251,9 @@ export const T: Record<Lang, HomeT> = {
       copiedBtn: '✓ Lien copié',
     },
     why: {
-      sectionLabel: 'Sommet G7',
+      sectionLabel: 'Grand Genève',
       h2a: 'Pourquoi chaque', h2b: 'minute compte',
-      sub: 'Lors d\'un sommet international, la ville change de nature. Sans information centralisée, chaque perturbation touche des milliers de personnes simultanément.',
+      sub: 'Dans une agglomération en mouvement permanent, la ville change de nature d\'une heure à l\'autre. Sans information centralisée, chaque perturbation touche des milliers de personnes simultanément.',
       carHead: '4 scénarios réels, cliquez pour le détail',
       analyzeLink: 'Voir l\'analyse complète →',
       withoutTIF: 'Sans TIF',
@@ -301,7 +275,7 @@ export const T: Record<Lang, HomeT> = {
           numLabel: 'Entreprise',
           title: 'Un livreur. 14 arrêts. 4 zones fermées.',
           withoutText: 'découvre les blocages un par un, perd 3 heures.',
-          withText: 'tournée planifiée sur la carte G7. 14 livraisons avant 16h.',
+          withText: 'tournée planifiée sur la carte. 14 livraisons avant 16h.',
         },
         {
           numLabel: 'Réaction rapide',
@@ -314,19 +288,19 @@ export const T: Record<Lang, HomeT> = {
     faq: {
       sectionLabel: 'Questions fréquentes',
       h2a: 'Tout comprendre', h2b: 'en 30 secondes',
-      sub: 'Ce que TIF apporte concrètement pendant le G7 et au quotidien.',
+      sub: 'Ce que TIF apporte concrètement au quotidien.',
       items: [
         {
-          q: 'TIF pendant le G7, c\'est quoi exactement ?',
-          a: 'TIF centralise en temps réel toutes les perturbations liées au Sommet : zones rouges, routes fermées, restrictions TPG, délais aux frontières et alertes météo. Une seule source fiable, mise à jour toutes les 30 secondes depuis les sources officielles.',
+          q: 'TIF, c\'est quoi exactement ?',
+          a: 'TIF centralise en temps réel toutes les perturbations du Grand Genève : zones à risque, routes fermées, restrictions TPG, délais aux frontières et alertes météo. Une seule source fiable, mise à jour toutes les 30 secondes depuis les sources officielles.',
         },
         {
           q: 'Pourquoi ne pas juste utiliser Google Maps ou Twitter ?',
-          a: 'Google Maps a un délai de 5 à 15 minutes sur les restrictions G7 spécifiques. Twitter diffuse des rumeurs non vérifiées. TIF s\'alimente directement aux sources officielles (Police Cantonale GE, OFROU, TPG, CFF) avec attribution traçable pour chaque information.',
+          a: 'Google Maps a un délai de 5 à 15 minutes sur les restrictions de circulation spécifiques. Twitter diffuse des rumeurs non vérifiées. TIF s\'alimente directement aux sources officielles (Police Cantonale GE, OFROU, TPG, CFF) avec attribution traçable pour chaque information.',
         },
         {
           q: 'Qui est réellement concerné ?',
-          a: 'Toute personne se déplaçant dans le Grand Genève du 10 au 19 juin 2026 (contrôles frontaliers) — sommet G7 à Évian-les-Bains les 15–17 juin : 47 000 frontaliers par jour, livreurs, professionnels de santé, habitants des communes sous restrictions, et touristes en visite pendant le Sommet.',
+          a: 'Toute personne se déplaçant dans le Grand Genève : 47 000 frontaliers par jour, livreurs, professionnels de santé, habitants et visiteurs.',
         },
         {
           q: 'TIF peut-il vraiment éviter un blocage ?',
@@ -334,7 +308,7 @@ export const T: Record<Lang, HomeT> = {
         },
         {
           q: 'La plateforme est-elle vraiment gratuite, sans conditions ?',
-          a: 'Oui. Sans inscription, sans publicité, sans limite de fonctionnalités. TIF est financé par des contributions volontaires et Börja Swiss Solutions. L\'accès public restera gratuit même après le G7.',
+          a: 'Oui. Sans inscription, sans publicité, sans limite de fonctionnalités. TIF est financé par des contributions volontaires et Börja Swiss Solutions. L\'accès public restera toujours gratuit.',
         },
         {
           q: 'TIF remplace-t-il les communications officielles des autorités ?',
@@ -345,28 +319,14 @@ export const T: Record<Lang, HomeT> = {
     prk: {
       sectionLabel: 'Stationnement · P+R',
       h2a: 'Parkings et', h2b: 'solutions actives',
-      sub: 'Pendant le G7, garez votre voiture dans un P+R et prenez les transports publics directement au centre-ville. Moins d\'embouteillages, zéro stress.',
+      sub: 'Garez votre voiture dans un P+R et prenez les transports publics directement au centre-ville. Moins d\'embouteillages, zéro stress.',
       carHead: '8 P+R principaux · accès TPG direct',
       places: 'places',
       rt: '⚡ Disponibilité temps réel',
       viewMap: 'Voir sur la carte →',
-      ctaStrong: 'Stratégie P+R pendant le G7.',
+      ctaStrong: 'La stratégie P+R.',
       ctaDesc: 'Posez votre voiture en périphérie et rejoignez le centre en TPG. La plupart des P+R sont gratuits ou à très faible coût.',
       ctaBtn: 'Voir les parkings sur la carte',
-    },
-    lgv: {
-      sectionLabel: 'Ligne officielle · Police cantonale',
-      h2: 'Ligne verte G7',
-      sub: 'À l\'approche du sommet du G7 à Évian-les-Bains (15–17 juin 2026), la Police cantonale de Genève, avec l\'appui de l\'OCPPAM, met en place une ligne gratuite pour toutes vos questions de sécurité, mobilité et accès.',
-      freeNumberLabel: 'Numéro gratuit',
-      freeCallLabel: 'Appel gratuit depuis la Suisse',
-      hoursLabel: 'Horaires',
-      hoursLine1: 'Lun 1er – ven 5 juin 2026',
-      hoursLine2: 'Lun 8 – jeu 18 juin 2026',
-      hoursLine3: '11h – 19h',
-      emergencyLabel: 'Urgences',
-      pressLabel: 'Contact presse',
-      sourceText: 'Source : Police cantonale de Genève · Office cantonal de la protection de la population et des affaires militaires (OCPPAM)',
     },
     src: {
       sectionLabel: 'Sources officielles',
@@ -434,7 +394,7 @@ export const T: Record<Lang, HomeT> = {
       tc2Slides: [
         { name: 'FAQ', desc: 'Questions fréquentes  Sources  Fiabilité' },
         { name: 'Documentation', desc: 'Guide utilisateur  Fonctionnalités' },
-        { name: 'Cas d\'usage', desc: 'Habitants  Frontaliers  Entreprises  G7' },
+        { name: 'Cas d\'usage', desc: 'Habitants  Frontaliers  Entreprises  Visiteurs' },
         { name: 'Architecture', desc: 'Schéma simplifié  Sources  Flux' },
       ],
       auditH3: 'Niveau 3, Audit participatif, sur demande',
@@ -487,13 +447,12 @@ export const T: Record<Lang, HomeT> = {
     },
     ticker: [
       { label: 'TIF',       text: '7 sources officielles + 2 sources communautaires, mise à jour toutes les 30 secondes' },
-      { label: 'G7',        text: 'G7 Évian-les-Bains (15–17 juin) — contrôles frontaliers Suisse (10–19 juin)' },
       { label: 'Frontières', text: '7 passages ouverts : Anières, Moillesulaz, Thônex-Vallard, Bardonnex, Perly, Meyrin, Ferney-Voltaire · Gares Cornavin et Annemasse + aéroport GVA ouverts · Pièce d\'identité obligatoire · Temps d\'attente à prévoir' },
       { label: 'CEVA',      text: 'Léman Express 4 lignes surveillées : L1, L2, L3, L4' },
-      { label: 'Info',      text: '47 000 frontaliers par jour dans le Grand Genève concernés par les restrictions G7' },
+      { label: 'Info',      text: '47 000 frontaliers par jour dans le Grand Genève' },
       { label: 'Sources',   text: 'OFROU, Police Cantonale GE, TPG, CFF, MétéoSuisse, SITG, BAZG' },
     ],
-    shareText: 'TIF centralise toutes les perturbations du G7 Grand Genève en temps réel. Routes, frontières, TPG, météo : gratuit et sans inscription.',
+    shareText: 'TIF centralise toutes les perturbations du Grand Genève en temps réel. Routes, frontières, TPG, météo : gratuit et sans inscription.',
     agenda: {
       navLink: 'Événements',
       sectionLabel: 'Agenda · Grand Genève · Été 2026',
@@ -535,7 +494,7 @@ export const T: Record<Lang, HomeT> = {
       h1a: 'Greater Geneva,',
       h1b: 'in',
       accent: 'real time.',
-      p1: 'An accident. A closed road. A G7 alert.',
+      p1: 'An accident. A closed road. A live alert.',
       p2: 'This information exists. It\'s scattered.',
       p3: 'TIF centralises it. Before it\'s too late.',
       btn: 'Open live map',
@@ -566,25 +525,16 @@ export const T: Record<Lang, HomeT> = {
         normal: 'Normal', descNormal: 'Normal conditions, no active alerts',
         red: 'Red', orange: 'Orange',
       },
-      g7: {
-        label: 'G7 Watch, Active Restrictions',
-        zonesLabel: 'Red zones', roadsLabel: 'Closed roads',
-        tpgLabel: 'Impacted TPG lines', alertsLabel: 'Alerts sent',
-        zonesDesc: 'Palais Nations, Quai Wilson, Rue de Lausanne, IATA',
-        roadsDesc: 'Left bank and airport access regulated',
-        tpgDesc: 'According to current G7 measures',
-        alertsFrom: 'Since 06:00 this morning',
-      },
       borders: { label: 'CH-FR Borders' },
       ceva: { label: 'Léman Express CEVA' },
       ctaStrong: 'You\'ve just seen the live situation.',
-      ctaDesc: 'The live map puts it all in one view: roads, TPG, G7, weather, borders.',
+      ctaDesc: 'The live map puts it all in one view: roads, TPG, weather, borders.',
       ctaBtn: 'Open live map',
     },
     share: {
       sectionLabel: 'Share TIF',
       h2a: 'Inform your', h2b: 'community',
-      sub: 'The more people know about TIF before the G7, the fewer unnecessary blockages. Every share can save someone an hour.',
+      sub: 'The more people know about TIF, the fewer unnecessary blockages. Every share can save someone an hour.',
       xBtn: 'Share on X',
       liBtn: 'Share on LinkedIn',
       waBtn: 'WhatsApp',
@@ -592,9 +542,9 @@ export const T: Record<Lang, HomeT> = {
       copiedBtn: '✓ Link copied',
     },
     why: {
-      sectionLabel: 'G7 Summit',
+      sectionLabel: 'Greater Geneva',
       h2a: 'Why every', h2b: 'minute matters',
-      sub: 'During an international summit, the city changes character. Without centralized information, every disruption affects thousands simultaneously.',
+      sub: 'In an agglomeration in constant motion, the city changes character from one hour to the next. Without centralized information, every disruption affects thousands simultaneously.',
       carHead: '4 real scenarios, click for details',
       analyzeLink: 'See full analysis →',
       withoutTIF: 'Without TIF',
@@ -616,7 +566,7 @@ export const T: Record<Lang, HomeT> = {
           numLabel: 'Business',
           title: 'A delivery driver. 14 stops. 4 closed zones.',
           withoutText: 'discovers blockages one by one, loses 3 hours.',
-          withText: 'tour planned on the G7 map. 14 deliveries by 4 PM.',
+          withText: 'tour planned on the map. 14 deliveries by 4 PM.',
         },
         {
           numLabel: 'Fast response',
@@ -629,19 +579,19 @@ export const T: Record<Lang, HomeT> = {
     faq: {
       sectionLabel: 'Frequently asked questions',
       h2a: 'Understand everything', h2b: 'in 30 seconds',
-      sub: 'What TIF concretely delivers during the G7 and every day.',
+      sub: 'What TIF concretely delivers every day.',
       items: [
         {
-          q: 'What exactly is TIF during the G7?',
-          a: 'TIF centralises in real time all disruptions related to the Summit: red zones, closed roads, TPG restrictions, border delays and weather alerts. One reliable source, updated every 30 seconds from official sources.',
+          q: 'What exactly is TIF?',
+          a: 'TIF centralises in real time all disruptions in Greater Geneva: risk zones, closed roads, TPG restrictions, border delays and weather alerts. One reliable source, updated every 30 seconds from official sources.',
         },
         {
           q: 'Why not just use Google Maps or Twitter?',
-          a: 'Google Maps has a 5–15 minute delay on G7-specific restrictions. Twitter spreads unverified rumours. TIF feeds directly from official sources (Geneva Cantonal Police, OFROU, TPG, SBB) with traceable attribution for each piece of information.',
+          a: 'Google Maps has a 5–15 minute delay on specific traffic restrictions. Twitter spreads unverified rumours. TIF feeds directly from official sources (Geneva Cantonal Police, OFROU, TPG, SBB) with traceable attribution for each piece of information.',
         },
         {
           q: 'Who is actually affected?',
-          a: 'Anyone travelling in Greater Geneva from June 10–19, 2026 (border controls) — G7 summit in Évian-les-Bains on June 15–17: 47,000 cross-border workers per day, delivery drivers, healthcare professionals, residents of restricted communes, and tourists visiting during the Summit.',
+          a: 'Anyone travelling in Greater Geneva: 47,000 cross-border workers per day, delivery drivers, healthcare professionals, residents and visitors.',
         },
         {
           q: 'Can TIF really prevent a blockage?',
@@ -649,7 +599,7 @@ export const T: Record<Lang, HomeT> = {
         },
         {
           q: 'Is the platform really free, with no conditions?',
-          a: 'Yes. No registration, no advertising, no feature limits. TIF is funded by voluntary contributions and Börja Swiss Solutions. Public access will remain free even after the G7.',
+          a: 'Yes. No registration, no advertising, no feature limits. TIF is funded by voluntary contributions and Börja Swiss Solutions. Public access will always remain free.',
         },
         {
           q: 'Does TIF replace official authority communications?',
@@ -660,28 +610,14 @@ export const T: Record<Lang, HomeT> = {
     prk: {
       sectionLabel: 'Parking · P+R',
       h2a: 'Parking &', h2b: 'active solutions',
-      sub: 'During the G7, park your car at a P+R and take public transport directly to the city centre. Less traffic, zero stress.',
+      sub: 'Park your car at a P+R and take public transport directly to the city centre. Less traffic, zero stress.',
       carHead: '8 main P+R · direct TPG access',
       places: 'spaces',
       rt: '⚡ Real-time availability',
       viewMap: 'View on map →',
-      ctaStrong: 'P+R strategy during the G7.',
+      ctaStrong: 'The P+R strategy.',
       ctaDesc: 'Leave your car on the outskirts and take TPG to the centre. Most P+R parks are free or very low cost.',
       ctaBtn: 'View parking on map',
-    },
-    lgv: {
-      sectionLabel: 'Official Line · Cantonal Police',
-      h2: 'G7 Green Line',
-      sub: 'As the G7 Summit in Évian-les-Bains (June 15–17, 2026) approaches, Geneva Cantonal Police, supported by OCPPAM, has set up a free helpline for all your security, mobility and access questions.',
-      freeNumberLabel: 'Free number',
-      freeCallLabel: 'Free call from Switzerland',
-      hoursLabel: 'Hours',
-      hoursLine1: 'Mon 1st – Fri 5 June 2026',
-      hoursLine2: 'Mon 8 – Thu 18 June 2026',
-      hoursLine3: '11 AM – 7 PM',
-      emergencyLabel: 'Emergency',
-      pressLabel: 'Press contact',
-      sourceText: 'Source: Geneva Cantonal Police · Office cantonal de la protection de la population et des affaires militaires (OCPPAM)',
     },
     src: {
       sectionLabel: 'Official sources',
@@ -749,7 +685,7 @@ export const T: Record<Lang, HomeT> = {
       tc2Slides: [
         { name: 'FAQ', desc: 'Common questions  Sources  Reliability' },
         { name: 'Documentation', desc: 'User guide  Features' },
-        { name: 'Use cases', desc: 'Residents  Cross-border  Business  G7' },
+        { name: 'Use cases', desc: 'Residents  Cross-border  Business  Visitors' },
         { name: 'Architecture', desc: 'Simplified diagram  Sources  Flows' },
       ],
       auditH3: 'Level 3, Participatory audit, on request',
@@ -802,13 +738,12 @@ export const T: Record<Lang, HomeT> = {
     },
     ticker: [
       { label: 'TIF',      text: '7 official sources + 2 community sources, updated every 30 seconds' },
-      { label: 'G7',       text: 'G7 Évian-les-Bains (June 15–17) — Swiss border controls (June 10–19)' },
       { label: 'Borders',  text: '7 open crossings: Anières, Moillesulaz, Thônex-Vallard, Bardonnex, Perly, Meyrin, Ferney-Voltaire · Cornavin + Annemasse stations and GVA airport open · ID required at all crossings · Delays expected' },
       { label: 'CEVA',     text: 'Léman Express 4 monitored lines: L1, L2, L3, L4' },
-      { label: 'Info',     text: '47,000 cross-border workers per day in Greater Geneva affected by G7 restrictions' },
+      { label: 'Info',     text: '47,000 cross-border workers per day in Greater Geneva' },
       { label: 'Sources',  text: 'OFROU, Geneva Cantonal Police, TPG, SBB, MeteoSwiss, SITG, BAZG' },
     ],
-    shareText: 'TIF centralises all G7 Greater Geneva disruptions in real time. Roads, borders, TPG, weather: free and no registration required.',
+    shareText: 'TIF centralises all Greater Geneva disruptions in real time. Roads, borders, TPG, weather: free and no registration required.',
     agenda: {
       navLink: 'Events',
       sectionLabel: 'Events · Greater Geneva · Summer 2026',
@@ -850,7 +785,7 @@ export const T: Record<Lang, HomeT> = {
       h1a: 'Grossraum Genf,',
       h1b: 'in',
       accent: 'Echtzeit.',
-      p1: 'Ein Unfall. Eine gesperrte Strasse. Ein G7-Alarm.',
+      p1: 'Ein Unfall. Eine gesperrte Strasse. Ein Live-Alarm.',
       p2: 'Diese Informationen existieren. Sie sind verstreut.',
       p3: 'TIF bündelt sie. Bevor es zu spät ist.',
       btn: 'Live-Karte öffnen',
@@ -881,25 +816,16 @@ export const T: Record<Lang, HomeT> = {
         normal: 'Normal', descNormal: 'Normale Bedingungen, keine aktive Warnung',
         red: 'Rot', orange: 'Orange',
       },
-      g7: {
-        label: 'G7-Überwachung, aktive Einschränkungen',
-        zonesLabel: 'Rote Zonen', roadsLabel: 'Gesperrte Strassen',
-        tpgLabel: 'Betroffene TPG-Linien', alertsLabel: 'Ausgabene Warnungen',
-        zonesDesc: 'Palais des Nations, Quai Wilson, Rue de Lausanne, IATA',
-        roadsDesc: 'Linkes Rhoneufer und Flughafenzufahrt geregelt',
-        tpgDesc: 'Gemäss geltendem G7-Dispositiv',
-        alertsFrom: 'Seit 06:00 Uhr heute Morgen',
-      },
       borders: { label: 'Grenzen CH-FR' },
       ceva: { label: 'Léman Express CEVA' },
       ctaStrong: 'Sie haben die aktuelle Lage gerade live gesehen.',
-      ctaDesc: 'Die Live-Karte bündelt alles: Strassen, TPG, G7, Wetter, Grenzen.',
+      ctaDesc: 'Die Live-Karte bündelt alles: Strassen, TPG, Wetter, Grenzen.',
       ctaBtn: 'Live-Karte öffnen',
     },
     share: {
       sectionLabel: 'TIF teilen',
       h2a: 'Ihr Umfeld', h2b: 'informieren',
-      sub: 'Je mehr Menschen TIF vor dem G7 kennen, desto weniger unnötige Staus. Jedes Teilen kann jemandem eine verlorene Stunde ersparen.',
+      sub: 'Je mehr Menschen TIF kennen, desto weniger unnötige Staus. Jedes Teilen kann jemandem eine verlorene Stunde ersparen.',
       xBtn: 'Auf X teilen',
       liBtn: 'Auf LinkedIn teilen',
       waBtn: 'WhatsApp',
@@ -907,9 +833,9 @@ export const T: Record<Lang, HomeT> = {
       copiedBtn: '✓ Link kopiert',
     },
     why: {
-      sectionLabel: 'G7-Gipfel',
+      sectionLabel: 'Grossraum Genf',
       h2a: 'Warum jede', h2b: 'Minute zählt',
-      sub: 'Bei einem internationalen Gipfel verändert die Stadt ihr Gesicht. Ohne zentrale Information trifft jede Störung Tausende von Menschen gleichzeitig.',
+      sub: 'In einer Agglomeration in ständiger Bewegung verändert die Stadt ihr Gesicht von einer Stunde zur nächsten. Ohne zentrale Information trifft jede Störung Tausende von Menschen gleichzeitig.',
       carHead: '4 reale Szenarien, klicken für Details',
       analyzeLink: 'Vollständige Analyse →',
       withoutTIF: 'Ohne TIF',
@@ -931,7 +857,7 @@ export const T: Record<Lang, HomeT> = {
           numLabel: 'Unternehmen',
           title: 'Ein Zusteller. 14 Stopps. 4 gesperrte Zonen.',
           withoutText: 'entdeckt die Sperren eine nach der anderen, verliert 3 Stunden.',
-          withText: 'Tour auf der G7-Karte geplant. 14 Lieferungen vor 16:00 Uhr.',
+          withText: 'Tour auf der Karte geplant. 14 Lieferungen vor 16:00 Uhr.',
         },
         {
           numLabel: 'Schnelle Reaktion',
@@ -944,19 +870,19 @@ export const T: Record<Lang, HomeT> = {
     faq: {
       sectionLabel: 'Häufige Fragen',
       h2a: 'Alles verstehen', h2b: 'in 30 Sekunden',
-      sub: 'Was TIF konkret während des G7 und im Alltag leistet.',
+      sub: 'Was TIF konkret im Alltag leistet.',
       items: [
         {
-          q: 'Was ist TIF beim G7 genau?',
-          a: 'TIF bündelt in Echtzeit alle Störungen rund um den Gipfel: Rote Zonen, gesperrte Strassen, TPG-Einschränkungen, Grenzwartezeiten und Wetterwarnungen. Eine zuverlässige Quelle, alle 30 Sekunden von offiziellen Quellen aktualisiert.',
+          q: 'Was ist TIF genau?',
+          a: 'TIF bündelt in Echtzeit alle Störungen im Grossraum Genf: Risikozonen, gesperrte Strassen, TPG-Einschränkungen, Grenzwartezeiten und Wetterwarnungen. Eine zuverlässige Quelle, alle 30 Sekunden von offiziellen Quellen aktualisiert.',
         },
         {
           q: 'Warum nicht einfach Google Maps oder Twitter nutzen?',
-          a: 'Google Maps hat 5–15 Minuten Verzögerung bei G7-spezifischen Einschränkungen. Twitter verbreitet ungeprüfte Gerüchte. TIF speist sich direkt aus offiziellen Quellen (Kantonspolizei GE, ASTRA, TPG, SBB) mit nachvollziehbarer Zuordnung für jede Information.',
+          a: 'Google Maps hat 5–15 Minuten Verzögerung bei spezifischen Verkehrseinschränkungen. Twitter verbreitet ungeprüfte Gerüchte. TIF speist sich direkt aus offiziellen Quellen (Kantonspolizei GE, ASTRA, TPG, SBB) mit nachvollziehbarer Zuordnung für jede Information.',
         },
         {
           q: 'Wen betrifft das wirklich?',
-          a: 'Alle Personen, die sich vom 10. bis 19. Juni 2026 im Grossraum Genf bewegen (Grenzkontrollen) — G7-Gipfel in Évian-les-Bains vom 15.–17. Juni: 47 000 Grenzgänger pro Tag, Zusteller, Gesundheitsfachleute, Bewohner der betroffenen Gemeinden und Touristen.',
+          a: 'Alle Personen, die sich im Grossraum Genf bewegen: 47 000 Grenzgänger pro Tag, Zusteller, Gesundheitsfachleute, Einwohner und Besucher.',
         },
         {
           q: 'Kann TIF wirklich einen Stau verhindern?',
@@ -964,7 +890,7 @@ export const T: Record<Lang, HomeT> = {
         },
         {
           q: 'Ist die Plattform wirklich kostenlos, ohne Bedingungen?',
-          a: 'Ja. Ohne Anmeldung, ohne Werbung, ohne Funktionsbeschränkung. TIF wird durch freiwillige Beiträge und Börja Swiss Solutions finanziert. Der öffentliche Zugang bleibt auch nach dem G7 kostenlos.',
+          a: 'Ja. Ohne Anmeldung, ohne Werbung, ohne Funktionsbeschränkung. TIF wird durch freiwillige Beiträge und Börja Swiss Solutions finanziert. Der öffentliche Zugang bleibt dauerhaft kostenlos.',
         },
         {
           q: 'Ersetzt TIF die offiziellen Kommunikationen der Behörden?',
@@ -975,28 +901,14 @@ export const T: Record<Lang, HomeT> = {
     prk: {
       sectionLabel: 'Parkieren · P+R',
       h2a: 'Parkplätze und', h2b: 'aktive Lösungen',
-      sub: 'Während des G7 parken Sie Ihr Auto in einem P+R und nehmen Sie den öffentlichen Verkehr direkt ins Stadtzentrum. Weniger Stau, null Stress.',
+      sub: 'Parken Sie Ihr Auto in einem P+R und nehmen Sie den öffentlichen Verkehr direkt ins Stadtzentrum. Weniger Stau, null Stress.',
       carHead: '8 Haupt-P+R · direkter TPG-Zugang',
       places: 'Plätze',
       rt: '⚡ Echtzeit-Verfügbarkeit',
       viewMap: 'Auf der Karte anzeigen →',
-      ctaStrong: 'P+R-Strategie während des G7.',
+      ctaStrong: 'Die P+R-Strategie.',
       ctaDesc: 'Stellen Sie Ihr Auto am Stadtrand ab und fahren Sie mit dem TPG ins Zentrum. Die meisten P+R sind kostenlos oder sehr günstig.',
       ctaBtn: 'Parkplätze auf der Karte anzeigen',
-    },
-    lgv: {
-      sectionLabel: 'Offizielle Linie · Kantonspolizei',
-      h2: 'Grüne Linie G7',
-      sub: 'Im Vorfeld des G7-Gipfels in Évian-les-Bains (15.–17. Juni 2026) richtet die Kantonspolizei Genf mit Unterstützung des OCPPAM eine kostenlose Linie für alle Ihre Fragen zu Sicherheit, Mobilität und Zugang ein.',
-      freeNumberLabel: 'Kostenlose Nummer',
-      freeCallLabel: 'Kostenloser Anruf aus der Schweiz',
-      hoursLabel: 'Öffnungszeiten',
-      hoursLine1: 'Mo 1. – Fr 5. Juni 2026',
-      hoursLine2: 'Mo 8. – Do 18. Juni 2026',
-      hoursLine3: '11:00 – 19:00 Uhr',
-      emergencyLabel: 'Notfall',
-      pressLabel: 'Pressekontakt',
-      sourceText: 'Quelle: Kantonspolizei Genf · Kantonales Amt für Bevölkerungsschutz und Militär (OCPPAM)',
     },
     src: {
       sectionLabel: 'Offizielle Quellen',
@@ -1064,7 +976,7 @@ export const T: Record<Lang, HomeT> = {
       tc2Slides: [
         { name: 'FAQ', desc: 'Häufige Fragen  Quellen  Zuverlässigkeit' },
         { name: 'Dokumentation', desc: 'Benutzerhandbuch  Funktionen' },
-        { name: 'Anwendungsfälle', desc: 'Einwohner  Grenzgänger  Unternehmen  G7' },
+        { name: 'Anwendungsfälle', desc: 'Einwohner  Grenzgänger  Unternehmen  Besucher' },
         { name: 'Architektur', desc: 'Vereinfachtes Schema  Quellen  Datenströme' },
       ],
       auditH3: 'Stufe 3, Partizipativer Audit, auf Anfrage',
@@ -1117,13 +1029,12 @@ export const T: Record<Lang, HomeT> = {
     },
     ticker: [
       { label: 'TIF',       text: '7 offizielle Quellen + 2 Community-Quellen, alle 30 Sekunden aktualisiert' },
-      { label: 'G7',        text: 'G7 Évian-les-Bains (15.–17. Juni) — Schweizer Grenzkontrollen (10.–19. Juni)' },
       { label: 'Grenzen',   text: '7 offene Grenzübergänge: Anières, Moillesulaz, Thônex-Vallard, Bardonnex, Perly, Meyrin, Ferney-Voltaire · Bahnhöfe Cornavin und Annemasse + Flughafen GVA geöffnet · Ausweis erforderlich · Wartezeiten möglich' },
       { label: 'CEVA',      text: 'Léman Express 4 überwachte Linien: L1, L2, L3, L4' },
-      { label: 'Info',      text: '47 000 Grenzgänger pro Tag im Grossraum Genf von G7-Einschränkungen betroffen' },
+      { label: 'Info',      text: '47 000 Grenzgänger pro Tag im Grossraum Genf' },
       { label: 'Quellen',   text: 'ASTRA, Kantonspolizei GE, TPG, SBB, MeteoSchweiz, SITG, BAZG' },
     ],
-    shareText: 'TIF bündelt alle G7-Störungen im Grossraum Genf in Echtzeit. Strassen, Grenzen, TPG, Wetter: kostenlos und ohne Anmeldung.',
+    shareText: 'TIF bündelt alle Störungen im Grossraum Genf in Echtzeit. Strassen, Grenzen, TPG, Wetter: kostenlos und ohne Anmeldung.',
     agenda: {
       navLink: 'Veranstaltungen',
       sectionLabel: 'Agenda · Grossraum Genf · Sommer 2026',
@@ -1165,7 +1076,7 @@ export const T: Record<Lang, HomeT> = {
       h1a: 'La Grande Ginevra,',
       h1b: 'in',
       accent: 'tempo reale.',
-      p1: 'Un incidente. Una strada chiusa. Un\'allerta G7.',
+      p1: 'Un incidente. Una strada chiusa. Un\'allerta in diretta.',
       p2: 'Queste informazioni esistono. Sono disperse.',
       p3: 'TIF le centralizza. Prima che sia troppo tardi.',
       btn: 'Apri la mappa live',
@@ -1196,25 +1107,16 @@ export const T: Record<Lang, HomeT> = {
         normal: 'Normale', descNormal: 'Condizioni normali, nessuna allerta attiva',
         red: 'Rosso', orange: 'Arancione',
       },
-      g7: {
-        label: 'Monitoraggio G7, restrizioni attive',
-        zonesLabel: 'Zone rosse', roadsLabel: 'Strade chiuse',
-        tpgLabel: 'Linee TPG interessate', alertsLabel: 'Allerte diffuse',
-        zonesDesc: 'Palais des Nations, Quai Wilson, Rue de Lausanne, IATA',
-        roadsDesc: 'Riva sinistra e accesso aeroporto regolamentati',
-        tpgDesc: 'Secondo il dispositivo G7 in vigore',
-        alertsFrom: 'Dalle ore 06:00 di stamattina',
-      },
       borders: { label: 'Frontiere CH-FR' },
       ceva: { label: 'Léman Express CEVA' },
       ctaStrong: 'Avete appena visto la situazione in diretta.',
-      ctaDesc: 'La mappa live riunisce tutto in un\'unica vista: strade, TPG, G7, meteo, frontiere.',
+      ctaDesc: 'La mappa live riunisce tutto in un\'unica vista: strade, TPG, meteo, frontiere.',
       ctaBtn: 'Apri la mappa live',
     },
     share: {
       sectionLabel: 'Condividi TIF',
       h2a: 'Informa la tua', h2b: 'cerchia',
-      sub: 'Più persone conoscono TIF prima del G7, meno blocchi inutili ci saranno. Ogni condivisione può risparmiare un\'ora persa a qualcuno.',
+      sub: 'Più persone conoscono TIF, meno blocchi inutili ci saranno. Ogni condivisione può risparmiare un\'ora persa a qualcuno.',
       xBtn: 'Condividi su X',
       liBtn: 'Condividi su LinkedIn',
       waBtn: 'WhatsApp',
@@ -1222,9 +1124,9 @@ export const T: Record<Lang, HomeT> = {
       copiedBtn: '✓ Link copiato',
     },
     why: {
-      sectionLabel: 'Vertice G7',
+      sectionLabel: 'Grande Ginevra',
       h2a: 'Perché ogni', h2b: 'minuto conta',
-      sub: 'Durante un vertice internazionale, la città cambia natura. Senza informazione centralizzata, ogni perturbazione colpisce migliaia di persone simultaneamente.',
+      sub: 'In un\'agglomerazione in movimento costante, la città cambia natura da un\'ora all\'altra. Senza informazione centralizzata, ogni perturbazione colpisce migliaia di persone simultaneamente.',
       carHead: '4 scenari reali, clic per il dettaglio',
       analyzeLink: 'Vedi l\'analisi completa →',
       withoutTIF: 'Senza TIF',
@@ -1246,7 +1148,7 @@ export const T: Record<Lang, HomeT> = {
           numLabel: 'Aziende',
           title: 'Un corriere. 14 fermate. 4 zone chiuse.',
           withoutText: 'scopre i blocchi uno per uno, perde 3 ore.',
-          withText: 'giro pianificato sulla mappa G7. 14 consegne prima delle 16:00.',
+          withText: 'giro pianificato sulla mappa. 14 consegne prima delle 16:00.',
         },
         {
           numLabel: 'Reazione rapida',
@@ -1259,19 +1161,19 @@ export const T: Record<Lang, HomeT> = {
     faq: {
       sectionLabel: 'Domande frequenti',
       h2a: 'Capire tutto', h2b: 'in 30 secondi',
-      sub: 'Cosa apporta concretamente TIF durante il G7 e nel quotidiano.',
+      sub: 'Cosa apporta concretamente TIF nel quotidiano.',
       items: [
         {
-          q: 'Cos\'è esattamente TIF durante il G7?',
-          a: 'TIF centralizza in tempo reale tutte le perturbazioni legate al Vertice: zone rosse, strade chiuse, restrizioni TPG, ritardi alle frontiere e allerte meteo. Un\'unica fonte affidabile, aggiornata ogni 30 secondi dalle fonti ufficiali.',
+          q: 'Cos\'è esattamente TIF?',
+          a: 'TIF centralizza in tempo reale tutte le perturbazioni della Grande Ginevra: zone a rischio, strade chiuse, restrizioni TPG, ritardi alle frontiere e allerte meteo. Un\'unica fonte affidabile, aggiornata ogni 30 secondi dalle fonti ufficiali.',
         },
         {
           q: 'Perché non usare semplicemente Google Maps o Twitter?',
-          a: 'Google Maps ha un ritardo di 5–15 minuti sulle restrizioni specifiche del G7. Twitter diffonde voci non verificate. TIF si alimenta direttamente dalle fonti ufficiali (Polizia cantonale GE, USTRA, TPG, FFS) con attribuzione tracciabile per ogni informazione.',
+          a: 'Google Maps ha un ritardo di 5–15 minuti sulle restrizioni di circolazione specifiche. Twitter diffonde voci non verificate. TIF si alimenta direttamente dalle fonti ufficiali (Polizia cantonale GE, USTRA, TPG, FFS) con attribuzione tracciabile per ogni informazione.',
         },
         {
           q: 'Chi è davvero interessato?',
-          a: 'Chiunque si sposti nella Grande Ginevra dal 10 al 19 giugno 2026 (controlli alle frontiere) — vertice G7 a Évian-les-Bains dal 15 al 17 giugno: 47 000 frontalieri al giorno, corrieri, professionisti della salute, abitanti dei comuni sotto restrizioni e turisti.',
+          a: 'Chiunque si sposti nella Grande Ginevra: 47 000 frontalieri al giorno, corrieri, professionisti della salute, abitanti e visitatori.',
         },
         {
           q: 'TIF può davvero evitare un blocco?',
@@ -1279,7 +1181,7 @@ export const T: Record<Lang, HomeT> = {
         },
         {
           q: 'La piattaforma è davvero gratuita, senza condizioni?',
-          a: 'Sì. Senza registrazione, senza pubblicità, senza limiti di funzionalità. TIF è finanziato da contributi volontari e da Börja Swiss Solutions. L\'accesso pubblico rimarrà gratuito anche dopo il G7.',
+          a: 'Sì. Senza registrazione, senza pubblicità, senza limiti di funzionalità. TIF è finanziato da contributi volontari e da Börja Swiss Solutions. L\'accesso pubblico rimarrà sempre gratuito.',
         },
         {
           q: 'TIF sostituisce le comunicazioni ufficiali delle autorità?',
@@ -1290,28 +1192,14 @@ export const T: Record<Lang, HomeT> = {
     prk: {
       sectionLabel: 'Parcheggio · P+R',
       h2a: 'Parcheggi e', h2b: 'soluzioni attive',
-      sub: 'Durante il G7, parcheggiate la vostra auto in un P+R e prendete i trasporti pubblici direttamente in centro città. Meno ingorghi, zero stress.',
+      sub: 'Parcheggiate la vostra auto in un P+R e prendete i trasporti pubblici direttamente in centro città. Meno ingorghi, zero stress.',
       carHead: '8 P+R principali · accesso TPG diretto',
       places: 'posti',
       rt: '⚡ Disponibilità in tempo reale',
       viewMap: 'Vedi sulla mappa →',
-      ctaStrong: 'Strategia P+R durante il G7.',
+      ctaStrong: 'La strategia P+R.',
       ctaDesc: 'Lasciate l\'auto in periferia e raggiungete il centro con il TPG. La maggior parte dei P+R è gratuita o a costo molto basso.',
       ctaBtn: 'Vedi i parcheggi sulla mappa',
-    },
-    lgv: {
-      sectionLabel: 'Linea ufficiale · Polizia cantonale',
-      h2: 'Linea verde G7',
-      sub: 'In prossimità del vertice G7 a Évian-les-Bains (15–17 giugno 2026), la Polizia cantonale di Ginevra, con il supporto dell\'OCPPAM, mette in atto una linea gratuita per tutte le vostre domande su sicurezza, mobilità e accesso.',
-      freeNumberLabel: 'Numero gratuito',
-      freeCallLabel: 'Chiamata gratuita dalla Svizzera',
-      hoursLabel: 'Orari',
-      hoursLine1: 'Lun 1° – ven 5 giugno 2026',
-      hoursLine2: 'Lun 8 – gio 18 giugno 2026',
-      hoursLine3: '11:00 – 19:00',
-      emergencyLabel: 'Emergenze',
-      pressLabel: 'Contatto stampa',
-      sourceText: 'Fonte: Polizia cantonale di Ginevra · Ufficio cantonale per la protezione della popolazione e gli affari militari (OCPPAM)',
     },
     src: {
       sectionLabel: 'Fonti ufficiali',
@@ -1379,7 +1267,7 @@ export const T: Record<Lang, HomeT> = {
       tc2Slides: [
         { name: 'FAQ', desc: 'Domande frequenti  Fonti  Affidabilità' },
         { name: 'Documentazione', desc: 'Guida utente  Funzionalità' },
-        { name: 'Casi d\'uso', desc: 'Residenti  Frontalieri  Aziende  G7' },
+        { name: 'Casi d\'uso', desc: 'Residenti  Frontalieri  Aziende  Visitatori' },
         { name: 'Architettura', desc: 'Schema semplificato  Fonti  Flussi' },
       ],
       auditH3: 'Livello 3, Audit partecipativo, su richiesta',
@@ -1432,13 +1320,12 @@ export const T: Record<Lang, HomeT> = {
     },
     ticker: [
       { label: 'TIF',       text: '7 fonti ufficiali + 2 fonti comunitarie, aggiornate ogni 30 secondi' },
-      { label: 'G7',        text: 'G7 Évian-les-Bains (15–17 giugno) — controlli frontalieri Svizzera (10–19 giugno)' },
       { label: 'Frontiere', text: '7 valichi aperti: Anières, Moillesulaz, Thônex-Vallard, Bardonnex, Perly, Meyrin, Ferney-Voltaire · Stazioni Cornavin e Annemasse + aeroporto GVA aperti · Documento d\'identità obbligatorio · Possibili attese' },
       { label: 'CEVA',      text: 'Léman Express 4 linee monitorate: L1, L2, L3, L4' },
-      { label: 'Info',      text: '47 000 frontalieri al giorno nella Grande Ginevra interessati dalle restrizioni G7' },
+      { label: 'Info',      text: '47 000 frontalieri al giorno nella Grande Ginevra' },
       { label: 'Fonti',     text: 'USTRA, Polizia cantonale GE, TPG, FFS, MeteoSvizzera, SITG, BAZG' },
     ],
-    shareText: 'TIF centralizza in tempo reale tutte le perturbazioni G7 della Grande Ginevra. Strade, frontiere, TPG, meteo: gratuito e senza registrazione.',
+    shareText: 'TIF centralizza in tempo reale tutte le perturbazioni della Grande Ginevra. Strade, frontiere, TPG, meteo: gratuito e senza registrazione.',
     agenda: {
       navLink: 'Eventi',
       sectionLabel: 'Agenda · Grande Ginevra · Estate 2026',
@@ -1480,7 +1367,7 @@ export const T: Record<Lang, HomeT> = {
       h1a: 'El Gran Ginebra,',
       h1b: 'en',
       accent: 'tiempo real.',
-      p1: 'Un accidente. Una carretera cerrada. Una alerta G7.',
+      p1: 'Un accidente. Una carretera cerrada. Una alerta en directo.',
       p2: 'Esta información existe. Está dispersa.',
       p3: 'TIF la centraliza. Antes de que sea demasiado tarde.',
       btn: 'Abrir el mapa en vivo',
@@ -1511,25 +1398,16 @@ export const T: Record<Lang, HomeT> = {
         normal: 'Normal', descNormal: 'Condiciones normales, ninguna alerta activa',
         red: 'Rojo', orange: 'Naranja',
       },
-      g7: {
-        label: 'Vigilancia G7, restricciones activas',
-        zonesLabel: 'Zonas rojas', roadsLabel: 'Carreteras cerradas',
-        tpgLabel: 'Líneas TPG afectadas', alertsLabel: 'Alertas emitidas',
-        zonesDesc: 'Palais des Nations, Quai Wilson, Rue de Lausanne, IATA',
-        roadsDesc: 'Orilla izquierda y acceso al aeropuerto regulados',
-        tpgDesc: 'Según el dispositivo G7 vigente',
-        alertsFrom: 'Desde las 06:00 de esta mañana',
-      },
       borders: { label: 'Fronteras CH-FR' },
       ceva: { label: 'Léman Express CEVA' },
       ctaStrong: 'Acaba de ver la situación en directo.',
-      ctaDesc: 'El mapa en vivo reúne todo en una sola vista: carreteras, TPG, G7, tiempo, fronteras.',
+      ctaDesc: 'El mapa en vivo reúne todo en una sola vista: carreteras, TPG, tiempo, fronteras.',
       ctaBtn: 'Abrir el mapa en vivo',
     },
     share: {
       sectionLabel: 'Compartir TIF',
       h2a: 'Informa a tu', h2b: 'entorno',
-      sub: 'Cuanta más gente conozca TIF antes del G7, menos bloqueos innecesarios habrá. Cada vez que compartes puedes ahorrarle una hora perdida a alguien.',
+      sub: 'Cuanta más gente conozca TIF, menos bloqueos innecesarios habrá. Cada vez que compartes puedes ahorrarle una hora perdida a alguien.',
       xBtn: 'Compartir en X',
       liBtn: 'Compartir en LinkedIn',
       waBtn: 'WhatsApp',
@@ -1537,9 +1415,9 @@ export const T: Record<Lang, HomeT> = {
       copiedBtn: '✓ Enlace copiado',
     },
     why: {
-      sectionLabel: 'Cumbre G7',
+      sectionLabel: 'Gran Ginebra',
       h2a: 'Por qué cada', h2b: 'minuto cuenta',
-      sub: 'Durante una cumbre internacional, la ciudad cambia de naturaleza. Sin información centralizada, cada perturbación afecta a miles de personas simultáneamente.',
+      sub: 'En una aglomeración en movimiento constante, la ciudad cambia de naturaleza de una hora a otra. Sin información centralizada, cada perturbación afecta a miles de personas simultáneamente.',
       carHead: '4 escenarios reales, haz clic para el detalle',
       analyzeLink: 'Ver el análisis completo →',
       withoutTIF: 'Sin TIF',
@@ -1561,7 +1439,7 @@ export const T: Record<Lang, HomeT> = {
           numLabel: 'Empresa',
           title: 'Un repartidor. 14 paradas. 4 zonas cerradas.',
           withoutText: 'descubre los bloqueos uno a uno, pierde 3 horas.',
-          withText: 'ruta planificada en el mapa G7. 14 entregas antes de las 16:00.',
+          withText: 'ruta planificada en el mapa. 14 entregas antes de las 16:00.',
         },
         {
           numLabel: 'Reacción rápida',
@@ -1574,19 +1452,19 @@ export const T: Record<Lang, HomeT> = {
     faq: {
       sectionLabel: 'Preguntas frecuentes',
       h2a: 'Entender todo', h2b: 'en 30 segundos',
-      sub: 'Lo que TIF aporta concretamente durante el G7 y en el día a día.',
+      sub: 'Lo que TIF aporta concretamente en el día a día.',
       items: [
         {
-          q: '¿Qué es exactamente TIF durante el G7?',
-          a: 'TIF centraliza en tiempo real todas las perturbaciones relacionadas con la Cumbre: zonas rojas, carreteras cerradas, restricciones TPG, retrasos en fronteras y alertas meteorológicas. Una sola fuente fiable, actualizada cada 30 segundos desde fuentes oficiales.',
+          q: '¿Qué es exactamente TIF?',
+          a: 'TIF centraliza en tiempo real todas las perturbaciones del Gran Ginebra: zonas de riesgo, carreteras cerradas, restricciones TPG, retrasos en fronteras y alertas meteorológicas. Una sola fuente fiable, actualizada cada 30 segundos desde fuentes oficiales.',
         },
         {
           q: '¿Por qué no usar simplemente Google Maps o Twitter?',
-          a: 'Google Maps tiene un retraso de 5 a 15 minutos en las restricciones específicas del G7. Twitter difunde rumores no verificados. TIF se alimenta directamente de fuentes oficiales (Policía Cantonal GE, OFROU, TPG, CFF) con atribución trazable para cada información.',
+          a: 'Google Maps tiene un retraso de 5 a 15 minutos en las restricciones de circulación específicas. Twitter difunde rumores no verificados. TIF se alimenta directamente de fuentes oficiales (Policía Cantonal GE, OFROU, TPG, CFF) con atribución trazable para cada información.',
         },
         {
           q: '¿Quién está realmente afectado?',
-          a: 'Toda persona que se desplace por el Gran Ginebra del 10 al 19 de junio de 2026 (controles fronterizos) — cumbre G7 en Évian-les-Bains del 15 al 17 de junio: 47 000 trabajadores fronterizos por día, repartidores, profesionales de la salud, habitantes de municipios bajo restricciones y turistas.',
+          a: 'Toda persona que se desplace por el Gran Ginebra: 47 000 trabajadores fronterizos por día, repartidores, profesionales de la salud, habitantes y visitantes.',
         },
         {
           q: '¿Puede TIF realmente evitar un bloqueo?',
@@ -1594,7 +1472,7 @@ export const T: Record<Lang, HomeT> = {
         },
         {
           q: '¿La plataforma es realmente gratuita, sin condiciones?',
-          a: 'Sí. Sin registro, sin publicidad, sin límite de funcionalidades. TIF está financiado por contribuciones voluntarias y Börja Swiss Solutions. El acceso público seguirá siendo gratuito incluso después del G7.',
+          a: 'Sí. Sin registro, sin publicidad, sin límite de funcionalidades. TIF está financiado por contribuciones voluntarias y Börja Swiss Solutions. El acceso público seguirá siendo siempre gratuito.',
         },
         {
           q: '¿TIF reemplaza las comunicaciones oficiales de las autoridades?',
@@ -1605,28 +1483,14 @@ export const T: Record<Lang, HomeT> = {
     prk: {
       sectionLabel: 'Aparcamiento · P+R',
       h2a: 'Aparcamientos y', h2b: 'soluciones activas',
-      sub: 'Durante el G7, aparque su coche en un P+R y tome el transporte público directamente al centro de la ciudad. Menos atascos, cero estrés.',
+      sub: 'Aparque su coche en un P+R y tome el transporte público directamente al centro de la ciudad. Menos atascos, cero estrés.',
       carHead: '8 P+R principales · acceso TPG directo',
       places: 'plazas',
       rt: '⚡ Disponibilidad en tiempo real',
       viewMap: 'Ver en el mapa →',
-      ctaStrong: 'Estrategia P+R durante el G7.',
+      ctaStrong: 'La estrategia P+R.',
       ctaDesc: 'Deja el coche en la periferia y llega al centro en TPG. La mayoría de los P+R son gratuitos o a coste muy bajo.',
       ctaBtn: 'Ver los aparcamientos en el mapa',
-    },
-    lgv: {
-      sectionLabel: 'Línea oficial · Policía cantonal',
-      h2: 'Línea verde G7',
-      sub: 'De cara a la cumbre del G7 en Évian-les-Bains (15–17 de junio de 2026), la Policía Cantonal de Ginebra, con el apoyo del OCPPAM, establece una línea gratuita para todas sus preguntas sobre seguridad, movilidad y acceso.',
-      freeNumberLabel: 'Número gratuito',
-      freeCallLabel: 'Llamada gratuita desde Suiza',
-      hoursLabel: 'Horarios',
-      hoursLine1: 'Lun 1 – vie 5 de junio de 2026',
-      hoursLine2: 'Lun 8 – jue 18 de junio de 2026',
-      hoursLine3: '11:00 – 19:00',
-      emergencyLabel: 'Emergencias',
-      pressLabel: 'Contacto prensa',
-      sourceText: 'Fuente: Policía Cantonal de Ginebra · Oficina cantonal de protección de la población y asuntos militares (OCPPAM)',
     },
     src: {
       sectionLabel: 'Fuentes oficiales',
@@ -1694,7 +1558,7 @@ export const T: Record<Lang, HomeT> = {
       tc2Slides: [
         { name: 'FAQ', desc: 'Preguntas frecuentes  Fuentes  Fiabilidad' },
         { name: 'Documentación', desc: 'Guía de usuario  Funcionalidades' },
-        { name: 'Casos de uso', desc: 'Residentes  Fronterizos  Empresas  G7' },
+        { name: 'Casos de uso', desc: 'Residentes  Fronterizos  Empresas  Visitantes' },
         { name: 'Arquitectura', desc: 'Esquema simplificado  Fuentes  Flujos' },
       ],
       auditH3: 'Nivel 3, Auditoría participativa, bajo demanda',
@@ -1747,13 +1611,12 @@ export const T: Record<Lang, HomeT> = {
     },
     ticker: [
       { label: 'TIF',       text: '7 fuentes oficiales + 2 fuentes comunitarias, actualizadas cada 30 segundos' },
-      { label: 'G7',        text: 'G7 Évian-les-Bains (15–17 de junio) — controles fronterizos Suiza (10–19 de junio)' },
       { label: 'Fronteras', text: '7 pasos fronterizos abiertos: Anières, Moillesulaz, Thônex-Vallard, Bardonnex, Perly, Meyrin, Ferney-Voltaire · Estaciones Cornavin y Annemasse + aeropuerto GVA abiertos · Documento de identidad obligatorio · Posibles esperas' },
       { label: 'CEVA',      text: 'Léman Express 4 líneas monitorizadas: L1, L2, L3, L4' },
-      { label: 'Info',      text: '47 000 trabajadores fronterizos por día en el Gran Ginebra afectados por las restricciones G7' },
+      { label: 'Info',      text: '47 000 trabajadores fronterizos por día en el Gran Ginebra' },
       { label: 'Fuentes',   text: 'OFROU, Policía Cantonal GE, TPG, CFF, MeteoSuiza, SITG, BAZG' },
     ],
-    shareText: 'TIF centraliza en tiempo real todas las perturbaciones del G7 en el Gran Ginebra. Carreteras, fronteras, TPG, tiempo: gratis y sin registro.',
+    shareText: 'TIF centraliza en tiempo real todas las perturbaciones del Gran Ginebra. Carreteras, fronteras, TPG, tiempo: gratis y sin registro.',
     agenda: {
       navLink: 'Eventos',
       sectionLabel: 'Agenda · Gran Ginebra · Verano 2026',
@@ -1795,7 +1658,7 @@ export const T: Record<Lang, HomeT> = {
       h1a: 'A Grande Genebra,',
       h1b: 'em',
       accent: 'tempo real.',
-      p1: 'Um acidente. Uma estrada fechada. Um alerta G7.',
+      p1: 'Um acidente. Uma estrada fechada. Um alerta em direto.',
       p2: 'Estas informações existem. Estão dispersas.',
       p3: 'O TIF centraliza-as. Antes que seja tarde demais.',
       btn: 'Abrir o mapa ao vivo',
@@ -1826,25 +1689,16 @@ export const T: Record<Lang, HomeT> = {
         normal: 'Normal', descNormal: 'Condições normais, sem alerta ativo',
         red: 'Vermelho', orange: 'Laranja',
       },
-      g7: {
-        label: 'Vigilância G7, restrições ativas',
-        zonesLabel: 'Zonas vermelhas', roadsLabel: 'Estradas fechadas',
-        tpgLabel: 'Linhas TPG afetadas', alertsLabel: 'Alertas emitidos',
-        zonesDesc: 'Palais des Nations, Quai Wilson, Rue de Lausanne, IATA',
-        roadsDesc: 'Margem esquerda e acesso ao aeroporto regulamentados',
-        tpgDesc: 'De acordo com o dispositivo G7 em vigor',
-        alertsFrom: 'Desde as 06:00 desta manhã',
-      },
       borders: { label: 'Fronteiras CH-FR' },
       ceva: { label: 'Léman Express CEVA' },
       ctaStrong: 'Acabou de ver a situação em direto.',
-      ctaDesc: 'O mapa ao vivo reúne tudo numa só vista: estradas, TPG, G7, tempo, fronteiras.',
+      ctaDesc: 'O mapa ao vivo reúne tudo numa só vista: estradas, TPG, tempo, fronteiras.',
       ctaBtn: 'Abrir o mapa ao vivo',
     },
     share: {
       sectionLabel: 'Partilhar TIF',
       h2a: 'Informe o seu', h2b: 'entorno',
-      sub: 'Quanto mais pessoas conhecerem o TIF antes do G7, menos bloqueios desnecessários haverá. Cada partilha pode poupar uma hora perdida a alguém.',
+      sub: 'Quanto mais pessoas conhecerem o TIF, menos bloqueios desnecessários haverá. Cada partilha pode poupar uma hora perdida a alguém.',
       xBtn: 'Partilhar no X',
       liBtn: 'Partilhar no LinkedIn',
       waBtn: 'WhatsApp',
@@ -1852,9 +1706,9 @@ export const T: Record<Lang, HomeT> = {
       copiedBtn: '✓ Link copiado',
     },
     why: {
-      sectionLabel: 'Cimeira G7',
+      sectionLabel: 'Grande Genebra',
       h2a: 'Por que cada', h2b: 'minuto conta',
-      sub: 'Durante uma cimeira internacional, a cidade muda de natureza. Sem informação centralizada, cada perturbação afeta milhares de pessoas simultaneamente.',
+      sub: 'Numa aglomeração em movimento constante, a cidade muda de natureza de uma hora para a outra. Sem informação centralizada, cada perturbação afeta milhares de pessoas simultaneamente.',
       carHead: '4 cenários reais, clique para o detalhe',
       analyzeLink: 'Ver a análise completa →',
       withoutTIF: 'Sem TIF',
@@ -1876,7 +1730,7 @@ export const T: Record<Lang, HomeT> = {
           numLabel: 'Empresa',
           title: 'Um estafeta. 14 paragens. 4 zonas fechadas.',
           withoutText: 'descobre os bloqueios um a um, perde 3 horas.',
-          withText: 'rota planeada no mapa G7. 14 entregas antes das 16h00.',
+          withText: 'rota planeada no mapa. 14 entregas antes das 16h00.',
         },
         {
           numLabel: 'Reação rápida',
@@ -1889,19 +1743,19 @@ export const T: Record<Lang, HomeT> = {
     faq: {
       sectionLabel: 'Perguntas frequentes',
       h2a: 'Perceber tudo', h2b: 'em 30 segundos',
-      sub: 'O que o TIF traz concretamente durante o G7 e no dia a dia.',
+      sub: 'O que o TIF traz concretamente no dia a dia.',
       items: [
         {
-          q: 'O que é exatamente o TIF durante o G7?',
-          a: 'O TIF centraliza em tempo real todas as perturbações relacionadas com a Cimeira: zonas vermelhas, estradas fechadas, restrições TPG, atrasos nas fronteiras e alertas meteorológicos. Uma única fonte fiável, atualizada a cada 30 segundos a partir de fontes oficiais.',
+          q: 'O que é exatamente o TIF?',
+          a: 'O TIF centraliza em tempo real todas as perturbações da Grande Genebra: zonas de risco, estradas fechadas, restrições TPG, atrasos nas fronteiras e alertas meteorológicos. Uma única fonte fiável, atualizada a cada 30 segundos a partir de fontes oficiais.',
         },
         {
           q: 'Por que não usar simplesmente o Google Maps ou o Twitter?',
-          a: 'O Google Maps tem um atraso de 5 a 15 minutos nas restrições específicas do G7. O Twitter difunde rumores não verificados. O TIF alimenta-se diretamente de fontes oficiais (Polícia Cantonal GE, OFROU, TPG, CFF) com atribuição rastreável para cada informação.',
+          a: 'O Google Maps tem um atraso de 5 a 15 minutos nas restrições de circulação específicas. O Twitter difunde rumores não verificados. O TIF alimenta-se diretamente de fontes oficiais (Polícia Cantonal GE, OFROU, TPG, CFF) com atribuição rastreável para cada informação.',
         },
         {
           q: 'Quem é realmente afetado?',
-          a: 'Qualquer pessoa que se desloque na Grande Genebra de 10 a 19 de junho de 2026 (controlos fronteiriços) — cimeira G7 em Évian-les-Bains de 15 a 17 de junho: 47 000 trabalhadores fronteiriços por dia, estafetas, profissionais de saúde, habitantes de municípios sob restrições e turistas.',
+          a: 'Qualquer pessoa que se desloque na Grande Genebra: 47 000 trabalhadores fronteiriços por dia, estafetas, profissionais de saúde, habitantes e visitantes.',
         },
         {
           q: 'O TIF pode realmente evitar um bloqueio?',
@@ -1909,7 +1763,7 @@ export const T: Record<Lang, HomeT> = {
         },
         {
           q: 'A plataforma é realmente gratuita, sem condições?',
-          a: 'Sim. Sem registo, sem publicidade, sem limite de funcionalidades. O TIF é financiado por contribuições voluntárias e pela Börja Swiss Solutions. O acesso público continuará gratuito mesmo após o G7.',
+          a: 'Sim. Sem registo, sem publicidade, sem limite de funcionalidades. O TIF é financiado por contribuições voluntárias e pela Börja Swiss Solutions. O acesso público continuará sempre gratuito.',
         },
         {
           q: 'O TIF substitui as comunicações oficiais das autoridades?',
@@ -1920,28 +1774,14 @@ export const T: Record<Lang, HomeT> = {
     prk: {
       sectionLabel: 'Estacionamento · P+R',
       h2a: 'Parques e', h2b: 'soluções ativas',
-      sub: 'Durante o G7, estacione o seu carro num P+R e tome os transportes públicos diretamente para o centro da cidade. Menos congestionamento, zero stress.',
+      sub: 'Estacione o seu carro num P+R e tome os transportes públicos diretamente para o centro da cidade. Menos congestionamento, zero stress.',
       carHead: '8 P+R principais · acesso TPG direto',
       places: 'lugares',
       rt: '⚡ Disponibilidade em tempo real',
       viewMap: 'Ver no mapa →',
-      ctaStrong: 'Estratégia P+R durante o G7.',
+      ctaStrong: 'A estratégia P+R.',
       ctaDesc: 'Deixe o carro na periferia e chegue ao centro de TPG. A maioria dos P+R é gratuita ou a custo muito baixo.',
       ctaBtn: 'Ver os parques no mapa',
-    },
-    lgv: {
-      sectionLabel: 'Linha oficial · Polícia cantonal',
-      h2: 'Linha verde G7',
-      sub: 'Em antecipação à cimeira do G7 em Évian-les-Bains (15–17 de junho de 2026), a Polícia Cantonal de Genebra, com o apoio do OCPPAM, estabelece uma linha gratuita para todas as suas questões de segurança, mobilidade e acesso.',
-      freeNumberLabel: 'Número gratuito',
-      freeCallLabel: 'Chamada gratuita da Suíça',
-      hoursLabel: 'Horários',
-      hoursLine1: 'Seg 1 – sex 5 de junho de 2026',
-      hoursLine2: 'Seg 8 – qui 18 de junho de 2026',
-      hoursLine3: '11h00 – 19h00',
-      emergencyLabel: 'Emergências',
-      pressLabel: 'Contacto imprensa',
-      sourceText: 'Fonte: Polícia Cantonal de Genebra · Gabinete cantonal de proteção da população e assuntos militares (OCPPAM)',
     },
     src: {
       sectionLabel: 'Fontes oficiais',
@@ -2009,7 +1849,7 @@ export const T: Record<Lang, HomeT> = {
       tc2Slides: [
         { name: 'FAQ', desc: 'Perguntas frequentes  Fontes  Fiabilidade' },
         { name: 'Documentação', desc: 'Guia do utilizador  Funcionalidades' },
-        { name: 'Casos de uso', desc: 'Residentes  Fronteiriços  Empresas  G7' },
+        { name: 'Casos de uso', desc: 'Residentes  Fronteiriços  Empresas  Visitantes' },
         { name: 'Arquitetura', desc: 'Esquema simplificado  Fontes  Fluxos' },
       ],
       auditH3: 'Nível 3, Auditoria participativa, a pedido',
@@ -2062,13 +1902,12 @@ export const T: Record<Lang, HomeT> = {
     },
     ticker: [
       { label: 'TIF',       text: '7 fontes oficiais + 2 fontes comunitárias, atualizadas a cada 30 segundos' },
-      { label: 'G7',        text: 'G7 Évian-les-Bains (15–17 de junho) — controlos fronteiriços Suíça (10–19 de junho)' },
       { label: 'Fronteiras', text: '7 postos fronteiriços abertos: Anières, Moillesulaz, Thônex-Vallard, Bardonnex, Perly, Meyrin, Ferney-Voltaire · Estações Cornavin e Annemasse + aeroporto GVA abertos · Documento de identidade obrigatório · Possíveis esperas' },
       { label: 'CEVA',      text: 'Léman Express 4 linhas monitorizadas: L1, L2, L3, L4' },
-      { label: 'Info',      text: '47 000 trabalhadores fronteiriços por dia na Grande Genebra afetados pelas restrições G7' },
+      { label: 'Info',      text: '47 000 trabalhadores fronteiriços por dia na Grande Genebra' },
       { label: 'Fontes',    text: 'OFROU, Polícia Cantonal GE, TPG, CFF, MeteoSuíça, SITG, BAZG' },
     ],
-    shareText: 'O TIF centraliza em tempo real todas as perturbações do G7 na Grande Genebra. Estradas, fronteiras, TPG, meteorologia: gratuito e sem registo.',
+    shareText: 'O TIF centraliza em tempo real todas as perturbações da Grande Genebra. Estradas, fronteiras, TPG, meteorologia: gratuito e sem registo.',
     agenda: {
       navLink: 'Eventos',
       sectionLabel: 'Agenda · Grande Genebra · Verão 2026',
@@ -2110,7 +1949,7 @@ export const T: Record<Lang, HomeT> = {
       h1a: 'Gjeneva e Madhe,',
       h1b: 'në',
       accent: 'kohë reale.',
-      p1: 'Një aksident. Një rrugë e mbyllur. Një alarm G7.',
+      p1: 'Një aksident. Një rrugë e mbyllur. Një alarm live.',
       p2: 'Këto informacione ekzistojnë. Janë të shpërndara.',
       p3: 'TIF i centralizon ato. Para se të jetë tepër vonë.',
       btn: 'Hap hartën live',
@@ -2141,25 +1980,16 @@ export const T: Record<Lang, HomeT> = {
         normal: 'Normal', descNormal: 'Kushte normale, asnjë alarm aktiv',
         red: 'E kuqe', orange: 'Portokalli',
       },
-      g7: {
-        label: 'Monitorimi G7, kufizime aktive',
-        zonesLabel: 'Zona të kuqe', roadsLabel: 'Rrugë të mbyllura',
-        tpgLabel: 'Linja TPG të prekura', alertsLabel: 'Alarme të lëshuara',
-        zonesDesc: 'Palais des Nations, Quai Wilson, Rue de Lausanne, IATA',
-        roadsDesc: 'Bregu i majtë dhe aksesi në aeroport i rregulluar',
-        tpgDesc: 'Sipas dispozitivit G7 në fuqi',
-        alertsFrom: 'Që nga ora 06:00 sot në mëngjes',
-      },
       borders: { label: 'Kufijtë CH-FR' },
       ceva: { label: 'Léman Express CEVA' },
       ctaStrong: 'Sapo patë situatën live.',
-      ctaDesc: 'Harta live mbledh gjithçka në një pamje: rrugë, TPG, G7, mot, kufij.',
+      ctaDesc: 'Harta live mbledh gjithçka në një pamje: rrugë, TPG, mot, kufij.',
       ctaBtn: 'Hap hartën live',
     },
     share: {
       sectionLabel: 'Ndaj TIF',
       h2a: 'Informo', h2b: 'të afërmit tuaj',
-      sub: 'Sa më shumë njerëz të njohin TIF para G7, aq më pak bllokime të panevojshme do të ketë. Çdo ndarje mund t\'i kursejë dikujt një orë të humbur.',
+      sub: 'Sa më shumë njerëz të njohin TIF, aq më pak bllokime të panevojshme do të ketë. Çdo ndarje mund t\'i kursejë dikujt një orë të humbur.',
       xBtn: 'Ndaj në X',
       liBtn: 'Ndaj në LinkedIn',
       waBtn: 'WhatsApp',
@@ -2167,9 +1997,9 @@ export const T: Record<Lang, HomeT> = {
       copiedBtn: '✓ Linku u kopjua',
     },
     why: {
-      sectionLabel: 'Samiti G7',
+      sectionLabel: 'Gjeneva e Madhe',
       h2a: 'Pse çdo', h2b: 'minutë ka rëndësi',
-      sub: 'Gjatë një samiti ndërkombëtar, qyteti ndryshon natyrë. Pa informacion të centralizuar, çdo ndërprerje prek mijëra njerëz njëkohësisht.',
+      sub: 'Në një aglomeracion në lëvizje të vazhdueshme, qyteti ndryshon natyrë nga një orë në tjetrën. Pa informacion të centralizuar, çdo ndërprerje prek mijëra njerëz njëkohësisht.',
       carHead: '4 skenarë realë, klikoni për detaje',
       analyzeLink: 'Shiko analizën e plotë →',
       withoutTIF: 'Pa TIF',
@@ -2191,7 +2021,7 @@ export const T: Record<Lang, HomeT> = {
           numLabel: 'Biznes',
           title: 'Një korrier. 14 ndalesa. 4 zona të mbyllura.',
           withoutText: 'zbulon bllokimet një nga një, humbet 3 orë.',
-          withText: 'rruga e planifikuar në hartën G7. 14 dërgesa para orës 16:00.',
+          withText: 'rruga e planifikuar në hartë. 14 dërgesa para orës 16:00.',
         },
         {
           numLabel: 'Reagim i shpejtë',
@@ -2204,19 +2034,19 @@ export const T: Record<Lang, HomeT> = {
     faq: {
       sectionLabel: 'Pyetje të shpeshta',
       h2a: 'Kuptoni gjithçka', h2b: 'në 30 sekonda',
-      sub: 'Çfarë sjell konkretisht TIF gjatë G7 dhe në jetën e përditshme.',
+      sub: 'Çfarë sjell konkretisht TIF në jetën e përditshme.',
       items: [
         {
-          q: 'Çfarë është saktësisht TIF gjatë G7?',
-          a: 'TIF centralizon në kohë reale të gjitha ndërprerjet lidhur me Samitin: zona të kuqe, rrugë të mbyllura, kufizime TPG, vonesa në kufij dhe alarme meteorologjike. Një burim i vetëm i besueshëm, përditësuar çdo 30 sekonda nga burime zyrtare.',
+          q: 'Çfarë është saktësisht TIF?',
+          a: 'TIF centralizon në kohë reale të gjitha ndërprerjet e Gjenevës së Madhe: zona me rrezik, rrugë të mbyllura, kufizime TPG, vonesa në kufij dhe alarme meteorologjike. Një burim i vetëm i besueshëm, përditësuar çdo 30 sekonda nga burime zyrtare.',
         },
         {
           q: 'Pse të mos përdorni thjesht Google Maps ose Twitter?',
-          a: 'Google Maps ka vonesë 5–15 minuta për kufizimet specifike të G7. Twitter përhap thashetheme të paverifikuara. TIF ushqehet drejtpërdrejt nga burime zyrtare (Policia Kantonale GE, OFROU, TPG, CFF) me atribuim të gjurmueshëm për çdo informacion.',
+          a: 'Google Maps ka vonesë 5–15 minuta për kufizime specifike të qarkullimit. Twitter përhap thashetheme të paverifikuara. TIF ushqehet drejtpërdrejt nga burime zyrtare (Policia Kantonale GE, OFROU, TPG, CFF) me atribuim të gjurmueshëm për çdo informacion.',
         },
         {
           q: 'Kush preket realisht?',
-          a: 'Çdo person që lëviz në Gjenevën e Madhe nga 10 deri më 19 qershor 2026 (kontrollet kufitare) — samiti G7 në Évian-les-Bains 15–17 qershor: 47 000 punëtorë kufitarë në ditë, korierë, profesionistë shëndetësorë, banorë të komunave nën kufizime dhe turistë.',
+          a: 'Çdo person që lëviz në Gjenevën e Madhe: 47 000 punëtorë kufitarë në ditë, korierë, profesionistë shëndetësorë, banorë dhe vizitorë.',
         },
         {
           q: 'A mund TIF të parandalojë vërtet një bllokadë?',
@@ -2224,7 +2054,7 @@ export const T: Record<Lang, HomeT> = {
         },
         {
           q: 'A është platforma vërtet falas, pa kushte?',
-          a: 'Po. Pa regjistrim, pa reklama, pa kufizim funksionalitetesh. TIF financohet nga kontribute vullnetare dhe Börja Swiss Solutions. Aksesi publik do të mbetet falas edhe pas G7.',
+          a: 'Po. Pa regjistrim, pa reklama, pa kufizim funksionalitetesh. TIF financohet nga kontribute vullnetare dhe Börja Swiss Solutions. Aksesi publik do të mbetet gjithmonë falas.',
         },
         {
           q: 'A zëvendëson TIF komunikimet zyrtare të autoriteteve?',
@@ -2235,28 +2065,14 @@ export const T: Record<Lang, HomeT> = {
     prk: {
       sectionLabel: 'Parkim · P+R',
       h2a: 'Parkinget dhe', h2b: 'zgjidhjet aktive',
-      sub: 'Gjatë G7, parkoni makinën tuaj në një P+R dhe merrni transportin publik drejtpërdrejt në qendër të qytetit. Më pak bllokime, zero stres.',
+      sub: 'Parkoni makinën tuaj në një P+R dhe merrni transportin publik drejtpërdrejt në qendër të qytetit. Më pak bllokime, zero stres.',
       carHead: '8 P+R kryesorë · akses direkt TPG',
       places: 'vende',
       rt: '⚡ Disponibilitet në kohë reale',
       viewMap: 'Shiko në hartë →',
-      ctaStrong: 'Strategjia P+R gjatë G7.',
+      ctaStrong: 'Strategjia P+R.',
       ctaDesc: 'Lini makinën në periferi dhe arrini në qendër me TPG. Shumica e P+R janë falas ose me kosto shumë të ulët.',
       ctaBtn: 'Shiko parkinget në hartë',
-    },
-    lgv: {
-      sectionLabel: 'Linja zyrtare · Policia Kantonale',
-      h2: 'Linja e gjelbër G7',
-      sub: 'Në prag të samitit G7 në Évian-les-Bains (15–17 qershor 2026), Policia Kantonale e Gjenevës, me mbështetjen e OCPPAM, vendos një linjë falas për të gjitha pyetjet tuaja për sigurinë, mobilitetin dhe aksesin.',
-      freeNumberLabel: 'Numër falas',
-      freeCallLabel: 'Thirrje falas nga Zvicra',
-      hoursLabel: 'Orari',
-      hoursLine1: 'Hën 1 – pre 5 qershor 2026',
-      hoursLine2: 'Hën 8 – enj 18 qershor 2026',
-      hoursLine3: '11:00 – 19:00',
-      emergencyLabel: 'Emergjenca',
-      pressLabel: 'Kontakt shtypi',
-      sourceText: 'Burimi: Policia Kantonale e Gjenevës · Zyra Kantonale e Mbrojtjes së Popullatës dhe Çështjeve Ushtarake (OCPPAM)',
     },
     src: {
       sectionLabel: 'Burime zyrtare',
@@ -2324,7 +2140,7 @@ export const T: Record<Lang, HomeT> = {
       tc2Slides: [
         { name: 'FAQ', desc: 'Pyetje të shpeshta  Burime  Besueshmëri' },
         { name: 'Dokumentacion', desc: 'Udhëzues përdoruesi  Funksionalitete' },
-        { name: 'Rastet e përdorimit', desc: 'Rezidentë  Kufitarë  Biznese  G7' },
+        { name: 'Rastet e përdorimit', desc: 'Rezidentë  Kufitarë  Biznese  Vizitorë' },
         { name: 'Arkitektura', desc: 'Skemë e thjeshtësuar  Burime  Flukse' },
       ],
       auditH3: 'Niveli 3, Auditim pjesëmarrës, me kërkesë',
@@ -2377,13 +2193,12 @@ export const T: Record<Lang, HomeT> = {
     },
     ticker: [
       { label: 'TIF',      text: '7 burime zyrtare + 2 burime komunitare, përditësuar çdo 30 sekonda' },
-      { label: 'G7',       text: 'G7 Évian-les-Bains (15–17 qershor) — kontrollet kufitare Zvicra (10–19 qershor)' },
       { label: 'Kufijtë',  text: '7 kalime kufitare të hapura: Anières, Moillesulaz, Thônex-Vallard, Bardonnex, Perly, Meyrin, Ferney-Voltaire · Stacionet Cornavin dhe Annemasse + aeroporti GVA të hapura · Dokument identiteti i detyrueshëm · Pritje të mundshme' },
       { label: 'CEVA',     text: 'Léman Express 4 linja të monitoruara: L1, L2, L3, L4' },
-      { label: 'Info',     text: '47 000 punëtorë kufitarë në ditë në Gjenevën e Madhe të prekur nga kufizimet G7' },
+      { label: 'Info',     text: '47 000 punëtorë kufitarë në ditë në Gjenevën e Madhe' },
       { label: 'Burimet',  text: 'OFROU, Policia Kantonale GE, TPG, CFF, MeteoZvicra, SITG, BAZG' },
     ],
-    shareText: 'TIF centralizon në kohë reale të gjitha ndërprerjet e G7 në Gjenevën e Madhe. Rrugë, kufij, TPG, mot: falas dhe pa regjistrim.',
+    shareText: 'TIF centralizon në kohë reale të gjitha ndërprerjet e Gjenevës së Madhe. Rrugë, kufij, TPG, mot: falas dhe pa regjistrim.',
     agenda: {
       navLink: 'Ngjarje',
       sectionLabel: 'Agjenda · Gjeneva e Madhe · Verë 2026',
@@ -2425,7 +2240,7 @@ export const T: Record<Lang, HomeT> = {
       h1a: 'グラン・ジュネーヴ、',
       h1b: 'リアルタイムで',
       accent: '把握する。',
-      p1: '事故。道路閉鎖。G7アラート。',
+      p1: '事故。道路閉鎖。ライブアラート。',
       p2: 'この情報は存在する。ただし分散している。',
       p3: 'TIFが一箇所に集約する。手遅れになる前に。',
       btn: 'ライブマップを開く',
@@ -2456,25 +2271,16 @@ export const T: Record<Lang, HomeT> = {
         normal: '正常', descNormal: '通常気象、アクティブな警報なし',
         red: '赤', orange: 'オレンジ',
       },
-      g7: {
-        label: 'G7 監視、制限中',
-        zonesLabel: '立入禁止区域', roadsLabel: '通行止め道路',
-        tpgLabel: '影響路線', alertsLabel: '発報アラート数',
-        zonesDesc: '国連宮殿、ウィルソン埠頭、ローザンヌ通り、IATA',
-        roadsDesc: '左岸および空港アクセスを規制',
-        tpgDesc: '現行G7体制に準ずる',
-        alertsFrom: '本日午前6時から',
-      },
       borders: { label: 'スイス・フランス国境' },
       ceva: { label: 'レマン・エクスプレス CEVA' },
       ctaStrong: 'リアルタイム状況を確認しました。',
-      ctaDesc: 'ライブマップは道路・TPG・G7・天気・国境をひとつの画面に集約しています。',
+      ctaDesc: 'ライブマップは道路・TPG・天気・国境をひとつの画面に集約しています。',
       ctaBtn: 'ライブマップを開く',
     },
     share: {
       sectionLabel: 'TIFをシェア',
       h2a: '周りの人に', h2b: '知らせよう',
-      sub: 'G7前にTIFを知っている人が増えるほど、不必要な渋滞が減ります。シェアひとつで誰かの1時間を救えるかもしれません。',
+      sub: 'TIFを知っている人が増えるほど、不必要な渋滞が減ります。シェアひとつで誰かの1時間を救えるかもしれません。',
       xBtn: 'Xでシェア',
       liBtn: 'LinkedInでシェア',
       waBtn: 'WhatsApp',
@@ -2482,9 +2288,9 @@ export const T: Record<Lang, HomeT> = {
       copiedBtn: '✓ コピーしました',
     },
     why: {
-      sectionLabel: 'G7サミット',
+      sectionLabel: 'グラン・ジュネーヴ',
       h2a: 'なぜ1分1秒が', h2b: '重要なのか',
-      sub: '国際サミット開催中、街は様変わりします。情報が集約されていなければ、1つの障害が何千人もの人に同時に影響を与えます。',
+      sub: '絶えず動き続けるこの都市圏では、街の様相は1時間ごとに変わります。情報が集約されていなければ、1つの障害が何千人もの人に同時に影響を与えます。',
       carHead: '4つの実際のシナリオ、クリックして詳細を確認',
       analyzeLink: '詳細分析を見る →',
       withoutTIF: 'TIFなし',
@@ -2506,7 +2312,7 @@ export const T: Record<Lang, HomeT> = {
           numLabel: 'ビジネス',
           title: '配達員。14箇所。4区域閉鎖。',
           withoutText: '封鎖を一つずつ発見し、3時間をロス。',
-          withText: 'G7マップでルートを計画。16時前に14件を完了。',
+          withText: 'マップでルートを計画。16時前に14件を完了。',
         },
         {
           numLabel: '迅速な対応',
@@ -2519,19 +2325,19 @@ export const T: Record<Lang, HomeT> = {
     faq: {
       sectionLabel: 'よくある質問',
       h2a: '30秒で', h2b: 'すべてを理解',
-      sub: 'G7期間中および日常でTIFが具体的に何をするか。',
+      sub: '日常でTIFが具体的に何をするか。',
       items: [
         {
-          q: 'G7期間中のTIFとは何ですか？',
-          a: 'TIFはサミット関連のすべての障害をリアルタイムで集約します：立入禁止区域、通行止め道路、TPG制限、国境での待ち時間、気象警報。公式ソースから30秒ごとに更新される唯一の信頼できる情報源です。',
+          q: 'TIFとは何ですか？',
+          a: 'TIFはグラン・ジュネーヴのすべての障害をリアルタイムで集約します：リスク区域、通行止め道路、TPG制限、国境での待ち時間、気象警報。公式ソースから30秒ごとに更新される唯一の信頼できる情報源です。',
         },
         {
           q: 'Google MapsやTwitterではダメなのですか？',
-          a: 'Google MapsはG7特有の制限に5〜15分の遅延があります。Twitterは未確認の噂を拡散します。TIFは公式ソース（ジュネーヴ州警察・OFROU・TPG・SBB）から直接データを取得し、各情報に追跡可能な帰属を付けています。',
+          a: 'Google Mapsは特定の交通規制に5〜15分の遅延があります。Twitterは未確認の噂を拡散します。TIFは公式ソース（ジュネーヴ州警察・OFROU・TPG・SBB）から直接データを取得し、各情報に追跡可能な帰属を付けています。',
         },
         {
           q: '実際に誰が影響を受けますか？',
-          a: '2026年6月10日〜19日（国境検査）にグラン・ジュネーヴを移動するすべての人—G7サミットはエビアン・レ・バン6月15〜17日：1日4万7000人の越境労働者、配送業者、医療従事者、制限区域の住民、観光客。',
+          a: 'グラン・ジュネーヴを移動するすべての人：1日4万7000人の越境労働者、配送業者、医療従事者、住民、訪問者。',
         },
         {
           q: 'TIFは本当に足止めを防げますか？',
@@ -2539,7 +2345,7 @@ export const T: Record<Lang, HomeT> = {
         },
         {
           q: '本当に無料で、条件なしですか？',
-          a: 'はい。登録不要、広告なし、機能制限なし。TIFは任意の寄付とBörja Swiss Solutionsによって運営されています。G7後も公開アクセスは無料のままです。',
+          a: 'はい。登録不要、広告なし、機能制限なし。TIFは任意の寄付とBörja Swiss Solutionsによって運営されています。公開アクセスは今後も無料のままです。',
         },
         {
           q: 'TIFは当局の公式情報を代替しますか？',
@@ -2550,28 +2356,14 @@ export const T: Record<Lang, HomeT> = {
     prk: {
       sectionLabel: '駐車場 · P+R',
       h2a: '駐車場と', h2b: 'アクティブな解決策',
-      sub: 'G7期間中は、P+Rに車を停めて公共交通機関で市街地へ。渋滞なし、ストレスなし。',
+      sub: 'P+Rに車を停めて公共交通機関で市街地へ。渋滞なし、ストレスなし。',
       carHead: '主要P+R 8箇所 · TPG直通アクセス',
       places: '台',
       rt: '⚡ リアルタイム空き情報',
       viewMap: 'マップで見る →',
-      ctaStrong: 'G7中のP+R戦略。',
+      ctaStrong: 'P+R戦略。',
       ctaDesc: '郊外に車を停めてTPGで中心部へ。ほとんどのP+Rは無料または低コストです。',
       ctaBtn: '駐車場をマップで見る',
-    },
-    lgv: {
-      sectionLabel: '公式ライン · 州警察',
-      h2: 'G7 グリーンライン',
-      sub: 'エビアン・レ・バンG7サミット（2026年6月15〜17日）を前に、ジュネーヴ州警察はOCPPAMの支援のもと、安全・移動・アクセスに関するすべてのご質問に対応する無料電話を開設します。',
-      freeNumberLabel: '無料番号',
-      freeCallLabel: 'スイス国内から無料通話',
-      hoursLabel: '受付時間',
-      hoursLine1: '2026年6月1日(月)〜5日(金)',
-      hoursLine2: '2026年6月8日(月)〜18日(木)',
-      hoursLine3: '11:00〜19:00',
-      emergencyLabel: '緊急',
-      pressLabel: '報道お問い合わせ',
-      sourceText: '出典：ジュネーヴ州警察 · ジュネーヴ州民間防衛・軍事局（OCPPAM）',
     },
     src: {
       sectionLabel: '公式データ源',
@@ -2639,7 +2431,7 @@ export const T: Record<Lang, HomeT> = {
       tc2Slides: [
         { name: 'FAQ', desc: 'よくある質問  ソース  信頼性' },
         { name: 'ドキュメント', desc: 'ユーザーガイド  機能' },
-        { name: '活用事例', desc: '住民  越境労働者  企業  G7' },
+        { name: '活用事例', desc: '住民  越境労働者  企業  訪問者' },
         { name: 'アーキテクチャ', desc: '簡略図  ソース  データフロー' },
       ],
       auditH3: 'レベル3、参加型監査、要リクエスト',
@@ -2692,13 +2484,12 @@ export const T: Record<Lang, HomeT> = {
     },
     ticker: [
       { label: 'TIF',    text: '公式ソース7件＋コミュニティ2件、30秒ごとに更新' },
-      { label: 'G7',     text: 'G7エビアン・レ・バン（6月15〜17日）— スイス国境検査（6月10〜19日）' },
       { label: '国境',   text: '開放7箇所：アニエール、モワルスラ、トネックス＝バラール、バルドネックス、ペルリ、メラン、フェルネー＝ヴォルテール · コルナヴァン・アヌマス駅＋GVA空港は開放 · 身分証明書必須 · 待ち時間あり' },
       { label: 'CEVA',   text: 'レマン・エクスプレス監視路線4本：L1、L2、L3、L4' },
-      { label: 'Info',   text: 'グラン・ジュネーヴの越境労働者1日4万7000人がG7制限の影響を受ける' },
+      { label: 'Info',   text: 'グラン・ジュネーヴの越境労働者1日4万7000人' },
       { label: 'ソース', text: 'OFROU、ジュネーヴ州警察、TPG、SBB、MeteoSwiss、SITG、BAZG' },
     ],
-    shareText: 'TIFはG7グラン・ジュネーヴの全混乱をリアルタイムで集約。道路、国境、TPG、天気：無料、登録不要。',
+    shareText: 'TIFはグラン・ジュネーヴの全混乱をリアルタイムで集約。道路、国境、TPG、天気：無料、登録不要。',
     agenda: {
       navLink: 'イベント',
       sectionLabel: 'アジェンダ · グラン・ジュネーヴ · 2026年夏',
@@ -2740,7 +2531,7 @@ export const T: Record<Lang, HomeT> = {
       h1a: '大日内瓦地区，',
       h1b: '实时',
       accent: '掌握动态。',
-      p1: '一起事故。一处封路。一条G7警报。',
+      p1: '一起事故。一处封路。一条实时警报。',
       p2: '这些信息存在。只是分散各处。',
       p3: 'TIF将其集中整合。在为时已晚之前。',
       btn: '打开实时地图',
@@ -2771,25 +2562,16 @@ export const T: Record<Lang, HomeT> = {
         normal: '正常', descNormal: '天气正常，无活跃警报',
         red: '红色', orange: '橙色',
       },
-      g7: {
-        label: 'G7 监控，限制生效中',
-        zonesLabel: '红色区域', roadsLabel: '封闭道路',
-        tpgLabel: '受影响线路', alertsLabel: '已发布警报',
-        zonesDesc: '国联宫、威尔逊码头、洛桑大街、IATA',
-        roadsDesc: '左岸及机场通道受管控',
-        tpgDesc: '依据现行G7部署方案',
-        alertsFrom: '今日凌晨6时起',
-      },
       borders: { label: '瑞法边境' },
       ceva: { label: '莱蒙快铁 CEVA' },
       ctaStrong: '您刚刚查看了实时状况。',
-      ctaDesc: '实时地图将道路、TPG、G7、天气、边境信息汇聚于一屏。',
+      ctaDesc: '实时地图将道路、TPG、天气、边境信息汇聚于一屏。',
       ctaBtn: '打开实时地图',
     },
     share: {
       sectionLabel: '分享 TIF',
       h2a: '告知您的', h2b: '周围人',
-      sub: '越多人在G7前了解TIF，就越能减少不必要的堵塞。每一次分享都可能为他人节省一小时。',
+      sub: '越多人了解TIF，就越能减少不必要的堵塞。每一次分享都可能为他人节省一小时。',
       xBtn: '在X上分享',
       liBtn: '在LinkedIn上分享',
       waBtn: 'WhatsApp',
@@ -2797,9 +2579,9 @@ export const T: Record<Lang, HomeT> = {
       copiedBtn: '✓ 已复制',
     },
     why: {
-      sectionLabel: 'G7峰会',
+      sectionLabel: '大日内瓦地区',
       h2a: '为何每一分钟', h2b: '都至关重要',
-      sub: '国际峰会期间，城市面貌大变。若缺乏集中信息，每一次中断都会同时影响数千人。',
+      sub: '在一个持续变动的都市圈，城市面貌每小时都在变化。若缺乏集中信息，每一次中断都会同时影响数千人。',
       carHead: '4个真实场景，点击查看详情',
       analyzeLink: '查看完整分析 →',
       withoutTIF: '没有TIF',
@@ -2821,7 +2603,7 @@ export const T: Record<Lang, HomeT> = {
           numLabel: '商业',
           title: '一位快递员。14个站点。4个封闭区域。',
           withoutText: '逐一发现封锁，浪费3小时。',
-          withText: '在G7地图上规划路线，16点前完成14次配送。',
+          withText: '在地图上规划路线，16点前完成14次配送。',
         },
         {
           numLabel: '快速响应',
@@ -2834,19 +2616,19 @@ export const T: Record<Lang, HomeT> = {
     faq: {
       sectionLabel: '常见问题',
       h2a: '30秒内', h2b: '了解一切',
-      sub: 'TIF在G7期间及日常生活中能具体提供什么。',
+      sub: 'TIF在日常生活中能具体提供什么。',
       items: [
         {
-          q: 'G7期间TIF究竟是什么？',
-          a: 'TIF实时汇总所有与峰会相关的干扰：红色区域、封闭道路、TPG限制、边境等候时间和气象警报。每30秒从官方来源更新，是唯一可靠的信息源。',
+          q: 'TIF究竟是什么？',
+          a: 'TIF实时汇总大日内瓦地区的所有干扰：风险区域、封闭道路、TPG限制、边境等候时间和气象警报。每30秒从官方来源更新，是唯一可靠的信息源。',
         },
         {
           q: '为什么不直接用Google Maps或Twitter？',
-          a: 'Google Maps对G7特定限制有5至15分钟的延迟。Twitter传播未经核实的谣言。TIF直接从官方来源（日内瓦州警察局、OFROU、TPG、SBB）获取数据，每条信息均有可追溯的来源标注。',
+          a: 'Google Maps对特定交通限制有5至15分钟的延迟。Twitter传播未经核实的谣言。TIF直接从官方来源（日内瓦州警察局、OFROU、TPG、SBB）获取数据，每条信息均有可追溯的来源标注。',
         },
         {
           q: '实际上谁会受到影响？',
-          a: '2026年6月10日至19日（边境管控）期间在大日内瓦地区出行的所有人——G7峰会在埃维昂莱班举行（6月15至17日）：每日4.7万名跨境工作者、快递员、医疗专业人员、限制区域居民及游客。',
+          a: '在大日内瓦地区出行的所有人：每日4.7万名跨境工作者、快递员、医疗专业人员、居民及访客。',
         },
         {
           q: 'TIF真的能避免堵车吗？',
@@ -2854,7 +2636,7 @@ export const T: Record<Lang, HomeT> = {
         },
         {
           q: '这个平台真的完全免费吗？',
-          a: '是的。无需注册，无广告，无功能限制。TIF由自愿捐款和Börja Swiss Solutions资助。G7结束后公共访问仍将保持免费。',
+          a: '是的。无需注册，无广告，无功能限制。TIF由自愿捐款和Börja Swiss Solutions资助。公共访问将始终保持免费。',
         },
         {
           q: 'TIF会取代当局的官方通讯吗？',
@@ -2865,28 +2647,14 @@ export const T: Record<Lang, HomeT> = {
     prk: {
       sectionLabel: '停车 · P+R',
       h2a: '停车场与', h2b: '积极解决方案',
-      sub: 'G7期间，将车停在P+R换乘停车场，再乘公共交通直达市中心。减少拥堵，零压力。',
+      sub: '将车停在P+R换乘停车场，再乘公共交通直达市中心。减少拥堵，零压力。',
       carHead: '8个主要P+R · 直达TPG',
       places: '个车位',
       rt: '⚡ 实时车位信息',
       viewMap: '在地图上查看 →',
-      ctaStrong: 'G7期间的P+R策略。',
+      ctaStrong: 'P+R策略。',
       ctaDesc: '将车停在郊区，乘TPG前往市中心。大多数P+R免费或收费极低。',
       ctaBtn: '在地图上查看停车场',
-    },
-    lgv: {
-      sectionLabel: '官方热线 · 州警察局',
-      h2: 'G7 绿色热线',
-      sub: '在埃维昂莱班G7峰会（2026年6月15至17日）前夕，日内瓦州警察局在OCPPAM支持下，开设免费热线，解答您关于安全、出行和通行的所有问题。',
-      freeNumberLabel: '免费电话',
-      freeCallLabel: '瑞士境内免费拨打',
-      hoursLabel: '服务时间',
-      hoursLine1: '2026年6月1日（周一）至5日（周五）',
-      hoursLine2: '2026年6月8日（周一）至18日（周四）',
-      hoursLine3: '11:00 – 19:00',
-      emergencyLabel: '紧急情况',
-      pressLabel: '媒体联系',
-      sourceText: '来源：日内瓦州警察局 · 日内瓦州民众保护与军事事务局（OCPPAM）',
     },
     src: {
       sectionLabel: '官方数据来源',
@@ -2954,7 +2722,7 @@ export const T: Record<Lang, HomeT> = {
       tc2Slides: [
         { name: '常见问题', desc: '常见问题  数据来源  可靠性' },
         { name: '文档', desc: '用户指南  功能说明' },
-        { name: '使用案例', desc: '居民  跨境工作者  企业  G7' },
+        { name: '使用案例', desc: '居民  跨境工作者  企业  访客' },
         { name: '架构', desc: '简化架构图  来源  数据流' },
       ],
       auditH3: '第3级，参与式审计，按需申请',
@@ -3007,13 +2775,12 @@ export const T: Record<Lang, HomeT> = {
     },
     ticker: [
       { label: 'TIF',  text: '7个官方来源 + 2个社区来源，每30秒更新一次' },
-      { label: 'G7',   text: 'G7埃维昂莱班（6月15至17日）— 瑞士边境管控（6月10至19日）' },
       { label: '边境', text: '7个开放口岸：Anières、Moillesulaz、Thônex-Vallard、Bardonnex、Perly、Meyrin、Ferney-Voltaire · 科纳文站、安纳马斯站及GVA机场开放 · 须出示身份证件 · 可能有等待时间' },
       { label: 'CEVA', text: '莱蒙快铁4条监控线路：L1、L2、L3、L4' },
-      { label: '信息', text: '大日内瓦地区每日4.7万名跨境工作者受G7限制影响' },
+      { label: '信息', text: '大日内瓦地区每日4.7万名跨境工作者' },
       { label: '来源', text: 'OFROU、日内瓦州警察局、TPG、SBB、瑞士气象局、SITG、BAZG' },
     ],
-    shareText: 'TIF实时汇聚G7大日内瓦地区所有干扰信息。道路、边境、TPG、天气：完全免费，无需注册。',
+    shareText: 'TIF实时汇聚大日内瓦地区所有干扰信息。道路、边境、TPG、天气：完全免费，无需注册。',
     agenda: {
       navLink: '活动',
       sectionLabel: '日程 · 大日内瓦地区 · 2026年夏',

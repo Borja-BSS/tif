@@ -1,5 +1,4 @@
 import nodemailer from 'nodemailer'
-import type { G7Alert } from '@/data/types'
 
 function esc(s: string): string {
   return s
@@ -35,7 +34,6 @@ export interface JourneyAlertPayload {
   delayMinutes:  number
   departureHour: number
   departureMin:  number
-  g7Alerts?:     G7Alert[]
 }
 
 const STATUS_FR: Record<string, string> = {
@@ -45,21 +43,10 @@ const STATUS_FR: Record<string, string> = {
 }
 
 export async function sendJourneyAlert(payload: JourneyAlertPayload): Promise<void> {
-  const { to, journeyName, status, headline, detail, delayMinutes, departureHour, departureMin, g7Alerts } = payload
+  const { to, journeyName, status, headline, detail, delayMinutes, departureHour, departureMin } = payload
 
   const dep = `${String(departureHour).padStart(2,'0')}h${String(departureMin).padStart(2,'0')}`
   const subject = `${STATUS_FR[status] ?? '⚠️ Alerte'} — ${journeyName} · ${dep}`
-
-  let g7Section = ''
-  if (g7Alerts && g7Alerts.length > 0) {
-    const alertRows = g7Alerts.map(a => {
-      const bg   = a.severity === 'critical' ? 'rgba(255,69,58,0.08)'  : a.severity === 'warning' ? 'rgba(255,196,0,0.07)'  : 'rgba(255,255,255,0.03)'
-      const bd   = a.severity === 'critical' ? 'rgba(255,69,58,0.25)'  : a.severity === 'warning' ? 'rgba(255,196,0,0.20)'  : 'rgba(255,255,255,0.08)'
-      const icon = a.severity === 'critical' ? '🔴' : a.severity === 'warning' ? '🟡' : 'ℹ️'
-      return `<div style="background:${bg};border:1px solid ${bd};border-radius:10px;padding:10px 14px;margin-bottom:8px;"><div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.88);">${icon} ${esc(a.title)}</div><div style="font-size:12px;color:rgba(255,255,255,0.52);margin-top:4px;line-height:1.5;">${esc(a.detail)}</div></div>`
-    }).join('')
-    g7Section = `<div style="margin-bottom:20px;"><div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">⚠️ Alertes G7 actives aujourd'hui</div>${alertRows}</div>`
-  }
 
   const html = `
 <!DOCTYPE html>
@@ -76,7 +63,7 @@ export async function sendJourneyAlert(payload: JourneyAlertPayload): Promise<vo
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
         <div style="width:40px;height:40px;border-radius:10px;background:#E8000E;display:flex;align-items:center;justify-content:center;font-size:20px;">🗺️</div>
         <div>
-          <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.08em;">TIF · G7 Grand Genève</div>
+          <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.08em;">TIF · Grand Genève</div>
           <div style="font-size:15px;font-weight:700;color:#fff;margin-top:2px;">Mon Trajet — Alerte</div>
         </div>
       </div>
@@ -98,9 +85,6 @@ export async function sendJourneyAlert(payload: JourneyAlertPayload): Promise<vo
       ${detail ? `<div style="font-size:14px;color:rgba(255,255,255,0.6);margin-bottom:16px;line-height:1.5;">${esc(detail)}</div>` : ''}
       ${delayMinutes > 0 ? `<div style="background:rgba(255,159,10,0.08);border:1px solid rgba(255,159,10,0.2);border-radius:12px;padding:12px 16px;font-size:13px;color:#FF9F0A;font-weight:600;margin-bottom:16px;">⏱ Retard estimé : +${delayMinutes} min · Départ prévu ${dep}</div>` : ''}
 
-      <!-- G7 Alerts -->
-      ${g7Section}
-
       <!-- CTA -->
       <a href="https://tif.borja-swiss-solutions.ch/map" style="display:inline-block;padding:12px 24px;background:#E8000E;color:#fff;text-decoration:none;border-radius:14px;font-size:14px;font-weight:700;margin-top:4px;">
         Voir sur la carte →
@@ -108,7 +92,7 @@ export async function sendJourneyAlert(payload: JourneyAlertPayload): Promise<vo
 
       <!-- Footer -->
       <div style="margin-top:28px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.07);font-size:11px;color:rgba(255,255,255,0.3);line-height:1.6;">
-        TIF · Application de mobilité G7 Grand Genève 2026<br>
+        TIF · Application de mobilité Grand Genève 2026<br>
         Développé par <a href="https://borja-swiss-solutions.ch" style="color:rgba(255,255,255,0.4);">Börja Swiss Solutions</a>
       </div>
     </div>
@@ -178,7 +162,7 @@ export async function sendJourneyConfirmation(payload: JourneyConfirmationPayloa
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
         <div style="width:40px;height:40px;border-radius:10px;background:#E8000E;display:flex;align-items:center;justify-content:center;font-size:20px;">✓</div>
         <div>
-          <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.08em;">TIF · G7 Grand Genève</div>
+          <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.08em;">TIF · Grand Genève</div>
           <div style="font-size:15px;font-weight:700;color:#fff;margin-top:2px;">Trajet configuré</div>
         </div>
       </div>
@@ -230,7 +214,7 @@ export async function sendJourneyConfirmation(payload: JourneyConfirmationPayloa
 
       <!-- Footer -->
       <div style="margin-top:28px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.07);font-size:11px;color:rgba(255,255,255,0.3);line-height:1.6;">
-        TIF · Application de mobilité G7 Grand Genève 2026<br>
+        TIF · Application de mobilité Grand Genève 2026<br>
         Développé par <a href="https://borja-swiss-solutions.ch" style="color:rgba(255,255,255,0.4);">Börja Swiss Solutions</a>
       </div>
     </div>
@@ -307,7 +291,7 @@ export async function sendSignalementNotification(payload: SignalementNotifPaylo
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
       <div style="width:40px;height:40px;border-radius:10px;background:#FF3B30;display:flex;align-items:center;justify-content:center;font-size:20px;">📡</div>
       <div>
-        <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.08em;">TIF Admin · G7 Grand Genève</div>
+        <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.08em;">TIF Admin · Grand Genève</div>
         <div style="font-size:15px;font-weight:700;color:#fff;margin-top:2px;">Nouveau signalement</div>
       </div>
     </div>
@@ -340,7 +324,7 @@ export async function sendSignalementNotification(payload: SignalementNotifPaylo
       Voir &amp; traiter dans l'admin →
     </a>
     <div style="margin-top:28px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.07);font-size:11px;color:rgba(255,255,255,0.3);line-height:1.6;">
-      TIF · Application de mobilité G7 Grand Genève 2026 · ID: ${esc(id)}
+      TIF · Application de mobilité Grand Genève 2026 · ID: ${esc(id)}
     </div>
   </div>
 </div>
@@ -405,7 +389,7 @@ export async function sendContactForm(payload: ContactFormPayload): Promise<void
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
         <div style="width:40px;height:40px;border-radius:10px;background:#E8000E;display:flex;align-items:center;justify-content:center;font-size:20px;">📬</div>
         <div>
-          <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.08em;">TIF · G7 Grand Genève</div>
+          <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.08em;">TIF · Grand Genève</div>
           <div style="font-size:15px;font-weight:700;color:#fff;margin-top:2px;">${esc(TYPE_FR[type] ?? type)}</div>
         </div>
       </div>
@@ -425,7 +409,7 @@ export async function sendContactForm(payload: ContactFormPayload): Promise<void
 
       <!-- Footer -->
       <div style="margin-top:28px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.07);font-size:11px;color:rgba(255,255,255,0.3);line-height:1.6;">
-        TIF · Application de mobilité G7 Grand Genève 2026<br>
+        TIF · Application de mobilité Grand Genève 2026<br>
         Développé par <a href="https://borja-swiss-solutions.ch" style="color:rgba(255,255,255,0.4);">Börja Swiss Solutions</a>
       </div>
     </div>
@@ -433,7 +417,7 @@ export async function sendContactForm(payload: ContactFormPayload): Promise<void
 </body>
 </html>`
 
-  const ackSubject = 'Votre message a bien été reçu — TIF G7 Grand Genève'
+  const ackSubject = 'Votre message a bien été reçu · TIF Grand Genève'
 
   const ackHtml = `
 <!DOCTYPE html>
@@ -450,7 +434,7 @@ export async function sendContactForm(payload: ContactFormPayload): Promise<void
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
         <div style="width:40px;height:40px;border-radius:10px;background:#E8000E;display:flex;align-items:center;justify-content:center;font-size:20px;">✓</div>
         <div>
-          <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.08em;">TIF · G7 Grand Genève</div>
+          <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.08em;">TIF · Grand Genève</div>
           <div style="font-size:15px;font-weight:700;color:#fff;margin-top:2px;">Message reçu</div>
         </div>
       </div>
@@ -462,7 +446,7 @@ export async function sendContactForm(payload: ContactFormPayload): Promise<void
 
       <!-- Footer -->
       <div style="margin-top:28px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.07);font-size:11px;color:rgba(255,255,255,0.3);line-height:1.6;">
-        TIF · Application de mobilité G7 Grand Genève 2026<br>
+        TIF · Application de mobilité Grand Genève 2026<br>
         Développé par <a href="https://borja-swiss-solutions.ch" style="color:rgba(255,255,255,0.4);">Börja Swiss Solutions</a>
       </div>
     </div>

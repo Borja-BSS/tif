@@ -36,7 +36,6 @@ export interface TransportRoute {
   }
   alternative: boolean
   warnings:    string[]   // avertissements de perturbation
-  g7Affected:  boolean    // conservé pour compat — toujours false (G7 terminé)
 }
 
 export async function calculateTransportRoute(
@@ -82,7 +81,6 @@ export async function calculateTransportRoute(
       },
       alternative: idx > 0,
       warnings:    anyDisrupted ? ['Retard signalé — vérifier avant départ'] : [],
-      g7Affected:  false,
     }
   })
 

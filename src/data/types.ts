@@ -37,22 +37,4 @@ export interface EventItem {
   priceInfo?:   string
   links:        EventLink[]
   verif:        VerifStatus
-  g7AccessNotes?: string[]
-}
-
-export type AlertCategory =
-  | 'frontiere' | 'route' | 'transport' | 'aerien'
-  | 'manifestation' | 'lac' | 'service' | 'culture'
-
-export type Severity = 'info' | 'warning' | 'critical'
-
-export interface G7Alert {
-  id:         string
-  category:   AlertCategory
-  severity:   Severity
-  title:      string
-  detail:     string
-  activeFrom: string   // ISO datetime
-  activeTo:   string   // ISO datetime
-  source:     string
 }

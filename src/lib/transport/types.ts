@@ -26,17 +26,6 @@ export interface CffDisruption {
   detectedAt?:   string            // ISO — heure du départ concerné
 }
 
-export interface G7Impact {
-  isActive:        boolean
-  isWarningPeriod: boolean
-  affectedLines:   string[]
-  suspendedLines:  string[]
-  closedAgencies:  { name: string; closedFrom: string; reopenAt: string }[]
-  hotline:         string
-  startDate:       string
-  endDate:         string
-}
-
 export interface VehicleSplit {
   tpg: FeatureCollection
   cff: FeatureCollection
@@ -52,7 +41,6 @@ export interface TransportLayerResponse {
     tpg: TpgDisruption[]
     cff: CffDisruption[]
   }
-  g7: G7Impact
   generatedAt: string
   sources: {
     vehicles: string

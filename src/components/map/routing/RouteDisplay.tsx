@@ -13,14 +13,13 @@ interface RouteDisplayProps {
   destination?:   SearchResult | null
 }
 
-type RouteType = 'fastest' | 'alternative' | 'safe'
+type RouteType = 'fastest' | 'alternative'
 
 const LAYERS  = ['route-alt-2', 'route-alt-1', 'route-glow', 'route-outline', 'route-main']
 const SOURCES = ['route', 'route-alt-1', 'route-alt-2']
 
 // ── Derive route display type from warnings ────────────────────────────────────
 function routeType(route: CarRoute): RouteType {
-  if (route.warnings.includes('Évite les zones G7')) return 'safe'
   if (route.alternative) return 'alternative'
   return 'fastest'
 }
@@ -29,7 +28,6 @@ function routeType(route: CarRoute): RouteType {
 const ROUTE_STYLE: Record<RouteType, { color: string; width: number; opacity: number; dasharray?: number[] }> = {
   fastest:     { color: '#0A84FF', width: 5,  opacity: 0.96 },
   alternative: { color: 'var(--text-tertiary)', width: 3, opacity: 0.5, dasharray: [4, 3] },
-  safe:        { color: '#34C759', width: 3,  opacity: 0.85, dasharray: [5, 2] },
 }
 
 // ── Marker HTML factory ────────────────────────────────────────────────────────
@@ -205,11 +203,11 @@ export function RouteDisplay({
       },
     })
 
-    // Selected route always draws solid — blue unless it's the G7-safe (green) variant
-    const selectedType = routeType(mainRoute) === 'safe' ? 'safe' : 'fastest'
+    // Selected route always draws solid blue
+    const selectedType = 'fastest' as const
     const mainStyle    = ROUTE_STYLE[selectedType]
-    const isBlue       = selectedType === 'fastest'
-    const glowColor    = selectedType === 'safe' ? '#34C759' : '#0A84FF'
+    const isBlue       = true
+    const glowColor    = '#0A84FF'
 
     // Glow layer — blurred, wide
     map.addLayer({

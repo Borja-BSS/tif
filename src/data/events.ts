@@ -648,10 +648,6 @@ export const events: EventItem[] = [
       { label: 'TikTok @gradi24fanzone', url: 'https://www.tiktok.com/@gradi24fanzone', kind: 'info', status: 'verified' },
     ],
     verif: 'confirmed',
-    g7AccessNotes: [
-      'Bus 11 → arrêt Plan-les-Ouates / Galaise · 15 min depuis Carouge',
-      'Voiture : sortie Lancy/Plan-les-Ouates · parking gratuit sur site',
-    ],
   },
   {
     id: 'fanzone-nyon', slug: 'fanzone-cantine-de-rive-nyon',
@@ -692,10 +688,6 @@ export const events: EventItem[] = [
       { label: 'RTS — Nyon fan zone', url: 'https://www.rts.ch/info/suisse/2026/article/ou-regarder-la-coupe-du-monde-2026-en-suisse-romande-fan-zones-et-bars-29266676.html', kind: 'info', status: 'verified' },
     ],
     verif: 'confirmed',
-    g7AccessNotes: [
-      'Train CFF : Genève-Cornavin → Nyon (18 min, très fréquent)',
-      'Voiture : A1 dir. Lausanne, sortie Nyon · ~25 km de Genève',
-    ],
   },
   {
     id: 'fanzone-saint-genis', slug: 'fanzone-saint-genis-pouilly',
@@ -753,11 +745,6 @@ export const events: EventItem[] = [
       { label: 'Programme officiel', url: 'https://caribana.ch/fr/programmation-du-caribana-festival', kind: 'info', status: 'verified' },
     ],
     verif: 'confirmed',
-    g7AccessNotes: [
-      'Train CFF : Genève-Cornavin → Nyon (20 min, fréquent) · bus 802 Nyon → Crans-près-Céligny (~15 min)',
-      'Voiture : A1/E25 dir. Lausanne, sortie Crans-Céligny · ~35 km de Genève · Parking sur site',
-      'Navette nocturne Lausanne disponible (CHF 15)',
-    ],
   },
   {
     id: 'caribana-18', slug: 'caribana-festival-18-juin',
@@ -775,11 +762,6 @@ export const events: EventItem[] = [
       { label: 'Programme officiel', url: 'https://caribana.ch/fr/programmation-du-caribana-festival', kind: 'info', status: 'verified' },
     ],
     verif: 'confirmed',
-    g7AccessNotes: [
-      'Train CFF : Genève-Cornavin → Nyon (20 min, fréquent) · bus 802 Nyon → Crans-près-Céligny (~15 min)',
-      'Voiture : A1/E25 dir. Lausanne, sortie Crans-Céligny · ~35 km de Genève · Parking sur site',
-      'Navette nocturne Lausanne disponible (CHF 15)',
-    ],
   },
   {
     id: 'caribana-19', slug: 'caribana-festival-19-juin',
@@ -797,11 +779,6 @@ export const events: EventItem[] = [
       { label: 'Programme officiel', url: 'https://caribana.ch/fr/programmation-du-caribana-festival', kind: 'info', status: 'verified' },
     ],
     verif: 'confirmed',
-    g7AccessNotes: [
-      'Train CFF : Genève-Cornavin → Nyon (20 min, fréquent) · bus 802 Nyon → Crans-près-Céligny (~15 min)',
-      'Voiture : A1/E25 dir. Lausanne, sortie Crans-Céligny · ~35 km de Genève · Parking sur site',
-      'Navette nocturne Lausanne disponible (CHF 15)',
-    ],
   },
   {
     id: 'caribana-20', slug: 'caribana-festival-20-juin',
@@ -819,11 +796,6 @@ export const events: EventItem[] = [
       { label: 'Programme officiel', url: 'https://caribana.ch/fr/programmation-du-caribana-festival', kind: 'info', status: 'verified' },
     ],
     verif: 'confirmed',
-    g7AccessNotes: [
-      'Train CFF : Genève-Cornavin → Nyon (20 min, fréquent) · bus 802 Nyon → Crans-près-Céligny (~15 min)',
-      'Voiture : A1/E25 dir. Lausanne, sortie Crans-Céligny · ~35 km de Genève · Parking sur site',
-      'Navette nocturne Lausanne disponible (CHF 15)',
-    ],
   },
 
   {
@@ -869,10 +841,6 @@ export const events: EventItem[] = [
       { label: 'AMR — programme', url: 'https://www.amr-geneve.ch/programme', kind: 'organizer', status: 'verified' },
     ],
     verif: 'confirmed',
-    g7AccessNotes: [
-      'Tram 15 → arrêt Cropettes · Bus 3/5 → arrêt Servette',
-      'Parking Servette à proximité',
-    ],
   },
 
   // ── SCÈNE ELLA FITZGERALD — Parc La Grange (dès le 29 juin) ──────────────────
@@ -901,10 +869,6 @@ export const events: EventItem[] = [
       { label: 'Ville de Genève — concerts La Grange', url: 'https://www.geneve.ch/fr/actualites/concerts-gratuits-parc-la-grange', kind: 'info', status: 'verified' },
     ],
     verif: 'confirmed',
-    g7AccessNotes: [
-      'Bus 2/9 → arrêt Eaux-Vives / Genève · 10 min à pied jusqu\'au parc',
-      'Parking Eaux-Vives à proximité',
-    ],
   },
 
   // ── PLEIN-LES-WATTS FESTIVAL — 9–11 juillet 2026 ────────────────────────────
@@ -927,11 +891,6 @@ export const events: EventItem[] = [
       { label: 'Plein-les-Watts', url: 'https://www.pleinleswatts.ch', kind: 'info', status: 'verified' },
     ],
     verif: 'confirmed',
-    g7AccessNotes: [
-      'Bus 11 → arrêt Lancy-Bâtie · 5 min à pied',
-      'Tram 14/18 → Carouge-Bachet puis bus 23 → Grand-Lancy',
-      'Voiture : sortie Lancy depuis le contournement · parking sur site',
-    ],
   },
 
   // ── GUITARE EN SCÈNE — 14–18 juillet 2026 ────────────────────────────────────
@@ -956,11 +915,6 @@ export const events: EventItem[] = [
       { label: 'Guitare en Scène (officiel)', url: 'https://www.guitare-en-scene.com', kind: 'info', status: 'verified' },
     ],
     verif: 'confirmed',
-    g7AccessNotes: [
-      'Bus TPG 44/46 → Saint-Julien depuis Genève (30 min)',
-      'Voiture : A40 sortie Saint-Julien-en-Genevois · ~15 km de Genève · Parking sur site',
-      'Douane Bardonnex–Saint-Julien (ouverte 24h)',
-    ],
   },
 
   // ── CINÉMAS — Genève & Grand Genève ──────────────────────────────────────────
@@ -1148,10 +1102,6 @@ export const events: EventItem[] = [
       { label: 'Pathé Archamps — programme', url: 'https://www.pathe.ch/fr/cinemas/cinema-pathe-archamps', kind: 'venue', status: 'verified' },
     ],
     verif: 'confirmed',
-    g7AccessNotes: [
-      'Depuis Genève : douane Bardonnex–Saint-Julien (ouverte 24h) · ~15 min en voiture',
-      'Bus STO ligne 43/44 depuis Genève Gare Routière vers Archamps',
-    ],
   },
 
   // ── PALÉO FESTIVAL NYON — 21–26 juillet 2026 ─────────────────────────────────
@@ -1178,11 +1128,6 @@ export const events: EventItem[] = [
       { label: 'Billetterie (Ticketcorner)', url: 'https://www.ticketcorner.ch', kind: 'tickets', status: 'verified' },
     ],
     verif: 'confirmed',
-    g7AccessNotes: [
-      'Train CFF : Genève-Cornavin → Nyon (18 min, très fréquent) · navette festival Nyon → Plaine de l\'Asse',
-      'Voiture : A1 dir. Lausanne, sortie Nyon · ~25 km de Genève · Parking payant sur site',
-      'Vélo : piste cyclable bord du lac Genève–Nyon (~25 km)',
-    ],
   },
 
   // ── BEACH PRO TOUR FUTURES FEMMES — 18–21 juin 2026 ─────────────────────────

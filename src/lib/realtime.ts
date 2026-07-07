@@ -19,7 +19,6 @@ export function getAblyClient(): Ably.Realtime {
 export const CHANNELS = {
   signals:  'tif:signals:grand-geneve',   // signaux mobilité temps réel
   events:   'tif:events:territorial',     // événements territoriaux
-  g7:       'tif:g7:updates',             // mises à jour G7 spécifiques
   presence: 'tif:presence',              // utilisateurs connectés
 } as const
 

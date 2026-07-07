@@ -4,7 +4,7 @@ import { HomeContent } from '@/components/HomeContent'
 
 export const metadata: Metadata = {
   title: 'TIF — Grand Genève en temps réel',
-  description: 'Trafic, frontières, transport public et alertes G7 en direct. Sources officielles agrégées en 30 secondes.',
+  description: 'Trafic, frontières, transport public et alertes en direct. Sources officielles agrégées en 30 secondes.',
 }
 
 export default function HomePage() {

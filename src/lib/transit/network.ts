@@ -116,7 +116,7 @@ async function fetchFromOverpass(): Promise<TransitNetwork> {
       const url = new URL(endpoint)
       url.searchParams.set('data', OVERPASS_QUERY)
       const res = await fetch(url.toString(), {
-        headers: { 'User-Agent': 'TIF-Monitor/1.0 (G7 Geneva 2026)' },
+        headers: { 'User-Agent': 'TIF-Monitor/1.0 (Grand Geneve)' },
         signal:  AbortSignal.timeout(50_000),
         cache:   'no-store',
       })

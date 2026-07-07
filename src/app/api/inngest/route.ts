@@ -9,7 +9,6 @@ import { processMobilitySignals }   from '@/inngest/process-mobility-signals'
 import { learnPatterns }            from '@/inngest/learn-patterns'
 import { resolveEvents }            from '@/inngest/resolve-events'
 import { shipLogs }                 from '@/inngest/ship-logs'
-import { watchG7Sources }          from '@/inngest/watch-g7-sources'
 import { predictJourneysJob }      from '@/inngest/predict-journeys'
 import { morningBriefingJob }      from '@/inngest/morning-briefing'
 
@@ -25,7 +24,6 @@ export const { GET, POST, PUT } = serve({
     learnPatterns,
     resolveEvents,
     shipLogs,
-    watchG7Sources,
     predictJourneysJob,
     morningBriefingJob,
   ],

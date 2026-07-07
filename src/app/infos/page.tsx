@@ -6,7 +6,6 @@ import { SectionLabel }  from '@/components/ui/SectionLabel'
 import { Card }          from '@/components/ui/Card'
 import { getTpgDisruptions }  from '@/lib/transport/tpg-disruptions'
 import { getCffDisruptions }  from '@/lib/transport/cff-disruptions'
-import { getG7Impact }        from '@/lib/transport/g7-impact'
 import { getBorderCrossings } from '@/lib/territory/border-crossings'
 import type { TpgDisruption, CffDisruption } from '@/lib/transport/types'
 import type { FeatureCollection } from 'geojson'
@@ -279,7 +278,6 @@ async function TransportSection() {
 
 async function SourcesSidebar() {
   const fetchedAt = new Date().toISOString()
-  const g7 = getG7Impact()
 
   const [tpgResult, cffResult, borderResult] = await Promise.allSettled([
     getTpgDisruptions(),
@@ -326,57 +324,7 @@ async function SourcesSidebar() {
           </div>
         </Card>
       ))}
-
-      <Card variant="bordered" style={{ padding: '14px 18px' }}>
-        <div className="flex items-center gap-3">
-          <span
-            className="w-2 h-2 rounded-full flex-shrink-0"
-            style={{ background: g7.isActive ? 'var(--orange)' : g7.isWarningPeriod ? 'var(--yellow)' : 'var(--green)' }}
-          />
-          <div className="flex-1 min-w-0">
-            <div className="text-[13px] font-medium" style={{ color: 'var(--text-primary)' }}>G7 Évian 2026</div>
-            <div className="text-[12px] mt-0.5" style={{ color: 'var(--text-tertiary)' }}>
-              {g7.isActive ? 'Actif' : g7.isWarningPeriod ? 'Pré-alerte' : 'Inactif'} · {fmt(fetchedAt)}
-            </div>
-          </div>
-          <span
-            className="text-[11px] flex-shrink-0"
-            style={{ color: g7.isActive ? 'var(--orange)' : g7.isWarningPeriod ? 'var(--yellow)' : 'var(--green)' }}
-          >
-            {g7.isActive ? 'ACT' : g7.isWarningPeriod ? 'WARN' : 'OK'}
-          </span>
-        </div>
-      </Card>
     </>
-  )
-}
-
-// ── G7 banner (synchronous, no fetch needed) ──────────────────────────────────
-
-function G7Banner() {
-  const g7 = getG7Impact()
-  if (!g7.isActive && !g7.isWarningPeriod) return null
-
-  return (
-    <Card variant="featured">
-      <SectionLabel className="mb-2">
-        G7 · {g7.isActive ? 'Priorité haute' : 'Pré-alerte'}
-      </SectionLabel>
-      <h3 className="text-[17px] font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-        {g7.isActive ? 'G7 Évian 2026 — Périmètre sécurisé actif' : 'G7 Évian 2026 — Pré-alerte en cours'}
-      </h3>
-      <p className="text-[15px] leading-[1.6] mb-3" style={{ color: 'var(--text-secondary)' }}>
-        {g7.suspendedLines.length > 0
-          ? `Lignes suspendues : ${g7.suspendedLines.join(', ')}. `
-          : ''}
-        {g7.affectedLines.length} lignes TPG impactées · Contrôles systématiques aux postes frontaliers.
-      </p>
-      <div className="flex items-center gap-2 text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
-        <span>Source : TPG / Autorités GE</span>
-        <span>·</span>
-        <span>Du {new Date(g7.startDate).toLocaleDateString('fr-CH')} au {new Date(g7.endDate).toLocaleDateString('fr-CH')}</span>
-      </div>
-    </Card>
   )
 }
 
@@ -410,11 +358,6 @@ export default function InfosPage() {
         <p className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
           Actualisé à {fmt(now)} · Données officielles
         </p>
-      </section>
-
-      {/* G7 banner — synchrone, pas de fetch */}
-      <section className="px-6 md:px-8 max-w-6xl mx-auto mb-2">
-        <G7Banner />
       </section>
 
       {/* Main grid */}

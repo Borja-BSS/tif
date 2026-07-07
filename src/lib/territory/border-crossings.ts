@@ -7,7 +7,6 @@ import type { FeatureCollection, Feature, Point } from 'geojson'
 type BorderStatus   = 'CLEAR' | 'LIGHT' | 'MODERATE' | 'HEAVY' | 'BLOCKED'
 type Capacity       = 'high' | 'medium' | 'low'
 type CrossingType   = 'motorway' | 'main' | 'secondary' | 'tertiary'
-type G7Status       = 'open' | 'closed' | 'macaron'
 type FranceSide     = 'north' | 'south' | 'east' | 'west'
 type WaitDirection  = 'fr-ch' | 'ch-fr' | 'both' | null
 
@@ -21,7 +20,6 @@ interface Crossing {
   hours:        string
   vehicles:     string[]
   vignettes:    string[]
-  g7Info:       string
   nearestOpen?: string
   franceSide:   FranceSide   // geographic direction from crossing toward France
 }
@@ -42,15 +40,12 @@ export interface BorderProperties {
   icon:            string
   color:           string
   lastUpdated:     string
-  source:          'here-live' | 'synthetic-calibrated' | 'G7-directive'
+  source:          'here-live' | 'synthetic-calibrated'
   confidence:      number
-  dataQuality:     'live' | 'synthetic' | 'g7-directive'
-  g7Period:        boolean
-  g7Status:        G7Status | null
+  dataQuality:     'live' | 'synthetic'
   hours:           string
   vehicles:        string[]
   vignettes:       string[]
-  g7Info:          string
   nearestOpen:     string
 }
 
@@ -61,7 +56,7 @@ export type BorderFeatureCollection = FeatureCollection<Point, BorderProperties>
 // (relation 51701 × routes) + douanes nommées via Overpass/Nominatim
 const CROSSINGS: Crossing[] = [
 
-  // ── TIER 1 — Ouverts 24/7 (normalement et pendant G7) ─────────────────────
+  // ── TIER 1 — Ouverts 24/7 ──────────────────────────────────────────────────
 
   {
     id: 'bardonnex', name: 'Bardonnex',
@@ -76,7 +71,6 @@ const CROSSINGS: Crossing[] = [
       'Vignette autoroutière CH · CHF 40/an (obligatoire A1)',
       'Assurance RC véhicule',
     ],
-    g7Info: '⭐ Poste macaron prioritaire · Douane OUVERTE 24h/24 · ⚠️ A1 CH→FR fermée 15–17 juin (sortie obligatoire Meyrin/Vernier/Genève-Centre — source : ge.ch) · A1 FR→CH ouverte · Pièce d\'identité obligatoire · Contrôles systématiques · Des temps d\'attente sont à prévoir',
   },
   {
     id: 'thonex-vallard', name: 'Thônex-Vallard',
@@ -90,7 +84,6 @@ const CROSSINGS: Crossing[] = [
       'Permis de conduire + carte grise',
       'Assurance RC véhicule',
     ],
-    g7Info: '⭐ Poste macaron prioritaire · Accès prioritaire réservé au personnel essentiel des services critiques · Douanes secondaires ouvertes sur plages horaires dédiées · Pièce d\'identité obligatoire · Contrôles systématiques 12–18 juin · Des temps d\'attente sont à prévoir',
   },
   {
     id: 'moillesulaz', name: 'Moillesulaz',
@@ -104,7 +97,6 @@ const CROSSINGS: Crossing[] = [
       'Permis de conduire + carte grise',
       'Crit\'Air ou Stick\'AIR (ZFE Annemasse, depuis janv. 2025)',
     ],
-    g7Info: '✓ Ouvert 24/7 pendant le G7 · Pièce d\'identité obligatoire · Contrôles renforcés · Des temps d\'attente sont à prévoir',
   },
   {
     id: 'meyrin', name: 'Meyrin',
@@ -118,7 +110,6 @@ const CROSSINGS: Crossing[] = [
       'Permis de conduire + carte grise',
       'Assurance RC véhicule',
     ],
-    g7Info: '✓ Ouvert 24/7 pendant le G7 · Pièce d\'identité obligatoire · Contrôles systématiques · Corridor CERN maintenu',
   },
   {
     id: 'ferney-voltaire', name: 'Ferney-Voltaire',
@@ -132,7 +123,6 @@ const CROSSINGS: Crossing[] = [
       'Permis de conduire + carte grise',
       'Assurance RC véhicule',
     ],
-    g7Info: '✓ Ouvert 24/7 pendant le G7 · Pièce d\'identité obligatoire · Contrôles renforcés · Proximité aéroport GVA',
   },
   {
     id: 'perly', name: 'Perly',
@@ -145,7 +135,6 @@ const CROSSINGS: Crossing[] = [
       'CNI ou passeport obligatoire',
       'Permis de conduire + carte grise',
     ],
-    g7Info: '✓ Ouvert 24/7 pendant le G7 · Pièce d\'identité obligatoire · Route de Saint-Julien-en-Genevois · Des temps d\'attente sont à prévoir',
   },
   {
     id: 'anieres', name: 'Anières',
@@ -158,20 +147,18 @@ const CROSSINGS: Crossing[] = [
       'CNI ou passeport obligatoire',
       'Permis de conduire + carte grise',
     ],
-    g7Info: '✓ Ouvert 24/7 pendant le G7 · Pièce d\'identité obligatoire · Passage est du canton · Des temps d\'attente sont à prévoir',
   },
 
-  // ── TIER 2 — Heures restreintes (06:00–20:00), FERMÉS pendant G7 ──────────
+  // ── TIER 2 — Heures restreintes (06:00–20:00) ──────────────────────────────
 
   {
     id: 'croix-de-rozon', name: 'Croix-de-Rozon',
     lat: 46.14351, lng: 6.13836,
     type: 'secondary', capacity: 'low',
     franceSide: 'south',
-    hours: '06:00–20:00 (hors G7)',
+    hours: '06:00–20:00',
     vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026 · Base légale : art. 25 Code frontières Schengen',
     nearestOpen: 'Bardonnex (7 km) · Perly (5 km)',
   },
   {
@@ -179,10 +166,9 @@ const CROSSINGS: Crossing[] = [
     lat: 46.16631, lng: 6.18840,
     type: 'secondary', capacity: 'low',
     franceSide: 'east',
-    hours: '06:00–20:00 (hors G7)',
+    hours: '06:00–20:00',
     vehicles: ['Voitures', 'Motos', 'Piétons'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
     nearestOpen: 'Moillesulaz (5 km) · Bardonnex (9 km)',
   },
   {
@@ -190,10 +176,9 @@ const CROSSINGS: Crossing[] = [
     lat: 46.1836465, lng: 6.1950107,
     type: 'secondary', capacity: 'low',
     franceSide: 'east',
-    hours: '06:00–20:00 (hors G7)',
+    hours: '06:00–20:00',
     vehicles: ['Voitures'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
     nearestOpen: 'Moillesulaz (2 km) · Thônex-Vallard (3 km)',
   },
   {
@@ -201,10 +186,9 @@ const CROSSINGS: Crossing[] = [
     lat: 46.2437796, lng: 6.0923679,
     type: 'secondary', capacity: 'low',
     franceSide: 'west',
-    hours: '06:00–20:00 (hors G7)',
+    hours: '06:00–20:00',
     vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
     nearestOpen: 'Meyrin (3 km) · Ferney-Voltaire (4 km)',
   },
   {
@@ -212,10 +196,9 @@ const CROSSINGS: Crossing[] = [
     lat: 46.20654, lng: 6.25008,
     type: 'secondary', capacity: 'low',
     franceSide: 'east',
-    hours: '06:00–20:00 (hors G7)',
+    hours: '06:00–20:00',
     vehicles: ['Voitures'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
     nearestOpen: 'Perly (1 km) · Bardonnex (1.5 km)',
   },
   {
@@ -223,10 +206,9 @@ const CROSSINGS: Crossing[] = [
     lat: 46.24155, lng: 6.30836,
     type: 'secondary', capacity: 'low',
     franceSide: 'east',
-    hours: '06:00–20:00 (hors G7)',
+    hours: '06:00–20:00',
     vehicles: ['Voitures'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
     nearestOpen: 'Anières (8 km)',
   },
   {
@@ -234,10 +216,9 @@ const CROSSINGS: Crossing[] = [
     lat: 46.14442, lng: 5.96583,
     type: 'secondary', capacity: 'low',
     franceSide: 'west',
-    hours: '06:00–20:00 (hors G7)',
+    hours: '06:00–20:00',
     vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026 · Extrémité ouest du canton',
     nearestOpen: 'Soral (14 km) · Bardonnex (22 km)',
   },
   {
@@ -245,10 +226,9 @@ const CROSSINGS: Crossing[] = [
     lat: 46.1618, lng: 5.9778,
     type: 'secondary', capacity: 'low',
     franceSide: 'west',
-    hours: '06:00–20:00 (hors G7)',
+    hours: '06:00–20:00',
     vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026 · Barrière levante · Frontière Ain (FR)',
     nearestOpen: 'La Plaine (9 km) · Chancy (8 km)',
   },
   {
@@ -256,10 +236,9 @@ const CROSSINGS: Crossing[] = [
     lat: 46.17737, lng: 5.99153,
     type: 'secondary', capacity: 'low',
     franceSide: 'west',
-    hours: '06:00–20:00 (hors G7)',
+    hours: '06:00–20:00',
     vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026 · Route de Challex · Frontière Ain (FR)',
     nearestOpen: 'Meyrin (20 km) · Écogia (14 km)',
   },
   {
@@ -267,10 +246,9 @@ const CROSSINGS: Crossing[] = [
     lat: 46.1958, lng: 6.2180,
     type: 'secondary', capacity: 'low',
     franceSide: 'east',
-    hours: '06:00–20:00 (hors G7)',
+    hours: '06:00–20:00',
     vehicles: ['Voitures', 'Riverains'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026 · Barrière levante automatique · Thônex ↔ Ambilly',
     nearestOpen: 'Moillesulaz (2 km) · Thônex-Vallard (2 km)',
   },
   {
@@ -278,10 +256,9 @@ const CROSSINGS: Crossing[] = [
     lat: 46.30283, lng: 6.24758,
     type: 'secondary', capacity: 'low',
     franceSide: 'east',
-    hours: '06:00–20:00 (hors G7)',
+    hours: '06:00–20:00',
     vehicles: ['Voitures', 'Piétons', 'Vélos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026 · Rive sud du lac Léman · Hermance ↔ Douvaine',
     nearestOpen: 'Veigy (8 km) · Anières (12 km)',
   },
   {
@@ -289,10 +266,9 @@ const CROSSINGS: Crossing[] = [
     lat: 46.13712, lng: 6.03616,
     type: 'secondary', capacity: 'low',
     franceSide: 'west',
-    hours: '06:00–20:00 (hors G7)',
+    hours: '06:00–20:00',
     vehicles: ['Voitures'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
     nearestOpen: 'Bardonnex (18 km) · Perly (16 km)',
   },
   {
@@ -300,10 +276,9 @@ const CROSSINGS: Crossing[] = [
     lat: 46.2018913, lng: 5.9718478,
     type: 'secondary', capacity: 'low',
     franceSide: 'west',
-    hours: '06:00–20:00 (hors G7)',
+    hours: '06:00–20:00',
     vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
     nearestOpen: 'Meyrin (12 km)',
   },
   {
@@ -311,10 +286,9 @@ const CROSSINGS: Crossing[] = [
     lat: 46.1900628, lng: 5.9820292,
     type: 'secondary', capacity: 'low',
     franceSide: 'west',
-    hours: '06:00–20:00 (hors G7)',
+    hours: '06:00–20:00',
     vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
     nearestOpen: 'Meyrin (11 km)',
   },
   {
@@ -322,10 +296,9 @@ const CROSSINGS: Crossing[] = [
     lat: 46.1336524, lng: 5.9774808,
     type: 'secondary', capacity: 'low',
     franceSide: 'west',
-    hours: '06:00–20:00 (hors G7)',
+    hours: '06:00–20:00',
     vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
     nearestOpen: 'Perly (18 km) · Bardonnex (19 km)',
   },
   {
@@ -333,10 +306,9 @@ const CROSSINGS: Crossing[] = [
     lat: 46.1427496, lng: 6.0088161,
     type: 'secondary', capacity: 'low',
     franceSide: 'west',
-    hours: '06:00–20:00 (hors G7)',
+    hours: '06:00–20:00',
     vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
     nearestOpen: 'Perly (12 km) · Bardonnex (12 km)',
   },
   {
@@ -344,10 +316,9 @@ const CROSSINGS: Crossing[] = [
     lat: 46.1427656, lng: 6.0087949,
     type: 'tertiary', capacity: 'low',
     franceSide: 'west',
-    hours: '06:00–20:00 (hors G7)',
+    hours: '06:00–20:00',
     vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
     nearestOpen: 'Perly (12 km) · Bardonnex (12 km)',
   },
   {
@@ -355,10 +326,9 @@ const CROSSINGS: Crossing[] = [
     lat: 46.1426323, lng: 6.0470017,
     type: 'secondary', capacity: 'low',
     franceSide: 'south',
-    hours: '06:00–20:00 (hors G7)',
+    hours: '06:00–20:00',
     vehicles: ['Voitures'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
     nearestOpen: 'Perly (7 km) · Bardonnex (8 km)',
   },
   {
@@ -366,14 +336,13 @@ const CROSSINGS: Crossing[] = [
     lat: 46.1664299, lng: 6.1884322,
     type: 'secondary', capacity: 'low',
     franceSide: 'east',
-    hours: '06:00–20:00 (hors G7)',
+    hours: '06:00–20:00',
     vehicles: ['Voitures', 'Motos', 'Piétons'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
     nearestOpen: 'Thônex-Vallard (4 km) · Moillesulaz (4 km)',
   },
 
-  // ── TIER 3 — Accès restreint / piétons-vélos, FERMÉS pendant G7 ───────────
+  // ── TIER 3 — Accès restreint / piétons-vélos ───────────────────────────────
 
   {
     id: 'landecy', name: 'Landecy',
@@ -383,7 +352,6 @@ const CROSSINGS: Crossing[] = [
     hours: 'Restreint (locaux)',
     vehicles: ['Voitures', 'Riverains'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
     nearestOpen: 'Croix-de-Rozon (2 km) · Bardonnex (6 km)',
   },
   {
@@ -394,7 +362,6 @@ const CROSSINGS: Crossing[] = [
     hours: 'Piétons / Vélos uniquement',
     vehicles: ['Piétons', 'Vélos'],
     vignettes: ['CNI ou passeport obligatoire'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026 · Traversée piétonne/vélo',
     nearestOpen: 'Bardonnex (9 km) · Perly (8 km)',
   },
   {
@@ -405,7 +372,6 @@ const CROSSINGS: Crossing[] = [
     hours: 'Restreint (locaux)',
     vehicles: ['Voitures'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
     nearestOpen: 'Veyrier (2 km) · Croix-de-Rozon (4 km)',
   },
   {
@@ -413,10 +379,9 @@ const CROSSINGS: Crossing[] = [
     lat: 46.14950, lng: 6.07338,
     type: 'tertiary', capacity: 'low',
     franceSide: 'south',
-    hours: '06:00–18:00 (hors G7)',
+    hours: '06:00–18:00',
     vehicles: ['Voitures'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
     nearestOpen: 'Mon-Idée (1 km) · Perly (1.5 km)',
   },
   {
@@ -427,7 +392,6 @@ const CROSSINGS: Crossing[] = [
     hours: 'Restreint (locaux)',
     vehicles: ['Voitures'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
     nearestOpen: 'Perly (5 km) · Mon-Idée (3 km)',
   },
   {
@@ -438,7 +402,6 @@ const CROSSINGS: Crossing[] = [
     hours: 'Restreint (agricole/local)',
     vehicles: ['Voitures', 'Tracteurs'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
     nearestOpen: 'Meyrin (8 km) · Ferney-Voltaire (7 km)',
   },
   {
@@ -449,7 +412,6 @@ const CROSSINGS: Crossing[] = [
     hours: 'Restreint (locaux)',
     vehicles: ['Voitures'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026',
     nearestOpen: 'Anières (5 km)',
   },
 
@@ -460,31 +422,30 @@ const CROSSINGS: Crossing[] = [
     franceSide: 'west',
     hours: '24h/24', vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '✓ Ouvert · Zone CERN · Contrôles fréquents',
   },
   {
     id: 'sauverny', name: 'Sauverny',
     lat: 46.3114, lng: 6.1204, type: 'secondary', capacity: 'low',
     franceSide: 'west',
-    hours: '06:00–22:00 (hors G7)', vehicles: ['Voitures', 'Motos'],
+    hours: '06:00–22:00', vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026', nearestOpen: 'Meyrin (5 km) · Ferney-Voltaire (7 km)',
+    nearestOpen: 'Meyrin (5 km) · Ferney-Voltaire (7 km)',
   },
   {
     id: 'bois-chaton', name: 'Bois-Châton',
     lat: 46.2869728, lng: 6.1045552, type: 'secondary', capacity: 'low',
     franceSide: 'west',
-    hours: '06:00–22:00 (hors G7)', vehicles: ['Voitures', 'Motos'],
+    hours: '06:00–22:00', vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026', nearestOpen: 'Meyrin (4 km)',
+    nearestOpen: 'Meyrin (4 km)',
   },
   {
     id: 'versoix-ferney', name: 'Versoix / Ferney',
     lat: 46.2608456, lng: 6.1197727, type: 'secondary', capacity: 'low',
     franceSide: 'west',
-    hours: '06:00–22:00 (hors G7)', vehicles: ['Voitures', 'Motos'],
+    hours: '06:00–22:00', vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '🔒 Fermé du 12 au 18 juin 2026', nearestOpen: 'Ferney-Voltaire (1 km) · Meyrin (5 km)',
+    nearestOpen: 'Ferney-Voltaire (1 km) · Meyrin (5 km)',
   },
   {
     id: 'thoiry', name: 'Thoiry / Saint-Jean-de-Gonville',
@@ -492,7 +453,7 @@ const CROSSINGS: Crossing[] = [
     franceSide: 'west',
     hours: '06:00–22:00', vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '⚠️ Contrôles renforcés pendant G7', nearestOpen: 'La Plaine (12 km)',
+    nearestOpen: 'La Plaine (12 km)',
   },
   {
     id: 'peron', name: 'Péron',
@@ -500,7 +461,7 @@ const CROSSINGS: Crossing[] = [
     franceSide: 'west',
     hours: '06:00–20:00', vehicles: ['Voitures'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '⚠️ Contrôles renforcés pendant G7', nearestOpen: 'La Plaine (15 km)',
+    nearestOpen: 'La Plaine (15 km)',
   },
   {
     id: 'divonne', name: 'Divonne-les-Bains',
@@ -508,7 +469,6 @@ const CROSSINGS: Crossing[] = [
     franceSide: 'west',
     hours: '24h/24', vehicles: ['Voitures', 'Motos', 'Piétons'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '✓ Ouvert 24/7 · Accès lac et casino',
   },
   {
     id: 'leaz', name: 'Léaz / Longeray',
@@ -516,7 +476,6 @@ const CROSSINGS: Crossing[] = [
     franceSide: 'west',
     hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '✓ Ouvert · Entrée A40 côté français',
   },
 
   // ── Extension Grand Genève — Vaud-France ────────────────────────────────────
@@ -526,7 +485,6 @@ const CROSSINGS: Crossing[] = [
     franceSide: 'west',
     hours: '24h/24 (sauf neige)', vehicles: ['Voitures', 'Motos', 'Piétons', 'Vélos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '✓ Ouvert · Route D1084 ↔ Givrine · Fermé si neige abondante',
   },
   {
     id: 'saint-cergue', name: 'Saint-Cergue (Col de la Givrine)',
@@ -534,7 +492,7 @@ const CROSSINGS: Crossing[] = [
     franceSide: 'west',
     hours: '24h/24 (saison)', vehicles: ['Voitures', 'Motos', 'Vélos', 'Piétons'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '✓ Ouvert · Passage Nyon ↔ Morez FR', nearestOpen: 'La Cure (15 km)',
+    nearestOpen: 'La Cure (15 km)',
   },
   {
     id: 'vallorbe', name: 'Vallorbe',
@@ -542,7 +500,6 @@ const CROSSINGS: Crossing[] = [
     franceSide: 'west',
     hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Train', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise', 'Vignette CH recommandée'],
-    g7Info: '✓ Ouvert · Douane principale Vaud · Ligne CFF Lausanne-Paris',
   },
   {
     id: 'bois-d-amont', name: "Bois-d'Amont (Les Rousses)",
@@ -550,7 +507,6 @@ const CROSSINGS: Crossing[] = [
     franceSide: 'west',
     hours: '24h/24 (saison ski)', vehicles: ['Voitures', 'Motos', 'Piétons'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '✓ Ouvert · Zone ski transfrontalière Les Rousses ↔ Suisse',
   },
   {
     id: 'saint-Laurent', name: 'Saint-Laurent-en-Grandvaux',
@@ -558,7 +514,7 @@ const CROSSINGS: Crossing[] = [
     franceSide: 'west',
     hours: '06:00–22:00', vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '✓ Ouvert · Jura ↔ Vaud · Vers Champagnole', nearestOpen: 'La Cure (20 km)',
+    nearestOpen: 'La Cure (20 km)',
   },
   {
     id: 'les-hopitaux-neufs', name: 'Les Hôpitaux-Neufs / Pontarlier',
@@ -566,7 +522,6 @@ const CROSSINGS: Crossing[] = [
     franceSide: 'west',
     hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '✓ Ouvert · Axe RN57 Pontarlier ↔ Vallorbe (CH)',
   },
 
   // ── Extension Grand Genève — Haute-Savoie ───────────────────────────────────
@@ -576,7 +531,6 @@ const CROSSINGS: Crossing[] = [
     franceSide: 'east',
     hours: '24h/24', vehicles: ['Voitures', 'Motos', 'Camions'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '✓ Ouvert · Axe Annemasse ↔ Thonon · Surveillance renforcée G7',
   },
   {
     id: 'sciez', name: 'Sciez / Ballaison',
@@ -584,7 +538,7 @@ const CROSSINGS: Crossing[] = [
     franceSide: 'east',
     hours: '06:00–22:00', vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '⚠️ Contrôles pendant G7', nearestOpen: 'Douvaine (8 km)',
+    nearestOpen: 'Douvaine (8 km)',
   },
   {
     id: 'excenevex', name: 'Excenevex / Yvoire',
@@ -592,7 +546,7 @@ const CROSSINGS: Crossing[] = [
     franceSide: 'east',
     hours: 'Piétons / Vélos / Riverains', vehicles: ['Piétons', 'Vélos', 'Voitures riverains'],
     vignettes: ['CNI ou passeport obligatoire'],
-    g7Info: '⚠️ Contrôles renforcés G7 · Rive lac Léman', nearestOpen: 'Douvaine (9 km)',
+    nearestOpen: 'Douvaine (9 km)',
   },
   {
     id: 'thonon', name: 'Thonon-les-Bains',
@@ -600,15 +554,13 @@ const CROSSINGS: Crossing[] = [
     franceSide: 'south',
     hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '✓ Ouvert · Axe vers Évian et Valais · Renforcé G7',
   },
   {
     id: 'evian', name: 'Évian-les-Bains',
     lat: 46.40163, lng: 6.59467, type: 'main', capacity: 'medium',
     franceSide: 'south',
     hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Motos'],
-    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise', 'Pass G7 requis 12-18 juin'],
-    g7Info: '🏛️ SITE G7 · Contrôles maximaux 8-18 juin · Accès très restreint sans accréditation',
+    vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
     nearestOpen: 'Thonon (15 km)',
   },
   {
@@ -617,7 +569,6 @@ const CROSSINGS: Crossing[] = [
     franceSide: 'east',
     hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Motos', 'Piétons', 'Tram'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise', "Crit'Air / Stick'AIR (ZFE Annemasse)"],
-    g7Info: '✓ Ouvert · Axe principal Genève ↔ Annecy · Contrôles renforcés G7',
   },
   {
     id: 'saint-julien', name: 'Saint-Julien-en-Genevois',
@@ -625,7 +576,6 @@ const CROSSINGS: Crossing[] = [
     franceSide: 'south',
     hours: '24h/24', vehicles: ['Voitures', 'Camions', 'Cars', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '✓ Ouvert · Axe A41 vers Annecy · Contrôles renforcés G7 · Pièce d\'identité obligatoire',
   },
   {
     id: 'collonges', name: 'Collonges-sous-Salève',
@@ -633,22 +583,8 @@ const CROSSINGS: Crossing[] = [
     franceSide: 'south',
     hours: '24h/24', vehicles: ['Voitures', 'Motos'],
     vignettes: ['CNI ou passeport', 'Permis de conduire + carte grise'],
-    g7Info: '✓ Ouvert · A40 direction Annecy / Sallanches',
   },
 ]
-
-// ── Directives G7 ─────────────────────────────────────────────────────────────
-const G7_START_UTC = new Date('2026-06-11T22:01:00Z')
-const G7_END_UTC   = new Date('2026-06-18T05:00:00Z') // Retour à la normale 18 juin 7h CEST
-
-// Synchronized with border-crossings-client.ts G7_OPEN set
-const G7_AUTHORIZED = new Set([
-  'bardonnex', 'thonex-vallard', 'moillesulaz', 'meyrin', 'ferney-voltaire', 'perly', 'anieres',
-  'saint-julien',
-  'divonne', 'leaz', 'la-cure', 'vallorbe', 'bois-d-amont',
-  'les-hopitaux-neufs', 'saint-Laurent', 'douvaine', 'thonon',
-])
-const G7_MACARON = new Set(['bardonnex', 'thonex-vallard'])
 
 // ── HERE Traffic flow — queue-length algorithm ────────────────────────────────
 
@@ -684,8 +620,6 @@ const FLOW_JAM_THRESHOLD     = 3.5
 const QUEUE_SEARCH_RADIUS    = 500
 // skip unreliable HERE segments
 const MIN_SEGMENT_CONFIDENCE = 0.3
-// G7 controls add ~20% overhead vs baseline (was 1.5 — too aggressive)
-const G7_WAIT_FACTOR         = 1.2
 
 // Time spent at the booth itself, based on how congested the approach is
 function processingMinutes(peakJam: number): number {
@@ -766,21 +700,19 @@ function analyzeApproachQueue(
 }
 
 /**
- * Wait = (queue drive-through time + booth processing) × G7 factor.
- * Max cap: 60 min (realistic Geneva-area ceiling even in worst G7 conditions).
+ * Wait = queue drive-through time + booth processing.
+ * Max cap: 60 min (realistic Geneva-area ceiling).
  */
 function queueToStatusAndWait(
   q: QueueAnalysis,
-  isG7: boolean,
 ): { status: BorderStatus; waitMinutes: number } {
   if (q.peakJamFactor < FLOW_JAM_THRESHOLD || q.segmentCount === 0) {
     return { status: 'CLEAR', waitMinutes: 0 }
   }
 
-  const g7Factor = isG7 ? G7_WAIT_FACTOR : 1.0
   const driveMin = (q.frDelayS + q.chDelayS) / 60
   const procMin  = processingMinutes(q.peakJamFactor)
-  const wait     = Math.round((driveMin + procMin) * g7Factor)
+  const wait     = Math.round(driveMin + procMin)
 
   if (wait < 3)  return { status: 'CLEAR',    waitMinutes: 0 }
   if (wait < 9)  return { status: 'LIGHT',    waitMinutes: wait }
@@ -794,13 +726,6 @@ const STATUS_COLOR: Record<BorderStatus, string> = {
   MODERATE: '#FF9500',
   HEAVY:    '#FF3B30',
   BLOCKED:  '#636366',
-}
-
-const G7_CLOSED_COLOR  = '#FF3B30'
-const G7_MACARON_COLOR = '#5AC8FA'
-
-function isG7Period(date: Date): boolean {
-  return date >= G7_START_UTC && date < G7_END_UTC
 }
 
 // Synthetic fallback (no HERE data available) — time-of-day estimate
@@ -852,8 +777,7 @@ export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
     logger.warn({ err }, 'border-crossings:redis-get-failed')
   }
 
-  const now      = new Date()
-  const g7Active = isG7Period(now)
+  const now = new Date()
 
   // Fetch HERE flow once for the full region (already Redis-cached internally)
   let flow: FlowFeatureCollection | null = null
@@ -873,88 +797,52 @@ export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
     let source: BorderProperties['source']
     let confidence: number
     let dataQuality: BorderProperties['dataQuality']
-    let g7Status: G7Status | null = null
     let waitTimeMinutes = 0
     let waitFrChMinutes = 0
     let waitChFrMinutes = 0
     let waitDirection: WaitDirection = null
 
-    if (g7Active && !G7_AUTHORIZED.has(c.id)) {
-      // Hard G7 closure — directive overrides everything
-      status      = 'BLOCKED'
-      jamFactor   = 10
-      color       = G7_CLOSED_COLOR
-      icon        = '🔒'
-      g7Status    = 'closed'
-      source      = 'G7-directive'
-      confidence  = 1.0
-      dataQuality = 'g7-directive'
+    // Try HERE live traffic — queue-length algorithm
+    const queue = flow ? analyzeApproachQueue(c.lat, c.lng, c.franceSide, flow) : null
+
+    if (queue && queue.segmentCount > 0) {
+      const derived   = queueToStatusAndWait(queue)
+      status          = derived.status
+      jamFactor       = queue.peakJamFactor
+      waitTimeMinutes = derived.waitMinutes
+      confidence      = queue.confidence
+      source          = 'here-live'
+      dataQuality     = 'live'
+      liveCount++
+
+      // Per-direction wait: each side computed from its own delay + processing
+      waitFrChMinutes = Math.min(Math.round((queue.frDelayS / 60) + processingMinutes(queue.frPeakJam)), 60)
+      waitChFrMinutes = Math.min(Math.round((queue.chDelayS / 60) + processingMinutes(queue.chPeakJam)), 60)
+
+      // Dominant direction: > 15s delay on a side = meaningful queue
+      if (queue.frDelayS > 15 && queue.chDelayS > 15) {
+        const ratio = Math.max(queue.frDelayS, queue.chDelayS) / Math.min(queue.frDelayS, queue.chDelayS)
+        waitDirection = ratio < 2 ? 'both' : queue.frDelayS > queue.chDelayS ? 'fr-ch' : 'ch-fr'
+      } else if (queue.frDelayS > 15) {
+        waitDirection = 'fr-ch'
+      } else if (queue.chDelayS > 15) {
+        waitDirection = 'ch-fr'
+      }
     } else {
-      // Try HERE live traffic — queue-length algorithm
-      const queue = flow ? analyzeApproachQueue(c.lat, c.lng, c.franceSide, flow) : null
-
-      if (queue && queue.segmentCount > 0) {
-        const derived   = queueToStatusAndWait(queue, g7Active)
-        status          = derived.status
-        jamFactor       = queue.peakJamFactor
-        waitTimeMinutes = derived.waitMinutes
-        confidence      = queue.confidence
-        source          = g7Active ? 'G7-directive' : 'here-live'
-        dataQuality     = g7Active ? 'g7-directive' : 'live'
-        liveCount++
-
-        // Per-direction wait: each side computed from its own delay + processing
-        const g7f = g7Active ? G7_WAIT_FACTOR : 1.0
-        waitFrChMinutes = Math.min(Math.round(((queue.frDelayS / 60) + processingMinutes(queue.frPeakJam)) * g7f), 60)
-        waitChFrMinutes = Math.min(Math.round(((queue.chDelayS / 60) + processingMinutes(queue.chPeakJam)) * g7f), 60)
-
-        // Dominant direction: > 15s delay on a side = meaningful queue
-        if (queue.frDelayS > 15 && queue.chDelayS > 15) {
-          const ratio = Math.max(queue.frDelayS, queue.chDelayS) / Math.min(queue.frDelayS, queue.chDelayS)
-          waitDirection = ratio < 2 ? 'both' : queue.frDelayS > queue.chDelayS ? 'fr-ch' : 'ch-fr'
-        } else if (queue.frDelayS > 15) {
-          waitDirection = 'fr-ch'
-        } else if (queue.chDelayS > 15) {
-          waitDirection = 'ch-fr'
-        }
-      } else {
-        const computed  = computeCrossingStatus(c, now)
-        status          = computed.status
-        jamFactor       = computed.jamFactor
-        waitTimeMinutes = syntheticWait(status, c.capacity)
-        // No directional HERE data — show same estimate for both directions
-        waitFrChMinutes = waitTimeMinutes
-        waitChFrMinutes = waitTimeMinutes
-        confidence      = 0.3
-        source          = g7Active ? 'G7-directive' : 'synthetic-calibrated'
-        dataQuality     = g7Active ? 'g7-directive' : 'synthetic'
-      }
-
-      // Apply G7 adjustments on top of live/synthetic base
-      if (g7Active) {
-        if (G7_MACARON.has(c.id)) {
-          status     = status === 'BLOCKED' ? 'MODERATE' : status
-          color      = G7_MACARON_COLOR
-          icon       = '🛂'
-          g7Status   = 'macaron'
-          confidence = 1.0
-        } else {
-          // Open during G7 — minimum LIGHT, G7 penalty (+2 jam)
-          if (status === 'CLEAR') {
-            status = 'LIGHT'
-            if (waitTimeMinutes === 0) waitTimeMinutes = syntheticWait('LIGHT', c.capacity)
-          }
-          jamFactor  = Math.min(jamFactor + 2, 9)
-          color      = STATUS_COLOR[status]
-          icon       = '🛂'
-          g7Status   = 'open'
-          confidence = 1.0
-        }
-      } else {
-        color = STATUS_COLOR[status]
-        icon  = '🛂'
-      }
+      const computed  = computeCrossingStatus(c, now)
+      status          = computed.status
+      jamFactor       = computed.jamFactor
+      waitTimeMinutes = syntheticWait(status, c.capacity)
+      // No directional HERE data — show same estimate for both directions
+      waitFrChMinutes = waitTimeMinutes
+      waitChFrMinutes = waitTimeMinutes
+      confidence      = 0.3
+      source          = 'synthetic-calibrated'
+      dataQuality     = 'synthetic'
     }
+
+    color = STATUS_COLOR[status]
+    icon  = '🛂'
 
     return {
       type:       'Feature',
@@ -977,12 +865,9 @@ export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
         source,
         confidence,
         dataQuality,
-        g7Period:        g7Active,
-        g7Status,
         hours:           c.hours,
         vehicles:        c.vehicles,
         vignettes:       c.vignettes,
-        g7Info:          c.g7Info,
         nearestOpen:     c.nearestOpen ?? '',
       },
       geometry: { type: 'Point', coordinates: [c.lng, c.lat] },
@@ -998,7 +883,7 @@ export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
   }
 
   logger.debug(
-    { count: features.length, liveCount, synthetic: features.length - liveCount, g7Active },
+    { count: features.length, liveCount, synthetic: features.length - liveCount },
     'border-crossings:computed',
   )
   return result

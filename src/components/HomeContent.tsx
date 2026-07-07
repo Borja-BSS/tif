@@ -20,7 +20,6 @@ interface TransportData {
     tpg: Array<{ lineNumber: string; description: string }>
     cff: Array<{ line: string; from: string; to: string; delayMinutes?: number; isCEVA: boolean }>
   }
-  g7: { isActive: boolean; affectedLines: string[]; suspendedLines: string[] }
 }
 interface BorderRow { name: string; waitMinutes: number; status: string }
 type IncSlide = { id: string; icon: string; title: string; severity: string; timeAgo: string; source?: string }
@@ -35,7 +34,6 @@ const SOURCE_URLS: Record<string, string> = {
   'OFROU (Réseau autoroutier national)': 'https://www.astra.admin.ch/astra/fr/home.html',
   'TPG': 'https://www.tpg.ch/fr/voyagez-avec-nous/infos-trafic',
   'TPG (Transports Publics Genevois)': 'https://www.tpg.ch/fr/voyagez-avec-nous/infos-trafic',
-  'TPG en lien avec dispositif G7': 'https://www.tpg.ch/fr/voyagez-avec-nous/infos-trafic',
   'OpenTransportData.swiss': 'https://opentransportdata.swiss/fr/',
   'CFF / SBB via OpenTransportData.swiss': 'https://opentransportdata.swiss/fr/',
   'CFF / SBB': 'https://www.sbb.ch/fr',
@@ -45,9 +43,7 @@ const SOURCE_URLS: Record<string, string> = {
   'BAZG, Bureau fédéral des douanes suisses': 'https://www.bazg.admin.ch/bazg/fr/home.html',
   'BAZG (frontières), Police Cantonale GE': 'https://www.bazg.admin.ch/bazg/fr/home.html',
   'Police Cantonale GE': 'https://www.police.ge.ch/',
-  'Police Cantonale GE, Dispositif G7': 'https://www.police.ge.ch/',
   'Police Cantonale GE, SITG, OFROU': 'https://www.police.ge.ch/',
-  'OFROU, SITG, Veille G7 TIF': 'https://www.astra.admin.ch/astra/fr/home.html',
   'OFROU, SITG': 'https://ge.ch/sitg/',
   'OFROU, Police Cantonale GE, TPG, CFF, MétéoSuisse, BAZG': 'https://tif.borja-swiss-solutions.ch',
   'Canton GE, SITG': 'https://ge.ch/sitg/',
@@ -71,12 +67,12 @@ const PRK_SLIDES = [
 
 const STATIC_INC: IncSlide[] = [
   { id: '1', icon: '🚦', title: 'A1, km 4.2 direction Lausanne, 2 voies bloquées sur 3', severity: 'CRITICAL', timeAgo: '07:43', source: 'OFROU' },
-  { id: '2', icon: '⬡', title: 'G7 Zones rouges actives : Palais des Nations, Quai Wilson, Rue de Lausanne', severity: 'HIGH', timeAgo: '06:00', source: 'Police Cantonale GE' },
+  { id: '2', icon: '🚧', title: 'Accident Route de Meyrin, une voie bloquée, ralentissements vers le centre-ville', severity: 'HIGH', timeAgo: '06:00', source: 'Police Cantonale GE' },
   { id: '3', icon: '📢', title: 'Manifestation Quai du Mont-Blanc, blocage, durée estimée 45 min', severity: 'HIGH', timeAgo: '08:12', source: 'Police Cantonale GE' },
   { id: '4', icon: '🚌', title: 'TPG Ligne 12, Déviation Cornavin vers Rive, retard cumulé 8 min', severity: 'MEDIUM', timeAgo: '07:58', source: 'TPG' },
   { id: '5', icon: '⛈️', title: 'Alerte météo orange, orages dès 17h, rafales 80 km/h, grêle possible', severity: 'MEDIUM', timeAgo: '05:30', source: 'MétéoSuisse' },
   { id: '6', icon: '🚆', title: 'CFF IR90 Genève vers Berne, retard 14 min suite incident Lausanne', severity: 'MEDIUM', timeAgo: '08:02', source: 'CFF' },
-  { id: '7', icon: '⬡', title: 'G7 Consigne, éviter secteur aéroport 11h à 14h, convois officiels', severity: 'HIGH', timeAgo: '09:00', source: 'Police Cantonale GE' },
+  { id: '7', icon: '⚽', title: 'Fan zone Plainpalais, forte affluence, accès piéton recommandé de 11h à 14h', severity: 'HIGH', timeAgo: '09:00', source: 'Police Cantonale GE' },
   { id: '8', icon: '🚧', title: 'Travaux Rue de Rive, fermeture totale, déviation par Cours de Rive', severity: 'LOW', timeAgo: '00:00', source: 'Canton GE, SITG' },
 ]
 
@@ -93,23 +89,23 @@ const WHY_DETAILS: DetailInfo[] = [
   ], note: 'Ce scénario se produit chaque matin de sommet international pour des milliers de professionnels de santé dans le Grand Genève.' },
   { icon: '👨‍👩‍👧', title: 'Scénario 02 : Sécurité familiale', rows: [
     { label: 'Profil', value: 'Famille, sortie Quai Wilson' },
-    { label: 'Problème', value: 'Zone rouge G7 non connue' },
+    { label: 'Problème', value: 'Fermeture liée à la fan zone non connue' },
     { label: 'Sans TIF', value: 'Blocage surprise, demi-tour forcé', color: 'var(--red)' },
-    { label: 'Avec TIF', value: 'Zone visible à 6h00 avec itinéraire alternatif', color: 'var(--green)' },
-    { label: 'Source données', value: 'Police Cantonale GE, Veille G7 TIF' },
-  ], note: 'Les zones G7 changent quotidiennement. TIF les met à jour dès leur publication officielle.' },
+    { label: 'Avec TIF', value: 'Fermeture visible à 6h00 avec itinéraire alternatif', color: 'var(--green)' },
+    { label: 'Source données', value: 'Police Cantonale GE' },
+  ], note: 'Les fermetures liées aux événements changent régulièrement. TIF les met à jour dès leur publication officielle.' },
   { icon: '🚚', title: 'Scénario 03 : Logistique entreprise', rows: [
     { label: 'Profil', value: 'Livreur, 14 arrêts dans Genève' },
-    { label: 'Problème', value: '4 zones G7 fermées sur le trajet' },
+    { label: 'Problème', value: '4 fermetures liées à la Coupe du Monde sur le trajet' },
     { label: 'Sans TIF', value: '3 heures perdues, 6 livraisons ratées', color: 'var(--red)' },
     { label: 'Avec TIF', value: 'Tournée planifiée avant 7h30, 14 livraisons OK', color: 'var(--green)' },
     { label: 'Gain estimé', value: '3h et 6 livraisons supplémentaires' },
-    { label: 'Source données', value: 'OFROU, SITG, Veille G7 TIF' },
+    { label: 'Source données', value: 'OFROU, SITG' },
   ], note: 'Pour les entreprises logistiques, TIF Pro offre une API directe pour automatiser la planification.' },
   { icon: '⚡', title: 'Scénario 04 : Réaction en temps réel', rows: [
     { label: 'Situation', value: 'Incident soudain, information dispersée' },
     { label: 'Twitter / Waze', value: 'Délai 5 à 15 min, rumeurs non vérifiées', color: 'var(--red)' },
-    { label: 'Google Maps', value: 'Délai 5 à 15 min, pas de contexte G7', color: 'var(--orange)' },
+    { label: 'Google Maps', value: 'Délai 5 à 15 min, pas de contexte local', color: 'var(--orange)' },
     { label: 'TIF', value: 'Sources officielles agrégées en moins de 30s', color: 'var(--green)' },
     { label: 'Sources', value: 'OFROU, Police, TPG, CFF, MétéoSuisse' },
   ], note: 'TIF ne produit pas de données. Il les agrège et les attribue. Chaque information est traçable à sa source primaire.' },
@@ -389,8 +385,6 @@ export function HomeContent() {
   const cevaOk = !(transport?.disruptions.cff ?? []).some(d => d.isCEVA && (d.delayMinutes ?? 0) > 0)
   const trafficAlert = dashData?.alerts.find(a => ['🚦', '🚫', '🚨'].includes(a.icon))
   const meteoAlert = dashData?.alerts.find(a => a.icon === '⛈️')
-  const g7Zones = dashData?.activeZones ?? 4
-  const g7Lines = transport?.g7.affectedLines ?? []
   const traficBar = trafficAlert ? (trafficAlert.severity === 'CRITICAL' ? 90 : 65) : 20
   const tpgBar = Math.min(95, uniqueTpgLines.length * 14)
   const cffBar = Math.min(90, maxCffDelay * 2)
@@ -400,7 +394,7 @@ export function HomeContent() {
   const tickerItems = useMemo(() => {
     const apiItems = (dashData?.alerts ?? []).map(a => {
       const cls = a.severity === 'CRITICAL' ? 'tb-r' : a.severity === 'HIGH' ? 'tb-gold' : 'tb-o'
-      const lbl = a.icon === '🚆' ? 'CFF' : a.icon === '🚌' ? 'TPG' : a.icon === '⛈️' ? 'Météo' : a.icon === '⬡' ? 'G7' : 'Alerte'
+      const lbl = a.icon === '🚆' ? 'CFF' : a.icon === '🚌' ? 'TPG' : a.icon === '⛈️' ? 'Météo' : a.icon === '⬡' ? 'Zone' : 'Alerte'
       return { cls, label: lbl, text: a.title }
     })
     const TICKER_CLS = ['tb-b', 'tb-gold', 'tb-g', 'tb-b', 'tb-g', 'tb-b']
@@ -784,32 +778,12 @@ export function HomeContent() {
             </div>
           </div>
           <div className="dash-row dash-row-3">
-            {/* G7 */}
-            <div className="dc">
-              <div className="g7-head"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><polygon points="5,1 9,3 9,7 5,9 1,7 1,3" stroke="currentColor" strokeWidth="1.2" /></svg>{t.dash.g7.label}</div>
-              <div className="g7-grid">
-                <div className="g7m g7m-btn" onClick={() => setDetail({ icon: '🔴', title: `${g7Zones} ${t.dash.g7.zonesLabel}`, rows: [{ label: 'Nombre', value: `${g7Zones}`, color: 'var(--red)' }, { label: 'Source', value: 'Police Cantonale GE' }], note: t.dash.g7.zonesDesc })}>
-                  <div className="g7m-l">{t.dash.g7.zonesLabel}</div><div className="g7m-v" style={{ color: 'var(--red)' }}>{g7Zones}</div><div className="g7m-d">{t.dash.g7.zonesDesc}</div>
-                </div>
-                <div className="g7m g7m-btn" onClick={() => setDetail({ icon: '🚫', title: `11 ${t.dash.g7.roadsLabel}`, rows: [{ label: 'Nombre', value: '11', color: 'var(--orange)' }, { label: 'Source', value: 'Police Cantonale GE, SITG, OFROU' }], note: t.dash.g7.roadsDesc })}>
-                  <div className="g7m-l">{t.dash.g7.roadsLabel}</div><div className="g7m-v" style={{ color: 'var(--orange)' }}>11</div><div className="g7m-d">{t.dash.g7.roadsDesc}</div>
-                </div>
-                <div className="g7m g7m-btn" onClick={() => setDetail({ icon: '🚌', title: t.dash.g7.tpgLabel, rows: [{ label: 'Nombre', value: `${g7Lines.length > 0 ? g7Lines.length : 3}`, color: 'var(--gold)' }, { label: 'Source', value: 'TPG' }], note: t.dash.g7.tpgDesc })}>
-                  <div className="g7m-l">{t.dash.g7.tpgLabel}</div>
-                  <div className="g7m-v" style={{ color: 'var(--gold)' }}>{g7Lines.length > 0 ? g7Lines.length : transport?.g7.isActive ? '—' : 3}</div>
-                  <div className="g7m-d">{g7Lines.length > 0 ? `Lignes ${g7Lines.slice(0, 4).map(l => l.startsWith('L') || l.startsWith('l') ? l : `L${l}`).join(', ')}` : t.dash.g7.tpgDesc}</div>
-                </div>
-                <div className="g7m g7m-btn" onClick={() => setDetail({ icon: '📢', title: `${dashData?.alerts.length ?? 28} ${t.dash.g7.alertsLabel}`, rows: [{ label: 'Total', value: `${dashData?.alerts.length ?? 28}` }, { label: 'Sources', value: 'OFROU, Police GE, TPG, CFF, MétéoSuisse, BAZG' }], note: t.dash.g7.alertsFrom })}>
-                  <div className="g7m-l">{t.dash.g7.alertsLabel}</div><div className="g7m-v" style={{ color: 'var(--blue-d)' }}>{dashData?.alerts.length ?? 28}</div><div className="g7m-d">{t.dash.g7.alertsFrom}</div>
-                </div>
-              </div>
-            </div>
             {/* Frontières */}
             <div className="dc">
               <div className="dc-top"><div className="dc-label">{t.dash.borders.label}</div><div className="dc-live-dot" /></div>
               <div className="mini-table" style={{ marginTop: '4px' }}>
                 {borders.map(b => (
-                  <div key={b.name} className="mt-row mt-row-btn" onClick={() => setDetail({ icon: '🛂', title: b.name, rows: [{ label: 'Attente actuelle', value: b.waitMinutes < 2 ? '< 2 min' : `${b.waitMinutes} min`, color: borderClass(b.status) === 'mt-ok' ? 'var(--green)' : borderClass(b.status) === 'mt-bad' ? 'var(--red)' : 'var(--orange)' }, { label: 'Niveau', value: borderLabel(b.status) }, { label: 'Source', value: 'BAZG, Bureau fédéral des douanes suisses' }, { label: 'Fréquence', value: 'Mise à jour toutes les 5 min' }], note: "Temps indicatif. Peut varier selon les dispositifs G7 en vigueur et les contrôles douaniers renforcés pendant le Sommet." })}>
+                  <div key={b.name} className="mt-row mt-row-btn" onClick={() => setDetail({ icon: '🛂', title: b.name, rows: [{ label: 'Attente actuelle', value: b.waitMinutes < 2 ? '< 2 min' : `${b.waitMinutes} min`, color: borderClass(b.status) === 'mt-ok' ? 'var(--green)' : borderClass(b.status) === 'mt-bad' ? 'var(--red)' : 'var(--orange)' }, { label: 'Niveau', value: borderLabel(b.status) }, { label: 'Source', value: 'BAZG, Bureau fédéral des douanes suisses' }, { label: 'Fréquence', value: 'Mise à jour toutes les 5 min' }], note: "Temps indicatif. Peut varier selon les contrôles douaniers en vigueur." })}>
                     <span className="mt-name">{b.name}</span>
                     <span className={`mt-val ${borderClass(b.status)}`}>{b.waitMinutes < 2 ? '< 2 min' : `${b.waitMinutes} min`}{(b.status === 'HEAVY' || b.status === 'BLOCKED') ? ' ⚠' : ''}</span>
                   </div>
@@ -1398,14 +1372,14 @@ export function HomeContent() {
         { id: 'm-faq', tag: { bg: 'var(--green-bg)', c: 'var(--green)', label: 'Public' }, title: 'FAQ', content: (<>{t.faq.items.map((item, i) => <div key={i}><h4>{item.q}</h4><p>{item.a}</p></div>)}</>) },
         { id: 'm-doc', tag: { bg: 'var(--green-bg)', c: 'var(--green)', label: 'Public' }, title: 'Documentation', content: (
           <><p>Documentation complète bientôt disponible.</p>
-          <ul><li>Prise en main, naviguer sur la carte</li><li>Alertes, configurer des notifications par zone</li><li>Carte live, couches de données et filtres</li><li>Veille G7, tableau de bord pendant le Sommet</li></ul>
+          <ul><li>Prise en main, naviguer sur la carte</li><li>Alertes, configurer des notifications par zone</li><li>Carte live, couches de données et filtres</li><li>ÃvÃ©nements, agenda et fan zones de la rÃ©gion</li></ul>
           <div className="m-note">📩 contact@borja-swiss-solutions.ch</div></>
         )},
         { id: 'm-usecases', tag: { bg: 'var(--green-bg)', c: 'var(--green)', label: 'Public' }, title: "Cas d'usage", content: (
           <><h4>🏠 Habitant</h4><p>Vérifier les conditions avant de partir. Alerte météo. Lignes perturbées.</p>
-          <h4>🚗 Frontalier</h4><p>Temps d&apos;attente aux postes frontière. Restrictions G7. Passage optimal.</p>
+          <h4>🚗 Frontalier</h4><p>Temps d&apos;attente aux postes frontière. Restrictions de circulation. Passage optimal.</p>
           <h4>🏥 Professionnel de santé</h4><p>Arriver à l&apos;heure malgré les perturbations. Déviations validées.</p>
-          <h4>🚚 Entreprise logistique</h4><p>Tournées planifiées avec restrictions G7. Coûts réduits.</p></>
+          <h4>🚚 Entreprise logistique</h4><p>Tournées planifiées avec les restrictions de circulation. Coûts réduits.</p></>
         )},
         { id: 'm-archi', tag: { bg: 'var(--green-bg)', c: 'var(--green)', label: 'Simplifié' }, title: 'Architecture générale', content: (
           <><div className="m-note">Présentation simplifiée. Documentation technique sur demande.</div>

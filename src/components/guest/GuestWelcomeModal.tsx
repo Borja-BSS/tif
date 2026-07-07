@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation'
 const LOCKED_FEATURES = [
   { icon: '🗺️', label: 'Mon trajet personnalisé', desc: 'Sauvegarde et alertes sur votre trajet quotidien' },
   { icon: '📧', label: 'Alertes email avant le départ', desc: 'Notification si votre trajet est perturbé' },
-  { icon: '🔔', label: 'Veille G7 en continu', desc: 'Accès illimité sans minuterie' },
 ]
 
 export function GuestWelcomeModal() {
