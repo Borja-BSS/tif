@@ -537,7 +537,7 @@ export const T: Record<Lang, HomeT> = {
       accent: 'real time.',
       p1: 'An accident. A closed road. A G7 alert.',
       p2: 'This information exists. It\'s scattered.',
-      p3: 'TIF centralizes it. Before it\'s too late.',
+      p3: 'TIF centralises it. Before it\'s too late.',
       btn: 'Open live map',
       scrollCue: 'Live situation',
     },
@@ -621,7 +621,7 @@ export const T: Record<Lang, HomeT> = {
         {
           numLabel: 'Fast response',
           title: 'An incident. Who informs first?',
-          withoutText: 'Twitter, rumors, Google Maps delayed.',
+          withoutText: 'Twitter, rumours, Google Maps delayed.',
           withText: 'official sources aggregated in 30 seconds, verified before the confusion.',
         },
       ],
@@ -633,11 +633,11 @@ export const T: Record<Lang, HomeT> = {
       items: [
         {
           q: 'What exactly is TIF during the G7?',
-          a: 'TIF centralizes in real time all disruptions related to the Summit: red zones, closed roads, TPG restrictions, border delays and weather alerts. One reliable source, updated every 30 seconds from official sources.',
+          a: 'TIF centralises in real time all disruptions related to the Summit: red zones, closed roads, TPG restrictions, border delays and weather alerts. One reliable source, updated every 30 seconds from official sources.',
         },
         {
           q: 'Why not just use Google Maps or Twitter?',
-          a: 'Google Maps has a 5–15 minute delay on G7-specific restrictions. Twitter spreads unverified rumors. TIF feeds directly from official sources (Geneva Cantonal Police, OFROU, TPG, SBB) with traceable attribution for each piece of information.',
+          a: 'Google Maps has a 5–15 minute delay on G7-specific restrictions. Twitter spreads unverified rumours. TIF feeds directly from official sources (Geneva Cantonal Police, OFROU, TPG, SBB) with traceable attribution for each piece of information.',
         },
         {
           q: 'Who is actually affected?',
@@ -653,7 +653,7 @@ export const T: Record<Lang, HomeT> = {
         },
         {
           q: 'Does TIF replace official authority communications?',
-          a: 'No. TIF is an independent citizens dashboard. It aggregates and synthesizes official sources but does not replace them. In an emergency, always follow direct instructions from cantonal authorities.',
+          a: 'No. TIF is an independent citizen dashboard. It aggregates and synthesises official sources but does not replace them. In an emergency, always follow direct instructions from cantonal authorities.',
         },
       ],
     },
@@ -678,7 +678,7 @@ export const T: Record<Lang, HomeT> = {
       hoursLabel: 'Hours',
       hoursLine1: 'Mon 1st – Fri 5 June 2026',
       hoursLine2: 'Mon 8 – Thu 18 June 2026',
-      hoursLine3: '11am – 7pm',
+      hoursLine3: '11 AM – 7 PM',
       emergencyLabel: 'Emergency',
       pressLabel: 'Press contact',
       sourceText: 'Source: Geneva Cantonal Police · Office cantonal de la protection de la population et des affaires militaires (OCPPAM)',
@@ -742,7 +742,7 @@ export const T: Record<Lang, HomeT> = {
       legalHead: 'Data & Legal', docHead: 'Documentation',
       tc1Slides: [
         { name: 'Hosting', desc: 'EU hosting (DE/IE) · Switzerland migration in progress · data never outside EU' },
-        { name: 'Data protection', desc: 'GDPR  nDPA  No data sold' },
+        { name: 'Data protection', desc: 'GDPR  nFADP  No data sold' },
         { name: 'Privacy', desc: 'Data collected  Duration  Rights' },
         { name: 'Security contact', desc: 'contact@borja-swiss-solutions.ch' },
       ],
@@ -766,9 +766,9 @@ export const T: Record<Lang, HomeT> = {
       mapBtn: 'Open live map', supportBtn: 'Support TIF',
     },
     footer: {
-      tagline: 'Citizens dashboard, Greater Geneva, by Börja Swiss Solutions RI',
+      tagline: 'Citizen dashboard, Greater Geneva, by Börja Swiss Solutions RI',
       copyright: '© 2025 Börja Swiss Solutions RI, Geneva, Switzerland',
-      legal: 'GDPR, nDPA, Hosted in Switzerland, Anonymised data',
+      legal: 'GDPR, nFADP, Hosted in Switzerland, Anonymised data',
       live: 'Live situation', sources: 'Sources', support: 'Support',
       transparency: 'Transparency', contact: 'Contact', privacy: 'Privacy',
     },
@@ -808,7 +808,7 @@ export const T: Record<Lang, HomeT> = {
       { label: 'Info',     text: '47,000 cross-border workers per day in Greater Geneva affected by G7 restrictions' },
       { label: 'Sources',  text: 'OFROU, Geneva Cantonal Police, TPG, SBB, MeteoSwiss, SITG, BAZG' },
     ],
-    shareText: 'TIF centralizes all G7 Grand Geneva disruptions in real time. Roads, borders, TPG, weather: free and no registration required.',
+    shareText: 'TIF centralises all G7 Greater Geneva disruptions in real time. Roads, borders, TPG, weather: free and no registration required.',
     agenda: {
       navLink: 'Events',
       sectionLabel: 'Events · Greater Geneva · Summer 2026',
@@ -832,7 +832,7 @@ export const T: Record<Lang, HomeT> = {
       { q: "Is TIF free?", a: "Yes, TIF is completely free for all users. No registration is required to view the map and real-time data. An account gives access to additional features such as favourites and personalised alerts." },
       { q: "How reliable is the data?", a: "TIF cross-references certified official sources with its own custom internal algorithms. When sources disagree, our validation system prioritises the most recent and most contextually coherent data. Platform uptime has been 100% since launch." },
       { q: "Who can use TIF?", a: "TIF is designed for everyone: Greater Geneva residents, visitors, cross-border commuters, event organisers and public services. The public version is free and requires no registration. Professional access with enriched data is available on request for institutional partners." },
-      { q: "How is my data protected?", a: "TIF applies the Privacy by Design principle. No exact GPS coordinates are stored. Usage data is anonymised and aggregated. Hosting is exclusively in Europe, compliant with Swiss nDPA and the EU GDPR." },
+      { q: "How is my data protected?", a: "TIF applies the Privacy by Design principle. No exact GPS coordinates are stored. Usage data is anonymised and aggregated. Hosting is exclusively in Europe, compliant with Swiss nFADP and the EU GDPR." },
     ],
   },
 
@@ -867,7 +867,7 @@ export const T: Record<Lang, HomeT> = {
         descNormal: 'Autobahnen frei, kein Vorfall gemeldet',
       },
       tpg: {
-        label: 'TPG Störungen',
+        label: 'TPG-Störungen',
         normal: 'Normal', descNormal: 'Normalbetrieb, keine Umleitung',
         line: 'Linie', lines: 'Linien', other: 'und weitere',
       },
@@ -929,7 +929,7 @@ export const T: Record<Lang, HomeT> = {
         },
         {
           numLabel: 'Unternehmen',
-          title: 'Ein Lieferant. 14 Stopps. 4 gesperrte Zonen.',
+          title: 'Ein Zusteller. 14 Stopps. 4 gesperrte Zonen.',
           withoutText: 'entdeckt die Sperren eine nach der anderen, verliert 3 Stunden.',
           withText: 'Tour auf der G7-Karte geplant. 14 Lieferungen vor 16:00 Uhr.',
         },
@@ -956,7 +956,7 @@ export const T: Record<Lang, HomeT> = {
         },
         {
           q: 'Wen betrifft das wirklich?',
-          a: 'Alle Personen, die sich vom 10. bis 19. Juni 2026 im Grossraum Genf bewegen (Grenzkontrollen) — G7-Gipfel in Évian-les-Bains vom 15.–17. Juni: 47 000 Grenzgänger pro Tag, Lieferanten, Gesundheitsfachleute, Bewohner der betroffenen Gemeinden und Touristen.',
+          a: 'Alle Personen, die sich vom 10. bis 19. Juni 2026 im Grossraum Genf bewegen (Grenzkontrollen) — G7-Gipfel in Évian-les-Bains vom 15.–17. Juni: 47 000 Grenzgänger pro Tag, Zusteller, Gesundheitsfachleute, Bewohner der betroffenen Gemeinden und Touristen.',
         },
         {
           q: 'Kann TIF wirklich einen Stau verhindern?',
@@ -979,7 +979,7 @@ export const T: Record<Lang, HomeT> = {
       carHead: '8 Haupt-P+R · direkter TPG-Zugang',
       places: 'Plätze',
       rt: '⚡ Echtzeit-Verfügbarkeit',
-      viewMap: 'Auf Karte anzeigen →',
+      viewMap: 'Auf der Karte anzeigen →',
       ctaStrong: 'P+R-Strategie während des G7.',
       ctaDesc: 'Stellen Sie Ihr Auto am Stadtrand ab und fahren Sie mit dem TPG ins Zentrum. Die meisten P+R sind kostenlos oder sehr günstig.',
       ctaBtn: 'Parkplätze auf der Karte anzeigen',
@@ -1010,7 +1010,7 @@ export const T: Record<Lang, HomeT> = {
         { desc: 'Geoinformationssystem des Kantons Genf. Strassennetz, Ereignisse und offizielle Einschränkungen.', live: 'Offiziell Kanton GE' },
         { desc: 'Störungen, Verspätungen und Umleitungen im Tram-, Bus- und Trolleybusnetz des Grossraums Genf.', live: 'Live  30s' },
         { desc: 'Léman Express, InterRegio, Verspätungen via OpenTransportData.swiss. Alle Linien abgedeckt.', live: 'Live  30s' },
-        { desc: 'Offizielle Wetterwarnungen, Niederschläge, Gewitter und Vigilanz für den Kanton Genf.', live: 'Offiziell Bund' },
+        { desc: 'Offizielle Wetterwarnungen, Niederschläge, Gewitter und Warnstufen für den Kanton Genf.', live: 'Offiziell Bund' },
         { desc: 'Wartezeiten an den 8 französisch-schweizerischen Grenzübergängen. Bardonnex, Moillesulaz, Ferney...', live: 'Live  5 Min.' },
         { desc: 'Community-Verkehrsdaten. Feldvorfälle, Stau, Bürgermeldungen.', live: 'Live  Korrelation' },
       ],
@@ -1056,7 +1056,7 @@ export const T: Record<Lang, HomeT> = {
       sub: 'Wir behaupten nicht, zertifiziert zu sein. Wir bevorzugen aktive Transparenz und laden Sie ein, die Plattform selbst zu prüfen.',
       legalHead: 'Daten & Recht', docHead: 'Dokumentation',
       tc1Slides: [
-        { name: 'Hosting', desc: 'EU-Hosting (DE/IE) · Migration Schweiz in Kürze · Daten nie ausserhalb der EU' },
+        { name: 'Hosting', desc: 'EU-Hosting (DE/IE) · Migration Schweiz im Gange · Daten nie ausserhalb der EU' },
         { name: 'Datenschutz', desc: 'DSGVO  nDSG  Keine Daten verkauft' },
         { name: 'Vertraulichkeit', desc: 'Erhobene Daten  Dauer  Rechte' },
         { name: 'Sicherheitskontakt', desc: 'contact@borja-swiss-solutions.ch' },
@@ -1072,7 +1072,7 @@ export const T: Record<Lang, HomeT> = {
       vulnTitle: 'Schwachstellen melden', vulnSub: 'Responsible Disclosure, Frist, verschlüsselter Kontakt',
       auditTitle: 'Vollständigen Audit-Zugang anfragen', auditSub: 'Detaillierte Architektur, API-Sandbox, technische Sitzung',
       partnerTitle: 'Institutionelle Partnerschaft', partnerSub: 'Gemeinden, Rettungsdienste, NGOs, Behörden',
-      disclaimer: 'TIF aggregiert öffentliche Informationen und ist keine offizielle Warnplattform der kantonalen oder bundesbehördlichen Stellen.',
+      disclaimer: '⚠ TIF aggregiert öffentliche Informationen und ist keine offizielle Warnplattform der kantonalen oder bundesbehördlichen Stellen.',
       learnMore: 'Mehr erfahren →', seeMore: 'Ansehen →',
     },
     final: {
@@ -1123,13 +1123,13 @@ export const T: Record<Lang, HomeT> = {
       { label: 'Info',      text: '47 000 Grenzgänger pro Tag im Grossraum Genf von G7-Einschränkungen betroffen' },
       { label: 'Quellen',   text: 'ASTRA, Kantonspolizei GE, TPG, SBB, MeteoSchweiz, SITG, BAZG' },
     ],
-    shareText: 'TIF bündelt alle G7-Störungen im Grossraum Genf in Echtzeit. Strassen, Grenzen, TPG, Wetter: kostenlos und ohne Registrierung.',
+    shareText: 'TIF bündelt alle G7-Störungen im Grossraum Genf in Echtzeit. Strassen, Grenzen, TPG, Wetter: kostenlos und ohne Anmeldung.',
     agenda: {
       navLink: 'Veranstaltungen',
       sectionLabel: 'Agenda · Grossraum Genf · Sommer 2026',
       h2a: 'Was gerade passiert', h2b: 'in Ihrer Region.',
       sub: 'Geprüfte Veranstaltungen · Offizielle Quellen · Laufend aktualisiert',
-      fullLabel: 'Vollständiger Agenda',
+      fullLabel: 'Vollständige Agenda',
       fullH2a: 'Alle Veranstaltungen', fullH2b: 'im Grossraum Genf.',
       free: 'KOSTENLOS', freeLower: 'Kostenlos',
       seeMap: 'Auf der Karte ansehen →', ticket: 'Tickets →',
@@ -1143,10 +1143,10 @@ export const T: Record<Lang, HomeT> = {
     },
     faq2: [
       { q: "Gibt es eine mobile App?", a: "Ja, die TIF-App wird Ende Juni 2026 im App Store und Google Play Store verfügbar sein. Sie bietet alle Funktionen der Web-Version, für Mobilgeräte optimiert, mit Echtzeit-Benachrichtigungen." },
-      { q: "Wie funktioniert TIF?", a: "TIF aggregiert 6 offizielle Datenquellen (HERE, SBB, TPG, MeteoSchweiz, OFDF, OpenStreetMap) und reichert sie mit proprietären Algorithmen an. Diese hauseigenen Algorithmen analysieren, kreuzen und prognostizieren territoriale Bedingungen mit höherer Genauigkeit als jede einzelne Quelle." },
-      { q: "Ist TIF kostenlos?", a: "Ja, TIF ist für alle Nutzer vollständig kostenlos. Keine Registrierung erforderlich, um die Karte und Echtzeit-Daten einzusehen. Ein Konto ermöglicht zusätzliche Funktionen wie Favoriten und personalisierte Warnungen." },
+      { q: "Wie funktioniert TIF?", a: "TIF aggregiert 6 offizielle Datenquellen (HERE, SBB, TPG, MeteoSchweiz, BAZG, OpenStreetMap) und reichert sie mit proprietären Algorithmen an. Diese hauseigenen Algorithmen analysieren, kreuzen und prognostizieren territoriale Bedingungen mit höherer Genauigkeit als jede einzelne Quelle." },
+      { q: "Ist TIF kostenlos?", a: "Ja, TIF ist für alle Nutzer vollständig kostenlos. Keine Anmeldung erforderlich, um die Karte und Echtzeit-Daten einzusehen. Ein Konto ermöglicht zusätzliche Funktionen wie Favoriten und personalisierte Warnungen." },
       { q: "Wie zuverlässig sind die Daten?", a: "TIF kreuzt zertifizierte offizielle Quellen mit eigenen massgeschneiderten Algorithmen. Bei Abweichungen zwischen Quellen priorisiert unser Validierungssystem die aktuellsten und kohärentesten Daten. Die Plattformverfügbarkeit beträgt seit dem Start 100%." },
-      { q: "Wer kann TIF nutzen?", a: "TIF ist für alle konzipiert: Einwohner des Grossraums Genf, Besucher, Grenzpendler, Veranstaltungsorganisatoren und öffentliche Dienste. Die öffentliche Version ist kostenlos und ohne Registrierung. Professioneller Zugang mit erweiterten Daten ist auf Anfrage für institutionelle Partner verfügbar." },
+      { q: "Wer kann TIF nutzen?", a: "TIF ist für alle konzipiert: Einwohner des Grossraums Genf, Besucher, Grenzpendler, Veranstaltungsorganisatoren und öffentliche Dienste. Die öffentliche Version ist kostenlos und ohne Anmeldung. Professioneller Zugang mit erweiterten Daten ist auf Anfrage für institutionelle Partner verfügbar." },
       { q: "Wie werden meine Daten geschützt?", a: "TIF wendet das Prinzip Privacy by Design an. Es werden keine genauen GPS-Koordinaten gespeichert. Nutzungsdaten werden anonymisiert und aggregiert. Das Hosting erfolgt ausschliesslich in Europa, konform mit dem Schweizer nDSG und der EU-DSGVO." },
     ],
   },
@@ -1213,7 +1213,7 @@ export const T: Record<Lang, HomeT> = {
     },
     share: {
       sectionLabel: 'Condividi TIF',
-      h2a: 'Informa il tuo', h2b: 'entourage',
+      h2a: 'Informa la tua', h2b: 'cerchia',
       sub: 'Più persone conoscono TIF prima del G7, meno blocchi inutili ci saranno. Ogni condivisione può risparmiare un\'ora persa a qualcuno.',
       xBtn: 'Condividi su X',
       liBtn: 'Condividi su LinkedIn',
@@ -1320,7 +1320,7 @@ export const T: Record<Lang, HomeT> = {
       carHead: '7 fonti ufficiali + 2 comunitarie',
       learnMore: 'Scopri di più →',
       slides: [
-        { desc: 'Segnalazioni anonime della community TIF. Correlazione sul campo per affinare i dati ufficiali.', live: 'Complementare' },
+        { desc: 'Segnalazioni anonime della comunità TIF. Correlazione sul campo per affinare i dati ufficiali.', live: 'Complementare' },
         { desc: 'Traffico autostradale A1, A40 e rete nazionale. Incidenti, chiusure, lavori in tempo reale.', live: 'Live  60s' },
         { desc: 'Sistema informativo del territorio ginevrino. Viabilità, eventi e restrizioni ufficiali.', live: 'Ufficiale Cantone GE' },
         { desc: 'Perturbazioni, ritardi e deviazioni sulla rete tram, bus e filobus della Grande Ginevra.', live: 'Live  30s' },
@@ -1372,7 +1372,7 @@ export const T: Record<Lang, HomeT> = {
       legalHead: 'Dati e legale', docHead: 'Documentazione',
       tc1Slides: [
         { name: 'Hosting', desc: 'Hosting UE (DE/IE) · migrazione Svizzera in corso · dati mai fuori dall\'UE' },
-        { name: 'Protezione dati', desc: 'RGPD  LPD  Nessun dato venduto' },
+        { name: 'Protezione dati', desc: 'GDPR  nLPD  Nessun dato venduto' },
         { name: 'Riservatezza', desc: 'Dati raccolti  Durata  Diritti' },
         { name: 'Contatto sicurezza', desc: 'contact@borja-swiss-solutions.ch' },
       ],
@@ -1387,18 +1387,18 @@ export const T: Record<Lang, HomeT> = {
       vulnTitle: 'Segnalazione vulnerabilità', vulnSub: 'Responsible disclosure, scadenza, contatto cifrato',
       auditTitle: 'Richiedere accesso audit completo', auditSub: 'Architettura dettagliata, API sandbox, sessione tecnica',
       partnerTitle: 'Partnership istituzionale', partnerSub: 'Comuni, servizi di emergenza, ONG, autorità',
-      disclaimer: 'TIF aggrega informazioni pubbliche e non costituisce una piattaforma ufficiale di allerta delle autorità cantonali o federali.',
+      disclaimer: '⚠ TIF aggrega informazioni pubbliche e non costituisce una piattaforma ufficiale di allerta delle autorità cantonali o federali.',
       learnMore: 'Scopri di più →', seeMore: 'Vedi →',
     },
     final: {
       h2: 'Vedere. Capire. ', accent: 'Anticipare.',
-      p: 'Gratuito. Senza registrazione. Conforme RGPD. Ospitato in Svizzera.',
+      p: 'Gratuito. Senza registrazione. Conforme GDPR. Ospitato in Svizzera.',
       mapBtn: 'Apri la mappa live', supportBtn: 'Sostenere TIF',
     },
     footer: {
       tagline: 'Dashboard civico, Grande Ginevra, di Börja Swiss Solutions RI',
       copyright: '© 2025 Börja Swiss Solutions RI, Ginevra, Svizzera',
-      legal: 'RGPD, LPD, Ospitato in Svizzera, Dati anonimizzati',
+      legal: 'GDPR, nLPD, Ospitato in Svizzera, Dati anonimizzati',
       live: 'Situazione live', sources: 'Fonti', support: 'Sostenere',
       transparency: 'Trasparenza', contact: 'Contatto', privacy: 'Riservatezza',
     },
@@ -1416,7 +1416,7 @@ export const T: Record<Lang, HomeT> = {
       faqTitle: 'FAQ', docTitle: 'Documentazione', usecasesTitle: 'Casi d\'uso',
       archiTitle: 'Architettura generale', vulnTitle: 'Segnalazione vulnerabilità',
       auditTitle: 'Accesso audit completo', partnerTitle: 'Partnership istituzionale',
-      tagPublic: 'Pubblico', tagPro: 'Professionale', tagSecurity: 'Sicurezza',
+      tagPublic: 'Pubblico', tagPro: 'Professionista', tagSecurity: 'Sicurezza',
       tagSimplified: 'Semplificato', tagInstitutional: 'Istituzionale', tagOnDemand: 'Su richiesta',
       donNote: '💚 Il 100% delle donazioni va al progetto TIF — pagamento sicuro Stripe',
       donBtn: '💚 Sostenere TIF con carta',
@@ -1444,7 +1444,7 @@ export const T: Record<Lang, HomeT> = {
       sectionLabel: 'Agenda · Grande Ginevra · Estate 2026',
       h2a: 'Tutto quello che succede', h2b: 'nella vostra regione.',
       sub: 'Eventi verificati · Fonti ufficiali · Aggiornati continuamente',
-      fullLabel: 'Agenda completo',
+      fullLabel: 'Agenda completa',
       fullH2a: 'Tutti gli eventi', fullH2b: 'della Grande Ginevra.',
       free: 'GRATUITO', freeLower: 'Gratuito',
       seeMap: 'Vedi sulla mappa →', ticket: 'Biglietteria →',
@@ -1453,7 +1453,7 @@ export const T: Record<Lang, HomeT> = {
       filterCulture: 'Cultura', filterFootball: 'Calcio 🇨🇭', filterCinema: 'Cinema',
     },
     app: {
-      sub: "Tutta l'intelligenza territoriale della Grande Ginevra, ottimizzata per mobile. Mobilità, agenda eventi e alerting in tempo reale, ovunque voi siate.",
+      sub: "Tutta l'intelligenza territoriale della Grande Ginevra, ottimizzata per mobile. Mobilità, agenda eventi e avvisi in tempo reale, ovunque voi siate.",
       launch: 'Lancio previsto fine giugno 2026 · iOS & Android',
     },
     faq2: [
@@ -1502,7 +1502,7 @@ export const T: Record<Lang, HomeT> = {
         line: 'línea', lines: 'líneas', other: 'y otras',
       },
       cff: {
-        label: 'FFS / CEVA',
+        label: 'CFF / CEVA',
         normal: 'Normal', delayOngoing: 'Retraso en curso',
         leman: 'Léman Express', lemanNormal: 'servicio normal', lemanDisrupted: 'perturbado',
       },
@@ -1565,7 +1565,7 @@ export const T: Record<Lang, HomeT> = {
         },
         {
           numLabel: 'Reacción rápida',
-          title: '¿Un incidente. Quién informa primero?',
+          title: 'Un incidente. ¿Quién informa primero?',
           withoutText: 'Twitter, rumores, Google Maps con retraso.',
           withText: 'fuentes oficiales agregadas en 30 segundos, información verificada antes de la confusión.',
         },
@@ -1582,7 +1582,7 @@ export const T: Record<Lang, HomeT> = {
         },
         {
           q: '¿Por qué no usar simplemente Google Maps o Twitter?',
-          a: 'Google Maps tiene un retraso de 5 a 15 minutos en las restricciones específicas del G7. Twitter difunde rumores no verificados. TIF se alimenta directamente de fuentes oficiales (Policía Cantonal GE, OFROU, TPG, FFS) con atribución trazable para cada información.',
+          a: 'Google Maps tiene un retraso de 5 a 15 minutos en las restricciones específicas del G7. Twitter difunde rumores no verificados. TIF se alimenta directamente de fuentes oficiales (Policía Cantonal GE, OFROU, TPG, CFF) con atribución trazable para cada información.',
         },
         {
           q: '¿Quién está realmente afectado?',
@@ -1605,7 +1605,7 @@ export const T: Record<Lang, HomeT> = {
     prk: {
       sectionLabel: 'Aparcamiento · P+R',
       h2a: 'Aparcamientos y', h2b: 'soluciones activas',
-      sub: 'Durante el G7, aparca tu coche en un P+R y toma el transporte público directamente al centro de la ciudad. Menos atascos, cero estrés.',
+      sub: 'Durante el G7, aparque su coche en un P+R y tome el transporte público directamente al centro de la ciudad. Menos atascos, cero estrés.',
       carHead: '8 P+R principales · acceso TPG directo',
       places: 'plazas',
       rt: '⚡ Disponibilidad en tiempo real',
@@ -1631,7 +1631,7 @@ export const T: Record<Lang, HomeT> = {
     src: {
       sectionLabel: 'Fuentes oficiales',
       h2a: 'Datos verificados.', h2b: 'Trazados hasta la fuente.',
-      sub: 'Cada información publicada en TIF está atribuida a su fuente oficial. Ningún dato no verificable. Haz clic para acceder a cada fuente.',
+      sub: 'Cada información publicada en TIF está atribuida a su fuente oficial. Ningún dato sin verificar. Haga clic para acceder a cada fuente.',
       carHead: '7 fuentes oficiales + 2 comunitarias',
       learnMore: 'Más información →',
       slides: [
@@ -1686,8 +1686,8 @@ export const T: Record<Lang, HomeT> = {
       sub: 'No pretendemos estar certificados. Preferimos la transparencia activa e invitamos a auditar la plataforma.',
       legalHead: 'Datos y legal', docHead: 'Documentación',
       tc1Slides: [
-        { name: 'Alojamiento', desc: 'Hosting UE (DE/IE) · migración Suiza en curso · datos nunca fuera de la UE' },
-        { name: 'Protección de datos', desc: 'RGPD  LPD  Ningún dato vendido' },
+        { name: 'Alojamiento', desc: 'Alojamiento UE (DE/IE) · migración Suiza en curso · datos nunca fuera de la UE' },
+        { name: 'Protección de datos', desc: 'RGPD  nLPD  Ningún dato vendido' },
         { name: 'Confidencialidad', desc: 'Datos recopilados  Duración  Derechos' },
         { name: 'Contacto seguridad', desc: 'contact@borja-swiss-solutions.ch' },
       ],
@@ -1702,7 +1702,7 @@ export const T: Record<Lang, HomeT> = {
       vulnTitle: 'Notificación de vulnerabilidades', vulnSub: 'Responsible disclosure, plazo, contacto cifrado',
       auditTitle: 'Solicitar acceso de auditoría completo', auditSub: 'Arquitectura detallada, API sandbox, sesión técnica',
       partnerTitle: 'Asociación institucional', partnerSub: 'Municipios, servicios de emergencia, ONG, autoridades',
-      disclaimer: 'TIF agrega información pública y no constituye una plataforma oficial de alerta de las autoridades cantonales o federales.',
+      disclaimer: '⚠ TIF agrega información pública y no constituye una plataforma oficial de alerta de las autoridades cantonales o federales.',
       learnMore: 'Más información →', seeMore: 'Ver →',
     },
     final: {
@@ -1713,8 +1713,8 @@ export const T: Record<Lang, HomeT> = {
     footer: {
       tagline: 'Panel ciudadano, Gran Ginebra, por Börja Swiss Solutions RI',
       copyright: '© 2025 Börja Swiss Solutions RI, Ginebra, Suiza',
-      legal: 'RGPD, LPD, Alojado en Suiza, Datos anonimizados',
-      live: 'Situación live', sources: 'Fuentes', support: 'Apoyar',
+      legal: 'RGPD, nLPD, Alojado en Suiza, Datos anonimizados',
+      live: 'Situación en vivo', sources: 'Fuentes', support: 'Apoyar',
       transparency: 'Transparencia', contact: 'Contacto', privacy: 'Privacidad',
     },
     common: {
@@ -1751,7 +1751,7 @@ export const T: Record<Lang, HomeT> = {
       { label: 'Fronteras', text: '7 pasos fronterizos abiertos: Anières, Moillesulaz, Thônex-Vallard, Bardonnex, Perly, Meyrin, Ferney-Voltaire · Estaciones Cornavin y Annemasse + aeropuerto GVA abiertos · Documento de identidad obligatorio · Posibles esperas' },
       { label: 'CEVA',      text: 'Léman Express 4 líneas monitorizadas: L1, L2, L3, L4' },
       { label: 'Info',      text: '47 000 trabajadores fronterizos por día en el Gran Ginebra afectados por las restricciones G7' },
-      { label: 'Fuentes',   text: 'OFROU, Policía Cantonal GE, TPG, FFS, MeteoSuiza, SITG, BAZG' },
+      { label: 'Fuentes',   text: 'OFROU, Policía Cantonal GE, TPG, CFF, MeteoSuiza, SITG, BAZG' },
     ],
     shareText: 'TIF centraliza en tiempo real todas las perturbaciones del G7 en el Gran Ginebra. Carreteras, fronteras, TPG, tiempo: gratis y sin registro.',
     agenda: {
@@ -1759,7 +1759,7 @@ export const T: Record<Lang, HomeT> = {
       sectionLabel: 'Agenda · Gran Ginebra · Verano 2026',
       h2a: 'Todo lo que pasa', h2b: 'en tu región.',
       sub: 'Eventos verificados · Fuentes oficiales · Actualizado continuamente',
-      fullLabel: 'Agenda completo',
+      fullLabel: 'Agenda completa',
       fullH2a: 'Todos los eventos', fullH2b: 'del Gran Ginebra.',
       free: 'GRATIS', freeLower: 'Gratis',
       seeMap: 'Ver en el mapa →', ticket: 'Entradas →',
@@ -1773,7 +1773,7 @@ export const T: Record<Lang, HomeT> = {
     },
     faq2: [
       { q: "¿Hay una aplicación móvil?", a: "Sí, la aplicación TIF estará disponible a finales de junio 2026 en el App Store y Google Play Store. Ofrecerá todas las funcionalidades de la versión web, optimizadas para móvil, con notificaciones en tiempo real." },
-      { q: "¿Cómo funciona TIF?", a: "TIF agrega 6 fuentes de datos oficiales (HERE, FFS, TPG, MeteoSwiss, OFDF, OpenStreetMap) y las enriquece con sus propios algoritmos de procesamiento desarrollados internamente. Estos algoritmos propietarios permiten analizar, cruzar y predecir las condiciones territoriales con mayor precisión que cualquier fuente individual." },
+      { q: "¿Cómo funciona TIF?", a: "TIF agrega 6 fuentes de datos oficiales (HERE, CFF, TPG, MeteoSuiza, OFDF, OpenStreetMap) y las enriquece con sus propios algoritmos de procesamiento desarrollados internamente. Estos algoritmos propietarios permiten analizar, cruzar y predecir las condiciones territoriales con mayor precisión que cualquier fuente individual." },
       { q: "¿TIF es gratuito?", a: "Sí, TIF es completamente gratuito para todos los usuarios. No se requiere registro para consultar el mapa y los datos en tiempo real. Una cuenta permite acceder a funciones adicionales como favoritos y alertas personalizadas." },
       { q: "¿Son fiables los datos?", a: "TIF cruza fuentes oficiales certificadas con sus propios algoritmos internos a medida. En caso de divergencia entre fuentes, nuestro sistema de validación prioriza el dato más reciente y coherente con el contexto territorial. La disponibilidad de la plataforma es del 100% desde su lanzamiento." },
       { q: "¿Quién puede usar TIF?", a: "TIF está diseñado para todos: residentes del Gran Ginebra, visitantes, trabajadores transfronterizos, organizadores de eventos y servicios públicos. La versión pública es gratuita y sin registro. Accesos profesionales con datos enriquecidos están disponibles bajo demanda para socios institucionales." },
@@ -1817,7 +1817,7 @@ export const T: Record<Lang, HomeT> = {
         line: 'linha', lines: 'linhas', other: 'e outras',
       },
       cff: {
-        label: 'FFS / CEVA',
+        label: 'CFF / CEVA',
         normal: 'Normal', delayOngoing: 'Atraso em curso',
         leman: 'Léman Express', lemanNormal: 'serviço normal', lemanDisrupted: 'perturbado',
       },
@@ -1897,7 +1897,7 @@ export const T: Record<Lang, HomeT> = {
         },
         {
           q: 'Por que não usar simplesmente o Google Maps ou o Twitter?',
-          a: 'O Google Maps tem um atraso de 5 a 15 minutos nas restrições específicas do G7. O Twitter difunde rumores não verificados. O TIF alimenta-se diretamente de fontes oficiais (Polícia Cantonal GE, OFROU, TPG, FFS) com atribuição rastreável para cada informação.',
+          a: 'O Google Maps tem um atraso de 5 a 15 minutos nas restrições específicas do G7. O Twitter difunde rumores não verificados. O TIF alimenta-se diretamente de fontes oficiais (Polícia Cantonal GE, OFROU, TPG, CFF) com atribuição rastreável para cada informação.',
         },
         {
           q: 'Quem é realmente afetado?',
@@ -1952,7 +1952,7 @@ export const T: Record<Lang, HomeT> = {
       slides: [
         { desc: 'Relatos anónimos da comunidade TIF. Correlação de campo para aperfeiçoar os dados oficiais.', live: 'Complementar' },
         { desc: 'Tráfego rodoviário A1, A40 e rede nacional. Incidentes, encerramentos, obras em tempo real.', live: 'Live  60s' },
-        { desc: 'Sistema de Informação do Território Genebrino. Viabilidade, eventos e restrições oficiais.', live: 'Oficial Cantão GE' },
+        { desc: 'Sistema de Informação do Território Genebrino. Rede viária, eventos e restrições oficiais.', live: 'Oficial Cantão GE' },
         { desc: 'Perturbações, atrasos e desvios na rede de elétricos, autocarros e troleicarros da Grande Genebra.', live: 'Live  30s' },
         { desc: 'Léman Express, InterRegio, atrasos via OpenTransportData.swiss. Todas as linhas cobertas.', live: 'Live  30s' },
         { desc: 'Alertas meteorológicos oficiais, precipitações, tempestades e vigilância para o Cantão de Genebra.', live: 'Oficial Confederação' },
@@ -2002,7 +2002,7 @@ export const T: Record<Lang, HomeT> = {
       legalHead: 'Dados e legal', docHead: 'Documentação',
       tc1Slides: [
         { name: 'Alojamento', desc: 'Hosting UE (DE/IE) · migração Suíça em curso · dados nunca fora da UE' },
-        { name: 'Proteção de dados', desc: 'RGPD  LPD  Nenhum dado vendido' },
+        { name: 'Proteção de dados', desc: 'RGPD  nLPD  Nenhum dado vendido' },
         { name: 'Confidencialidade', desc: 'Dados recolhidos  Duração  Direitos' },
         { name: 'Contacto segurança', desc: 'contact@borja-swiss-solutions.ch' },
       ],
@@ -2017,7 +2017,7 @@ export const T: Record<Lang, HomeT> = {
       vulnTitle: 'Notificação de vulnerabilidades', vulnSub: 'Responsible disclosure, prazo, contacto cifrado',
       auditTitle: 'Solicitar acesso de auditoria completo', auditSub: 'Arquitetura detalhada, API sandbox, sessão técnica',
       partnerTitle: 'Parceria institucional', partnerSub: 'Municípios, serviços de emergência, ONG, autoridades',
-      disclaimer: 'O TIF agrega informações públicas e não constitui uma plataforma oficial de alerta das autoridades cantonais ou federais.',
+      disclaimer: '⚠ O TIF agrega informações públicas e não constitui uma plataforma oficial de alerta das autoridades cantonais ou federais.',
       learnMore: 'Saber mais →', seeMore: 'Ver →',
     },
     final: {
@@ -2028,7 +2028,7 @@ export const T: Record<Lang, HomeT> = {
     footer: {
       tagline: 'Painel cidadão, Grande Genebra, por Börja Swiss Solutions RI',
       copyright: '© 2025 Börja Swiss Solutions RI, Genebra, Suíça',
-      legal: 'RGPD, LPD, Alojado na Suíça, Dados anonimizados',
+      legal: 'RGPD, nLPD, Alojado na Suíça, Dados anonimizados',
       live: 'Situação live', sources: 'Fontes', support: 'Apoiar',
       transparency: 'Transparência', contact: 'Contacto', privacy: 'Privacidade',
     },
@@ -2066,7 +2066,7 @@ export const T: Record<Lang, HomeT> = {
       { label: 'Fronteiras', text: '7 postos fronteiriços abertos: Anières, Moillesulaz, Thônex-Vallard, Bardonnex, Perly, Meyrin, Ferney-Voltaire · Estações Cornavin e Annemasse + aeroporto GVA abertos · Documento de identidade obrigatório · Possíveis esperas' },
       { label: 'CEVA',      text: 'Léman Express 4 linhas monitorizadas: L1, L2, L3, L4' },
       { label: 'Info',      text: '47 000 trabalhadores fronteiriços por dia na Grande Genebra afetados pelas restrições G7' },
-      { label: 'Fontes',    text: 'OFROU, Polícia Cantonal GE, TPG, FFS, MeteoSuíça, SITG, BAZG' },
+      { label: 'Fontes',    text: 'OFROU, Polícia Cantonal GE, TPG, CFF, MeteoSuíça, SITG, BAZG' },
     ],
     shareText: 'O TIF centraliza em tempo real todas as perturbações do G7 na Grande Genebra. Estradas, fronteiras, TPG, meteorologia: gratuito e sem registo.',
     agenda: {
@@ -2074,7 +2074,7 @@ export const T: Record<Lang, HomeT> = {
       sectionLabel: 'Agenda · Grande Genebra · Verão 2026',
       h2a: 'Tudo o que acontece', h2b: 'na sua região.',
       sub: 'Eventos verificados · Fontes oficiais · Atualizado continuamente',
-      fullLabel: 'Agenda completo',
+      fullLabel: 'Agenda completa',
       fullH2a: 'Todos os eventos', fullH2b: 'da Grande Genebra.',
       free: 'GRATUITO', freeLower: 'Gratuito',
       seeMap: 'Ver no mapa →', ticket: 'Bilheteira →',
@@ -2132,7 +2132,7 @@ export const T: Record<Lang, HomeT> = {
         line: 'linjë', lines: 'linja', other: 'dhe të tjera',
       },
       cff: {
-        label: 'FFS / CEVA',
+        label: 'CFF / CEVA',
         normal: 'Normal', delayOngoing: 'Vonesë në vazhdim',
         leman: 'Léman Express', lemanNormal: 'shërbim normal', lemanDisrupted: 'i ndërprerë',
       },
@@ -2178,7 +2178,7 @@ export const T: Record<Lang, HomeT> = {
         {
           numLabel: 'Mobilitet',
           title: 'Një infermiere. 7:45. Bardonnex e mbyllur.',
-          withoutText: 'e mëson në vend pas 20 minutash radhë.',
+          withoutText: 'e mëson në vend pas 20 minutash në radhë.',
           withText: 'alarm në 6:30, itinerari i zgjedhur në shtëpi. Mbërrin në kohë.',
         },
         {
@@ -2212,7 +2212,7 @@ export const T: Record<Lang, HomeT> = {
         },
         {
           q: 'Pse të mos përdorni thjesht Google Maps ose Twitter?',
-          a: 'Google Maps ka vonesë 5–15 minuta për kufizimet specifike të G7. Twitter përhap thashetheme të paverifikuara. TIF ushqehet drejtpërdrejt nga burime zyrtare (Policia Kantonale GE, OFROU, TPG, FFS) me atribuim të gjurmueshëm për çdo informacion.',
+          a: 'Google Maps ka vonesë 5–15 minuta për kufizimet specifike të G7. Twitter përhap thashetheme të paverifikuara. TIF ushqehet drejtpërdrejt nga burime zyrtare (Policia Kantonale GE, OFROU, TPG, CFF) me atribuim të gjurmueshëm për çdo informacion.',
         },
         {
           q: 'Kush preket realisht?',
@@ -2267,7 +2267,7 @@ export const T: Record<Lang, HomeT> = {
       slides: [
         { desc: 'Raporte anonime nga komuniteti TIF. Korrelacion në terren për të rafinuar të dhënat zyrtare.', live: 'Plotësuese' },
         { desc: 'Trafiku autostrador A1, A40 dhe rrjeti kombëtar. Incidente, mbyllje, punime në kohë reale.', live: 'Live  60s' },
-        { desc: 'Sistemi i Informacionit të Territorit Gjeneverë. Rrugëkalim, ngjarje dhe kufizime zyrtare.', live: 'Zyrtar Kantoni GE' },
+        { desc: 'Sistemi i Informacionit të Territorit Gjenevës. Rrjeti rrugor, ngjarje dhe kufizime zyrtare.', live: 'Zyrtar Kantoni GE' },
         { desc: 'Ndërprerje, vonesa dhe devijime në rrjetin e tramvajeve, autobusëve dhe trolejbusëve të Gjenevës së Madhe.', live: 'Live  30s' },
         { desc: 'Léman Express, InterRegio, vonesa nëpërmjet OpenTransportData.swiss. Të gjitha linjat e mbuluara.', live: 'Live  30s' },
         { desc: 'Alarme meteorologjike zyrtare, reshje, stuhia dhe vigjilencë për Kantonin e Gjenevës.', live: 'Zyrtar Konfederata' },
@@ -2313,11 +2313,11 @@ export const T: Record<Lang, HomeT> = {
     trans: {
       sectionLabel: 'Besimi dhe Transparenca',
       h2a: 'Ndershmëria', h2b: 'si fasadë.',
-      sub: 'Nuk pretendojmë të jemi të çertifikuar. Preferojmë transparencën aktive dhe ju ftojmë të auditoni platformën vetë.',
+      sub: 'Nuk pretendojmë të jemi të certifikuar. Preferojmë transparencën aktive dhe ju ftojmë të auditoni platformën vetë.',
       legalHead: 'Të dhëna dhe ligjore', docHead: 'Dokumentacion',
       tc1Slides: [
         { name: 'Hosting', desc: 'Hosting BE (DE/IE) · migrim Zvicra në vazhdim · të dhëna kurrë jashtë BE' },
-        { name: 'Mbrojtja e të dhënave', desc: 'RGPD  LPD  Asnjë të dhënë e shitur' },
+        { name: 'Mbrojtja e të dhënave', desc: 'RGPD  nLPD  Asnjë të dhënë e shitur' },
         { name: 'Konfidencialiteti', desc: 'Të dhëna të mbledhura  Kohëzgjatja  Të drejtat' },
         { name: 'Kontakt sigurie', desc: 'contact@borja-swiss-solutions.ch' },
       ],
@@ -2332,7 +2332,7 @@ export const T: Record<Lang, HomeT> = {
       vulnTitle: 'Raportimi i dobësive', vulnSub: 'Responsible disclosure, afat, kontakt i enkriptuar',
       auditTitle: 'Kërko akses auditimi të plotë', auditSub: 'Arkitekturë e detajuar, API sandbox, sesion teknik',
       partnerTitle: 'Partneritet institucional', partnerSub: 'Komuna, shërbime emergjence, OJQ, autoritete',
-      disclaimer: 'TIF grumbullon informacione publike dhe nuk përbën një platformë zyrtare alarmi të autoriteteve kantonale ose federale.',
+      disclaimer: '⚠ TIF grumbullon informacione publike dhe nuk përbën një platformë zyrtare alarmi të autoriteteve kantonale ose federale.',
       learnMore: 'Mëso më shumë →', seeMore: 'Shiko →',
     },
     final: {
@@ -2343,7 +2343,7 @@ export const T: Record<Lang, HomeT> = {
     footer: {
       tagline: 'Panel qytetar, Gjeneva e Madhe, nga Börja Swiss Solutions RI',
       copyright: '© 2025 Börja Swiss Solutions RI, Gjenevë, Zvicër',
-      legal: 'RGPD, LPD, Hostuar në Zvicër, Të dhëna të anonimizuara',
+      legal: 'RGPD, nLPD, Hostuar në Zvicër, Të dhëna të anonimizuara',
       live: 'Situata live', sources: 'Burimet', support: 'Mbështet',
       transparency: 'Transparenca', contact: 'Kontakt', privacy: 'Privatësia',
     },
@@ -2381,16 +2381,16 @@ export const T: Record<Lang, HomeT> = {
       { label: 'Kufijtë',  text: '7 kalime kufitare të hapura: Anières, Moillesulaz, Thônex-Vallard, Bardonnex, Perly, Meyrin, Ferney-Voltaire · Stacionet Cornavin dhe Annemasse + aeroporti GVA të hapura · Dokument identiteti i detyrueshëm · Pritje të mundshme' },
       { label: 'CEVA',     text: 'Léman Express 4 linja të monitoruara: L1, L2, L3, L4' },
       { label: 'Info',     text: '47 000 punëtorë kufitarë në ditë në Gjenevën e Madhe të prekur nga kufizimet G7' },
-      { label: 'Burimet',  text: 'OFROU, Policia Kantonale GE, TPG, FFS, MeteoZvicra, SITG, BAZG' },
+      { label: 'Burimet',  text: 'OFROU, Policia Kantonale GE, TPG, CFF, MeteoZvicra, SITG, BAZG' },
     ],
-    shareText: 'TIF centralizon në kohë reale të gjitha ndërhyrjet e G7 në Gjenevin e Madhe. Rrugë, kufij, TPG, mot: falas dhe pa regjistrim.',
+    shareText: 'TIF centralizon në kohë reale të gjitha ndërprerjet e G7 në Gjenevën e Madhe. Rrugë, kufij, TPG, mot: falas dhe pa regjistrim.',
     agenda: {
       navLink: 'Ngjarje',
       sectionLabel: 'Agjenda · Gjeneva e Madhe · Verë 2026',
       h2a: 'Gjithçka që ndodh', h2b: 'në rajonin tuaj.',
       sub: 'Ngjarje të verifikuara · Burime zyrtare · Përditësuar vazhdimisht',
       fullLabel: 'Agjenda e plotë',
-      fullH2a: 'Të gjitha ngjarjet', fullH2b: 'të Gjenevisë së Madhe.',
+      fullH2a: 'Të gjitha ngjarjet', fullH2b: 'të Gjenevës së Madhe.',
       free: 'FALAS', freeLower: 'Falas',
       seeMap: 'Shiko në hartë →', ticket: 'Bileta →',
       showMore: 'Shiko më shumë', eventsLabel: 'ngjarje',
@@ -2398,16 +2398,16 @@ export const T: Record<Lang, HomeT> = {
       filterCulture: 'Kulturë', filterFootball: 'Futboll 🇨🇭', filterCinema: 'Kinema',
     },
     app: {
-      sub: 'Tërë inteligjenca territoriale e Gjenevisë së Madhe, e optimizuar për celular. Lëvizshmëri, agjenda e ngjarjeve dhe alarme në kohë reale, kudo që jeni.',
+      sub: 'Tërë inteligjenca territoriale e Gjenevës së Madhe, e optimizuar për celular. Lëvizshmëri, agjenda e ngjarjeve dhe alarme në kohë reale, kudo që jeni.',
       launch: 'Lansim i planifikuar fund të qershorit 2026 · iOS & Android',
     },
     faq2: [
       { q: "A ka një aplikacion celular?", a: "Po, aplikacioni TIF do të jetë i disponueshëm në fund të qershorit 2026 në App Store dhe Google Play Store. Do të ofrojë të gjitha funksionalitetet e versionit web, të optimizuara për celular, me njoftime në kohë reale." },
-      { q: "Si funksionon TIF?", a: "TIF agreson 6 burime të dhënash zyrtare (HERE, CFF, TPG, MeteoSwiss, OFDF, OpenStreetMap) dhe i pasuron ato me algoritmet e veta të përpunimit të zhvilluara në shtëpi. Këto algoritme pronësore analizojnë, kryqëzojnë dhe parashikojnë kushtet territoriale me saktësi më të lartë se çdo burim individual." },
+      { q: "Si funksionon TIF?", a: "TIF agregon 6 burime të dhënash zyrtare (HERE, CFF, TPG, MeteoZvicra, OFDF, OpenStreetMap) dhe i pasuron ato me algoritmet e veta të përpunimit të zhvilluara në shtëpi. Këto algoritme pronësore analizojnë, kryqëzojnë dhe parashikojnë kushtet territoriale me saktësi më të lartë se çdo burim individual." },
       { q: "A është TIF falas?", a: "Po, TIF është plotësisht falas për të gjithë përdoruesit. Nuk kërkohet regjistrim për të parë hartën dhe të dhënat në kohë reale. Një llogari jep qasje në funksionalitete shtesë si të preferuarat dhe alarmet e personalizuara." },
-      { q: "A janë të dhënat të besueshme?", a: "TIF kryqëzon burime zyrtare të certifikuara me algoritmet e veta të brendshme të personalizuara. Në rast mospajtuese mes burimeve, sistemi ynë i validimit jep prioritet të dhënës më të re dhe më koherente me kontekstin territorial. Disponueshmëria e platformës është 100% që nga lansimi." },
-      { q: "Kush mund ta përdorë TIF-in?", a: "TIF është projektuar për të gjithë: banorët e Gjenevisë së Madhe, vizitorët, punëtorët ndërkufitarë, organizatorët e ngjarjeve dhe shërbimet publike. Versioni publik është falas dhe pa regjistrim. Qasjet profesionale me të dhëna të pasura janë të disponueshme me kërkesë për partnerët institucionalë." },
-      { q: "Si mbrohen të dhënat e mia?", a: "TIF aplikon parimin Privacy by Design. Nuk ruhen koordinata të sakta GPS. Të dhënat e përdorimit janë anonimizuara dhe agreguara. Hostimi është ekskluzivisht në Evropë, në përputhje me nLPD zvicerane dhe GDPR-in europian." },
+      { q: "A janë të dhënat të besueshme?", a: "TIF kryqëzon burime zyrtare të certifikuara me algoritmet e veta të brendshme të personalizuara. Në rast mospajtimi mes burimeve, sistemi ynë i validimit jep prioritet të dhënës më të re dhe më koherente me kontekstin territorial. Disponueshmëria e platformës është 100% që nga lansimi." },
+      { q: "Kush mund ta përdorë TIF-in?", a: "TIF është projektuar për të gjithë: banorët e Gjenevës së Madhe, vizitorët, punëtorët ndërkufitarë, organizatorët e ngjarjeve dhe shërbimet publike. Versioni publik është falas dhe pa regjistrim. Qasjet profesionale me të dhëna të pasura janë të disponueshme me kërkesë për partnerët institucionalë." },
+      { q: "Si mbrohen të dhënat e mia?", a: "TIF aplikon parimin Privacy by Design. Nuk ruhen koordinata të sakta GPS. Të dhënat e përdorimit janë anonimizuara dhe agreguara. Hostimi është ekskluzivisht në Evropë, në përputhje me nLPD zvicerane dhe RGPD europian." },
     ],
   },
 
@@ -2433,7 +2433,7 @@ export const T: Record<Lang, HomeT> = {
     },
     dash: {
       sectionLabel: 'リアルタイム状況',
-      h2a: '今何が起きているか', h2b: '',
+      h2a: '今', h2b: '起きていること',
       sub: '公式ソースから30秒ごとに更新。',
       updatedAt: '更新時刻：',
       traffic: {
@@ -2534,7 +2534,7 @@ export const T: Record<Lang, HomeT> = {
           a: '2026年6月10日〜19日（国境検査）にグラン・ジュネーヴを移動するすべての人—G7サミットはエビアン・レ・バン6月15〜17日：1日4万7000人の越境労働者、配送業者、医療従事者、制限区域の住民、観光客。',
         },
         {
-          q: 'TIFは本当に渋滞を防げますか？',
+          q: 'TIFは本当に足止めを防げますか？',
           a: '制限情報が6時に公開され、7時30分に出発する場合、TIFはハンドルを握る前に警告します。紹介したシナリオはジュネーヴの国際イベントで毎回起きる実際の状況です。',
         },
         {
@@ -2647,7 +2647,7 @@ export const T: Record<Lang, HomeT> = {
       vulnTitle: '脆弱性の報告', vulnSub: '責任ある開示、期限、暗号化された連絡先',
       auditTitle: '完全な監査アクセスを申請', auditSub: '詳細アーキテクチャ、APIサンドボックス、技術セッション',
       partnerTitle: '機関パートナーシップ', partnerSub: '自治体、緊急サービス、NGO、当局',
-      disclaimer: 'TIFは公開情報を集約するものであり、州または連邦当局の公式アラートプラットフォームではありません。',
+      disclaimer: '⚠ TIFは公開情報を集約するものであり、州または連邦当局の公式アラートプラットフォームではありません。',
       learnMore: '詳しく見る →', seeMore: '見る →',
     },
     final: {
@@ -2659,13 +2659,13 @@ export const T: Record<Lang, HomeT> = {
       tagline: '市民ダッシュボード、グラン・ジュネーヴ、Börja Swiss Solutions RI提供',
       copyright: '© 2025 Börja Swiss Solutions RI、ジュネーヴ、スイス',
       legal: 'GDPR、nDSG、スイスでホスティング、データ匿名化',
-      live: 'ライブ状況', sources: 'ソース', support: 'サポート',
+      live: 'リアルタイム状況', sources: 'データ源', support: 'サポート',
       transparency: '透明性', contact: 'お問い合わせ', privacy: 'プライバシー',
     },
     common: {
       normal: '正常',
       borderClear: '空き', borderLight: '軽微', borderModerate: '中程度',
-      borderHeavy: '混雑', borderBlocked: '閉鎖',
+      borderHeavy: '混雑', borderBlocked: '大渋滞',
       sourceLabel: '公式ソース', liveMap: 'ライブマップ', borjaNet: 'Börjaネットワーク', detail: '詳細',
       sending: '送信中...', sent: '✓ 送信完了。48営業時間以内に返信します。', send: '✉ 送信',
     },
@@ -2740,7 +2740,7 @@ export const T: Record<Lang, HomeT> = {
       h1a: '大日内瓦地区，',
       h1b: '实时',
       accent: '掌握动态。',
-      p1: '一起事故。一条封路。一条G7警报。',
+      p1: '一起事故。一处封路。一条G7警报。',
       p2: '这些信息存在。只是分散各处。',
       p3: 'TIF将其集中整合。在为时已晚之前。',
       btn: '打开实时地图',
@@ -2825,7 +2825,7 @@ export const T: Record<Lang, HomeT> = {
         },
         {
           numLabel: '快速响应',
-          title: '发生事故。谁最先获知？',
+          title: '发生事故。谁最先通报？',
           withoutText: 'Twitter、谣言、Google Maps延迟。',
           withText: '30秒内聚合官方来源，在混乱发生前提供经核实的信息。',
         },
@@ -2850,7 +2850,7 @@ export const T: Record<Lang, HomeT> = {
         },
         {
           q: 'TIF真的能避免堵车吗？',
-          a: '如果限制信息于早6点发布，而您7点30分出发，TIF会在您拿起方向盘前发出警报。所展示的场景都是日内瓦每次重大国际活动中真实发生的情况。',
+          a: '如果限制信息于早6点发布，而您7点30分出发，TIF会在您握上方向盘前发出警报。所展示的场景都是日内瓦每次重大国际活动中真实发生的情况。',
         },
         {
           q: '这个平台真的完全免费吗？',
@@ -2947,7 +2947,7 @@ export const T: Record<Lang, HomeT> = {
       legalHead: '数据与法律', docHead: '文档',
       tc1Slides: [
         { name: '托管', desc: '欧盟托管（DE/IE）· 迁移至瑞士进行中 · 数据从不离开欧盟' },
-        { name: '数据保护', desc: 'GDPR  nDSG  不出售任何数据' },
+        { name: '数据保护', desc: 'GDPR  nLPD  不出售任何数据' },
         { name: '隐私保密', desc: '收集的数据  保留期限  用户权利' },
         { name: '安全联系', desc: 'contact@borja-swiss-solutions.ch' },
       ],
@@ -2962,7 +2962,7 @@ export const T: Record<Lang, HomeT> = {
       vulnTitle: '漏洞报告', vulnSub: '负责任披露、时限、加密联系方式',
       auditTitle: '申请完整审计访问权限', auditSub: '详细架构、API沙箱、技术会议',
       partnerTitle: '机构合作', partnerSub: '市政机构、应急服务、NGO、主管部门',
-      disclaimer: 'TIF汇总公开信息，不构成州级或联邦主管部门的官方预警平台。',
+      disclaimer: '⚠ TIF汇总公开信息，不构成州级或联邦主管部门的官方预警平台。',
       learnMore: '了解更多 →', seeMore: '查看 →',
     },
     final: {
@@ -2973,14 +2973,14 @@ export const T: Record<Lang, HomeT> = {
     footer: {
       tagline: '市民仪表板，大日内瓦地区，由 Börja Swiss Solutions RI 提供',
       copyright: '© 2025 Börja Swiss Solutions RI，日内瓦，瑞士',
-      legal: 'GDPR、nDSG、托管于瑞士、数据已匿名化',
-      live: '实时状况', sources: '来源', support: '支持',
+      legal: 'GDPR、nLPD、托管于瑞士、数据已匿名化',
+      live: '实时状况', sources: '数据来源', support: '支持',
       transparency: '透明度', contact: '联系', privacy: '隐私',
     },
     common: {
       normal: '正常',
       borderClear: '畅通', borderLight: '轻微', borderModerate: '中等',
-      borderHeavy: '拥堵', borderBlocked: '封闭',
+      borderHeavy: '拥堵', borderBlocked: '严重拥堵',
       sourceLabel: '官方来源', liveMap: '实时地图', borjaNet: 'Börja网络', detail: '详情',
       sending: '发送中...', sent: '✓ 消息已发送。我们将在48个工作小时内回复。', send: '✉ 发送',
     },
@@ -3033,7 +3033,7 @@ export const T: Record<Lang, HomeT> = {
     },
     faq2: [
       { q: "有移动应用程序吗？", a: "是的，TIF应用将于2026年6月底在App Store和Google Play Store上架。它将提供所有网页版功能，针对移动端优化，并支持实时通知。" },
-      { q: "TIF是如何运作的？", a: "TIF汇聚6个官方数据源（HERE、SBB、TPG、MeteoSwiss、OFDF、OpenStreetMap），并通过自主研发的处理算法对其进行增强。这些专有算法能够分析、交叉核实和预测领土状况，其精度优于任何单一数据源。" },
+      { q: "TIF是如何运作的？", a: "TIF汇聚6个官方数据源（HERE、SBB、TPG、瑞士气象局、OFDF、OpenStreetMap），并通过自主研发的处理算法对其进行增强。这些专有算法能够分析、交叉核实和预测领土状况，其精度优于任何单一数据源。" },
       { q: "TIF是免费的吗？", a: "是的，TIF对所有用户完全免费。无需注册即可查看地图和实时数据。注册账户后可使用收藏和个性化警报等附加功能。" },
       { q: "数据可靠吗？", a: "TIF将经认证的官方来源与自定义内部算法进行交叉核实。当来源之间存在分歧时，我们的验证系统优先采用最新且与领土背景最为吻合的数据。平台自上线以来的可用率为100%。" },
       { q: "谁可以使用TIF？", a: "TIF面向所有人设计：大日内瓦地区居民、访客、跨境通勤者、活动组织者及公共服务机构。公共版本免费且无需注册。面向机构合作伙伴的专业访问权限（含丰富数据）可按需申请。" },
