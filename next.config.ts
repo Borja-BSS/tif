@@ -2,6 +2,10 @@ import type { NextConfig } from 'next'
 import { withSentryConfig } from '@sentry/nextjs'
 
 const nextConfig: NextConfig = {
+  // Serveur Node autonome : requis pour un hébergement hors Vercel
+  // (Infomaniak). N'altère pas le comportement de l'app, seulement son
+  // format de sortie.
+  output: 'standalone',
   productionBrowserSourceMaps: false,
   async rewrites() {
     return [
