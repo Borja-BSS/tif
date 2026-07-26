@@ -5,8 +5,8 @@ const BASE = 'https://tif.borja-swiss-solutions.ch'
 
 export const metadata: Metadata = {
   title: 'Agenda Genève 2026 — Tous les événements du Grand Genève | TIF',
-  description: 'Agenda complet des événements à Genève et Grand Genève en 2026 : FIFA World Cup, Paléo Festival, Montreux Jazz, Servette FC, cinéma plein air, expositions et sport. Programme, billets et infos pratiques.',
-  keywords: 'agenda Genève 2026, événements Genève, que faire Grand Genève, FIFA World Cup Genève, Paléo Festival, Montreux Jazz, Servette FC, festivals Genève, concerts Genève, cinéma Genève',
+  description: 'Agenda complet des événements à Genève et Grand Genève en 2026 : La Bâtie, cinéma en plein air, Servette FC, concerts, expositions et sport. Programme, billets et infos pratiques.',
+  keywords: 'agenda Genève 2026, événements Genève, que faire Grand Genève, La Bâtie Festival, cinéma plein air Genève, Servette FC, festivals Genève, concerts Genève, expositions Genève',
   openGraph: {
     title: 'Agenda Genève 2026 — Tous les événements du Grand Genève | TIF',
     description: 'Agenda complet des événements à Genève et Grand Genève en 2026.',
@@ -115,7 +115,7 @@ export default function AgendaPage() {
             <span style={{ color: 'var(--blue, #0A84FF)' }}>Grand Genève</span>
           </h1>
           <p style={{ fontSize: 17, color: 'var(--text-secondary, #666)', maxWidth: 720, lineHeight: 1.7, margin: '0 0 28px' }}>
-            {allWithDates.length} événements référencés — festivals, football FIFA World Cup, cinéma de plein air,
+            {allWithDates.length} événements référencés — festivals, cinéma de plein air, football,
             concerts, expositions et sport dans le Grand Genève. Programme complet avec billets et accès transports.
           </p>
 
@@ -240,11 +240,11 @@ export default function AgendaPage() {
         <footer style={{ marginTop: 48, paddingTop: 24, borderTop: '1px solid var(--border, #e0e0e0)', fontSize: 13, color: 'var(--text-secondary, #666)', lineHeight: 1.9 }}>
           <p>
             <strong>TIF — Intelligence Territoriale Grand Genève</strong> est la référence en matière d&apos;agenda événementiel pour Genève et sa région transfrontalière.
-            Que vous cherchiez un match de la Coupe du Monde FIFA 2026, le programme du Paléo Festival de Nyon, un film en plein air au Parc de la Grange, ou les matchs du Servette FC,
+            Que vous cherchiez le programme de La Bâtie, un film en plein air au bord du lac, une exposition au Musée Rath, ou les matchs du Servette FC au Stade de Genève,
             TIF vous donne accès en temps réel à tous les événements du Grand Genève — de Genève à Nyon, Carouge, Grand-Saconnex, Annemasse et Ferney-Voltaire.
           </p>
           <nav aria-label="Navigation événements" style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: '8px 16px' }}>
-            <a href="/evenements/categorie/football" style={{ color: 'var(--blue, #0A84FF)', textDecoration: 'none' }}>Football & FIFA World Cup</a>
+            <a href="/evenements/categorie/football" style={{ color: 'var(--blue, #0A84FF)', textDecoration: 'none' }}>Football & Servette FC</a>
             <a href="/evenements/categorie/festival" style={{ color: 'var(--blue, #0A84FF)', textDecoration: 'none' }}>Festivals Genève 2026</a>
             <a href="/evenements/categorie/cinema" style={{ color: 'var(--blue, #0A84FF)', textDecoration: 'none' }}>Cinéma de plein air</a>
             <a href="/evenements/categorie/sport" style={{ color: 'var(--blue, #0A84FF)', textDecoration: 'none' }}>Sport Grand Genève</a>

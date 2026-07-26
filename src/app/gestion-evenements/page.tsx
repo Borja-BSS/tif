@@ -66,7 +66,7 @@ const CASES = [
   {
     icon: '⚽',
     title: 'Football & sport',
-    desc: "Matchs Stade de Genève, Mondial 2026, tournois : zones de fan, transports publics, coordination avec les services de sécurité.",
+    desc: "Matchs au Stade de Genève, tournois, grandes rencontres : zones de fan, transports publics, coordination avec les services de sécurité.",
   },
   {
     icon: '🏛️',

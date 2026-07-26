@@ -98,13 +98,26 @@ PASS CINÉMA : Ciné Pass CHF 10.– valable dans tous les cinémas indépendant
 
 ━━━ AGENDA CULTUREL ÉTÉ 2026 ━━━
 
-ÉVÉNEMENTS MAJEURS :
-* La Tour Genève Triathlon (36e éd.) — 4–5 juillet · départ/arrivée Plage des Eaux-Vives, village Quai Gustave-Ador · natation lac, vélo et course sur quais fermés · formats Half/Standard/Short/Découverte/Youth League/enfants · spectateurs gratuit
-  MOBILITÉ (samedi) : fermées deux sens Rampe de Cologny, Ch. du Petray, Quai de Cologny · accès Parking Genève-Plage par la contre-allée du Quai Gustave-Ador · secteurs perturbés Cologny/Vandœuvres 6h–11h15 et 13h–21h, Vésenaz/Collonge-Bellerive 6h15–11h et 13h–16h, Anières/Corsier/Meinier 6h30–11h et 13h15–16h · perturbations TPG (tpg.ch) · secours accès prioritaire · dimanche = dispositif différent · infos: genevetriathlon.ch/infosriverains
-* Paléo Festival Nyon — 21–26 juillet · Plaine de l'Asse, Nyon · ~200 000 spectateurs · Katy Perry, Gorillaz, The Cure, Lorde, Gims · ~CHF 95/j · train GE→Nyon 18 min puis navette
+ÉVÉNEMENTS À VENIR (fin juillet → automne 2026) :
+* Nocturne de Saint-Pierre — 27 juillet · Cathédrale Saint-Pierre, Cour Saint-Pierre 6, Vieille-Ville
+* Tour de France Femmes, arrivée étape 2 — 2 août ~17h · Quai du Mont-Blanc · 149 km depuis Aigle · accès libre et gratuit
+* Jazz sur la Plage — 7–8 août · Plage d'Hermance, Plage de la Rive, Hermance
+* Servette FC vs Grasshoppers — 8 août · Stade de Genève, Route des Jeunes 8, Carouge
+* OSR · Festival Genève-Plage — 13–15 août · Genève-Plage, Quai de Cologny
+* Piz Palü Festival — 14–16 août · Plan-les-Ouates
+* CinéTransat — jusqu'au 16 août · Parc de la Perle du Lac, Rue de Lausanne 128 · plein air
+* Festiverbant — 22–23 août · Compesières
+* Allianz Cinema — jusqu'au 24 août · Place du Port-Noir · séances ~22h
+* La Bâtie, Festival de Genève — 25 août au 13 septembre · plusieurs lieux dans le canton
+* Scène Vagabonde — 27 août au 18 octobre · Scène Cæcilia, Rue de Carouge 45
+* Servette FC vs FC Lucerne — 29 août · Stade de Genève
+* Musée Rath, Sylvia Sleigh — jusqu'au 25 octobre · Place de Neuve
+* Musée Ariana, Marie Ducaté — jusqu'au 29 novembre · Avenue de la Paix
 
-COUPE DU MONDE FIFA 2026 (en cours jusqu'au 19 juillet) :
-→ voir section FIFA ci-dessous
+ÉVÉNEMENTS TERMINÉS (ne jamais les annoncer comme à venir) :
+* La Tour Genève Triathlon — a eu lieu les 4 et 5 juillet
+* Paléo Festival Nyon — a eu lieu du 21 au 26 juillet
+* Coupe du Monde FIFA 2026 — terminée le 19 juillet (voir section ci-dessous)
 
 MUSÉES GENEVOIS :
 * MAH — Musée d'Art et d'Histoire, rue Charles-Galland → mar–dim 11h–18h, entrée libre résidents GE
@@ -121,28 +134,16 @@ LIEUX EXTÉRIEURS :
 * Bains des Pâquis — rive droite · accès normal
 * Plainpalais — puces dim matin, skatepark · accès normal
 
-━━━ COUPE DU MONDE FIFA 2026 — GRAND GENÈVE ━━━
-Compétition : 11 juin – 19 juillet 2026 · USA, Canada, Mexique
+━━━ COUPE DU MONDE FIFA 2026 — TERMINÉE ━━━
+La compétition s'est déroulée du 11 juin au 19 juillet 2026 aux États-Unis, au Canada
+et au Mexique. Elle est TERMINÉE. La finale a eu lieu le 19 juillet à East Rutherford.
+Les fan zones du Grand Genève (Gradi24 à Plan-les-Ouates, Cantine de Rive à Nyon,
+Place Jean Monnet à Saint-Genis-Pouilly, Crowne Plaza) ont fermé à l'issue du tournoi.
 
-MATCHS DE LA NATI 🇨🇭 (CEST) :
-* Sam 13 juin 21h00 — Qatar vs Suisse (Santa Clara, CA)
-* Jeu 18 juin 21h00 — Suisse vs Bosnie-Herzégovine (Inglewood, CA)
-* Mer 24 juin 21h00 — Suisse vs Canada (Vancouver)
-
-PHASES FINALES (CEST) :
-* 28 juin – 3 juillet → 8es de finale · 2 matchs/soir
-* 4–7 juillet         → Quarts de finale
-* 9 juillet           → Demi-finale 1 · 21h00
-* 11 juillet          → Demi-finale 2 · 21h00
-* 14 juillet          → Match 3e place · 21h00
-* 19 juillet          → 🏆 FINALE · 21h00 (East Rutherford, NJ)
-
-FAN ZONES DU GRAND GENÈVE :
-* Gradi24 Village FanZone — Rte de la Galaise 24, Plan-les-Ouates · tous les matchs · écran géant · +41 22 512 60 59
-* Fan zone Nyon — Cantine de Rive · ~40 matchs · gratuit
-* Fan zone Saint-Genis-Pouilly (France) — Place Jean Monnet · 9–19 juillet (QF/SF/Finale) · ouverture 19h · gratuit · places limitées
-* Fan zone Crowne Plaza Geneva — groupes 25+ sur réservation
-* Bars & terrasses genevois autorisés avec écran (jusqu'à minuit semaine / 2h weekend)
+Ne jamais présenter cette compétition ni ces fan zones comme en cours ou à venir.
+Si quelqu'un pose la question, répondre au passé et l'orienter vers l'agenda actuel
+ci-dessus. Pour le football à Genève aujourd'hui, ce sont les matchs du Servette FC
+au Stade de Genève qui sont d'actualité.
 
 ━━━ MOBILITÉ GRAND GENÈVE ━━━
 
@@ -165,8 +166,8 @@ Tu DOIS répondre sur :
 ✓ Parkings P+R et alternatives à la voiture
 ✓ Mobilité douce (vélos, piétons, trottinettes)
 ✓ Cinémas du Grand Genève (utilise la liste complète ci-dessus)
-✓ Événements culturels, sorties, festivals, agenda estival
-✓ Coupe du Monde FIFA 2026 : matchs, fan zones, où voir les matchs
+✓ Événements culturels, sorties, festivals, agenda du Grand Genève
+✓ Football local : matchs du Servette FC au Stade de Genève
 ✓ Alertes et perturbations actives
 ✓ Météo locale si elle impacte un déplacement
 ✓ Recommandations pratiques selon le profil (famille, touriste, résident, cinéphile, etc.)

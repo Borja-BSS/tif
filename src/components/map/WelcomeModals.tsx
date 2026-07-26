@@ -169,10 +169,13 @@ function RetourNormaleModal({
       <div className="text-center mb-4">
         <div className="text-5xl mb-3">✅</div>
         <h2 className="text-[18px] font-bold text-white mb-1.5 leading-snug">
-          Bienvenue sur TIF — Été 2026
+          Bienvenue sur TIF
         </h2>
+        {/* Formulation volontairement sans date : la liste « À venir » juste
+            dessous est calculée depuis les données et se met à jour seule.
+            Écrire une période ici la condamne à devenir fausse. */}
         <p className="text-[12px] font-medium" style={{ color: 'rgba(255,255,255,0.45)' }}>
-          Mobilité · Sorties · FIFA World Cup jusqu&apos;au 19 juillet
+          Mobilité en temps réel · Sorties et festivals du Grand Genève
         </p>
       </div>
 
@@ -273,14 +276,10 @@ function RetourNormaleModal({
         </div>
       </div>
 
-      {/* App tease */}
-      <div className="rounded-2xl px-3.5 py-3 mb-4 flex items-center gap-3"
-        style={{ background: 'rgba(10,132,255,0.08)', border: '1px solid rgba(10,132,255,0.25)' }}>
-        <span className="text-xl flex-shrink-0">📱</span>
-        <p className="text-[12px] leading-snug" style={{ color: 'rgba(255,255,255,0.80)' }}>
-          <strong style={{ color: '#0A84FF' }}>TIF arrive sur l&apos;App Store</strong> — l&apos;application mobile sort la semaine prochaine.
-        </p>
-      </div>
+      {/* Bloc « TIF arrive sur l'App Store — sortie la semaine prochaine »
+          retiré le 26.07.2026 : l'application mobile n'existe pas encore, la
+          promesse était affichée à chaque visiteur depuis des semaines.
+          À remettre le jour où elle est réellement publiée. */}
 
       {/* Buttons */}
       <div className="flex gap-3">

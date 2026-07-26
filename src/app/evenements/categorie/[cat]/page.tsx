@@ -11,11 +11,11 @@ const CAT_META: Record<string, {
 }> = {
   football: {
     label: 'Football', labelPlural: 'matchs de football', color: '#FF9F0A',
-    title: 'Football à Genève 2026 — FIFA World Cup, Nati, Servette FC | TIF',
-    description: 'Agenda football complet au Grand Genève : Coupe du Monde FIFA 2026, matchs de la Nati, Fanzone Plan-les-Ouates, Servette FC, football local. Dates, billets, accès — TIF Grand Genève.',
-    keywords: 'football Genève 2026, FIFA World Cup Genève, Nati Suisse match, Servette FC, fanzone Genève, Coupe du Monde Genève, football Grand Genève',
+    title: 'Football à Genève 2026 — Servette FC, Stade de Genève | TIF',
+    description: 'Agenda football complet au Grand Genève : Servette FC au Stade de Genève, Super League, football local. Dates, billets, accès — TIF Grand Genève.',
+    keywords: 'football Genève 2026, Servette FC, Stade de Genève, Super League, match football Genève, football Grand Genève',
     h1: 'Football à Genève & Grand Genève — 2026',
-    intro: 'Suivez toute l\'actualité football dans le Grand Genève : la Coupe du Monde FIFA 2026, les fanzones officielles, les matchs de la Nati, le Servette FC et le football local. Billets, programme et infos pratiques.',
+    intro: 'Suivez toute l\'actualité football dans le Grand Genève : le Servette FC au Stade de Genève, la Super League et le football local. Billets, programme et infos pratiques.',
   },
   sport: {
     label: 'Sport', labelPlural: 'événements sportifs', color: '#30D158',

@@ -1578,7 +1578,7 @@ export const CATEGORY_LABELS: Record<string, string> = {
   art:       'Art',
   sport:     'Sport',
   festival:  'Festival',
-  football:  'Football & Mondial',
+  football:  'Football',
   cinema:    'Cinéma',
 }
 
