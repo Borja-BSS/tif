@@ -51,6 +51,32 @@ const SNAP_OFF = process.env.TIF_STATE_FILE === 'off'
 const STATE_FILE = process.env.TIF_STATE_FILE && !SNAP_OFF
   ? process.env.TIF_STATE_FILE
   : path.join(process.cwd(), '.data', 'tif-state.json')
+// Liste blanche : seules les données qu'on ne sait pas recalculer sont écrites sur
+// le disque. Les caches, la présence en direct (`tif:live:sessions`), les métriques,
+// les fenêtres de limitation et les états dérivés (consensus, EWMA, statut de trajet)
+// restent en mémoire. Redis ne contient ni session, ni code à usage unique, ni jeton.
+const DURABLE_PREFIXES = [
+  'tif:admin:custom-alerts',
+  'tif:signalements',
+  'tif:sig:ttl:',
+  'tif:media:',
+  'tif:survey:',
+  'tif:ratings:',
+  'tif:crossings:overrides',
+  'tif:journey:fb:',
+]
+function isDurable(key: string): boolean {
+  return DURABLE_PREFIXES.some(p => key.startsWith(p))
+}
+/** Chemin réel de l'instantané (pour le test et le diagnostic). */
+export const stateFilePath = STATE_FILE
+/** Écrit l'instantané tout de suite (tests, arrêt propre). */
+export function flushStateNow() {
+  dirty = true
+  if (timer) { clearTimeout(timer); timer = null }
+  writeSnapshot()
+}
+
 let dirty = false
 let timer: ReturnType<typeof setTimeout> | null = null
 let loaded = false
@@ -58,25 +84,28 @@ let loaded = false
 function markDirty() {
   dirty = true
   if (timer || SNAP_OFF) return
-  timer = setTimeout(() => {
-    timer = null
-    if (!dirty) return
-    dirty = false
-    try {
-      fs.mkdirSync(path.dirname(STATE_FILE), { recursive: true })
-      const out: Record<string, Entry> = {}
-      for (const [k, e] of store) {
-        if (e.exp !== null && e.exp <= now()) continue
-        // Compteurs de métriques : sans valeur à conserver.
-        if (k.startsWith('tif:metrics:')) continue
-        out[k] = e
-      }
-      const tmp = STATE_FILE + '.tmp'
-      fs.writeFileSync(tmp, JSON.stringify(out))
-      fs.renameSync(tmp, STATE_FILE)
-    } catch { /* disque en lecture seule : mémoire seule */ }
-  }, 30_000)
+  timer = setTimeout(() => { timer = null; writeSnapshot() }, 30_000)
   if (typeof timer === 'object' && 'unref' in timer) timer.unref()
+}
+
+function writeSnapshot() {
+  if (!dirty || SNAP_OFF) return
+  dirty = false
+  try {
+    const dir = path.dirname(STATE_FILE)
+    fs.mkdirSync(dir, { recursive: true, mode: 0o700 })
+    try { fs.chmodSync(dir, 0o700) } catch { /* conteneur qui ignore les modes */ }
+    const out: Record<string, Entry> = {}
+    for (const [k, e] of store) {
+      if (e.exp !== null && e.exp <= now()) continue
+      if (!isDurable(k)) continue
+      out[k] = e
+    }
+    const tmp = STATE_FILE + '.tmp'
+    fs.writeFileSync(tmp, JSON.stringify(out), { mode: 0o600 })
+    try { fs.chmodSync(tmp, 0o600) } catch { /* idem */ }
+    fs.renameSync(tmp, STATE_FILE)
+  } catch { /* disque en lecture seule : mémoire seule */ }
 }
 
 function loadOnce() {
