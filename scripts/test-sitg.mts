@@ -68,11 +68,11 @@ t('imageValide refuse http et autres hotes', [imageValide('http://app2.ge.ch/ter
 // ── 4. Trafic canton : données de 2022 = inconnu ────────────────────────────
 t('ETAT 1,2,3,0 -> jam', [1, 2, 3, 0, null].map(jamDepuisEtat), [1, 3, 6, null, null])
 const P = { id: 'p', nom: 'Point', lat: 46.19, lng: 6.165, type: 'axe' as const }
-const seg = { attributes: { ETAT: 1, DATE_MAJ_ETAT: 1663054500000, NOM: 'Chemin Rieu' }, geometry: { paths: [[[6.165, 46.19], [6.1652, 46.1905]]] } }
+const seg = { attributes: { etat: 1, dateheure: 1663054500000, indiceconfiance: 90 }, geometry: { paths: [[[6.165, 46.19], [6.1652, 46.1905]]] } }
 const l = lecturesDepuisSegments([seg], [P])
-t('segment proche trouve, heure = DATE_MAJ_ETAT', [l.length, l[0]?.at], [1, '2022-09-13T07:35:00.000Z'])
+t('segment proche trouve, heure = dateheure', [l.length, l[0]?.at], [1, '2022-09-13T07:35:00.000Z'])
 t('regle des 20 minutes : donnees de 2022 -> inconnu, jamais vert', decider(P, l, Date.parse('2026-11-04T20:00:00Z')).etat, 'inconnu')
-t('si le canton remet le service a jour (mesure d il y a 2 min) -> fluide', decider(P, lecturesDepuisSegments([{ ...seg, attributes: { ...seg.attributes, DATE_MAJ_ETAT: Date.parse('2026-11-04T19:58:00Z') } }], [P]), Date.parse('2026-11-04T20:00:00Z')).etat, 'fluide')
+t('si le canton remet le service a jour (mesure d il y a 2 min) -> fluide', decider(P, lecturesDepuisSegments([{ ...seg, attributes: { ...seg.attributes, dateheure: Date.parse('2026-11-04T19:58:00Z') } }], [P]), Date.parse('2026-11-04T20:00:00Z')).etat, 'fluide')
 
 // ── 5. Service réel (--reel) ────────────────────────────────────────────────
 if (reel) {
