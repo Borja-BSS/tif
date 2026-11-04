@@ -48,7 +48,7 @@ interface OverpassElement {
 export async function getOverpassRoadworks(): Promise<OverpassFeatureCollection> {
   const res = await fetch('https://overpass-api.de/api/interpreter', {
     method:  'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'User-Agent': 'TIF/1.0 (https://tif.borja-swiss-solutions.ch)' },
     body:    `data=${encodeURIComponent(QUERY)}`,
     signal:  AbortSignal.timeout(14000),
   })
