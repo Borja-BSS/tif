@@ -29,6 +29,13 @@ type Entry =
 
 const store = new Map<string, Entry>()
 
+// Plafonds contre l'épuisement mémoire (clés dérivées d'une entrée visiteur).
+const MAX_KEYS         = Number(process.env.TIF_MEM_MAX_KEYS)  || 20_000
+const MAX_LIST_LEN     = Number(process.env.TIF_MEM_MAX_LIST)  || 10_000
+const MAX_ZSET_LEN     = Number(process.env.TIF_MEM_MAX_ZSET)  || 50_000
+const MAX_RL_IDS       = Number(process.env.TIF_MEM_MAX_RL)    || 50_000
+const MAX_SNAPSHOT_B   = Number(process.env.TIF_MEM_MAX_SNAP)  || 64 * 1024 * 1024
+
 function now() { return Date.now() }
 
 function alive(key: string): Entry | undefined {
@@ -36,6 +43,21 @@ function alive(key: string): Entry | undefined {
   if (!e) return undefined
   if (e.exp !== null && e.exp <= now()) { store.delete(key); markDirty(); return undefined }
   return e
+}
+
+/** Écrit une entrée en respectant le plafond de clés : on chasse d'abord ce qui
+ *  n'est pas durable (le plus ancien d'abord), puis seulement en dernier recours le plus ancien durable. */
+function put(key: string, entry: Entry) {
+  if (!store.has(key) && store.size >= MAX_KEYS) {
+    let victim: string | undefined
+    const target = Math.ceil(MAX_KEYS * 0.95)
+    for (const k of store.keys()) {
+      if (store.size < target) break
+      if (!isDurable(k)) store.delete(k)
+    }
+    if (store.size >= MAX_KEYS) { victim = store.keys().next().value; if (victim !== undefined) store.delete(victim) }
+  }
+  store.set(key, entry)
 }
 
 function ser(value: unknown): string {
@@ -88,8 +110,10 @@ function markDirty() {
   if (typeof timer === 'object' && 'unref' in timer) timer.unref()
 }
 
+let writing = false
+
 function writeSnapshot() {
-  if (!dirty || SNAP_OFF) return
+  if (!dirty || SNAP_OFF || writing) return
   dirty = false
   try {
     const dir = path.dirname(STATE_FILE)
@@ -101,12 +125,26 @@ function writeSnapshot() {
       if (!isDurable(k)) continue
       out[k] = e
     }
+    const data = JSON.stringify(out)
+    if (data.length > MAX_SNAPSHOT_B) return // borné : trop gros, on garde la mémoire seule
     const tmp = STATE_FILE + '.tmp'
-    fs.writeFileSync(tmp, JSON.stringify(out), { mode: 0o600 })
-    try { fs.chmodSync(tmp, 0o600) } catch { /* idem */ }
-    fs.renameSync(tmp, STATE_FILE)
-  } catch { /* disque en lecture seule : mémoire seule */ }
+    writing = true
+    // Écriture asynchrone : la boucle d'événements n'attend pas le disque.
+    fs.promises.writeFile(tmp, data, { mode: 0o600 })
+      .then(async () => {
+        try { await fs.promises.chmod(tmp, 0o600) } catch { /* idem */ }
+        await fs.promises.rename(tmp, STATE_FILE)
+      })
+      .catch(() => { /* disque en lecture seule : mémoire seule */ })
+      .finally(() => { writing = false })
+  } catch { /* idem */ }
 }
+
+/** Attend la fin d'une écriture en cours (tests, arrêt propre). */
+export async function snapshotIdle() { while (writing) await new Promise(r => setTimeout(r, 5)) }
+
+/** Nombre de clés tenues en mémoire (diagnostic, tests). */
+export function memorySize() { return store.size }
 
 function loadOnce() {
   if (loaded) return
@@ -142,7 +180,7 @@ function opSet(key: string, value: unknown, opts?: SetOpts): 'OK' | null {
   if (opts?.nx && cur) return null
   if (opts?.xx && !cur) return null
   const exp = opts?.ex ? now() + opts.ex * 1000 : opts?.px ? now() + opts.px : null
-  store.set(key, { t: 's', v: ser(value), exp })
+  put(key, { t: 's', v: ser(value), exp })
   markDirty()
   return 'OK'
 }
@@ -159,7 +197,7 @@ function opIncrBy(key: string, by: number): number {
   const e = alive(key)
   const cur = e && e.t === 's' ? Number(e.v) : 0
   const next = (Number.isFinite(cur) ? cur : 0) + by
-  store.set(key, { t: 's', v: String(next), exp: e ? e.exp : null })
+  put(key, { t: 's', v: String(next), exp: e ? e.exp : null })
   markDirty()
   return next
 }
@@ -186,7 +224,7 @@ function listOf(key: string, create: boolean): string[] | undefined {
   if (e && e.t === 'l') return e.v
   if (!create) return undefined
   const v: string[] = []
-  store.set(key, { t: 'l', v, exp: null })
+  put(key, { t: 'l', v, exp: null })
   return v
 }
 
@@ -194,6 +232,7 @@ function opLpush(key: string, items: unknown[]): number {
   loadOnce()
   const l = listOf(key, true)!
   for (const it of items) l.unshift(ser(it))
+  if (l.length > MAX_LIST_LEN) l.length = MAX_LIST_LEN
   markDirty()
   return l.length
 }
@@ -226,7 +265,7 @@ function zsetOf(key: string, create: boolean): Array<[string, number]> | undefin
   if (e && e.t === 'z') return e.v
   if (!create) return undefined
   const v: Array<[string, number]> = []
-  store.set(key, { t: 'z', v, exp: null })
+  put(key, { t: 'z', v, exp: null })
   return v
 }
 
@@ -239,6 +278,7 @@ function opZadd(key: string, members: Array<{ score: number; member: string }>):
     if (i >= 0) z[i][1] = m.score
     else { z.push([m.member, m.score]); added++ }
   }
+  if (z.length > MAX_ZSET_LEN) { z.sort((a, b) => b[1] - a[1]); z.length = MAX_ZSET_LEN }
   markDirty()
   return added
 }
@@ -364,6 +404,11 @@ export class Ratelimit {
   async limit(identifier: string) {
     const key = `${this.prefix}:${identifier}`
     const t = now()
+    if (!this.hits.has(key) && this.hits.size >= MAX_RL_IDS) {
+      // Plafond : on purge d'abord les fenêtres vides, sinon les plus anciennes.
+      for (const [k, v] of this.hits) { if (!v.length || v[v.length - 1] <= t - this.windowMs) this.hits.delete(k) }
+      for (const k of this.hits.keys()) { if (this.hits.size < MAX_RL_IDS) break; this.hits.delete(k) }
+    }
     const arr = (this.hits.get(key) ?? []).filter(x => x > t - this.windowMs)
     const success = arr.length < this.tokens
     if (success) arr.push(t)
