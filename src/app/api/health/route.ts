@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db }    from '@/lib/db'
 import { redis, getPersistenceStatus } from '@/lib/redis'
+import { resoudreIp } from '@/lib/client-ip'
 import { logger } from '@/lib/logger'
 import { createHash, timingSafeEqual } from 'node:crypto'
 
@@ -63,6 +64,8 @@ export async function GET(req: NextRequest) {
       ...publicBody,
       checks:      { db, redis },
       persistence: getPersistenceStatus(),
+      // Sonde du déploiement : quelle adresse est retenue, et combien de sauts porte x-forwarded-for.
+      ip: { ...resoudreIp(req.headers), xffEntrees: (req.headers.get('x-forwarded-for') ?? '').split(',').filter(Boolean).length },
       ts:          new Date().toISOString(),
       duration:    Date.now() - start,
     }, { status, headers: { 'Cache-Control': 'no-store' } })
