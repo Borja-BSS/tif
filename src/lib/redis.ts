@@ -56,12 +56,17 @@ const Q = {
   ephemereKeys:   num(process.env.TIF_MEM_MAX_KEYS,     20_000),
   ephemereBytes:  num(process.env.TIF_MEM_MAX_EPH_B,    128 * MB),
   visiteurKeys:   num(process.env.TIF_MEM_MAX_VKEYS,    5_000),
-  visiteurBytes:  num(process.env.TIF_MEM_MAX_VBYTES,   256 * MB),
-  reserveeBytes:  num(process.env.TIF_MEM_MAX_RES_B,    64 * MB),
+  visiteurBytes:  num(process.env.TIF_MEM_MAX_VBYTES,   96 * MB),
+  reserveeBytes:  num(process.env.TIF_MEM_MAX_RES_B,    16 * MB),
   maxListLen:     num(process.env.TIF_MEM_MAX_LIST,     10_000),
   maxZsetLen:     num(process.env.TIF_MEM_MAX_ZSET,     50_000),
   maxRlIds:       num(process.env.TIF_MEM_MAX_RL,       50_000),
-  maxSnapshotB:   num(process.env.TIF_MEM_MAX_SNAP,     64 * MB),
+  maxSnapshotB:   num(process.env.TIF_MEM_MAX_SNAP,     160 * MB),
+}
+// Les quotas durables (visiteurs + réservées, plus 15 % de surcoût JSON) doivent toujours tenir dans l'instantané :
+// un visiteur ne peut ainsi jamais empêcher la sauvegarde. Sinon on réduit le quota visiteurs.
+if ((Q.visiteurBytes + Q.reserveeBytes) * 1.15 > Q.maxSnapshotB) {
+  Q.visiteurBytes = Math.max(0, Math.floor(Q.maxSnapshotB / 1.15) - Q.reserveeBytes)
 }
 
 const sizes = new Map<string, number>()
@@ -193,10 +198,14 @@ function fail(msg: string) {
 
 function serialiser(): string {
   const out: Record<string, Entry> = {}
+  // Les clés réservées (administration, référence) d'abord : elles sont toujours sauvegardées.
   for (const [k, e] of store) {
     if (e.exp !== null && e.exp <= now()) continue
-    if (!isDurable(k)) continue
-    out[k] = e
+    if (classOf(k) === 'reservee') out[k] = e
+  }
+  for (const [k, e] of store) {
+    if (e.exp !== null && e.exp <= now()) continue
+    if (classOf(k) === 'visiteur') out[k] = e
   }
   return JSON.stringify(out)
 }

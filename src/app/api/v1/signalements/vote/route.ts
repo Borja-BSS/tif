@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { clientIp } from '@/lib/client-ip'
 import { redis, ratelimit } from '@/lib/redis'
 import { REDIS_KEY_SIGNALEMENTS, computeCredibility, TTL_SECONDS } from '@/data/signalement-categories'
 import type { Signalement } from '@/data/signalement-categories'
@@ -17,9 +18,7 @@ async function load(): Promise<Signalement[]> {
 }
 
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get('x-real-ip')
-    ?? req.headers.get('x-forwarded-for')?.split(',').at(-1)?.trim()
-    ?? 'anon'
+  const ip = clientIp(req)
   const body = await req.json() as { id?: string; vote?: string; lat?: number; lng?: number }
   const { id, vote, lat, lng } = body
 

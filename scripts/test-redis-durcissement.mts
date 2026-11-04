@@ -50,4 +50,15 @@ if (sc === 'arret') {
   const f = process.env.TIF_STATE_FILE!
   ok(fs.existsSync(f) && fs.readFileSync(f, 'utf8').includes('dernier'), "ecriture a l'arret avant les 30 s")
 }
+if (sc === 'plein-ecrire') {
+  await redis.set('tif:admin:custom-alerts', [{ id: 'alerte-admin-critique' }])
+  let ecrites = 0
+  for (let i = 0; i < 100; i++) { if (!(await tente(() => redis.set('tif:media:p' + i, 'z'.repeat(900_000))))) ecrites++ }
+  M.flushStateNow(); await M.snapshotIdle?.()
+  console.log(`  ${ecrites} valeurs visiteur de 0,9 Mo ecrites ; instantane ${fs.existsSync(process.env.TIF_STATE_FILE!) ? fs.statSync(process.env.TIF_STATE_FILE!).size + ' o' : 'ABSENT'}`)
+}
+if (sc === 'plein-lire') {
+  const v = await redis.get('tif:admin:custom-alerts')
+  ok(JSON.stringify(v) === '[{"id":"alerte-admin-critique"}]', `l'alerte admin survit au redemarrage apres remplissage maximal par les visiteurs (lu: ${JSON.stringify(v)})`)
+}
 process.exit()
