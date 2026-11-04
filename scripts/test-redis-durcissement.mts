@@ -74,4 +74,10 @@ if (sc === 'inconnu') {
   let ok2 = 0; for (let i = 0; i < 20; i++) if ((await rl.limit('1.2.3.4')).success) ok2++
   ok(ok1 === 500 && ok2 === 10, `visiteurs d'adresse inconnue : compteur global de ${ok1} requetes/min (50 x 10), visiteur normal limite a ${ok2}`)
 }
+if (sc === 'inconnu-cle-vote') {
+  const rl = new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, '1m') })
+  let a = 0; for (let i = 0; i < 100; i++) if ((await rl.limit('vote:inconnu:1.2.3.4')).success) a++   // IP connue, id « inconnu »
+  let b = 0; for (let i = 0; i < 600; i++) if ((await rl.limit('vote:abc:inconnu')).success) b++       // IP inconnue
+  ok(a === 10 && b === 500, `IP connue avec id « inconnu » : ${a} acceptees (limite normale 10) ; IP inconnue : ${b} (limite x50 = 500)`)
+}
 process.exit()

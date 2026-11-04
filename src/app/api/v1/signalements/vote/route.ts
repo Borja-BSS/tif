@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'vote doit être confirm ou deny' }, { status: 400 })
   }
 
-  const rl = await ratelimit.limit(`vote:${ip}:${id}`)
+  const rl = await ratelimit.limit(`vote:${id}:${ip}`)
   if (!rl.success) {
     return NextResponse.json({ error: 'Vous avez déjà voté pour ce signalement' }, { status: 429 })
   }
