@@ -54,6 +54,8 @@ export default function CamerasLayer({ map }: { map: mapboxgl.Map | null }) {
         const data = await res.json() as FeatureCollection & { etat?: string }
         if (!alive) return
         if (data.etat !== 'ok') { setEtat({ etat: 'source-indisponible', n: 0 }); return }
+        if (!map.isStyleLoaded()) await new Promise<void>(res => map.once('idle', () => res()))
+        if (!alive) return
         const src = map.getSource(SOURCE_ID) as mapboxgl.GeoJSONSource | undefined
         if (src) src.setData(data)
         else {
@@ -75,8 +77,7 @@ export default function CamerasLayer({ map }: { map: mapboxgl.Map | null }) {
       } catch { if (alive) setEtat({ etat: 'reseau', n: 0 }) }
     }
 
-    const start = () => { load(); timerRef.current = setInterval(load, REFRESH_MS) }
-    if (map.loaded()) start(); else map.once('load', start)
+    load(); timerRef.current = setInterval(load, REFRESH_MS)
 
     return () => {
       alive = false

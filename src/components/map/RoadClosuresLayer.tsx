@@ -216,7 +216,8 @@ async function fetchAndApply(m: mapboxgl.Map): Promise<EtatFermetures> {
     if (!res.ok) return { etat: 'reseau', raison: `HTTP ${res.status}` }
     const data = await res.json() as FeatureCollection & { etat?: string; raison?: string; source?: string; lectureLe?: string }
     if (data.etat === 'source-indisponible') return { etat: 'source-indisponible', raison: data.raison, source: data.source }
-    applyData(m, data)
+    if (!m.isStyleLoaded()) await new Promise<void>(res => m.once('idle', () => res()))
+    await applyData(m, data)
     const n = (data.features ?? []).filter(f => f.geometry?.type === 'Point').length
     return { etat: 'ok', source: data.source, lectureLe: data.lectureLe, n }
   } catch { return { etat: 'reseau', raison: 'réseau indisponible' } }
@@ -256,8 +257,7 @@ export default function RoadClosuresLayer({ map }: RoadClosuresLayerProps) {
 
     const run = () => { fetchAndApply(map).then(setEtat) }
 
-    if (map.loaded()) { run(); setupClick(map) }
-    else map.once('load', () => { run(); setupClick(map) })
+    run(); setupClick(map)
 
     timerRef.current = setInterval(run, REFRESH_MS)
 
