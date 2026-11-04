@@ -14,7 +14,7 @@ export async function getFlow(): Promise<FlowFeatureCollection> {
 
   const { lectures, sources } = await lireToutes()
   if (sources.length === 0) throw new Error('Aucune source de flux active (TIF_TRAFFIC_SOURCE, clé manquante)')
-  const features = lectures.filter(l => l.coordinates.length > 1).map(l => ({
+  const features = lectures.filter(l => l.coordinates.length > 1 && l.speed > 0 && l.freeFlow > 0).map(l => ({
     type: 'Feature' as const,
     properties: {
       jamFactor: l.jamFactor, speed: l.speed, freeFlow: l.freeFlow, confidence: l.confidence,

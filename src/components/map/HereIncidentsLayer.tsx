@@ -33,6 +33,7 @@ const TYPE_LABEL: Record<string, string> = {
   plannedEvent:     'Événement planifié',
   misc:             'Incident',
   ofrou:            'Incident OFROU',
+  'chantier-planifie': 'Chantier planifié (pas un incident en direct)',
   weather:          'Alerte météo',
 }
 
@@ -47,6 +48,7 @@ const SOURCE_BADGE_COLOR: Record<string, string> = {
   HERE:         '#AF52DE',
   OFROU:        '#5AC8FA',
   TPG:          '#FF9500',
+  'Données SITG': '#0A84FF',
   MétéoSuisse:  '#34C759',
 }
 
@@ -91,6 +93,9 @@ function buildPopupHTML(p: Record<string, unknown>): string {
       }))
     : null
 
+  const lu = p.lectureLe
+    ? ` · lu à ${esc(new Date(String(p.lectureLe)).toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' }))}`
+    : ''
   const timeRow = start
     ? `<div style="font-size:11px;color:rgba(255,255,255,0.35)">🕐 ${start}${end ? ` → ${end}` : ''}</div>`
     : ''
@@ -116,7 +121,7 @@ function buildPopupHTML(p: Record<string, unknown>): string {
       <div style="padding:8px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
         ${timeRow}
         <span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;
-          background:${srcColor}22;color:${srcColor}">● ${src}</span>
+          background:${srcColor}22;color:${srcColor}">● ${src}${lu}</span>
       </div>
     </div>
   `

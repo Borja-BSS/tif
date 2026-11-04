@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import mapboxgl from 'mapbox-gl'
 import type { FeatureCollection } from 'geojson'
 
@@ -15,6 +15,8 @@ const LAYER_GLOW   = 'tif-rc-glow'
 const LAYER_BASE   = 'tif-rc-base'
 const LAYER_HATCH  = 'tif-rc-hatch'
 const LAYER_CASING = 'tif-rc-casing'
+const LAYER_PT_HALO = 'tif-rc-pt-halo'
+const LAYER_PT      = 'tif-rc-pt'
 
 // ── Popup style (réutilise le style global .tif-popup si déjà injecté) ────────
 function injectPopupStyle() {
@@ -47,6 +49,33 @@ function esc(s: string): string {
   return s.replace(/[&<>"']/g, c => (
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' } as Record<string, string>)[c]
   ))
+}
+
+function buildSitgPopupHTML(props: Record<string, unknown>): string {
+  const adresse = esc(String(props.adresse ?? ''))
+  const desc    = esc(String(props.description ?? '')).split(String.fromCharCode(10)).join('<br>')
+  const fmt = (v: unknown) => v ? esc(new Date(String(v) + 'T12:00:00').toLocaleDateString('fr-CH', { day: '2-digit', month: '2-digit', year: 'numeric' })) : 'inconnue'
+  const lu = props.lectureLe ? esc(new Date(String(props.lectureLe)).toLocaleString('fr-CH', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })) : 'inconnue'
+  const fiche = typeof props.ficheInfo === 'string' && /^https:\/\//.test(props.ficheInfo)
+    ? `<a href="${esc(props.ficheInfo)}" target="_blank" rel="noopener noreferrer" style="color:#0A84FF;font-size:11px">Fiche officielle</a>` : ''
+  return `
+    <div style="font-family:-apple-system,SF Pro Text,sans-serif;min-width:240px">
+      <div style="padding:12px 14px;background:rgba(255,149,0,0.12);border-bottom:1px solid rgba(255,255,255,0.07)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <span style="font-size:16px">🚧</span>
+          <span style="font-size:14px;font-weight:700;color:#fff">Fermeture annoncée</span>
+        </div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;background:#FF950022;color:#FF9500;border:1px solid #FF950044">Chantier planifié, pas un incident en direct</span>
+      </div>
+      <div style="padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.07)">
+        <div style="font-size:12px;font-weight:600;color:#fff;margin-bottom:4px">${adresse}</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.8);line-height:1.5">${desc}</div>
+      </div>
+      <div style="padding:8px 14px;font-size:11px;color:rgba(255,255,255,0.45);line-height:1.6">
+        Du ${fmt(props.startTime)} au ${fmt(props.endTime)}<br>
+        Source : Données SITG, lues le ${lu}<br>${fiche}
+      </div>
+    </div>`
 }
 
 function buildPopupHTML(props: Record<string, unknown>): string {
@@ -149,8 +178,22 @@ function addLayers(m: mapboxgl.Map) {
   }, LAYER_GLOW)
 }
 
+function addPointLayers(m: mapboxgl.Map) {
+  m.addLayer({
+    id: LAYER_PT_HALO, type: 'circle', source: SOURCE_ID, filter: ['==', ['geometry-type'], 'Point'],
+    paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 9, 11, 14, 20], 'circle-color': '#FF9500', 'circle-opacity': 0.22 },
+  })
+  m.addLayer({
+    id: LAYER_PT, type: 'circle', source: SOURCE_ID, filter: ['==', ['geometry-type'], 'Point'],
+    paint: {
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 9, 5, 14, 9], 'circle-color': '#FF3B30',
+      'circle-stroke-color': '#FFFFFF', 'circle-stroke-width': 2, 'circle-opacity': 0.95,
+    },
+  })
+}
+
 function removeLayers(m: mapboxgl.Map) {
-  for (const id of [LAYER_HATCH, LAYER_BASE, LAYER_CASING, LAYER_GLOW]) {
+  for (const id of [LAYER_PT, LAYER_PT_HALO, LAYER_HATCH, LAYER_BASE, LAYER_CASING, LAYER_GLOW]) {
     if (m.getLayer(id)) m.removeLayer(id)
   }
   if (m.getSource(SOURCE_ID)) m.removeSource(SOURCE_ID)
@@ -162,15 +205,21 @@ async function applyData(m: mapboxgl.Map, geojson: FeatureCollection) {
 
   m.addSource(SOURCE_ID, { type: 'geojson', data: geojson, tolerance: 0.5 })
   addLayers(m)
+  addPointLayers(m)
 }
 
-async function fetchAndApply(m: mapboxgl.Map) {
+export interface EtatFermetures { etat: 'ok' | 'source-indisponible' | 'reseau'; raison?: string; source?: string; lectureLe?: string; n?: number }
+
+async function fetchAndApply(m: mapboxgl.Map): Promise<EtatFermetures> {
   try {
     const res = await fetch('/api/v1/layers/road-closures', { cache: 'no-store', signal: AbortSignal.timeout(5000) })
-    if (!res.ok) return
-    const data = await res.json() as FeatureCollection
+    if (!res.ok) return { etat: 'reseau', raison: `HTTP ${res.status}` }
+    const data = await res.json() as FeatureCollection & { etat?: string; raison?: string; source?: string; lectureLe?: string }
+    if (data.etat === 'source-indisponible') return { etat: 'source-indisponible', raison: data.raison, source: data.source }
     applyData(m, data)
-  } catch { /* réseau indisponible — on ne crash pas */ }
+    const n = (data.features ?? []).filter(f => f.geometry?.type === 'Point').length
+    return { etat: 'ok', source: data.source, lectureLe: data.lectureLe, n }
+  } catch { return { etat: 'reseau', raison: 'réseau indisponible' } }
 }
 
 function setupClick(m: mapboxgl.Map) {
@@ -182,6 +231,16 @@ function setupClick(m: mapboxgl.Map) {
       .setHTML(buildPopupHTML(props))
       .addTo(m)
   })
+  m.on('click', LAYER_PT, e => {
+    if (!e.features?.length) return
+    const props = e.features[0].properties as Record<string, unknown>
+    new mapboxgl.Popup({ maxWidth: '320px', className: 'tif-popup', closeButton: true, offset: 10 })
+      .setLngLat(e.lngLat)
+      .setHTML(buildSitgPopupHTML(props))
+      .addTo(m)
+  })
+  m.on('mouseenter', LAYER_PT, () => { m.getCanvas().style.cursor = 'pointer' })
+  m.on('mouseleave', LAYER_PT, () => { m.getCanvas().style.cursor = '' })
   m.on('mouseenter', LAYER_BASE, () => { m.getCanvas().style.cursor = 'pointer' })
   m.on('mouseleave', LAYER_BASE, () => { m.getCanvas().style.cursor = '' })
 }
@@ -189,12 +248,13 @@ function setupClick(m: mapboxgl.Map) {
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function RoadClosuresLayer({ map }: RoadClosuresLayerProps) {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const [etat, setEtat] = useState<EtatFermetures | null>(null)
 
   useEffect(() => {
     if (!map) return
     injectPopupStyle()
 
-    const run = () => fetchAndApply(map)
+    const run = () => { fetchAndApply(map).then(setEtat) }
 
     if (map.loaded()) { run(); setupClick(map) }
     else map.once('load', () => { run(); setupClick(map) })
@@ -207,5 +267,18 @@ export default function RoadClosuresLayer({ map }: RoadClosuresLayerProps) {
     }
   }, [map])
 
-  return null
+  if (!etat) return null
+  const heure = etat.lectureLe ? new Date(etat.lectureLe).toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' }) : null
+  const texte = etat.etat === 'ok'
+    ? `Fermetures annoncées : ${etat.n ?? 0} · Données SITG, lues à ${heure ?? '?'}`
+    : etat.etat === 'source-indisponible'
+      ? 'Fermetures : source SITG indisponible, état inconnu'
+      : 'Fermetures : lecture impossible, état inconnu'
+  return (
+    <div data-testid="fermetures-source" style={{
+      position: 'absolute', left: 12, bottom: 64, zIndex: 5, maxWidth: 320, padding: '5px 10px', borderRadius: 10,
+      font: '600 11px -apple-system,SF Pro Text,sans-serif', color: etat.etat === 'ok' ? 'rgba(255,255,255,0.85)' : '#FFCC00',
+      background: 'rgba(12,12,18,0.82)', border: '1px solid rgba(255,255,255,0.12)', pointerEvents: 'none',
+    }}>{texte}</div>
+  )
 }

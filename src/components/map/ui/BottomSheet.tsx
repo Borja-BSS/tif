@@ -979,6 +979,7 @@ function AlertesDetail({ map, onAlertSelect }: { map: mapboxgl.Map | null; onAle
     : type === 'CONSTRUCTION' ? t.alertsSection.construction
     : type === 'CONGESTION'   ? t.alertsSection.congestion
     : type === 'ROAD_CLOSURE' ? t.alertsSection.roadClosure
+    : type === 'chantier-planifie' ? 'Chantier planifié'
     : type === 'tpg'          ? t.alertsSection.tpgDisruption
     : type === 'weather'      ? t.alertsSection.weather
     : t.alertsSection.incident

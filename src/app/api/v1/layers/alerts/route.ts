@@ -1,5 +1,6 @@
 import { NextResponse }              from 'next/server'
 import { getIncidents }             from '@/lib/here/incidents'
+import { getChantiers, fermetures } from '@/lib/sitg/chantiers'
 import { getTpgDisruptions }        from '@/lib/alerts/tpg-disruptions'
 import { getWeatherAlerts }         from '@/lib/alerts/openmeteo-weather'
 import { withMetrics }              from '@/lib/route-utils'
@@ -22,6 +23,7 @@ function areDuplicates(a: Feature<Point>, b: Feature<Point>): boolean {
   // Never deduplicate weather or tpg features — multiple per location are intentional
   if (typeA === 'weather' || typeB === 'weather') return false
   if (typeA === 'tpg'     || typeB === 'tpg')     return false
+  if (typeA === 'chantier-planifie' || typeB === 'chantier-planifie') return false
 
   // For road/traffic features: deduplicate if within ~200m and same type
   if (typeA !== typeB) return false
@@ -56,7 +58,8 @@ async function handler(_req: NextRequest): Promise<NextResponse> {
   }
 
   // 3 sources serveur en parallèle — Overpass et Waze retirés (bloqués côté Vercel)
-  const [hereResult, tpgResult, weatherResult] = await Promise.allSettled([
+  const [sitgResult, hereResult, tpgResult, weatherResult] = await Promise.allSettled([
+    getChantiers(),        // SITG : fermetures de chantiers PLANIFIÉS (jamais un incident en direct)
     getIncidents(),        // HERE Maps accidents/congestion
     getTpgDisruptions(),   // opendata.ch — retards TPG/CFF
     getWeatherAlerts(),    // OpenMeteo — météo 48h (gratuit)
@@ -69,6 +72,26 @@ async function handler(_req: NextRequest): Promise<NextResponse> {
     logger.info({ count: hereResult.value.features.length }, 'alerts:here-ok')
   } else {
     logger.warn({ err: hereResult.reason }, 'alerts:here-failed')
+  }
+
+  if (sitgResult.status === 'fulfilled' && sitgResult.value.etat === 'ok') {
+    const r = sitgResult.value
+    for (const f of fermetures(r)) {
+      const p = f.properties
+      allFeatures.push({
+        type: 'Feature',
+        geometry: f.geometry,
+        properties: {
+          id: p.id, type: 'chantier-planifie', criticality: 'minor', planifie: true,
+          description: `Chantier planifié · ${p.adresse} : ${p.description.replace(/\s+/g, ' ')}`,
+          icon: '🚧', color: '#FF9500', startTime: p.startTime, endTime: p.endTime,
+          source: 'Données SITG', lectureLe: r.lectureLe,
+        },
+      } as Feature<Point>)
+    }
+    logger.info({ count: r.compte.fermetures }, 'alerts:sitg-ok')
+  } else {
+    logger.warn({ raison: sitgResult.status === 'fulfilled' ? sitgResult.value.raison : sitgResult.reason }, 'alerts:sitg-indisponible')
   }
 
   if (tpgResult.status === 'fulfilled') {

@@ -21,6 +21,7 @@ const FilterPanel          = dynamic(() => import('./FilterPanel'),          { s
 const BorderCrossingsLayer = dynamic(() => import('./BorderCrossingsLayer'), { ssr: false })
 const RoadClosuresLayer    = dynamic(() => import('./RoadClosuresLayer'),    { ssr: false })
 const ConstructionLayer    = dynamic(() => import('./ConstructionLayer'),    { ssr: false })
+const CamerasLayer         = dynamic(() => import('./CamerasLayer'),         { ssr: false })
 const HereIncidentsLayer   = dynamic(() => import('./HereIncidentsLayer'),   { ssr: false })
 const ParkingLayer         = dynamic(() => import('./ParkingLayer'),         { ssr: false })
 const EventsLayer          = dynamic(() => import('./EventsLayer'),          { ssr: false })
@@ -89,6 +90,7 @@ export default function MapView({ filters: externalFilters, activeFilter = 'all'
       <BorderCrossingsLayer map={map} activeFilter={activeFilter} />
       <RoadClosuresLayer    map={map} />
       <ConstructionLayer    map={map} />
+      <CamerasLayer         map={map} />
 
       {map && (
         <>

@@ -38,7 +38,9 @@ async function fetchHereClosures(): Promise<FeatureCollection | null> {
   try {
     const r = await fetch('/api/v1/layers/road-closures', { signal: AbortSignal.timeout(8000) })
     if (!r.ok) return null
-    return r.json()
+    const fc = await r.json() as FeatureCollection
+    // Les chantiers SITG (points) ont leur propre couche (RoadClosuresLayer) : ici seulement les lignes.
+    return { ...fc, features: (fc.features ?? []).filter(f => f.geometry?.type === 'LineString') }
   } catch { return null }
 }
 
