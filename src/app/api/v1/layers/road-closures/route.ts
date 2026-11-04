@@ -15,7 +15,7 @@ async function handler(_req: NextRequest): Promise<NextResponse> {
   } catch (err) {
     logger.warn({ err }, 'road-closures:handler-failed')
     return NextResponse.json(
-      { type: 'FeatureCollection', features: [], generatedAt: new Date().toISOString() },
+      { type: 'FeatureCollection', features: [], generatedAt: new Date().toISOString(), etat: 'source-indisponible', raison: 'Aucune source gratuite de fermetures de routes n’est branchée (HERE inactive)' },
       { status: 200 },
     )
   }
