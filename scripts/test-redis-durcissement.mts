@@ -61,4 +61,17 @@ if (sc === 'plein-lire') {
   const v = await redis.get('tif:admin:custom-alerts')
   ok(JSON.stringify(v) === '[{"id":"alerte-admin-critique"}]', `l'alerte admin survit au redemarrage apres remplissage maximal par les visiteurs (lu: ${JSON.stringify(v)})`)
 }
+if (sc === 'admin-apres-plein') {
+  for (let i = 0; i < 200; i++) await tente(() => redis.set('tif:media:q' + i, 'z'.repeat(900_000)))
+  for (let i = 0; i < 3000; i++) await tente(() => redis.set('cache:' + i, 'x'))
+  const refus = await tente(() => redis.set('tif:media:encore', 'z'.repeat(900_000)))
+  const e = await tente(() => redis.set('tif:admin:custom-alerts', [{ id: 'admin-apres-plein' }]))
+  ok(refus === 'MemoireSaturee' && e === null && JSON.stringify(await redis.get('tif:admin:custom-alerts')) === '[{"id":"admin-apres-plein"}]', `ecriture admin reussie quand visiteurs et cache sont pleins (visiteur refuse: ${refus}, admin: ${e ?? 'ok'})`)
+}
+if (sc === 'inconnu') {
+  const rl = new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, '1m') })
+  let ok1 = 0; for (let i = 0; i < 600; i++) if ((await rl.limit('inconnu')).success) ok1++
+  let ok2 = 0; for (let i = 0; i < 20; i++) if ((await rl.limit('1.2.3.4')).success) ok2++
+  ok(ok1 === 500 && ok2 === 10, `visiteurs d'adresse inconnue : compteur global de ${ok1} requetes/min (50 x 10), visiteur normal limite a ${ok2}`)
+}
 process.exit()

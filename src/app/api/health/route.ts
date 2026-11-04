@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db }    from '@/lib/db'
 import { redis, getPersistenceStatus } from '@/lib/redis'
 import { logger } from '@/lib/logger'
+import { createHash, timingSafeEqual } from 'node:crypto'
 
 interface Check {
   ok:      boolean
@@ -29,6 +30,13 @@ async function checkRedis(): Promise<Check> {
   }
 }
 
+/** Comparaison en temps constant : hachages SHA-256 (même longueur) puis timingSafeEqual. */
+function cleValide(given: string, attendue: string): boolean {
+  const a = createHash('sha256').update(given).digest()
+  const b = createHash('sha256').update(attendue).digest()
+  return timingSafeEqual(a, b)
+}
+
 export async function GET(req: NextRequest) {
   const start = Date.now()
 
@@ -50,7 +58,7 @@ export async function GET(req: NextRequest) {
   // Détail réservé à l'administration (même clé que /api/metrics).
   const adminKey = process.env.TIF_ADMIN_API_KEY
   const given    = req.headers.get('x-api-key')
-  if (adminKey && given && given === adminKey) {
+  if (adminKey && given && cleValide(given, adminKey)) {
     return NextResponse.json({
       ...publicBody,
       checks:      { db, redis },

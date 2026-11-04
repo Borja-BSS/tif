@@ -548,6 +548,8 @@ export class Ratelimit {
     let key = `${this.prefix}:${identifier}`
     const t = now()
     let tokens = this.tokens
+    // Visiteur d'adresse inconnue (voir client-ip.ts) : compteur partagé, 50 fois plus généreux.
+    if (/(^|:)inconnu$/.test(identifier)) tokens = this.tokens * 50
     if (!this.hits.has(key) && this.hits.size >= Q.maxRlIds) {
       this.purge()
       if (this.hits.size >= Q.maxRlIds) {

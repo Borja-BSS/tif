@@ -5,8 +5,9 @@ import type { NextRequest } from 'next/server'
  *  - TIF_IP_HEADER : nom de l'en-tête qui porte l'adresse (ex. x-forwarded-for). Sans lui, AUCUN en-tête n'est lu.
  *  - TIF_IP_TRUSTED_HOPS : nombre de proxys de confiance devant l'application (défaut 1). Pour x-forwarded-for,
  *    on retient l'entrée située à ce nombre de sauts depuis la DROITE (celles de gauche sont écrites par le client).
- * Si la source est absente ou illisible, on ne bloque personne : l'identifiant est unique à la requête
- * (aucune limitation pour elle) et le fait est journalisé, au plus une fois par minute.
+ * Si la source est absente ou illisible, l'identifiant est « inconnu » : toutes ces requêtes partagent un compteur
+ * global par limiteur (donc par route), 50 fois plus généreux que la limite par visiteur (voir Ratelimit),
+ * pour ne bloquer personne un jour de pic sans laisser passer un flot illimité. Le fait est journalisé, au plus une fois par minute.
  */
 const g = globalThis as unknown as { __tifIpWarnAt?: number }
 
@@ -14,7 +15,7 @@ function avertir(raison: string) {
   const t = Date.now()
   if (t - (g.__tifIpWarnAt ?? 0) < 60_000) return
   g.__tifIpWarnAt = t
-  console.warn(JSON.stringify({ level: 'warn', scope: 'client-ip', msg: 'adresse du visiteur non determinee, limitation de debit non appliquee', raison }))
+  console.warn(JSON.stringify({ level: 'warn', scope: 'client-ip', msg: 'adresse du visiteur non determinee, limite globale genereuse appliquee', raison }))
 }
 
 export function resoudreIp(headers: Headers, env: { header?: string; hops?: string } = {
@@ -35,5 +36,5 @@ export function clientIp(req: NextRequest | Request): string {
   const r = resoudreIp(req.headers)
   if (r.ip) return r.ip
   avertir(r.raison ?? 'inconnue')
-  return `inconnu:${crypto.randomUUID()}`
+  return 'inconnu'
 }
