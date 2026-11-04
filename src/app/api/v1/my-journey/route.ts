@@ -1,6 +1,5 @@
 import { NextRequest }                  from 'next/server'
-import { redis }                         from '@/lib/redis'
-import { Ratelimit }                     from '@upstash/ratelimit'
+import { redis, Ratelimit } from '@/lib/redis'
 import { z }                             from 'zod'
 import { sendJourneyConfirmation }       from '@/lib/email'
 import { getFirebaseUserFromRequest }    from '@/lib/auth-firebase'

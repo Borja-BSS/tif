@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z }                        from 'zod'
-import { Ratelimit }                from '@upstash/ratelimit'
-import { redis }                    from '@/lib/redis'
+import { redis, Ratelimit } from '@/lib/redis'
 
 const rl = new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(20, '1m') })
 

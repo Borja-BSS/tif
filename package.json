@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "[ -n \"$DATABASE_URL\" ] && prisma migrate deploy; prisma generate && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.1",
@@ -19,8 +20,6 @@
     "@types/canvas-confetti": "^1.9.0",
     "@types/nodemailer": "^8.0.0",
     "@types/pg": "^8.20.0",
-    "@upstash/ratelimit": "^2.0.8",
-    "@upstash/redis": "^1.38.0",
     "ably": "^2.21.0",
     "argon2": "^0.44.0",
     "canvas-confetti": "^1.9.4",

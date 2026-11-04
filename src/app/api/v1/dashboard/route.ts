@@ -1,7 +1,6 @@
 import { auth }           from '@/lib/auth'
 import { db }              from '@/lib/db'
-import { redis }           from '@/lib/redis'
-import { Ratelimit }       from '@upstash/ratelimit'
+import { redis, Ratelimit } from '@/lib/redis'
 import { NextRequest }     from 'next/server'
 import type { EventType }  from '@prisma/client'
 import type { JourneyStatusResult } from '@/lib/my-journey/types'
