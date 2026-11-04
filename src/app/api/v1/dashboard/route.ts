@@ -1,5 +1,6 @@
 import { auth }           from '@/lib/auth'
 import { db }              from '@/lib/db'
+import { clientIp } from '@/lib/client-ip'
 import { redis, Ratelimit } from '@/lib/redis'
 import { NextRequest }     from 'next/server'
 import type { EventType }  from '@prisma/client'
@@ -36,7 +37,7 @@ async function redisGet(key: string): Promise<unknown> {
 
 export async function GET(req: NextRequest) {
   // Rate limiting — fail open if Redis is down
-  const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
+  const ip = clientIp(req)
   try {
     const { success } = await rl.limit(ip)
     if (!success) return Response.json({ error: 'Too many requests' }, { status: 429 })

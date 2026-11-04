@@ -1,0 +1,12 @@
+// Importer ce fichier enregistre toutes les tâches dans le registre interne (src/lib/inngest.ts).
+export { ingestSigGeneve }        from './ingest-sig-geneve'
+export { ingestSbb }              from './ingest-sbb'
+export { purgeRgpd }              from './purge-rgpd'
+export { computeConsensusJob }    from './compute-consensus'
+export { detectAnomaliesJob }     from './detect-anomalies'
+export { processMobilitySignals } from './process-mobility-signals'
+export { learnPatterns }          from './learn-patterns'
+export { resolveEvents }          from './resolve-events'
+export { shipLogs }               from './ship-logs'
+export { predictJourneysJob }     from './predict-journeys'
+export { morningBriefingJob }     from './morning-briefing'

@@ -1,5 +1,6 @@
 import { searchPlaces } from '@/lib/routing/shared/search-engine'
 import { ratelimit }    from '@/lib/redis'
+import { clientIp } from '@/lib/client-ip'
 import { z }            from 'zod'
 
 const QuerySchema = z.object({
@@ -10,7 +11,7 @@ export async function GET(req: Request) {
   try {
     // Rate-limit — fail-open if Redis is unavailable (dev Redis vs prod Upstash mismatch)
     try {
-      const ip          = req.headers.get('x-forwarded-for') ?? 'anonymous'
+      const ip          = clientIp(req)
       const { success } = await ratelimit.limit(`geocode:${ip}`)
       if (!success) return Response.json([], { status: 429 })
     } catch { /* proceed without rate-limit if Redis unreachable */ }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z }                        from 'zod'
+import { clientIp } from '@/lib/client-ip'
 import { redis, Ratelimit } from '@/lib/redis'
 
 const rl = new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(20, '1m') })
@@ -12,7 +13,7 @@ const SignalSchema = z.object({
 })
 
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'anon'
+  const ip = clientIp(req)
   try {
     const { success } = await rl.limit(`signals:${ip}`)
     if (!success) return NextResponse.json({ error: 'Too many requests' }, { status: 429 })

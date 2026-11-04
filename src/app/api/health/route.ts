@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { db }    from '@/lib/db'
-import { redis } from '@/lib/redis'
+import { redis, getPersistenceStatus } from '@/lib/redis'
 import { logger } from '@/lib/logger'
 
 interface Check {
@@ -39,6 +39,7 @@ export async function GET() {
   const body = {
     status:   healthy ? 'ok' : 'degraded',
     checks:   { db, redis },
+    persistence: getPersistenceStatus(),
     uptime:   process.uptime(),
     ts:       new Date().toISOString(),
     duration: Date.now() - start,

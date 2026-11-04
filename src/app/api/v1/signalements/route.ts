@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { randomUUID } from 'crypto'
+import { clientIp } from '@/lib/client-ip'
 import { redis, ratelimit } from '@/lib/redis'
 import { getFirebaseUserFromRequest } from '@/lib/auth-firebase'
 import { REDIS_KEY_SIGNALEMENTS, TTL_SECONDS, computeExpiresAt, computeCredibility } from '@/data/signalement-categories'
@@ -29,7 +30,7 @@ async function save(items: Signalement[]): Promise<void> {
 
 // POST public — envoi d'un signalement (rate-limited)
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get('x-forwarded-for') ?? 'anon'
+  const ip = clientIp(req)
   const { success } = await ratelimit.limit(`signalement:${ip}`)
   if (!success) return NextResponse.json({ error: 'Trop de requêtes' }, { status: 429 })
 

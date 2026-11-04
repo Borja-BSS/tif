@@ -14,6 +14,7 @@ export async function hereGet<T>(
   path: string,
   params: Record<string, string>,
 ): Promise<T> {
+  if (!process.env.HERE_API_KEY) throw new Error('HERE_API_KEY absente : source HERE inactive')
   const url = new URL(`${HERE_BASE}${path}`)
   url.searchParams.set('apiKey', process.env.HERE_API_KEY!)
   for (const [k, v] of Object.entries(params)) {

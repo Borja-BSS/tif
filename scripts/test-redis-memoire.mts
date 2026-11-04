@@ -2,7 +2,7 @@
 // (importe src/lib/redis.ts tel quel ; TIF_STATE_FILE et les plafonds se reglent par variables)
 import fs from 'node:fs'
 import path from 'node:path'
-import { redis, Ratelimit, flushStateNow, snapshotIdle, stateFilePath, memorySize } from '../src/lib/redis.ts'
+import { redis, Ratelimit, flushStateNow, snapshotIdle, stateFilePath, memoryStats } from '../src/lib/redis.ts'
 const ok = (c: boolean, m: string) => { console.log((c ? 'OK   ' : 'ECHEC') + ' ' + m); if (!c) process.exitCode = 1 }
 
 await redis.set('a', { x: 1 }); ok(JSON.stringify(await redis.get('a')) === '{"x":1}', 'set/get objet')
@@ -19,14 +19,15 @@ for (let i = 0; i < 4; i++) r.push((await rl.limit('ip')).success); ok(JSON.stri
 const MAXK = Number(process.env.TIF_MEM_MAX_KEYS), MAXL = Number(process.env.TIF_MEM_MAX_LIST)
 await redis.set('tif:signalements', [{ id: 1 }])
 for (let i = 0; i < MAXK * 5; i++) await redis.set(`tif:geocode:ip${i}`, 'x', { ex: 3600 })
-ok(memorySize() <= MAXK, `plafond de cles : ${memorySize()} <= ${MAXK} apres ${MAXK * 5} ecritures`)
+const eph = memoryStats().ephemere.keys
+ok(eph <= MAXK, `plafond de cles ephemeres : ${eph} <= ${MAXK} apres ${MAXK * 5} ecritures`)
 ok((await redis.get('tif:signalements')) !== null, 'la cle durable a survecu a l eviction')
 for (let i = 0; i < MAXL * 3; i++) await redis.lpush('biglist', 'v' + i)
 ok((await redis.lrange('biglist', 0, -1)).length === MAXL, `liste plafonnee a ${MAXL}`)
 const big = new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(1, '1h') })
 for (let i = 0; i < 200_000; i++) await big.limit('ip' + i)
 const hits = (big as unknown as { hits: Map<string, number[]> }).hits.size
-ok(hits <= Number(process.env.TIF_MEM_MAX_RL), `limiteur plafonne : ${hits} identifiants apres 200000 IP`)
+ok(hits <= Number(process.env.TIF_MEM_MAX_RL) + 1, `limiteur plafonne : ${hits} identifiants (plafond + 1 compteur de debordement) apres 200000 IP`)
 
 await redis.set('tif:media:x', 'y'.repeat(2_000_000), { ex: 3600 })
 let maxGap = 0, last = Date.now(); const iv = setInterval(() => { const t = Date.now(); maxGap = Math.max(maxGap, t - last); last = t }, 5)

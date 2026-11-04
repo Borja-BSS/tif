@@ -1,5 +1,6 @@
 // src/app/api/auth/guest/route.ts
 import { NextRequest, NextResponse } from 'next/server'
+import { clientIp } from '@/lib/client-ip'
 import { SignJWT }      from 'jose'
 import { env }         from '@/lib/env'
 import { logger }      from '@/lib/logger'
@@ -10,7 +11,7 @@ export const dynamic = 'force-dynamic'
 const GUEST_TTL = 600  // secondes (10 minutes)
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
-  const ip = req.headers.get('x-forwarded-for') ?? 'anonymous'
+  const ip = clientIp(req)
   try {
     const { success } = await ratelimit.limit(`guest:${ip}`)
     if (!success) return NextResponse.json({ ok: false, error: 'Too many requests' }, { status: 429 })

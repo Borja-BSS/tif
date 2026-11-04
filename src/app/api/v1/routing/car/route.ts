@@ -1,5 +1,6 @@
 import { calculateCarRoute, getActiveIncidentAreas } from '@/lib/routing/car/here-router'
 import { ratelimit } from '@/lib/redis'
+import { clientIp } from '@/lib/client-ip'
 import { z }         from 'zod'
 
 const CarRouteSchema = z.object({
@@ -12,7 +13,7 @@ const CarRouteSchema = z.object({
 export async function POST(req: Request) {
   try {
     try {
-      const ip          = req.headers.get('x-forwarded-for') ?? 'anonymous'
+      const ip          = clientIp(req)
       const { success } = await ratelimit.limit(`routing:${ip}`)
       if (!success) return Response.json({ error: 'RATE_LIMIT_EXCEEDED' }, { status: 429 })
     } catch { /* fail-open */ }

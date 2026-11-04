@@ -1,5 +1,6 @@
 import { NextRequest }    from 'next/server'
 import { z }              from 'zod'
+import { clientIp } from '@/lib/client-ip'
 import { redis, Ratelimit } from '@/lib/redis'
 import { sendContactForm } from '@/lib/email'
 
@@ -20,7 +21,7 @@ const ContactSchema = z.object({
 export const dynamic = 'force-dynamic'
 
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
+  const ip = clientIp(req)
   try {
     const { success } = await rl.limit(`contact:${ip}`)
     if (!success) return Response.json({ error: 'Too many requests' }, { status: 429 })

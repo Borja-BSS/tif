@@ -16,6 +16,10 @@ const BBOX = {
 const TIMEOUT = 10_000
 
 export async function fetchWazeData(): Promise<WazeResponse> {
+  // 04.11.2026 : désactivé par défaut. Les CGU Waze interdisent l'accès automatisé et l'usage commercial
+  // (https://support.google.com/waze/answer/12373727) ; cet endpoint n'est pas documenté. Réactivable seulement
+  // avec TIF_WAZE_NON_OFFICIEL=1, sous la responsabilité du fondateur.
+  if (process.env.TIF_WAZE_NON_OFFICIEL !== '1') throw new Error('Waze désactivé : conditions d’usage officielles non satisfaites')
   const url = new URL(WAZE_BASE)
   url.searchParams.set('top',    String(BBOX.top))
   url.searchParams.set('bottom', String(BBOX.bottom))

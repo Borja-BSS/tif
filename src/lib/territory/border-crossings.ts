@@ -1,6 +1,6 @@
 import { redis }           from '@/lib/redis'
 import { logger }          from '@/lib/logger'
-import { getTrafficFlow }  from '@/lib/here/traffic-flow'
+import { getFlow }         from '@/lib/etat-routes/flow'
 import type { FlowFeatureCollection } from '@/lib/here/traffic-flow'
 import type { FeatureCollection, Feature, Point } from 'geojson'
 
@@ -782,9 +782,9 @@ export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
   // Fetch HERE flow once for the full region (already Redis-cached internally)
   let flow: FlowFeatureCollection | null = null
   try {
-    flow = await getTrafficFlow()
+    flow = await getFlow()
   } catch (err) {
-    logger.warn({ err }, 'border-crossings:here-flow-failed — falling back to synthetic')
+    logger.warn({ err }, 'border-crossings:here-flow-failed — falling back to synthetic (aucune source de flux ou source en echec)')
   }
 
   let liveCount = 0
@@ -890,3 +890,8 @@ export async function getBorderCrossings(): Promise<BorderFeatureCollection> {
 }
 
 export { CROSSINGS as BORDER_CROSSINGS_STATIC }
+
+/** Points des douanes (identifiant, nom, coordonnées, capacité) pour le module etat-routes. */
+export function listCrossingPoints(): Array<{ id: string; name: string; lat: number; lng: number; capacity: Capacity }> {
+  return CROSSINGS.map(c => ({ id: c.id, name: c.name, lat: c.lat, lng: c.lng, capacity: c.capacity }))
+}

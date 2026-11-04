@@ -22,7 +22,14 @@ export async function POST(req: NextRequest) {
   const base64 = Buffer.from(bytes).toString('base64')
   const id     = randomUUID()
 
-  await redis.set(`tif:media:${id}`, { base64, type: file.type }, { ex: TTL_SECONDS })
+  try {
+    await redis.set(`tif:media:${id}`, { base64, type: file.type }, { ex: TTL_SECONDS })
+  } catch (err) {
+    if (err instanceof Error && err.name === 'MemoireSaturee') {
+      return NextResponse.json({ error: 'Stockage temporairement plein, réessayez plus tard' }, { status: 503 })
+    }
+    throw err
+  }
 
   return NextResponse.json({ url: `/api/v1/media/${id}` }, { status: 201 })
 }

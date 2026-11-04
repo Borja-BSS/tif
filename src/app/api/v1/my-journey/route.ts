@@ -1,5 +1,6 @@
 import { NextRequest }                  from 'next/server'
 import { redis, Ratelimit } from '@/lib/redis'
+import { clientIp } from '@/lib/client-ip'
 import { z }                             from 'zod'
 import { sendJourneyConfirmation }       from '@/lib/email'
 import { getFirebaseUserFromRequest }    from '@/lib/auth-firebase'
@@ -38,7 +39,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
+  const ip = clientIp(req)
   try {
     const { success } = await rl.limit(ip)
     if (!success) return Response.json({ error: 'Too many requests' }, { status: 429 })

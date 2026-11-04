@@ -1,5 +1,6 @@
 import Anthropic                from '@anthropic-ai/sdk'
 import { redis }               from '@/lib/redis'
+import { clientIp } from '@/lib/client-ip'
 import { logger }              from '@/lib/logger'
 import { getBorderCrossings }  from '@/lib/territory/border-crossings'
 import type { NextRequest }    from 'next/server'
@@ -253,7 +254,7 @@ function sseStream(text: string): Response {
 
 // ── Route handler ─────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'anon'
+  const ip = clientIp(req)
 
   // 1. Rate limit
   const allowed = await checkRateLimit(ip)
