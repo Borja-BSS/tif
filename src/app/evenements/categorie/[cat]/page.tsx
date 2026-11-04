@@ -1,8 +1,11 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { events } from '@/data/events'
+import { allDates, isPast, splitByTime, todayInGeneva, upcomingDates } from '@/lib/eventDates'
 
 const BASE = 'https://tif.borja-swiss-solutions.ch'
+
+export const revalidate = 3600
 
 const CAT_META: Record<string, {
   label: string; labelPlural: string; color: string
@@ -11,31 +14,31 @@ const CAT_META: Record<string, {
 }> = {
   football: {
     label: 'Football', labelPlural: 'matchs de football', color: '#FF9F0A',
-    title: 'Football à Genève 2026 — Servette FC, Stade de Genève | TIF',
-    description: 'Agenda football complet au Grand Genève : Servette FC au Stade de Genève, Super League, football local. Dates, billets, accès — TIF Grand Genève.',
+    title: 'Football à Genève 2026 · Servette FC, Stade de Genève | TIF',
+    description: 'Agenda football complet au Grand Genève : Servette FC au Stade de Genève, Super League, football local. Dates, billets, accès · TIF Grand Genève.',
     keywords: 'football Genève 2026, Servette FC, Stade de Genève, Super League, match football Genève, football Grand Genève',
-    h1: 'Football à Genève & Grand Genève — 2026',
+    h1: 'Football à Genève & Grand Genève · 2026',
     intro: 'Suivez toute l\'actualité football dans le Grand Genève : le Servette FC au Stade de Genève, la Super League et le football local. Billets, programme et infos pratiques.',
   },
   sport: {
     label: 'Sport', labelPlural: 'événements sportifs', color: '#30D158',
-    title: 'Sport à Genève 2026 — Triathlon, Beach Volley, Tennis, Tour de France | TIF',
+    title: 'Sport à Genève 2026 · Triathlon, Beach Volley, Tennis, Tour de France | TIF',
     description: 'Tous les événements sportifs du Grand Genève en 2026 : Triathlon Tour de Genève, Beach Pro Tour, Swiss Open Geneva, Tour de France Femmes. Agenda sport complet.',
     keywords: 'sport Genève 2026, triathlon Genève, beach volley Genève, tennis Genève, Tour de France Genève, Grand Genève sport',
-    h1: 'Sport à Genève & Grand Genève — été 2026',
+    h1: 'Sport à Genève & Grand Genève · été 2026',
     intro: 'Tous les grands événements sportifs du Grand Genève : triathlon, beach-volley, tennis, cyclisme et bien plus. Restez informés des compétitions et rendez-vous sportifs de l\'été 2026.',
   },
   festival: {
     label: 'Festival', labelPlural: 'festivals', color: '#0A84FF',
-    title: 'Festivals à Genève 2026 — Paléo, Montreux Jazz, Caribana, La Bâtie | TIF',
-    description: 'Le programme complet des festivals dans le Grand Genève et en Suisse romande : Paléo Festival Nyon, Montreux Jazz Festival, Caribana Festival, La Bâtie — Festival de Genève, Plein les Watts et plus.',
+    title: 'Festivals à Genève 2026 · Paléo, Montreux Jazz, Caribana, La Bâtie | TIF',
+    description: 'Le programme complet des festivals dans le Grand Genève et en Suisse romande : Paléo Festival Nyon, Montreux Jazz Festival, Caribana Festival, La Bâtie · Festival de Genève, Plein les Watts et plus.',
     keywords: 'festivals Genève 2026, Paléo Festival, Montreux Jazz, Caribana Festival, La Bâtie Genève, festival été Genève, Grand Genève festivals',
-    h1: 'Festivals été 2026 — Grand Genève & Suisse Romande',
+    h1: 'Festivals été 2026 · Grand Genève & Suisse Romande',
     intro: 'Ne manquez aucun festival cet été dans le Grand Genève et en Suisse romande. Du Paléo Festival de Nyon au Montreux Jazz, en passant par Caribana et la Fête de la Musique à Genève.',
   },
   concert: {
     label: 'Concert', labelPlural: 'concerts', color: '#0A84FF',
-    title: 'Concerts à Genève 2026 — Agenda complet | TIF',
+    title: 'Concerts à Genève 2026 · Agenda complet | TIF',
     description: 'Agenda des concerts à Genève et Grand Genève en 2026. Toutes les salles, tous les styles musicaux. Programme, billets et infos pratiques.',
     keywords: 'concerts Genève 2026, agenda concerts Genève, musique Genève, Grand Genève concerts',
     h1: 'Concerts à Genève 2026',
@@ -43,7 +46,7 @@ const CAT_META: Record<string, {
   },
   classique: {
     label: 'Musique Classique', labelPlural: 'concerts classiques', color: '#0A84FF',
-    title: 'Musique Classique à Genève 2026 — OSR, Concerts | TIF',
+    title: 'Musique Classique à Genève 2026 · OSR, Concerts | TIF',
     description: 'Agenda musique classique à Genève : Orchestre de la Suisse Romande, OSR Genève-Plage, récitals et concerts en plein air. Programme 2026.',
     keywords: 'musique classique Genève 2026, OSR Genève, Orchestre Suisse Romande, concert classique Genève',
     h1: 'Musique Classique à Genève 2026',
@@ -51,15 +54,15 @@ const CAT_META: Record<string, {
   },
   cinema: {
     label: 'Cinéma', labelPlural: 'séances cinema', color: '#FF375F',
-    title: 'Cinéma à Genève 2026 — Plein Air, CinéTransat, Allianz Cinema | TIF',
+    title: 'Cinéma à Genève 2026 · Plein Air, CinéTransat, Allianz Cinema | TIF',
     description: 'Programme cinéma à Genève : Allianz Cinema Parc de la Grange, CinéTransat, cinémas de quartier (Pathé, Spoutnik, Bio, Voltaire). Séances, horaires et tarifs 2026.',
     keywords: 'cinéma Genève 2026, Allianz Cinema, CinéTransat, cinéma plein air Genève, Pathé Genève, Spoutnik cinéma, programme cinéma Genève',
-    h1: 'Cinéma à Genève 2026 — Plein air & Salles',
+    h1: 'Cinéma à Genève 2026 · Plein air & Salles',
     intro: 'Toute la programmation cinématographique de Genève : films en plein air avec Allianz Cinema et CinéTransat, et le programme des salles indépendantes et multiplexes du Grand Genève.',
   },
   art: {
     label: 'Art & Expositions', labelPlural: 'expositions', color: '#BF5AF2',
-    title: 'Expositions & Art à Genève 2026 — Musées, Galeries | TIF',
+    title: 'Expositions & Art à Genève 2026 · Musées, Galeries | TIF',
     description: 'Agenda expositions et art à Genève : Musée Ariana, Musée Rath, galeries et événements culturels du Grand Genève 2026.',
     keywords: 'expositions Genève 2026, musée Genève, Musée Ariana, Musée Rath, art Genève, galeries Genève',
     h1: 'Art & Expositions à Genève 2026',
@@ -67,7 +70,7 @@ const CAT_META: Record<string, {
   },
   theatre: {
     label: 'Théâtre', labelPlural: 'spectacles de théâtre', color: '#BF5AF2',
-    title: 'Théâtre à Genève 2026 — Spectacles & Programme | TIF',
+    title: 'Théâtre à Genève 2026 · Spectacles & Programme | TIF',
     description: 'Agenda théâtre à Genève : spectacles, pièces et représentations dans les théâtres du Grand Genève. Programme 2026.',
     keywords: 'théâtre Genève 2026, spectacles Genève, programme théâtre Genève',
     h1: 'Théâtre à Genève 2026',
@@ -75,7 +78,7 @@ const CAT_META: Record<string, {
   },
   comedie: {
     label: 'Comédie & Humour', labelPlural: 'spectacles comiques', color: '#BF5AF2',
-    title: 'Comédie & Humour à Genève 2026 — Caustic Comedy Club | TIF',
+    title: 'Comédie & Humour à Genève 2026 · Caustic Comedy Club | TIF',
     description: 'Agenda comédie et humour à Genève : Caustic Comedy Club, spectacles comiques, stand-up. Programme 2026.',
     keywords: 'comédie Genève 2026, humour Genève, Caustic Comedy Club, stand-up Genève',
     h1: 'Comédie & Humour à Genève 2026',
@@ -83,7 +86,7 @@ const CAT_META: Record<string, {
   },
   danse: {
     label: 'Danse', labelPlural: 'spectacles de danse', color: '#BF5AF2',
-    title: 'Danse à Genève 2026 — Spectacles & Programme | TIF',
+    title: 'Danse à Genève 2026 · Spectacles & Programme | TIF',
     description: 'Agenda danse à Genève : ballet, danse contemporaine, spectacles et performances dans le Grand Genève 2026.',
     keywords: 'danse Genève 2026, ballet Genève, danse contemporaine Genève',
     h1: 'Danse à Genève 2026',
@@ -91,7 +94,7 @@ const CAT_META: Record<string, {
   },
   nightlife: {
     label: 'Vie Nocturne', labelPlural: 'événements nocturnes', color: '#BF5AF2',
-    title: 'Vie Nocturne à Genève 2026 — Soirées, Clubs, Events | TIF',
+    title: 'Vie Nocturne à Genève 2026 · Soirées, Clubs, Events | TIF',
     description: 'Agenda vie nocturne à Genève : soirées, événements clubbing, AMR et scènes nocturnes du Grand Genève 2026.',
     keywords: 'vie nocturne Genève 2026, soirées Genève, clubbing Genève, AMR Genève',
     h1: 'Vie Nocturne à Genève 2026',
@@ -140,13 +143,10 @@ export default async function CategoryPage(
   const meta = CAT_META[cat]
   if (!meta) notFound()
 
-  const catEvents = events
-    .filter(e => e.category === cat && e.occurrences.length > 0)
-    .sort((a, b) => {
-      const da = [...new Set(a.occurrences.map(o => o.date))].sort()[0]
-      const db = [...new Set(b.occurrences.map(o => o.date))].sort()[0]
-      return da.localeCompare(db)
-    })
+  const today = todayInGeneva()
+  const dated = events.filter(e => e.category === cat && e.occurrences.length > 0)
+  const { upcoming, past } = splitByTime(dated, today)
+  const catEvents = [...upcoming, ...past]
 
   if (catEvents.length === 0) notFound()
 
@@ -154,11 +154,11 @@ export default async function CategoryPage(
   const listLd = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    name: meta.label + ' — Grand Genève 2026',
+    name: meta.label + ' · Grand Genève 2026',
     description: meta.description,
     url: `${BASE}/evenements/categorie/${cat}`,
-    numberOfItems: catEvents.length,
-    itemListElement: catEvents.map((ev, i) => ({
+    numberOfItems: upcoming.length,
+    itemListElement: upcoming.map((ev, i) => ({
       '@type': 'ListItem',
       position: i + 1,
       name: ev.title,
@@ -200,7 +200,9 @@ export default async function CategoryPage(
             color: meta.color, background: meta.color + '1a',
             padding: '4px 12px', borderRadius: 6, marginBottom: 12,
           }}>
-            {catEvents.length} événements
+            {upcoming.length > 0
+              ? `${upcoming.length} ${upcoming.length > 1 ? 'à venir' : 'à venir'}${past.length ? ` · ${past.length} terminés` : ''}`
+              : `${past.length} ${past.length > 1 ? 'événements terminés' : 'événement terminé'}`}
           </span>
           <h1 style={{ fontSize: 'clamp(26px, 5vw, 44px)', fontWeight: 800, margin: '0 0 14px', lineHeight: 1.15 }}>
             {meta.h1}
@@ -214,7 +216,8 @@ export default async function CategoryPage(
         <section aria-label={`Liste ${meta.labelPlural}`}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
             {catEvents.map(ev => {
-              const dates = [...new Set(ev.occurrences.map(o => o.date))].sort()
+              const ended = isPast(ev, today)
+              const dates = ended ? allDates(ev) : upcomingDates(ev, today)
               const d0 = dates[0], dN = dates[dates.length - 1]
               const ticketLink = ev.links.find(l => l.kind === 'tickets')
               const mainUrl = ticketLink?.url ?? ev.links[0]?.url
@@ -223,8 +226,14 @@ export default async function CategoryPage(
                   background: 'var(--bg-card, #f5f5f5)', borderRadius: 14,
                   border: '1px solid var(--border, #e0e0e0)',
                   padding: 20, display: 'flex', flexDirection: 'column', gap: 10,
+                  opacity: ended ? 0.65 : 1,
                 }}>
                   <div>
+                    {ended && (
+                      <span style={{ display: 'inline-block', fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary, #999)', background: 'rgba(128,128,128,0.14)', padding: '3px 8px', borderRadius: 5, marginBottom: 6 }}>
+                        TERMINÉ
+                      </span>
+                    )}
                     <h2 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 4px', color: 'var(--text-primary, #111)' }}>
                       <a href={`/evenements/${ev.slug}`} style={{ color: 'inherit', textDecoration: 'none' }}>
                         {ev.title}
@@ -238,8 +247,8 @@ export default async function CategoryPage(
                     {ev.description.length > 100 ? ev.description.slice(0, 98) + '…' : ev.description}
                   </p>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-                    <time dateTime={d0} style={{ fontSize: 12, fontWeight: 600, color: meta.color }}>
-                      {formatDateShort(d0)}{dN !== d0 ? ` — ${formatDateShort(dN)}` : ''}
+                    <time dateTime={d0} style={{ fontSize: 12, fontWeight: 600, color: ended ? 'var(--text-tertiary, #999)' : meta.color }}>
+                      {ended ? 'Jusqu’au ' : ''}{formatDateShort(d0)}{dN !== d0 ? ` au ${formatDateShort(dN)}` : ''}
                       {dates.length > 1 ? ` · ${dates.length} dates` : ''}
                     </time>
                     <div style={{ display: 'flex', gap: 8 }}>

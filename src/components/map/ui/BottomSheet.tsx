@@ -19,6 +19,8 @@ import { events, CATEGORY_LABELS, CATEGORY_ICONS } from '@/data/events'
 import type { EventItem } from '@/data/types'
 import { IMPACT_ZONES, getActiveImpactZones } from '@/data/impact-zones'
 import type { ImpactZone } from '@/data/impact-zones'
+import { avisEnVigueur } from '@/data/avis'
+import { isUndated, isUpcoming, todayInGeneva } from '@/lib/eventDates'
 
 type DetailView = 'overview' | 'douanes' | 'transport' | 'alertes' | 'meteo' | 'parking' | 'journey' | 'events' | 'impact-zone'
 
@@ -1013,7 +1015,8 @@ function AlertesDetail({ map, onAlertSelect }: { map: mapboxgl.Map | null; onAle
     }
   }, [isLoading, alerts.length])
 
-  const totalActive = customAlerts.length + alerts.length
+  const avis = avisEnVigueur(todayInGeneva())
+  const totalActive = avis.length + customAlerts.length + alerts.length
 
   return (
     <div className="space-y-3">
@@ -1123,6 +1126,32 @@ function AlertesDetail({ map, onAlertSelect }: { map: mapboxgl.Map | null; onAle
           </div>
         )}
       </div>
+
+      {/* ══ AVIS OFFICIELS EN VIGUEUR ════════════════════════════════════ */}
+      {avis.map(a => {
+        const c = {
+          interdiction: { fond: 'rgba(255,69,58,0.12)',  bord: 'rgba(255,69,58,0.38)',  texte: '#FF6961', puce: '⛔', etiquette: 'Interdiction' },
+          perturbation: { fond: 'rgba(255,159,10,0.12)', bord: 'rgba(255,159,10,0.38)', texte: '#FFB340', puce: '⚠️', etiquette: 'Circulation' },
+          info:         { fond: 'rgba(10,132,255,0.12)', bord: 'rgba(10,132,255,0.38)', texte: '#64B5FF', puce: 'ℹ️', etiquette: 'À savoir' },
+        }[a.niveau]
+        return (
+          <div key={a.id} className="rounded-2xl px-3 py-2.5"
+            style={{ background: c.fond, border: `0.5px solid ${c.bord}`, backdropFilter: 'blur(20px)' }}>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[15px] leading-none">{c.puce}</span>
+              <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+                style={{ background: c.bord, color: c.texte }}>{c.etiquette}</span>
+              <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>en vigueur</span>
+            </div>
+            <p className="text-[13px] font-bold leading-snug mb-1" style={{ color: c.texte }}>{a.titre}</p>
+            <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{a.corps}</p>
+            <a href={a.source.url} target="_blank" rel="noopener noreferrer"
+              className="text-[10px] font-semibold mt-1.5 inline-block" style={{ color: 'var(--text-tertiary)' }}>
+              {a.source.label} ↗
+            </a>
+          </div>
+        )
+      })}
 
       {/* ── Alertes admin (opérateur) ─────────────────────────────────── */}
       {customAlerts.map(a => (
@@ -1666,7 +1695,8 @@ function ToutOverview({ data, onSelect }: {
   const now        = new Date()
   const liveData   = useLiveCrossings()
   const getStatus  = (c: CrossingStatic) => liveData[c.id]?.status ?? computeInstantStatus(c, now).status
-  const alertCount = data?.alerts.length ?? 0
+  const avisCount  = avisEnVigueur(todayInGeneva()).length
+  const alertCount = (data?.alerts.length ?? 0) + avisCount
   const hasIssue   = data?.network && Object.values(data.network).some(v => v !== 'normal')
   const blocked    = ALL_CROSSINGS.filter(c => getStatus(c) === 'BLOCKED').length
   const heavy      = ALL_CROSSINGS.find(c => {
@@ -1907,7 +1937,7 @@ function EventsPanel({ onSelect }: { onSelect: (slug: string) => void }) {
   }
 
   // Base filtered events (applies to both views — no date filter here)
-  let baseEvents = events
+  let baseEvents = events.filter(ev => isUpcoming(ev, today) || isUndated(ev))
   if (venueFilter)         baseEvents = baseEvents.filter(ev => ev.venue.name === venueFilter)
   if (catFilter !== 'all') baseEvents = baseEvents.filter(ev => ev.category === catFilter)
   baseEvents = priceFilter === 'free' ? baseEvents.filter(isFree)
@@ -2429,6 +2459,8 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
   const containerRef = useRef<HTMLDivElement>(null)
   const headerRef    = useRef<HTMLDivElement>(null)
   const contentRef   = useRef<HTMLDivElement>(null)
+  // Vrai quand un glisser a la souris vient de finir : le clic qui suit ne doit pas basculer le sheet
+  const mouseDraggedRef = useRef(false)
 
   // ── Safe area insets (viewport-fit=cover) ─────────────────────────────────
   useLayoutEffect(() => {
@@ -2521,11 +2553,60 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
       window.addEventListener('touchend',  onEnd)
     }
 
+    // Glisser a la souris (ordinateur) : meme logique que le doigt
+    let mouseMoved = false
+
+    function onMouseMove(e: MouseEvent) {
+      e.preventDefault()
+      const now = Date.now()
+      const dy  = lastY - e.clientY
+      const dt  = now - lastT
+      if (Math.abs(startY - e.clientY) > 3) mouseMoved = true
+      velo  = dt > 0 ? dy / dt : velo
+      lastY = e.clientY
+      lastT = now
+      const delta = startY - e.clientY
+      const newH  = Math.max(COMPACT_H, Math.min(getFullH(), startH + delta))
+      heightRef.current       = newH
+      container.style.height  = `${newH}px`
+    }
+
+    function onMouseUp() {
+      window.removeEventListener('mousemove', onMouseMove)
+      window.removeEventListener('mouseup',   onMouseUp)
+      document.body.style.userSelect = ''
+      if (mouseMoved) {
+        mouseDraggedRef.current = true
+        onEnd()
+      }
+    }
+
+    function onMouseDown(e: MouseEvent) {
+      if (e.button !== 0) return
+      e.preventDefault()
+      startY = e.clientY
+      startH = container.offsetHeight
+      lastY  = startY
+      lastT  = Date.now()
+      velo   = 0
+      mouseMoved = false
+      mouseDraggedRef.current = false
+      container.style.transition = 'none'
+      document.body.style.userSelect = 'none'
+      window.addEventListener('mousemove', onMouseMove)
+      window.addEventListener('mouseup',   onMouseUp)
+    }
+
     header.addEventListener('touchstart', onStart, { passive: false })
+    header.addEventListener('mousedown', onMouseDown)
     return () => {
       header.removeEventListener('touchstart', onStart)
+      header.removeEventListener('mousedown', onMouseDown)
       window.removeEventListener('touchmove', onMove)
       window.removeEventListener('touchend',  onEnd)
+      window.removeEventListener('mousemove', onMouseMove)
+      window.removeEventListener('mouseup',   onMouseUp)
+      document.body.style.userSelect = ''
     }
   }, [animateTo])
 
@@ -2610,6 +2691,11 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
       setDetailView('events')
       setSelectedEvent(null)
       animateTo(Math.round(window.innerHeight * 0.50), true)
+    }
+    if (activeFilter === 'alerts') {
+      setDetailView('alertes')
+      setSelectedAlertItem(null)
+      animateTo(Math.round(window.innerHeight * 0.62), true)
     }
   }, [activeFilter, animateTo])
 
@@ -2715,7 +2801,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
   }, [selectedCrossing, selectedAlertItem, selectedEvent, selectedImpactZone, animateTo])
 
   // Compact headline
-  const alertCount  = data?.alerts.length ?? 0
+  const alertCount  = (data?.alerts.length ?? 0) + avisEnVigueur(todayInGeneva()).length
   const compactText = activeFilter === 'all'     ? (alertCount > 0 ? `${t.compact.alertPrefix}${alertCount} ${alertCount > 1 ? t.compact.alertSuffixP : t.compact.alertSuffixS}` : t.compact.all)
     : activeFilter === 'transit'  ? t.compact.transit
     : activeFilter === 'traffic'  ? t.compact.traffic
@@ -2759,7 +2845,10 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
         <button
           className="flex justify-center pt-2.5 pb-1 w-full"
           onClick={() => {
-            if (!isOpen) animateTo(getFullH(), true)
+            // Un glisser a la souris se termine par un clic : on l'ignore
+            if (mouseDraggedRef.current) { mouseDraggedRef.current = false; return }
+            const fullH = getFullH()
+            if ((containerRef.current?.offsetHeight ?? COMPACT_H) < fullH - 40) animateTo(fullH, true)
             else { animateTo(COMPACT_H, true); setDetailView('overview'); setSelectedCrossing(null); setSelectedEvent(null); setSelectedImpactZone(null) }
           }}
           aria-label="Ouvrir/fermer">

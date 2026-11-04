@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react'
 import mapboxgl from 'mapbox-gl'
 import { events, CATEGORY_ICONS } from '@/data/events'
+import { isUndated, isUpcoming, todayInGeneva } from '@/lib/eventDates'
 import type { FeatureCollection, Point } from 'geojson'
 
 interface EventsLayerProps { map: mapboxgl.Map | null }
@@ -69,8 +70,11 @@ async function loadEventImage(m: mapboxgl.Map, cat: string, emoji: string): Prom
 function buildGeojson(): FeatureCollection<Point> {
   const seen = new Set<string>()
   const features: FeatureCollection<Point>['features'] = []
+  // Seulement ce qui vient ou ce qui est ouvert toute l'annee : pas de pin pour un evenement termine
+  const today = todayInGeneva()
+  const shown = events.filter(e => isUpcoming(e, today) || isUndated(e))
 
-  for (const ev of events) {
+  for (const ev of shown) {
     const { lat, lng } = ev.venue
     if (lat == null || lng == null) continue
 
@@ -80,7 +84,7 @@ function buildGeojson(): FeatureCollection<Point> {
     seen.add(key)
 
     // Slugs de tous les événements à ce lieu
-    const slugsAtVenue = events
+    const slugsAtVenue = shown
       .filter(e => e.venue.lat === lat && e.venue.lng === lng)
       .map(e => e.slug)
 

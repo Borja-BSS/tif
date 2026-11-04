@@ -8,6 +8,7 @@ import type { Lang } from '@/i18n/home'
 import { LangSelector } from '@/components/LangSelector'
 import { computeInstantStatus, ALL_CROSSINGS } from '@/lib/territory/border-crossings-client'
 import { events as allEvents } from '@/data/events'
+import { isUpcoming, lastDate, nextDate, todayInGeneva } from '@/lib/eventDates'
 
 interface DashData {
   alerts: Array<{ id: string; icon: string; title: string; severity: string; timeAgo: string }>
@@ -145,66 +146,6 @@ const CATEGORY_MAP: Record<string, string> = {
   danse: 'Culture',
 }
 
-// Seuls les événements publics à grande échelle (pas les spectacles de petite salle)
-const HOMEPAGE_IDS = new Set([
-  'worldcup-2026','nati-qatar-suisse','nati-suisse-bosnie','nati-suisse-canada',
-  'fanzone-gradi24','fanzone-nyon','fanzone-saint-genis','fanzone-crowne-plaza',
-  'etoile-carouge-aarau-j1',
-  'servette-bale-j1','servette-grasshoppers-2026','servette-lucerne-2026',
-  'caribana-17','caribana-18','caribana-19','caribana-20',
-  'fete-musique',
-  'scene-ella',
-  'beach-pro-tour-femmes','beach-pro-tour-hommes',
-  'tous-a-la-plage-2026',
-  'amr-cropettes',
-  'plein-les-watts',
-  'triathlon-tour-geneve',
-  'guitare-en-scene',
-  'swiss-open-geneva-2026',
-  'montreux-jazz-2026',
-  'grand-juillet-2026',
-  'paleo-2026',
-  'nocturne-saint-pierre-2026',
-  'allianz-cinema',
-  'cinetransat-2026',
-  'pathe-balexert','arena-la-praille','grutli','spoutnik','cinema-bio',
-  'les-scala','le-city','nord-sud','cinema-voltaire-ferney','pathe-archamps',
-  'jazz-sur-la-plage-2026',
-  'tdf-femmes-etape2',
-  'osr-geneve-plage-2026',
-  'piz-palu-festival-2026',
-  'festiverbant-2026',
-  'la-batie-2026',
-  'scene-vagabonde-2026',
-  'musee-ariana-ducate','musee-ariana-verre-cirva','musee-rath-sylvia-sleigh',
-])
-
-const EVENTS_DATA = allEvents
-  .filter(ev => ev.occurrences.length > 0 && HOMEPAGE_IDS.has(ev.id))
-  .map(ev => {
-    const dates = [...new Set(ev.occurrences.map(o => o.date))].sort()
-    const cat = CATEGORY_MAP[ev.category] ?? 'Culture'
-    const isFree = !!ev.priceInfo && (
-      ev.priceInfo.toLowerCase().includes('gratuit') ||
-      ev.priceInfo.toLowerCase().includes('libre')
-    )
-    const ticketLink = ev.links?.find(l => l.kind === 'tickets')
-    const infoLink   = ev.links?.find(l => l.kind === 'info')
-    const venueLink  = ev.links?.find(l => l.kind === 'venue')
-    const desc = ev.description.length > 90 ? ev.description.slice(0, 88) + '…' : ev.description
-    const lastDate = dates[dates.length - 1]
-    return {
-      date: dates[0],
-      endDate: lastDate !== dates[0] ? lastDate : undefined,
-      title: ev.title,
-      cat,
-      desc,
-      loc: ev.venue.name,
-      free: isFree,
-      url: `/evenements/${ev.slug}`,
-    }
-  })
-
 const CAT_COLORS: Record<string, string> = {
   Football: '#FF9F0A',
   Musique: '#0A84FF',
@@ -234,6 +175,43 @@ const CEVA_LINES = ['L1 Coppet Annemasse', 'L2 Bellegarde Évian', 'L3 Genève A
 
 export function HomeContent() {
   const [lang, setLang] = useState<Lang>('fr')
+  // Date du jour a Geneve, rafraichie toutes les heures : l'agenda ne montre que ce qui vient.
+  const [today, setToday] = useState<string>(() => todayInGeneva())
+  useEffect(() => {
+    const tick = () => setToday(todayInGeneva())
+    tick()
+    const id = setInterval(tick, 3600000)
+    return () => clearInterval(id)
+  }, [])
+
+  const EVENTS_DATA = useMemo(() => allEvents
+    .filter(ev => isUpcoming(ev, today))
+    .map(ev => {
+      const dates = [...new Set(ev.occurrences.map(o => o.date))].sort()
+      const cat = CATEGORY_MAP[ev.category] ?? 'Culture'
+      const isFree = !!ev.priceInfo && (
+        ev.priceInfo.toLowerCase().includes('gratuit') ||
+        ev.priceInfo.toLowerCase().includes('libre')
+      )
+      const ticketLink = ev.links?.find(l => l.kind === 'tickets')
+      const infoLink   = ev.links?.find(l => l.kind === 'info')
+      const venueLink  = ev.links?.find(l => l.kind === 'venue')
+      const desc = ev.description.length > 90 ? ev.description.slice(0, 88) + '…' : ev.description
+      const first = nextDate(ev, today) ?? dates[0]
+      const last = lastDate(ev) ?? first
+      return {
+        date: first,
+        endDate: last !== first ? last : undefined,
+        today: first === today,
+        title: ev.title,
+        cat,
+        desc,
+        loc: ev.venue.name,
+        free: isFree,
+        url: `/evenements/${ev.slug}`,
+      }
+    })
+    .sort((a, b) => a.date.localeCompare(b.date)), [today])
 
   useEffect(() => {
     const saved = localStorage.getItem('tif-lang') as Lang | null
@@ -592,10 +570,7 @@ export function HomeContent() {
         <h2 className="s-h reveal">{t.agenda.h2a}<br /><span style={{ fontStyle: 'italic', color: 'var(--text-secondary)' }}>{t.agenda.h2b}</span></h2>
         <p className="s-sub reveal" style={{ marginBottom: '32px' }}>{t.agenda.sub}</p>
         <div className="reveal" style={{ overflowX: 'auto', display: 'flex', gap: '12px', padding: '4px 0 20px', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
-          {EVENTS_DATA
-            .filter(ev => (ev.endDate ?? ev.date) >= new Date().toISOString().split('T')[0])
-            .sort((a, b) => a.date.localeCompare(b.date))
-            .map((ev, i) => {
+          {EVENTS_DATA.map((ev, i) => {
             const color = CAT_COLORS[ev.cat] ?? '#636366'
             return (
               <a key={i} href={ev.url} target={ev.url.startsWith('http') ? '_blank' : undefined} rel="noreferrer"
@@ -641,10 +616,7 @@ export function HomeContent() {
           ))}
         </div>
         {(() => {
-          const today = new Date().toISOString().split('T')[0]
-          const filtered = EVENTS_DATA
-            .filter(ev => (agendaFilter === 'Tout' || ev.cat === agendaFilter) && (ev.endDate ?? ev.date) >= today)
-            .sort((a, b) => a.date.localeCompare(b.date))
+          const filtered = EVENTS_DATA.filter(ev => agendaFilter === 'Tout' || ev.cat === agendaFilter)
           const visible = agendaShowAll ? filtered : filtered.slice(0, 4)
           return (
             <>
@@ -657,8 +629,14 @@ export function HomeContent() {
                       onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-card)'; (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)' }}
                       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.borderColor = 'transparent' }}>
                       <div style={{ flexShrink: 0, textAlign: 'center', minWidth: '44px' }}>
-                        <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1 }}>{new Date(ev.date).getDate()}</div>
-                        <div style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{MONTHS_FR[new Date(ev.date).getMonth()]}</div>
+                        {ev.today ? (
+                          <div style={{ fontSize: '10px', fontWeight: 800, color: 'var(--blue)', textTransform: 'uppercase', letterSpacing: '0.06em', lineHeight: 1.3 }}>Ce<br />soir</div>
+                        ) : (
+                          <>
+                            <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1 }}>{new Date(ev.date).getDate()}</div>
+                            <div style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{MONTHS_FR[new Date(ev.date).getMonth()]}</div>
+                          </>
+                        )}
                       </div>
                       <div style={{ width: '3px', height: '36px', borderRadius: '4px', background: color, flexShrink: 0 }} />
                       <div style={{ flex: 1, minWidth: 0 }}>
@@ -823,7 +801,7 @@ export function HomeContent() {
       <section className="s reveal" id="track">
         <div className="contrib-wrap reveal">
           <div className="cc" style={{ flex: '1 1 420px' }}>
-            <div className="s-label" style={{ marginBottom: '12px' }}>G7 Évian · 8–17 juin 2026</div>
+            <div className="s-label" style={{ marginBottom: '12px' }}>G7 Évian · 8 au 17 juin 2026</div>
             <div className="cc-h">Notre savoir-faire,<br /><span style={{ fontStyle: 'italic', color: 'var(--text-secondary)', fontWeight: 400 }}>éprouvé sous pression.</span></div>
             <div className="cc-p" style={{ marginTop: '16px' }}>
               Le Sommet du G7 à Évian a constitué pour TIF un test opérationnel d'envergure internationale. Durant dix jours, la plateforme a assuré une couverture temps réel du territoire genevois sous dispositif sécuritaire maximal, passages frontière renforcés, restrictions de circulation, perturbations TPG majeures, manifestations en centre-ville.
@@ -851,7 +829,7 @@ export function HomeContent() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
                 <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--green)', boxShadow: '0 0 8px var(--green)', display: 'inline-block' }} />
                 <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Rapport opérationnel G7</span>
-                <span style={{ fontSize: '10px', color: 'var(--text-tertiary)', marginLeft: 'auto' }}>8–17 juin 2026</span>
+                <span style={{ fontSize: '10px', color: 'var(--text-tertiary)', marginLeft: 'auto' }}>8 au 17 juin 2026</span>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
                 {[
@@ -1214,7 +1192,7 @@ export function HomeContent() {
             </div>
           </div>
           <div className="ft-bottom">
-            <p>{t.footer.copyright}</p>
+            <p><a href="https://borja-swiss-solutions.ch" style={{ color: 'inherit' }}>{t.footer.copyright}</a></p>
             <p>{t.footer.legal}</p>
           </div>
         </div>

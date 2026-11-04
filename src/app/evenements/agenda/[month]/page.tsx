@@ -1,8 +1,11 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { events } from '@/data/events'
+import { isCurrentMonth, isPastMonth, todayInGeneva } from '@/lib/eventDates'
 
 const BASE = 'https://tif.borja-swiss-solutions.ch'
+
+export const revalidate = 3600
 
 const MONTHS: Record<string, { num: string; label: string; labelLong: string; season: string }> = {
   'juin-2026':      { num: '06', label: 'juin 2026',      labelLong: 'Juin 2026',      season: 'début d\'été' },
@@ -10,6 +13,8 @@ const MONTHS: Record<string, { num: string; label: string; labelLong: string; se
   'aout-2026':      { num: '08', label: 'août 2026',      labelLong: 'Août 2026',      season: 'cœur de l\'été' },
   'septembre-2026': { num: '09', label: 'septembre 2026', labelLong: 'Septembre 2026', season: 'rentrée' },
   'octobre-2026':   { num: '10', label: 'octobre 2026',   labelLong: 'Octobre 2026',   season: 'automne' },
+  'novembre-2026':  { num: '11', label: 'novembre 2026',  labelLong: 'Novembre 2026',  season: 'fin d\'automne' },
+  'decembre-2026':  { num: '12', label: 'décembre 2026',  labelLong: 'Décembre 2026',  season: 'fêtes' },
 }
 
 const CAT_FR: Record<string, string> = {
@@ -41,8 +46,13 @@ export async function generateMetadata(
   const m = MONTHS[month]
   if (!m) return {}
 
-  const title = `Agenda Genève ${m.labelLong} — Que faire ? Événements & Sorties | TIF`
-  const description = `Tous les événements à Genève en ${m.label} : festivals, concerts, football, cinéma, expositions, sport. L'agenda complet du Grand Genève pour ${m.season} 2026 — programme, billets, accès.`
+  const past = isPastMonth(`2026-${m.num}`, todayInGeneva())
+  const title = past
+    ? `Agenda Genève ${m.labelLong} · ce qui a eu lieu | TIF`
+    : `Agenda Genève ${m.labelLong} · Que faire ? Événements & Sorties | TIF`
+  const description = past
+    ? `Archive des événements qui ont eu lieu à Genève en ${m.label} : festivals, concerts, football, cinéma, expositions, sport. Pour l'agenda à venir, voir l'agenda du Grand Genève.`
+    : `Tous les événements à Genève en ${m.label} : festivals, concerts, football, cinéma, expositions, sport. L'agenda complet du Grand Genève pour ${m.season} 2026, programme, billets, accès.`
 
   return {
     title,
@@ -74,6 +84,9 @@ export default async function MonthlyAgendaPage(
   if (!m) notFound()
 
   const monthPrefix = `2026-${m.num}`
+  const today = todayInGeneva()
+  const past = isPastMonth(monthPrefix, today)
+  const current = isCurrentMonth(monthPrefix, today)
 
   const monthEvents = events
     .filter(e => e.occurrences.some(o => o.date.startsWith(monthPrefix)))
@@ -149,11 +162,21 @@ export default async function MonthlyAgendaPage(
 
         {/* Header */}
         <header style={{ marginBottom: 36 }}>
+          {past && (
+            <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary, #666)', background: 'rgba(128,128,128,0.12)', border: '1px solid var(--border, #e0e0e0)', borderRadius: 10, padding: '10px 14px', margin: '0 0 16px', maxWidth: 700 }}>
+              Ce mois est passé. Cette page est conservée pour mémoire.{' '}
+              <a href="/evenements" style={{ color: 'var(--blue, #0A84FF)' }}>Voir ce qui arrive</a>.
+            </p>
+          )}
           <h1 style={{ fontSize: 'clamp(26px, 5vw, 44px)', fontWeight: 800, margin: '0 0 12px', lineHeight: 1.15 }}>
-            Que faire à Genève en {m.label} ?
+            {past ? `Ce qui s’est passé à Genève en ${m.label}` : `Que faire à Genève en ${m.label} ?`}
           </h1>
           <p style={{ fontSize: 16, color: 'var(--text-secondary, #666)', margin: '0 0 20px', lineHeight: 1.7, maxWidth: 700 }}>
-            L&apos;agenda complet des événements à Genève et dans le Grand Genève pour {m.season} — {monthEvents.length} événements, du festival au match de football en passant par les cinémas, musées et concerts.
+            {past ? (
+              <>Les {monthEvents.length} événements recensés à Genève et dans le Grand Genève en {m.label} : festivals, matchs, cinémas, musées et concerts. Ils sont terminés.</>
+            ) : (
+              <>L&apos;agenda complet des événements à Genève et dans le Grand Genève pour {m.season}, {monthEvents.length} événements, du festival au match de football en passant par les cinémas, musées et concerts.{current ? ' Le mois est en cours : certaines dates sont déjà passées.' : ''}</>
+            )}
           </p>
           {/* Stats catégories */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -216,7 +239,7 @@ export default async function MonthlyAgendaPage(
                     </p>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                       <span style={{ fontSize: 12, color, fontWeight: 600 }}>
-                        {formatDateShort(datesInMonth[0])}{datesInMonth.length > 1 ? ` — ${formatDateShort(datesInMonth[datesInMonth.length - 1])}` : ''}
+                        {formatDateShort(datesInMonth[0])}{datesInMonth.length > 1 ? ` au ${formatDateShort(datesInMonth[datesInMonth.length - 1])}` : ''}
                         {allDates.length > datesInMonth.length ? ` (+${allDates.length - datesInMonth.length} hors mois)` : ''}
                       </span>
                       <a href={`/evenements/${ev.slug}`} style={{ fontSize: 13, fontWeight: 600, color: 'var(--blue, #0A84FF)', textDecoration: 'none' }}>Programme →</a>
@@ -229,27 +252,48 @@ export default async function MonthlyAgendaPage(
           </div>
         </section>
 
-        {/* Prochains mois */}
-        <section style={{ marginTop: 48 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 16px' }}>Agenda des prochains mois</h2>
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-            {Object.entries(MONTHS).filter(([slug]) => slug !== month).map(([slug, info]) => (
-              <a key={slug} href={`/evenements/agenda/${slug}`} style={{
-                display: 'block', padding: '14px 20px', borderRadius: 12,
-                background: 'var(--bg-card, #f5f5f5)', border: '1px solid var(--border, #e0e0e0)',
-                textDecoration: 'none', color: 'var(--text-primary, #111)', fontWeight: 600, fontSize: 14,
-              }}>
-                Agenda {info.labelLong} →
-              </a>
-            ))}
-          </div>
-        </section>
+        {/* Autres mois : a venir, puis archives */}
+        {(() => {
+          const others = Object.entries(MONTHS).filter(([slug]) => slug !== month)
+          const nextMonths = others.filter(([, info]) => !isPastMonth(`2026-${info.num}`, today))
+          const pastMonths = others.filter(([, info]) => isPastMonth(`2026-${info.num}`, today))
+          const link = (slug: string, label: string, dim: boolean) => (
+            <a key={slug} href={`/evenements/agenda/${slug}`} style={{
+              display: 'block', padding: '14px 20px', borderRadius: 12,
+              background: 'var(--bg-card, #f5f5f5)', border: '1px solid var(--border, #e0e0e0)',
+              textDecoration: 'none', color: 'var(--text-primary, #111)', fontWeight: 600, fontSize: 14,
+              opacity: dim ? 0.6 : 1,
+            }}>
+              Agenda {label} →
+            </a>
+          )
+          return (
+            <>
+              {nextMonths.length > 0 && (
+                <section style={{ marginTop: 48 }}>
+                  <h2 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 16px' }}>Agenda des prochains mois</h2>
+                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                    {nextMonths.map(([slug, info]) => link(slug, info.labelLong, false))}
+                  </div>
+                </section>
+              )}
+              {pastMonths.length > 0 && (
+                <section style={{ marginTop: nextMonths.length > 0 ? 32 : 48 }}>
+                  <h2 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 16px' }}>Mois déjà passés</h2>
+                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                    {pastMonths.map(([slug, info]) => link(slug, info.labelLong, true))}
+                  </div>
+                </section>
+              )}
+            </>
+          )
+        })()}
 
         {/* CTA Carte */}
         <section style={{ marginTop: 36, padding: 28, borderRadius: 14, background: 'linear-gradient(135deg, rgba(10,132,255,0.08), rgba(48,209,88,0.08))', border: '1px solid rgba(10,132,255,0.2)' }}>
           <h2 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 8px' }}>Carte temps réel du Grand Genève</h2>
           <p style={{ fontSize: 14, color: 'var(--text-secondary, #666)', margin: '0 0 16px' }}>
-            Trafic, passages douanes, transports publics et événements — tout en un seul coup d&apos;œil.
+            Trafic, passages douanes, transports publics et événements, tout en un seul coup d&apos;œil.
           </p>
           <a href="/map" style={{ display: 'inline-block', padding: '10px 22px', background: 'var(--blue, #0A84FF)', color: '#fff', borderRadius: 10, fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>
             Ouvrir la carte TIF →

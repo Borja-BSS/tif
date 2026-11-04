@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { fireConfetti } from './OnboardingTour'
 import { events as ALL_EVENTS, CATEGORY_ICONS } from '../../data/events'
 import type { EventItem, Occurrence } from '../../data/types'
+import { avisEnVigueur } from '../../data/avis'
+import { todayInGeneva } from '../../lib/eventDates'
 
 const DISMISS_KEY  = 'tif:popup:dismiss-ts'
 const EIGHT_HOURS  = 8 * 60 * 60 * 1000
@@ -148,6 +150,11 @@ function RetourNormaleModal({
   onClose:    () => void
 }) {
   const upcomingEvents = getUpcomingEvents(3)
+  const [today, setToday] = useState(() => todayInGeneva())
+  useEffect(() => {
+    setToday(todayInGeneva())
+  }, [])
+  const avis = avisEnVigueur(today)
 
   const active = hover || stars
 
@@ -178,6 +185,28 @@ function RetourNormaleModal({
           Mobilité en temps réel · Sorties et festivals du Grand Genève
         </p>
       </div>
+
+      {/* ── Avis officiels en vigueur ──────────────────────────────────── */}
+      {avis.length > 0 && (
+        <div className="mb-4 flex flex-col gap-2">
+          {avis.map(a => {
+            const c = {
+              interdiction: { fond: 'rgba(255,69,58,0.10)',  bord: 'rgba(255,69,58,0.28)',  texte: '#FF6961', puce: '⛔' },
+              perturbation: { fond: 'rgba(255,159,10,0.10)', bord: 'rgba(255,159,10,0.28)', texte: '#FFB340', puce: '⚠️' },
+              info:         { fond: 'rgba(10,132,255,0.10)', bord: 'rgba(10,132,255,0.28)', texte: '#64B5FF', puce: '🇨🇭' },
+            }[a.niveau]
+            return (
+              <div key={a.id} className="rounded-2xl p-3 text-left" style={{ background: c.fond, border: `1px solid ${c.bord}` }}>
+                <p className="text-[12px] font-bold mb-1" style={{ color: c.texte }}>{c.puce} {a.titre}</p>
+                <p className="text-[11px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.72)' }}>{a.corps}</p>
+                <a href={a.source.url} target="_blank" rel="noopener noreferrer" className="text-[10px] font-semibold mt-1.5 inline-block" style={{ color: 'rgba(255,255,255,0.42)' }}>
+                  {a.source.label} ↗
+                </a>
+              </div>
+            )
+          })}
+        </div>
+      )}
 
       {/* ── Zone étoiles ───────────────────────────────────────────────── */}
       <div className="rounded-2xl p-4 mb-4" style={{ background: 'rgba(255,214,10,0.06)', border: '1px solid rgba(255,214,10,0.18)' }}>

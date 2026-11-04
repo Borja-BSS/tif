@@ -1,8 +1,11 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { events } from '@/data/events'
+import { isPast, nextDate, splitByTime, todayInGeneva } from '@/lib/eventDates'
 
 const BASE = 'https://tif.borja-swiss-solutions.ch'
+
+export const revalidate = 3600
 
 const CAT_FR: Record<string, string> = {
   theatre: 'Théâtre', comedie: 'Comédie & Humour', concert: 'Concert',
@@ -46,13 +49,17 @@ export async function generateMetadata(
   const dates = [...new Set(ev.occurrences.map(o => o.date))].sort()
   const d0 = dates[0], dN = dates[dates.length - 1]
   const dateStr = d0 === dN
-    ? formatDateShort(d0)
-    : `${formatDateShort(d0)} – ${formatDateShort(dN)}`
+    ? `le ${formatDateShort(d0)}`
+    : `du ${formatDateShort(d0)} au ${formatDateShort(dN)}`
   const catLabel = CAT_FR[ev.category] ?? ev.category
   const year = new Date(d0 + 'T12:00:00').getFullYear()
+  const past = isPast(ev, todayInGeneva())
 
-  const title = `${ev.title} — ${ev.venue.name} · Genève ${year}`
-  const description = `${ev.description} · ${dateStr} à ${ev.venue.name}${ev.venue.address ? `, ${ev.venue.address}` : ''}. Programme, billets et infos — ${catLabel} Grand Genève ${year}.`
+  const title = `${ev.title} · ${ev.venue.name} · Genève ${year}`
+  const place = `${ev.venue.name}${ev.venue.address ? `, ${ev.venue.address}` : ''}`
+  const description = past
+    ? `${ev.description} · A eu lieu ${dateStr} à ${place}. Événement terminé, ${catLabel} Grand Genève ${year}.`
+    : `${ev.description} · A lieu ${dateStr} à ${place}. Programme, billets et infos, ${catLabel} Grand Genève ${year}.`
 
   return {
     title,
@@ -94,9 +101,14 @@ export default async function EventPage(
   const venueLink  = ev.links.find(l => l.kind === 'venue')
   const mainUrl    = ticketLink?.url ?? infoLink?.url ?? venueLink?.url
 
-  const related = events
+  const today = todayInGeneva()
+  const past = isPast(ev, today)
+  const next = nextDate(ev, today)
+
+  const sameCat = events
     .filter(e => e.slug !== ev.slug && e.category === ev.category && e.occurrences.length > 0)
-    .slice(0, 6)
+  const { upcoming: relUpcoming, past: relPast } = splitByTime(sameCat, today)
+  const related = [...relUpcoming, ...relPast].slice(0, 6)
 
   // JSON-LD: Event
   const eventLd = {
@@ -160,13 +172,19 @@ export default async function EventPage(
 
         {/* Badge + Titre */}
         <header style={{ marginBottom: 32 }}>
+          {past && (
+            <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-secondary, #666)', background: 'rgba(128,128,128,0.12)', border: '1px solid var(--border, #e0e0e0)', borderRadius: 10, padding: '12px 16px', margin: '0 0 18px' }}>
+              Cet événement est terminé. Dernière date le {formatDateShort(dN)}.{' '}
+              <a href="/evenements" style={{ color: 'var(--blue, #0A84FF)' }}>Voir ce qui arrive dans le Grand Genève</a>.
+            </p>
+          )}
           <span style={{
             display: 'inline-block', fontSize: 11, fontWeight: 700,
             textTransform: 'uppercase', letterSpacing: '0.1em',
             color: color, background: color + '1a',
             padding: '4px 12px', borderRadius: 6, marginBottom: 12,
           }}>
-            {catLabel}
+            {catLabel}{next ? ` · prochaine date le ${formatDateShort(next)}` : ''}
           </span>
           <h1 style={{ fontSize: 'clamp(26px, 5vw, 44px)', fontWeight: 800, margin: '0 0 10px', lineHeight: 1.15, color: 'var(--text-primary, #111)' }}>
             {ev.title}
@@ -190,7 +208,7 @@ export default async function EventPage(
         {/* Dates */}
         <section aria-label="Dates et horaires" style={{ marginBottom: 28 }}>
           <h2 style={{ fontSize: 17, fontWeight: 700, margin: '0 0 14px', color: 'var(--text-primary, #111)' }}>
-            Dates &amp; horaires — {ev.venue.name}
+            Dates &amp; horaires · {ev.venue.name}
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {(dates.length > 14 ? dates.slice(0, 7) : dates).map(date => {
@@ -203,7 +221,7 @@ export default async function EventPage(
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                     {occs.map((o, i) => o.start ? (
                       <span key={i} style={{ fontSize: 13, color: 'var(--text-secondary, #666)', background: 'var(--bg, white)', padding: '3px 10px', borderRadius: 6, border: '1px solid var(--border, #e0e0e0)' }}>
-                        {o.start}{o.end ? ` – ${o.end}` : ''}{o.note ? ` (${o.note})` : ''}
+                        {o.start}{o.end ? ` au ${o.end}` : ''}{o.note ? ` (${o.note})` : ''}
                       </span>
                     ) : null)}
                   </div>
@@ -251,7 +269,7 @@ export default async function EventPage(
           border: '1px solid rgba(10,132,255,0.2)',
         }}>
           <h2 style={{ fontSize: 17, fontWeight: 700, margin: '0 0 8px', color: 'var(--text-primary, #111)' }}>
-            Voir sur la carte — Grand Genève en temps réel
+            Voir sur la carte · Grand Genève en temps réel
           </h2>
           <p style={{ fontSize: 14, color: 'var(--text-secondary, #666)', margin: '0 0 16px', lineHeight: 1.6 }}>
             Retrouvez <strong>{ev.title}</strong> et tous les événements du Grand Genève avec le trafic, les transports publics, les passages douanes et les alertes en direct.
@@ -299,11 +317,14 @@ export default async function EventPage(
             <strong>TIF — Intelligence Territoriale Grand Genève</strong> référence en temps réel tous les événements de Genève et du Grand Genève : festivals, concerts, matchs de football, expositions, cinéma et événements sportifs.
             Retrouvez <em>{ev.title}</em> ainsi que l&apos;agenda complet des événements à Genève, Nyon, Carouge, Annemasse et Ferney-Voltaire sur <a href="/" style={{ color: 'var(--blue, #0A84FF)' }}>TIF</a>.
           </p>
+          <p style={{ marginTop: 8 }}>
+            TIF est conçu et exploité par <a href="https://borja-swiss-solutions.ch" style={{ color: 'var(--blue, #0A84FF)' }}>Börja Swiss Solutions</a>, studio d&apos;ingénierie numérique établi à Genève.
+          </p>
           <nav aria-label="Liens internes" style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
             <a href="/evenements" style={{ color: 'var(--blue, #0A84FF)', textDecoration: 'none' }}>Agenda complet Genève {year}</a>
             <a href={`/evenements/categorie/${ev.category}`} style={{ color: 'var(--blue, #0A84FF)', textDecoration: 'none' }}>{catLabel} à Genève</a>
             <a href="/map" style={{ color: 'var(--blue, #0A84FF)', textDecoration: 'none' }}>Carte du Grand Genève</a>
-            <a href="/" style={{ color: 'var(--blue, #0A84FF)', textDecoration: 'none' }}>TIF — Accueil</a>
+            <a href="/" style={{ color: 'var(--blue, #0A84FF)', textDecoration: 'none' }}>TIF · Accueil</a>
           </nav>
         </footer>
       </main>
