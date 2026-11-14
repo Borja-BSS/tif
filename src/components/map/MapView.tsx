@@ -168,6 +168,16 @@ function TransportLegend() {
             {t.mapView.stopDisruption}
           </span>
         </div>
+        <div className="flex items-center gap-2">
+          <svg width="14" height="14" viewBox="0 0 72 72" className="flex-shrink-0" aria-hidden="true">
+            <circle cx="36" cy="36" r="31" fill="#0A84FF" stroke="#FFFFFF" strokeWidth="4" />
+            <rect x="17" y="25" width="26" height="22" rx="4" fill="#FFFFFF" />
+            <path d="M45 32 L56 26 L56 46 L45 40 Z" fill="#FFFFFF" />
+          </svg>
+          <span className="text-[10px] font-medium" style={{ color: 'var(--text-secondary)' }}>
+            {t.mapView.trafficCamera}
+          </span>
+        </div>
       </div>
     </div>
   )

@@ -75,6 +75,7 @@ export interface MapT {
   mapView: {
     tramTpg: string; busTpg: string; trainCff: string; leman: string; disrupted: string
     stopDisruption: string
+    trafficCamera: string
   }
   car: {
     title: string; origin: string; destination: string; calculating: string
@@ -261,6 +262,7 @@ const FR: MapT = {
     tramTpg: 'Tram TPG', busTpg: 'Bus TPG', trainCff: 'Train CFF',
     leman: 'Léman Express', disrupted: 'Ligne perturbée',
     stopDisruption: 'Perturbation arrêt',
+    trafficCamera: 'Caméra trafic, touchez pour voir',
   },
   car: {
     title: 'Itinéraire voiture',
@@ -485,6 +487,7 @@ const EN: MapT = {
     tramTpg: 'TPG Tram', busTpg: 'TPG Bus', trainCff: 'CFF Train',
     leman: 'Léman Express', disrupted: 'Disrupted line',
     stopDisruption: 'Disrupted stop',
+    trafficCamera: 'Traffic camera, tap to view',
   },
   car: {
     title: 'Car route',
@@ -709,6 +712,7 @@ const DE: MapT = {
     tramTpg: 'TPG-Tram', busTpg: 'TPG-Bus', trainCff: 'CFF-Zug',
     leman: 'Léman Express', disrupted: 'Gestörte Linie',
     stopDisruption: 'Gestörte Haltestelle',
+    trafficCamera: 'Verkehrskamera, antippen zum Ansehen',
   },
   car: {
     title: 'Auto-Route',
@@ -933,6 +937,7 @@ const IT: MapT = {
     tramTpg: 'Tram TPG', busTpg: 'Bus TPG', trainCff: 'Treno CFF',
     leman: 'Léman Express', disrupted: 'Linea perturbata',
     stopDisruption: 'Fermata perturbata',
+    trafficCamera: 'Telecamera del traffico, tocca per vedere',
   },
   car: {
     title: 'Itinerario auto',
@@ -1157,6 +1162,7 @@ const ES: MapT = {
     tramTpg: 'Tranvía TPG', busTpg: 'Autobús TPG', trainCff: 'Tren CFF',
     leman: 'Léman Express', disrupted: 'Línea perturbada',
     stopDisruption: 'Parada perturbada',
+    trafficCamera: 'Cámara de tráfico, toca para ver',
   },
   car: {
     title: 'Ruta en coche',
@@ -1381,6 +1387,7 @@ const PT: MapT = {
     tramTpg: 'Elétrico TPG', busTpg: 'Autocarro TPG', trainCff: 'Comboio CFF',
     leman: 'Léman Express', disrupted: 'Linha perturbada',
     stopDisruption: 'Paragem perturbada',
+    trafficCamera: 'Câmara de trânsito, toque para ver',
   },
   car: {
     title: 'Rota de carro',
@@ -1605,6 +1612,7 @@ const SQ: MapT = {
     tramTpg: 'Tramvaj TPG', busTpg: 'Autobus TPG', trainCff: 'Tren CFF',
     leman: 'Léman Express', disrupted: 'Linjë e ndërprerë',
     stopDisruption: 'Stacion i ndërprerë',
+    trafficCamera: 'Kamerë trafiku, prekni për ta parë',
   },
   car: {
     title: 'Itinerari me makinë',
@@ -1829,6 +1837,7 @@ const JA: MapT = {
     tramTpg: 'TPGトラム', busTpg: 'TPGバス', trainCff: 'CFF列車',
     leman: 'レマン・エクスプレス', disrupted: '運休路線',
     stopDisruption: '運休停留所',
+    trafficCamera: '交通カメラ（タップで表示）',
   },
   car: {
     title: '車ルート',
@@ -2053,6 +2062,7 @@ const ZH: MapT = {
     tramTpg: 'TPG有轨电车', busTpg: 'TPG巴士', trainCff: 'CFF列车',
     leman: '莱蒙特快', disrupted: '中断线路',
     stopDisruption: '中断站点',
+    trafficCamera: '交通摄像头（点击查看）',
   },
   car: {
     title: '驾车路线',
