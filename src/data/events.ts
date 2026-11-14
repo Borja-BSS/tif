@@ -4946,6 +4946,365 @@ export const events: EventItem[] = [
     ],
     verif: 'confirmed',
   },
+  {
+    id: 'futurup-2026', slug: 'futurup-palexpo-2026',
+    title: "Futur'Up", category: 'festival',
+    description: "Salon pour étudiants à Palexpo. Horaires non publiés sur la page lue.",
+    venue: {
+      name: 'Palexpo',
+      address: 'Route François-Peyrot 30, 1218 Le Grand-Saconnex',
+      area: 'Grand-Saconnex', lat: 46.2353, lng: 6.118,
+    },
+    occurrences: [
+      { date: '2026-11-14' },
+      { date: '2026-11-15' },
+    ],
+    links: [
+      { label: "Palexpo · Futur'Up", url: 'https://www.palexpo.ch/evenement/futurup/', kind: 'organizer', status: 'verified' },
+      { label: 'Palexpo · agenda', url: 'https://www.palexpo.ch/agenda/', kind: 'info', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'arena-orelsan-2026', slug: 'orelsan-arena-de-geneve-2026',
+    title: 'Orelsan', category: 'concert',
+    description: "Concert d'Orelsan à l'Arena de Genève, le soir de l'ouverture de Noël au Quai.",
+    venue: {
+      name: 'Arena de Genève',
+      address: 'Avenue Louis-Casaï 1218, Le Grand-Saconnex',
+      phone: '+41 22 761 23 00',
+      area: 'Grand-Saconnex', lat: 46.2259, lng: 6.107,
+    },
+    occurrences: [
+      { date: '2026-11-19', start: '19:30' },
+    ],
+    links: [
+      { label: 'Arena de Genève · programme', url: 'https://geneva-arena.ch/fr/', kind: 'venue', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'noel-au-quai-2026', slug: 'noel-au-quai-2026',
+    title: 'Noël au Quai', category: 'festival',
+    description: "Marché de Noël du quai du Mont-Blanc, du 19 novembre au 24 décembre 2026. Horaires d'ouverture non publiés sur les pages officielles. Forte affluence attendue le soir et le week-end sur le quai et le pont du Mont-Blanc.",
+    venue: {
+      name: 'Quai du Mont-Blanc',
+      address: 'Quai du Mont-Blanc, 1201 Genève',
+      area: 'GE', lat: 46.2095, lng: 6.149,
+    },
+    occurrences: dailyRange('2026-11-19', '2026-12-24'),
+    links: [
+      { label: 'Ville de Genève · marchés de Noël', url: 'https://www.geneve.ch/actualites/marches-noel-preparer-fetes', kind: 'organizer', status: 'verified' },
+      { label: 'Genève Tourisme · Noël au Quai', url: 'https://www.geneve.com/fr/evenements/noel-au-quai-7799477', kind: 'info', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'greve-jeunesse-2026-11-20', slug: 'greve-de-la-jeunesse-geneve-2026-11-20',
+    title: 'Grève de la jeunesse contre l\'austérité et la militarisation', category: 'festival',
+    description: "Grève nationale de la jeunesse, avec une mobilisation annoncée à Genève le 20 novembre 2026. L'heure, le lieu de départ et le parcours ne sont pas publiés à ce jour (« Plus d'informations à suivre »). Aucun avis de police ni des TPG publié.",
+    venue: {
+      name: 'Genève · lieu et parcours non publiés',
+      area: 'GE',
+    },
+    occurrences: [
+      { date: '2026-11-20', note: 'heure et parcours non publiés' },
+    ],
+    links: [
+      { label: 'Grève de la jeunesse · Genève', url: 'https://greve-de-la-jeunesse.ch/fr/geneve/', kind: 'organizer', status: 'verified' },
+      { label: 'Grève de la jeunesse · page nationale', url: 'https://greve-de-la-jeunesse.ch/fr/', kind: 'info', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'arena-claudio-capeo-2026', slug: 'claudio-capeo-arena-de-geneve-2026',
+    title: 'Claudio Capéo', category: 'concert',
+    description: "Concert de Claudio Capéo à l'Arena de Genève.",
+    venue: {
+      name: 'Arena de Genève',
+      address: 'Avenue Louis-Casaï 1218, Le Grand-Saconnex',
+      phone: '+41 22 761 23 00',
+      area: 'Grand-Saconnex', lat: 46.2259, lng: 6.107,
+    },
+    occurrences: [
+      { date: '2026-11-20', start: '20:00' },
+    ],
+    links: [
+      { label: 'Arena de Genève · programme', url: 'https://geneva-arena.ch/fr/', kind: 'venue', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'montreux-noel-2026', slug: 'montreux-noel-2026',
+    title: 'Montreux Noël', category: 'festival',
+    description: "Marché de Noël de Montreux, du 20 novembre au 24 décembre 2026. Horaires non publiés sur la page lue.",
+    venue: {
+      name: 'Montreux',
+      area: 'autour',
+    },
+    occurrences: dailyRange('2026-11-20', '2026-12-24'),
+    links: [
+      { label: 'Montreux Noël', url: 'https://www.montreuxnoel.com/en/?p=926', kind: 'organizer', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'trans-onesienne-2026', slug: 'trans-onesienne-2026',
+    title: "Trans'Onésienne", category: 'sport',
+    description: "Manifestation à Onex, de 11h à 17h environ. Routes fermées dès 11h : rue Gaudy-Le-Fort, place Duchêne, chemins David-Broillet, de la Blanchette et de la Vi-Longe. Dès 13h30 : chemins Gustave-Rochette, Charles-Borgeaud, des Laz, de Tirelonge et de Pierre-Longue.",
+    venue: {
+      name: 'Onex',
+      area: 'GE',
+    },
+    occurrences: [
+      { date: '2026-11-21', start: '11:00', end: '17:00', note: 'horaires approximatifs annoncés par la commune' },
+    ],
+    links: [
+      { label: "Commune d'Onex · perturbations de circulation", url: 'https://www.onex.ch/actualites/transonesienne--perturbations-de-circulation-le-21-novembre-6927', kind: 'info', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'o-ptit-sac-hiver-2026', slug: 'o-ptit-sac-fete-lhiver-2026',
+    title: "Ô P'tit-Sac fête l'hiver", category: 'festival',
+    description: "Fête de quartier sur la place du Petit-Saconnex.",
+    venue: {
+      name: 'Place du Petit-Saconnex',
+      address: 'Place du Petit-Saconnex, 1209 Genève',
+      area: 'GE',
+    },
+    occurrences: [
+      { date: '2026-11-21', start: '10:00', note: 'date relevée sur la page officielle le 14.11.2026' },
+    ],
+    links: [
+      { label: 'Ville de Genève · marchés de Noël', url: 'https://www.geneve.ch/actualites/marches-noel-preparer-fetes', kind: 'organizer', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'arena-redouane-bougheraba-2026', slug: 'redouane-bougheraba-arena-de-geneve-2026',
+    title: 'Redouane Bougheraba', category: 'comedie',
+    description: "Spectacle de Redouane Bougheraba à l'Arena de Genève.",
+    venue: {
+      name: 'Arena de Genève',
+      address: 'Avenue Louis-Casaï 1218, Le Grand-Saconnex',
+      phone: '+41 22 761 23 00',
+      area: 'Grand-Saconnex', lat: 46.2259, lng: 6.107,
+    },
+    occurrences: [
+      { date: '2026-11-22', start: '18:00', note: 'date relevée sur la page officielle le 14.11.2026' },
+    ],
+    links: [
+      { label: 'Arena de Genève · programme', url: 'https://geneva-arena.ch/fr/', kind: 'venue', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'arena-bryan-adams-2026', slug: 'bryan-adams-arena-de-geneve-2026',
+    title: 'Bryan Adams', category: 'concert',
+    description: "Concert de Bryan Adams à l'Arena de Genève.",
+    venue: {
+      name: 'Arena de Genève',
+      address: 'Avenue Louis-Casaï 1218, Le Grand-Saconnex',
+      phone: '+41 22 761 23 00',
+      area: 'Grand-Saconnex', lat: 46.2259, lng: 6.107,
+    },
+    occurrences: [
+      { date: '2026-11-25', start: '20:00' },
+    ],
+    links: [
+      { label: 'Arena de Genève · programme', url: 'https://geneva-arena.ch/fr/', kind: 'venue', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'arena-jeff-panacloc-2026', slug: 'jeff-panacloc-arena-de-geneve-2026',
+    title: 'Jeff Panacloc', category: 'comedie',
+    description: "Spectacle de Jeff Panacloc à l'Arena de Genève.",
+    venue: {
+      name: 'Arena de Genève',
+      address: 'Avenue Louis-Casaï 1218, Le Grand-Saconnex',
+      phone: '+41 22 761 23 00',
+      area: 'Grand-Saconnex', lat: 46.2259, lng: 6.107,
+    },
+    occurrences: [
+      { date: '2026-11-26', start: '20:00', note: 'date relevée sur la page officielle le 14.11.2026' },
+    ],
+    links: [
+      { label: 'Arena de Genève · programme', url: 'https://geneva-arena.ch/fr/', kind: 'venue', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'arena-ben-mazue-2026', slug: 'ben-mazue-arena-de-geneve-2026',
+    title: 'Ben Mazué', category: 'concert',
+    description: "Concert de Ben Mazué à l'Arena de Genève. Ouverture des portes à 19h.",
+    venue: {
+      name: 'Arena de Genève',
+      address: 'Avenue Louis-Casaï 1218, Le Grand-Saconnex',
+      phone: '+41 22 761 23 00',
+      area: 'Grand-Saconnex', lat: 46.2259, lng: 6.107,
+    },
+    occurrences: [
+      { date: '2026-11-27', start: '20:00' },
+    ],
+    links: [
+      { label: 'Arena de Genève · Ben Mazué', url: 'https://geneva-arena.ch/en/events/ben-mazue', kind: 'venue', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'marche-noel-carouge-2026', slug: 'marche-de-noel-de-carouge-2026',
+    title: 'Marché de Noël de Carouge', category: 'festival',
+    description: "Marché de Noël de Carouge, rue Saint-Joseph, place du Marché et rue Jacques-Dalphin. Même week-end que la Course de l'Escalade.",
+    venue: {
+      name: 'Carouge · place du Marché',
+      address: 'Rue Saint-Joseph, place du Marché, rue Jacques-Dalphin, 1227 Carouge',
+      area: 'Carouge', lat: 46.1836, lng: 6.1393,
+    },
+    occurrences: [
+      { date: '2026-12-04', start: '14:00', end: '21:00' },
+      { date: '2026-12-05', start: '10:00', end: '21:00' },
+      { date: '2026-12-06', start: '10:00', end: '18:30' },
+    ],
+    links: [
+      { label: 'Commune de Carouge · marché de Noël', url: 'https://www.carouge.ch/carouge-magique/marche-de-noel', kind: 'organizer', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'feu-chatterton-2026', slug: 'feu-chatterton-arena-de-geneve-2026',
+    title: 'Feu! Chatterton', category: 'concert',
+    description: "Concert de Feu! Chatterton à l'Arena de Genève.",
+    venue: {
+      name: 'Arena de Genève',
+      address: 'Avenue Louis-Casaï 1218, Le Grand-Saconnex',
+      phone: '+41 22 761 23 00',
+      area: 'Grand-Saconnex', lat: 46.2259, lng: 6.107,
+    },
+    occurrences: [
+      { date: '2026-12-08', start: '20:00' },
+    ],
+    links: [
+      { label: 'Genève Tourisme · Feu! Chatterton', url: 'https://www.geneve.com/fr/evenements/feu-chatterton-9960197', kind: 'info', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'village-noel-saint-julien-2026', slug: 'village-de-noel-saint-julien-en-genevois-2026',
+    title: 'Village de Noël de Saint-Julien-en-Genevois', category: 'festival',
+    description: "Village de Noël au square Victor-Hugo, à Saint-Julien-en-Genevois. Ouvert le jeudi et le vendredi de 17h à 22h, le samedi de 11h à 22h et le dimanche de 11h à 21h30. Dates relevées sur la page officielle le 14.11.2026.",
+    venue: {
+      name: 'Square Victor-Hugo',
+      address: 'Square Victor-Hugo, 74160 Saint-Julien-en-Genevois',
+      area: 'autour',
+    },
+    occurrences: [
+      { date: '2026-12-10', start: '17:00', end: '22:00' },
+      { date: '2026-12-11', start: '17:00', end: '22:00' },
+      { date: '2026-12-12', start: '11:00', end: '22:00' },
+      { date: '2026-12-13', start: '11:00', end: '21:30' },
+      { date: '2026-12-14', note: 'horaires non publiés' },
+      { date: '2026-12-15', note: 'horaires non publiés' },
+      { date: '2026-12-16', note: 'horaires non publiés' },
+      { date: '2026-12-17', start: '17:00', end: '22:00' },
+      { date: '2026-12-18', start: '17:00', end: '22:00' },
+      { date: '2026-12-19', start: '11:00', end: '22:00' },
+      { date: '2026-12-20', start: '11:00', end: '21:30' },
+    ],
+    links: [
+      { label: 'Haute-Savoie Tourisme · Village de Noël', url: 'https://www.haute-savoie-tourisme.org/8060238-village-de-noel-de-saint-julien-en-genevois', kind: 'info', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'marche-noel-fusterie-2026', slug: 'marche-de-noel-de-la-fusterie-2026',
+    title: 'Marché de Noël de la Fusterie', category: 'festival',
+    description: "Marché de Noël sur la place de la Fusterie, du 14 au 24 décembre 2026. Horaires non publiés sur la page lue.",
+    venue: {
+      name: 'Place de la Fusterie',
+      address: 'Place de la Fusterie, 1204 Genève',
+      area: 'GE', lat: 46.2043, lng: 6.1443,
+    },
+    occurrences: dailyRange('2026-12-14', '2026-12-24'),
+    links: [
+      { label: 'Ville de Genève · marchés de Noël', url: 'https://www.geneve.ch/actualites/marches-noel-preparer-fetes', kind: 'organizer', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'arena-indochine-2026', slug: 'indochine-arena-de-geneve-2026',
+    title: 'Indochine', category: 'concert',
+    description: "Trois concerts d'Indochine à l'Arena de Genève, les 15, 16 et 17 décembre 2026. Ouverture des portes à 18h30.",
+    venue: {
+      name: 'Arena de Genève',
+      address: 'Avenue Louis-Casaï 1218, Le Grand-Saconnex',
+      phone: '+41 22 761 23 00',
+      area: 'Grand-Saconnex', lat: 46.2259, lng: 6.107,
+    },
+    occurrences: [
+      { date: '2026-12-15', start: '20:00' },
+      { date: '2026-12-16', start: '20:00' },
+      { date: '2026-12-17', start: '20:00' },
+    ],
+    links: [
+      { label: 'Arena de Genève · Indochine', url: 'https://geneva-arena.ch/en/events/indochine-1', kind: 'venue', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'arena-disiz-2026', slug: 'disiz-arena-de-geneve-2026',
+    title: 'disiz', category: 'concert',
+    description: "Concert de disiz à l'Arena de Genève.",
+    venue: {
+      name: 'Arena de Genève',
+      address: 'Avenue Louis-Casaï 1218, Le Grand-Saconnex',
+      phone: '+41 22 761 23 00',
+      area: 'Grand-Saconnex', lat: 46.2259, lng: 6.107,
+    },
+    occurrences: [
+      { date: '2026-12-18', start: '20:00', note: 'date relevée sur la page officielle le 14.11.2026' },
+    ],
+    links: [
+      { label: 'Genève Tourisme · disiz', url: 'https://www.geneve.com/fr/evenements/disiz-9014624', kind: 'info', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'coupe-de-noel-2026', slug: 'coupe-de-noel-2026',
+    title: 'Coupe de Noël', category: 'sport',
+    description: "88e édition de la Coupe de Noël, dans la Rade, aux Bains des Pâquis. Horaires non publiés sur la page lue.",
+    venue: {
+      name: 'Bains des Pâquis · la Rade',
+      area: 'GE', lat: 46.2107, lng: 6.1556,
+    },
+    occurrences: [
+      { date: '2026-12-19' },
+      { date: '2026-12-20' },
+    ],
+    links: [
+      { label: 'Coupe de Noël · édition 2026', url: 'https://www.cdn1934.ch/blog/2509-edition-2026', kind: 'organizer', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'nouvel-an-quai-gustave-ador-2026', slug: 'nouvel-an-quai-gustave-ador-2026',
+    title: 'Nouvel An au bord de l\'eau', category: 'festival',
+    description: "La Ville de Genève invite le public à célébrer gratuitement et en plein air le passage à la nouvelle année, quai Gustave-Ador, du 31 décembre à 21h au 1er janvier 2027 à 2h. Programme et feu d'artifice 2026 non publiés.",
+    venue: {
+      name: 'Quai Gustave-Ador',
+      address: 'Quai Gustave-Ador, 1207 Genève',
+      area: 'GE', lat: 46.2074, lng: 6.1585,
+    },
+    occurrences: [
+      { date: '2026-12-31', start: '21:00', end: '02:00', note: "jusqu'au 1er janvier 2027 à 2h" },
+    ],
+    priceInfo: 'Gratuit',
+    links: [
+      { label: 'Genève Tourisme · Réveillon 2026', url: 'https://www.geneve.com/fr/evenements/reveillon-2026-au-bord-de-leau', kind: 'info', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
 ]
 export const CATEGORY_LABELS: Record<string, string> = {
   theatre:   'Théâtre',
