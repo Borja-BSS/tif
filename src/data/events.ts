@@ -5000,23 +5000,6 @@ export const events: EventItem[] = [
     verif: 'confirmed',
   },
   {
-    id: 'greve-jeunesse-2026-11-20', slug: 'greve-de-la-jeunesse-geneve-2026-11-20',
-    title: 'Grève de la jeunesse contre l\'austérité et la militarisation', category: 'festival',
-    description: "Grève nationale de la jeunesse, avec une mobilisation annoncée à Genève le 20 novembre 2026. L'heure, le lieu de départ et le parcours ne sont pas publiés à ce jour (« Plus d'informations à suivre »). Aucun avis de police ni des TPG publié.",
-    venue: {
-      name: 'Genève · lieu et parcours non publiés',
-      area: 'GE',
-    },
-    occurrences: [
-      { date: '2026-11-20', note: 'heure et parcours non publiés' },
-    ],
-    links: [
-      { label: 'Grève de la jeunesse · Genève', url: 'https://greve-de-la-jeunesse.ch/fr/geneve/', kind: 'organizer', status: 'verified' },
-      { label: 'Grève de la jeunesse · page nationale', url: 'https://greve-de-la-jeunesse.ch/fr/', kind: 'info', status: 'verified' },
-    ],
-    verif: 'confirmed',
-  },
-  {
     id: 'arena-claudio-capeo-2026', slug: 'claudio-capeo-arena-de-geneve-2026',
     title: 'Claudio Capéo', category: 'concert',
     description: "Concert de Claudio Capéo à l'Arena de Genève.",
