@@ -4,6 +4,7 @@ export type TifEvent =
   | 'page_view' | 'map_open' | 'filter_click' | 'crossing_open'
   | 'route_search' | 'consent_given' | 'consent_refused'
   | 'geo_granted' | 'geo_denied'
+  | 'camera_open' | 'event_open'
 
 export async function track(event: TifEvent, data?: Record<string, unknown>): Promise<void> {
   const consent = getConsent()

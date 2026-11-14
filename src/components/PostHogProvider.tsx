@@ -28,6 +28,8 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     posthog.capture('$pageview')
+    // Statistiques TIF internes (n'enregistre rien sans consentement analytique)
+    import('@/lib/analytics/track').then(({ track }) => track('page_view', { path: pathname }))
   }, [pathname])
 
   return <PHProvider client={posthog}>{children}</PHProvider>

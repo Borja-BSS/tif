@@ -8,6 +8,7 @@ const ALLOWED_EVENTS = new Set([
   'page_view', 'map_open', 'filter_click', 'crossing_open',
   'route_search', 'consent_given', 'consent_refused',
   'geo_granted', 'geo_denied',
+  'camera_open', 'event_open',
 ])
 
 export async function POST(req: NextRequest) {
@@ -26,6 +27,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false }, { status: 400 })
     }
 
+    // Pays : seul Vercel fournit cet en-tête. Chez Infomaniak il est absent, la colonne reste vide.
     const country = req.headers.get('x-vercel-ip-country') ?? null
 
     await db.tifAnalytic.create({

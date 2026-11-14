@@ -282,6 +282,10 @@ export default function SearchHandle({ map }: SearchHandleProps) {
       if (d.routes?.length) {
         const sorted = [...d.routes].sort((a: CarRoute, b: CarRoute) => a.summary.durationInTraffic - b.summary.durationInTraffic)
         setCarRoutes(sorted)
+        import('@/lib/analytics/track').then(({ track }) => track('route_search', {
+          minutes: Math.round(sorted[0].summary.durationInTraffic / 60),
+          trafficMin: Math.round((sorted[0].trafficDelay ?? 0) / 60),
+        }))
         setState('route')
         setSheetSize('peek')
         if (map && d.routes[0].geometry?.length > 1) {

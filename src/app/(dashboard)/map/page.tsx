@@ -85,6 +85,7 @@ export default function MapPage() {
 
   const handleMapReady = useCallback((m: mapboxgl.Map) => {
     setMapRef(m)
+    import('@/lib/analytics/track').then(({ track }) => track('map_open'))
     // Auto-fly to user location if geo consent was given
     try {
       const raw = localStorage.getItem('tif-consent-v1')

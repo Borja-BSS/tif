@@ -52,6 +52,10 @@ export async function GET(req: NextRequest) {
       }),
     ])
 
+  const liveCutoff = Date.now() - 300 * 1000
+  await redis.zremrangebyscore('tif:live:sessions', '-inf', liveCutoff).catch(() => 0)
+  const liveNow = await redis.zcard('tif:live:sessions').catch(() => 0)
+
   const parsedFeedback = (surveyFeedback as string[]).map(s => {
     try { return JSON.parse(s) } catch { return { text: s } }
   })
@@ -63,6 +67,7 @@ export async function GET(req: NextRequest) {
       total:    (surveyYes ?? 0) + (surveyNo ?? 0),
       feedback: parsedFeedback,
     },
+    live: liveNow ?? 0,
     sessions: {
       today: todaySessions.length,
       week:  weekSessions.length,

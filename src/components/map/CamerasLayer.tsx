@@ -112,6 +112,7 @@ export default function CamerasLayer({ map }: { map: mapboxgl.Map | null }) {
             paint: { 'text-color': '#FFFFFF', 'text-halo-color': 'rgba(0,0,0,0.75)', 'text-halo-width': 1.5 } })
           map.on('click', LAYER_ID, e => {
             if (!e.features?.length) return
+            import('@/lib/analytics/track').then(({ track }) => track('camera_open', { nom: String(e.features![0].properties?.nom ?? '') }))
             new mapboxgl.Popup({ maxWidth: '330px', className: 'tif-popup', closeButton: true, offset: 10 })
               .setLngLat(e.lngLat).setHTML(popupHTML(e.features[0].properties as Record<string, unknown>)).addTo(map)
           })

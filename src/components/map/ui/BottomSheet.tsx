@@ -2722,6 +2722,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
 
   const openCrossing = useCallback((c: CrossingStatic, waitDir?: string | null, frCh?: number | null, chFr?: number | null, liveStatus?: string | null, liveWaitMin?: number | null) => {
     setSelectedCrossing(c)
+    import('@/lib/analytics/track').then(({ track }) => track('crossing_open', { id: c.id }))
     setSelectedWaitDir(waitDir ?? null)
     setSelectedWaitFrCh(frCh ?? null)
     setSelectedWaitChFr(chFr ?? null)
@@ -2746,6 +2747,7 @@ export function BottomSheet({ session: _session, activeFilter, map, onFilterChan
     const handler = (e: Event) => {
       const { slug } = (e as CustomEvent<{ slug: string }>).detail
       if (!slug) return
+      import('@/lib/analytics/track').then(({ track }) => track('event_open', { slug }))
       setDetailView('events')
       setSelectedEvent(slug)
       setSelectedCrossing(null)
