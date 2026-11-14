@@ -4275,10 +4275,10 @@ export const events: EventItem[] = [
     occurrences: [
       { date: '2026-09-06', start: '14:00', note: 'Super League · FC Saint-Gall' },
       { date: '2026-10-10', start: '18:00', note: 'Super League · FC Sion' },
-      { date: '2026-10-24', note: 'Super League · FC Vaduz · horaire à confirmer' },
-      { date: '2026-11-07', note: 'Super League · FC Zurich · horaire à confirmer' },
-      { date: '2026-11-28', note: 'Super League · Lausanne-Sport · horaire à confirmer' },
-      { date: '2026-12-19', note: 'Super League · Young Boys · horaire à confirmer' },
+      { date: '2026-10-24', start: '18:00', note: 'Super League · FC Vaduz' },
+      { date: '2026-11-08', start: '16:30', note: 'Super League · FC Zurich' },
+      { date: '2026-11-28', start: '20:30', note: 'Super League · Lausanne-Sport' },
+      { date: '2026-12-20', start: '16:30', note: 'Super League · Young Boys' },
     ],
     links: [
       { label: 'Servette FC · calendrier', url: 'https://servettefc.ch/equipe-premiere/calendrier/', kind: 'organizer', status: 'verified' },
@@ -4407,6 +4407,542 @@ export const events: EventItem[] = [
     ],
     links: [
       { label: 'Grand Théâtre de Genève', url: 'https://www.gtg.ch/', kind: 'venue', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'sailgp-geneve-2026', slug: 'rolex-switzerland-sail-grand-prix-geneve',
+    title: 'Rolex Switzerland Sail Grand Prix', category: 'sport',
+    description: "Deuxième édition de l'étape genevoise du SailGP, sur le Léman. Catamarans à foils F50. Rive gauche fermée à la circulation du samedi 9h au dimanche 22h, et route de Thonon perturbée du 16 au 22 septembre. Voir la carte des perturbations.",
+    venue: {
+      name: 'Léman · rive gauche (Eaux-Vives / Cologny)',
+      area: 'GE', lat: 46.2078, lng: 6.1655,
+    },
+    occurrences: [
+      { date: '2026-09-19' },
+      { date: '2026-09-20' },
+    ],
+    links: [
+      { label: 'SailGP · étape de Genève', url: 'https://sailgp.com/races/2026/switzerland-sail-grand-prix-geneva/overview/', kind: 'organizer', status: 'verified' },
+      { label: 'Ville de Genève · annonce officielle', url: 'https://www.geneve.ch/actualites/rolex-switzerland-sail-arrive-geneve', kind: 'info', status: 'verified' },
+      { label: 'État de Genève · restrictions de circulation', url: 'https://www.ge.ch/actualite/perturbations-circulation-du-mercredi-16-au-mardi-22-septembre-15-09-2026', kind: 'info', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'lausanne-marathon-2026', slug: 'lausanne-marathon-2026',
+    title: 'Lausanne Marathon', category: 'sport',
+    description: "Marathon sur la rive lémanique, de Lausanne à Vevey via Pully, Lutry, Cully et Saint-Saphorin. Restrictions de trafic par secteur annoncées par l'organisateur. Édition 2026 complète.",
+    venue: {
+      name: 'Lausanne · rive lémanique',
+      area: 'autour', lat: 46.5197, lng: 6.6323,
+    },
+    occurrences: [
+      { date: '2026-10-25' },
+    ],
+    links: [
+      { label: 'Lausanne Marathon · plans et riverains', url: 'https://fr.lausanne-marathon.com/info-coureurs/plans2026/', kind: 'organizer', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'balexert-20km-2026', slug: 'balexert-20km-de-geneve-2026',
+    title: 'Balexert 20 km de Genève', category: 'sport',
+    description: 'Course sur route à travers la campagne genevoise, arrivée au bord du lac Léman.',
+    venue: {
+      name: 'Genève · campagne genevoise',
+      area: 'GE', lat: 46.2234, lng: 6.1123,
+    },
+    occurrences: [
+      { date: '2026-11-01' },
+    ],
+    links: [
+      { label: 'Balexert 20 km de Genève', url: 'https://www.balexert20kmgeneve.com/en/home', kind: 'organizer', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'palexpo-10km-2026', slug: 'les-10km-de-palexpo-2026',
+    title: 'Les 10 km de Palexpo', category: 'sport',
+    description: 'Course de 10 kilomètres au départ de Palexpo, ouverte au public.',
+    venue: {
+      name: 'Palexpo',
+      address: 'Route François-Peyrot 30, 1218 Le Grand-Saconnex',
+      area: 'Grand-Saconnex', lat: 46.2353, lng: 6.118,
+    },
+    occurrences: [
+      { date: '2026-11-14' },
+    ],
+    links: [
+      { label: 'Palexpo · Les 10 km', url: 'https://palexpo.ch/evenement/les-10km-de-palexpo-2026/', kind: 'organizer', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'chi-geneve-2026', slug: 'concours-hippique-international-geneve-2026',
+    title: 'Concours Hippique International de Genève · 100 ans', category: 'sport',
+    description: "Centième édition du Concours Hippique International de Genève, à Palexpo. L'un des plus grands rendez-vous équestres en salle au monde.",
+    venue: {
+      name: 'Palexpo',
+      address: 'Route François-Peyrot 30, 1218 Le Grand-Saconnex',
+      area: 'Grand-Saconnex', lat: 46.2353, lng: 6.118,
+    },
+    occurrences: [
+      { date: '2026-12-09' },
+      { date: '2026-12-10' },
+      { date: '2026-12-11' },
+      { date: '2026-12-12' },
+      { date: '2026-12-13' },
+    ],
+    links: [
+      { label: 'Palexpo · CHI de Genève', url: 'https://palexpo.ch/evenement/concours-hippique-international-de-geneve-100-ans/', kind: 'organizer', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'wawrinka-farewell-2026', slug: 'one-last-backhand-stan-wawrinka-2026',
+    title: "ONE LAST BACKHAND · soirée d'adieu de Stan Wawrinka", category: 'sport',
+    description: "Soirée d'adieu de Stan Wawrinka à Palexpo. Tous les billets disponibles ont été vendus.",
+    venue: {
+      name: 'Palexpo',
+      address: 'Route François-Peyrot 30, 1218 Le Grand-Saconnex',
+      area: 'Grand-Saconnex', lat: 46.2353, lng: 6.118,
+    },
+    occurrences: [
+      { date: '2026-12-19' },
+    ],
+    links: [
+      { label: 'Palexpo · ONE LAST BACKHAND', url: 'https://palexpo.ch/evenement/one-last-backhand-stan-wawrinkas-farewell-night/', kind: 'organizer', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'expo-canine-2026', slug: 'exposition-canine-internationale-2026',
+    title: 'Exposition Canine Internationale', category: 'festival',
+    description: 'Exposition canine internationale à Palexpo, ouverte au public.',
+    venue: {
+      name: 'Palexpo',
+      address: 'Route François-Peyrot 30, 1218 Le Grand-Saconnex',
+      area: 'Grand-Saconnex', lat: 46.2353, lng: 6.118,
+    },
+    occurrences: [
+      { date: '2026-10-02' },
+      { date: '2026-10-03' },
+      { date: '2026-10-04' },
+    ],
+    links: [
+      { label: 'Palexpo · Exposition Canine Internationale', url: 'https://palexpo.ch/evenement/lexposition-canine-internationale/', kind: 'organizer', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'bachata-geneva-2026', slug: 'bachata-geneva-festival-2026',
+    title: 'Bachata Geneva Festival · The Festival of Nations', category: 'danse',
+    description: 'Festival international de bachata à Palexpo, cinq jours de stages et de soirées.',
+    venue: {
+      name: 'Palexpo',
+      address: 'Route François-Peyrot 30, 1218 Le Grand-Saconnex',
+      area: 'Grand-Saconnex', lat: 46.2353, lng: 6.118,
+    },
+    occurrences: [
+      { date: '2026-10-08' },
+      { date: '2026-10-09' },
+      { date: '2026-10-10' },
+      { date: '2026-10-11' },
+      { date: '2026-10-12' },
+    ],
+    links: [
+      { label: 'Palexpo · Bachata Geneva Festival', url: 'https://palexpo.ch/evenement/bachata-geneva-festival-the-festival-of-nations/', kind: 'organizer', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'expo-feline-2026', slug: 'exposition-feline-internationale-2026',
+    title: 'Exposition féline internationale', category: 'festival',
+    description: 'Exposition féline internationale à Palexpo, ouverte au public.',
+    venue: {
+      name: 'Palexpo',
+      address: 'Route François-Peyrot 30, 1218 Le Grand-Saconnex',
+      area: 'Grand-Saconnex', lat: 46.2353, lng: 6.118,
+    },
+    occurrences: [
+      { date: '2026-11-06' },
+      { date: '2026-11-07' },
+      { date: '2026-11-08' },
+    ],
+    links: [
+      { label: 'Palexpo · Exposition féline internationale', url: 'https://palexpo.ch/evenement/exposition-feline-internationale-2026/', kind: 'organizer', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'arvinis-2026', slug: 'arvinis-salon-suisse-du-vin-2026',
+    title: 'Arvinis · salon suisse du vin', category: 'festival',
+    description: 'Salon suisse du vin à Palexpo, quatre jours de dégustations et de rencontres avec les vignerons.',
+    venue: {
+      name: 'Palexpo',
+      address: 'Route François-Peyrot 30, 1218 Le Grand-Saconnex',
+      area: 'Grand-Saconnex', lat: 46.2353, lng: 6.118,
+    },
+    occurrences: [
+      { date: '2026-11-12' },
+      { date: '2026-11-13' },
+      { date: '2026-11-14' },
+      { date: '2026-11-15' },
+    ],
+    links: [
+      { label: 'Palexpo · Arvinis', url: 'https://palexpo.ch/evenement/arvinis/', kind: 'organizer', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'fete-escalade-2026', slug: 'fete-de-lescalade-2026',
+    title: "Fête de l'Escalade", category: 'festival',
+    description: "Célébration de l'anniversaire de la bataille de l'Escalade de 1602, avec cortège historique dans la Vieille-Ville de Genève.",
+    venue: {
+      name: 'Vieille-Ville de Genève',
+      address: 'Vieille-Ville, 1204 Genève',
+      area: 'GE', lat: 46.2019, lng: 6.1456,
+    },
+    occurrences: [
+      { date: '2026-12-11' },
+      { date: '2026-12-12' },
+      { date: '2026-12-13' },
+    ],
+    links: [
+      { label: "Genève Tourisme · Fête de l'Escalade", url: 'https://www.geneve.com/fr/evenements/la-fete-de-lescalade-2026', kind: 'info', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'mah-liotard-2026', slug: 'liotard-et-marie-antoinette-mah',
+    title: 'Liotard et Marie-Antoinette · Visages sous enquête', category: 'art',
+    description: "Exposition du Musée d'art et d'histoire. Ouverture du mardi au dimanche de 11h à 18h, jusqu'à 21h le jeudi.",
+    venue: {
+      name: "Musée d'art et d'histoire",
+      address: 'Rue Charles-Galland 2, 1206 Genève',
+      area: 'GE', lat: 46.1992, lng: 6.1516,
+    },
+    occurrences: dailyRange('2026-10-03', '2026-12-31'),
+    priceInfo: 'Tarifs sur le site du musée',
+    links: [
+      { label: 'MAH · Liotard et Marie-Antoinette', url: 'https://www.mahmah.ch/expositions/liotard-et-marie-antoinette', kind: 'organizer', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'comedie-halte-2026', slug: 'halte-comedie-de-geneve',
+    title: 'HALTE', category: 'theatre',
+    description: 'Spectacle programmé à la Comédie de Genève.',
+    venue: {
+      name: 'Comédie de Genève',
+      address: 'Esplanade Alice-Bailly 1, 1207 Genève',
+      area: 'GE', lat: 46.2011, lng: 6.1652,
+    },
+    occurrences: [
+      { date: '2026-09-24' },
+      { date: '2026-09-25' },
+    ],
+    links: [
+      { label: 'Comédie de Genève · billetterie', url: 'https://billetterie.comedie.ch/list/events?lang=fr', kind: 'tickets', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'comedie-parabole-seum-2026', slug: 'la-parabole-du-seum-comedie',
+    title: 'La Parabole du Seum', category: 'theatre',
+    description: 'Spectacle programmé à la Comédie de Genève.',
+    venue: {
+      name: 'Comédie de Genève',
+      address: 'Esplanade Alice-Bailly 1, 1207 Genève',
+      area: 'GE', lat: 46.2011, lng: 6.1652,
+    },
+    occurrences: [
+      { date: '2026-09-29', note: 'première de la série' },
+      { date: '2026-10-02', note: 'dernière annoncée · dates de représentation sur le site de la salle' },
+    ],
+    links: [
+      { label: 'Comédie de Genève · billetterie', url: 'https://billetterie.comedie.ch/list/events?lang=fr', kind: 'tickets', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'comedie-other-place-2026', slug: 'the-other-place-comedie',
+    title: 'The Other Place', category: 'theatre',
+    description: 'Spectacle programmé à la Comédie de Genève.',
+    venue: {
+      name: 'Comédie de Genève',
+      address: 'Esplanade Alice-Bailly 1, 1207 Genève',
+      area: 'GE', lat: 46.2011, lng: 6.1652,
+    },
+    occurrences: [
+      { date: '2026-10-08', note: 'première de la série' },
+      { date: '2026-10-14', note: 'dernière annoncée · dates de représentation sur le site de la salle' },
+    ],
+    links: [
+      { label: 'Comédie de Genève · billetterie', url: 'https://billetterie.comedie.ch/list/events?lang=fr', kind: 'tickets', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'carouge-menagerie-verre-2026', slug: 'la-menagerie-de-verre-carouge',
+    title: 'La Ménagerie de verre', category: 'theatre',
+    description: 'Spectacle programmé au Théâtre de Carouge.',
+    venue: {
+      name: 'Théâtre de Carouge',
+      address: 'Rue Ancienne 39, 1227 Carouge',
+      area: 'Carouge', lat: 46.1804, lng: 6.1402,
+    },
+    occurrences: [
+      { date: '2026-09-25', note: 'première de la série' },
+      { date: '2026-10-18', note: 'dernière annoncée · dates de représentation sur le site de la salle' },
+    ],
+    links: [
+      { label: 'Théâtre de Carouge · saison', url: 'https://theatredecarouge.ch/saison/spectacles/', kind: 'organizer', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'carouge-kiss-and-cry-2026', slug: 'kiss-and-cry-carouge',
+    title: 'Kiss & Cry', category: 'danse',
+    description: 'Spectacle de danse programmé au Théâtre de Carouge.',
+    venue: {
+      name: 'Théâtre de Carouge',
+      address: 'Rue Ancienne 39, 1227 Carouge',
+      area: 'Carouge', lat: 46.1804, lng: 6.1402,
+    },
+    occurrences: [
+      { date: '2026-11-17', note: 'première de la série' },
+      { date: '2026-12-20', note: 'dernière annoncée · dates de représentation sur le site de la salle' },
+    ],
+    links: [
+      { label: 'Théâtre de Carouge · saison', url: 'https://theatredecarouge.ch/saison/spectacles/', kind: 'organizer', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'alchimic-pas-johnny-2026', slug: 'je-ne-suis-pas-johnny-alchimic',
+    title: 'Je ne suis pas Johnny', category: 'theatre',
+    description: 'Spectacle programmé au Théâtre Alchimic.',
+    venue: {
+      name: 'Théâtre Alchimic',
+      address: '2 Avenue de la Praille, 1227 Carouge',
+      area: 'Carouge', lat: 46.1802, lng: 6.1393,
+    },
+    occurrences: [
+      { date: '2026-10-07', note: 'première de la série' },
+      { date: '2026-10-17', note: 'dernière annoncée · dates de représentation sur le site de la salle' },
+    ],
+    links: [
+      { label: 'Alchimic · programmation septembre à décembre 2026', url: 'https://alchimic.ch/programation-septembre-decembre-2026/', kind: 'organizer', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'alchimic-homme-oreiller-2026', slug: 'lhomme-oreiller-alchimic',
+    title: "L'homme oreiller", category: 'theatre',
+    description: 'Spectacle programmé au Théâtre Alchimic.',
+    venue: {
+      name: 'Théâtre Alchimic',
+      address: '2 Avenue de la Praille, 1227 Carouge',
+      area: 'Carouge', lat: 46.1802, lng: 6.1393,
+    },
+    occurrences: [
+      { date: '2026-11-12', note: 'première de la série' },
+      { date: '2026-11-29', note: 'dernière annoncée · dates de représentation sur le site de la salle' },
+    ],
+    links: [
+      { label: 'Alchimic · programmation septembre à décembre 2026', url: 'https://alchimic.ch/programation-septembre-decembre-2026/', kind: 'organizer', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'bfm-geca-pulse-2026', slug: 'geca-concert-prestige-pulse-bfm',
+    title: 'GECA · Concert Prestige, Pulse', category: 'concert',
+    description: 'Concert rap avec Oxmo Puccino et la chorale GECA au Bâtiment des Forces Motrices.',
+    venue: {
+      name: 'Bâtiment des Forces Motrices (BFM)',
+      address: 'Place des Volontaires 2, 1204 Genève',
+      area: 'GE', lat: 46.2004, lng: 6.1424,
+    },
+    occurrences: [
+      { date: '2026-09-25', start: '20:00' },
+    ],
+    links: [
+      { label: 'BFM · programme', url: 'https://www.bfm.ch/fr/programme', kind: 'organizer', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'bfm-stop-suicide-2026', slug: 'stop-suicide-stand-up-2026',
+    title: 'Stop Suicide · Stand Up LÀPOURTOI', category: 'comedie',
+    description: "Soirée de stand-up organisée par l'association Stop Suicide au Bâtiment des Forces Motrices.",
+    venue: {
+      name: 'Bâtiment des Forces Motrices (BFM)',
+      address: 'Place des Volontaires 2, 1204 Genève',
+      area: 'GE', lat: 46.2004, lng: 6.1424,
+    },
+    occurrences: [
+      { date: '2026-10-04', start: '18:00' },
+    ],
+    links: [
+      { label: 'BFM · programme', url: 'https://www.bfm.ch/fr/programme', kind: 'organizer', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'bfm-mondial-impro-2026', slug: 'mondial-improvisation-theatrale-finale-2026',
+    title: "32e Mondial d'improvisation théâtrale · finale", category: 'theatre',
+    description: "Finale de la 32e édition du Mondial d'improvisation théâtrale, au Bâtiment des Forces Motrices.",
+    venue: {
+      name: 'Bâtiment des Forces Motrices (BFM)',
+      address: 'Place des Volontaires 2, 1204 Genève',
+      area: 'GE', lat: 46.2004, lng: 6.1424,
+    },
+    occurrences: [
+      { date: '2026-10-24', start: '20:00' },
+    ],
+    links: [
+      { label: 'BFM · programme', url: 'https://www.bfm.ch/fr/programme', kind: 'organizer', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'bfm-lise-davidsen-2026', slug: 'lise-davidsen-recital-2026',
+    title: 'Lise Davidsen · récital', category: 'classique',
+    description: 'Récital de la soprano Lise Davidsen, programmation du Grand Théâtre de Genève.',
+    venue: {
+      name: 'Bâtiment des Forces Motrices (BFM)',
+      address: 'Place des Volontaires 2, 1204 Genève',
+      area: 'GE', lat: 46.2004, lng: 6.1424,
+    },
+    occurrences: [
+      { date: '2026-11-12', start: '20:00' },
+    ],
+    links: [
+      { label: 'BFM · programme', url: 'https://www.bfm.ch/fr/programme', kind: 'organizer', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'gtg-noces-figaro-2026', slug: 'les-noces-de-figaro-2026',
+    title: 'Les Noces de Figaro · Mozart', category: 'classique',
+    description: 'Opéra de Wolfgang Amadeus Mozart, production du Grand Théâtre de Genève.',
+    venue: {
+      name: 'Bâtiment des Forces Motrices (BFM)',
+      address: 'Place des Volontaires 2, 1204 Genève',
+      area: 'GE', lat: 46.2004, lng: 6.1424,
+    },
+    occurrences: [
+      { date: '2026-12-13', note: 'première de la série' },
+      { date: '2026-12-31', note: 'dernière annoncée · dates de représentation sur le site de la salle' },
+    ],
+    links: [
+      { label: 'BFM · programme', url: 'https://www.bfm.ch/fr/programme', kind: 'organizer', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'gtg-souris-traviata-2026', slug: 'la-souris-traviata-2026',
+    title: 'La Souris Traviata', category: 'classique',
+    description: 'Spectacle programmé aux Salons du Grand Théâtre de Genève.',
+    venue: {
+      name: 'Fondation Les Salons',
+      address: 'Rue Bartholoni 6, 1204 Genève',
+      area: 'GE', lat: 46.2003, lng: 6.1441,
+    },
+    occurrences: [
+      { date: '2026-10-10', note: 'première de la série' },
+      { date: '2026-10-17', note: 'dernière annoncée · dates de représentation sur le site de la salle' },
+    ],
+    links: [
+      { label: 'Grand Théâtre · billetterie', url: 'https://billetterie.gtg.ch/list/events?lang=fr', kind: 'tickets', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'amr-peter-evans-2026', slug: 'peter-evans-extra-amr-2026',
+    title: 'Peter Evans Extra · Jim Black et Petter Eldh', category: 'concert',
+    description: "Concert de jazz programmé par l'AMR au Sud des Alpes.",
+    venue: {
+      name: 'AMR · Sud des Alpes',
+      address: 'Rue des Alpes 10, 1201 Genève',
+      area: 'GE', lat: 46.2097, lng: 6.1459,
+    },
+    occurrences: [
+      { date: '2026-09-26', start: '21:00' },
+    ],
+    links: [
+      { label: 'AMR · programme', url: 'https://www.amr-geneve.ch/programme', kind: 'organizer', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'usine-autechre-2026', slug: 'autechre-electron-usine-2026',
+    title: 'Autechre x Electron', category: 'concert',
+    description: "Concert de musique électronique à PTR, L'Usine.",
+    venue: {
+      name: "L'Usine · PTR / Le Rez",
+      address: 'Place des Volontaires 4, 1204 Genève',
+      area: 'GE', lat: 46.2003, lng: 6.1426,
+    },
+    occurrences: [
+      { date: '2026-10-12' },
+    ],
+    links: [
+      { label: "L'Usine · agenda", url: 'https://www.usine.ch/agenda', kind: 'organizer', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'chatnoir-standimpro-2026', slug: 'stand-impro-show-chat-noir-2026',
+    title: "Stand'Impro Show", category: 'comedie',
+    description: "Soirée d'improvisation théâtrale programmée au Chat Noir.",
+    venue: {
+      name: 'Chat Noir',
+      address: 'Rue Vautier 13, 1227 Carouge',
+      area: 'Carouge', lat: 46.185, lng: 6.1424,
+    },
+    occurrences: [
+      { date: '2026-09-24', start: '19:30' },
+    ],
+    links: [
+      { label: 'Chat Noir · live', url: 'https://www.chatnoir.ch/live/', kind: 'organizer', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'chrouge-calme-hauteurs-2026', slug: 'tout-est-calme-dans-les-hauteurs-chateau-rouge',
+    title: 'Tout est calme dans les hauteurs', category: 'theatre',
+    description: "Spectacle programmé au Château Rouge d'Annemasse.",
+    venue: {
+      name: 'Château Rouge',
+      address: '1 Route de Bonneville, 74100 Annemasse',
+      area: 'autour', lat: 46.1885, lng: 6.239,
+    },
+    occurrences: [
+      { date: '2026-09-24' },
+      { date: '2026-09-25' },
+    ],
+    links: [
+      { label: 'Château Rouge · saison', url: 'https://www.chateau-rouge.net/spectacles-saison/', kind: 'organizer', status: 'verified' },
+    ],
+    verif: 'confirmed',
+  },
+  {
+    id: 'chrouge-erik-truffaz-2026', slug: 'erik-truffaz-chateau-rouge-2026',
+    title: "Erik Truffaz avec l'Orchestre des Alpes et du Léman", category: 'concert',
+    description: "Concert d'Erik Truffaz au Château Rouge d'Annemasse.",
+    venue: {
+      name: 'Château Rouge',
+      address: '1 Route de Bonneville, 74100 Annemasse',
+      area: 'autour', lat: 46.1885, lng: 6.239,
+    },
+    occurrences: [
+      { date: '2026-10-01' },
+    ],
+    links: [
+      { label: 'Château Rouge · saison', url: 'https://www.chateau-rouge.net/spectacles-saison/', kind: 'organizer', status: 'verified' },
     ],
     verif: 'confirmed',
   },

@@ -50,7 +50,78 @@ const ZONE_TRIATHLON: [number, number][] = [
   [6.1545, 46.2035], // fermeture
 ]
 
+// Zone du Rolex Switzerland Sail Grand Prix (rive gauche : Eaux-Vives vers Pallanterie)
+// Emprise INDICATIVE du corridor perturbe, tracee sur les axes nommes par l'arrete :
+// quai Gustave-Ador, quai de Cologny, route de Thonon jusqu'au rond-point de la
+// Pallanterie, et les chemins de Cologny (Byron, Righi, Tour-Carree, Perriere,
+// Nant-d'Argent, Ruth). Les fermetures exactes figurent dans la description.
+const ZONE_SAILGP: [number, number][] = [
+  [6.1545, 46.2035], // Plage des Eaux-Vives / quai Gustave-Ador
+  [6.1655, 46.2078], // quai Gustave-Ador, hauteur Geneve-Plage
+  [6.1760, 46.2148], // quai de Cologny
+  [6.1868, 46.2298], // Vesenaz, tranchee couverte
+  [6.1975, 46.2432], // route de Thonon, vers La Pallanterie
+  [6.2048, 46.2512], // rond-point de la Pallanterie (limite NE)
+  [6.1962, 46.2470], // arriere de la route de Thonon
+  [6.1858, 46.2330], // ch. du Nant-d'Argent / Vesenaz interieur
+  [6.1782, 46.2205], // ch. de la Tour-Carree / ch. de Ruth
+  [6.1715, 46.2120], // ch. du Righi / ch. de la Perriere
+  [6.1648, 46.2050], // ch. Byron / rampe de Cologny
+  [6.1545, 46.2035], // fermeture
+]
+
 export const IMPACT_ZONES: ImpactZone[] = [
+  {
+    id:          'sailgp-2026-mobilite',
+    renderOnMap: true,
+    label:       'Mobilité · Rolex Switzerland Sail GP',
+    title:       'Rolex Switzerland Sail Grand Prix · circulation perturbée · 16 au 22 septembre',
+    description:
+      'Deuxième édition du Rolex Switzerland Sail Grand Prix, samedi 19 et dimanche 20 septembre 2026,\n' +
+      'sur le Léman. Catamarans à foils F50. Rive gauche fortement perturbée pendant le montage,\n' +
+      'la compétition et le démontage.\n\n' +
+      'FERMETURES DU MERCREDI 16 SEPTEMBRE (MINUIT) AU MARDI 22 SEPTEMBRE (MINUIT)\n' +
+      'Fermeture totale, sauf ayants droit :\n' +
+      '* Route de Thonon en direction de Genève, du rond-point de la Pallanterie au quai de Cologny\n' +
+      '* Tranchée couverte de Vésenaz\n' +
+      'Rues adjacentes fortement perturbées.\n\n' +
+      'FERMETURES DU SAMEDI 19 SEPTEMBRE 9H00 AU DIMANCHE 20 SEPTEMBRE 22H00\n' +
+      'Fermeture totale, sauf ayants droit :\n' +
+      '* Quai Gustave-Ador\n' +
+      '* Quai de Cologny\n' +
+      '* Route de Thonon\n' +
+      '* Chemin Byron\n' +
+      '* Chemin du Righi\n' +
+      '* Chemin de la Tour-Carrée\n' +
+      '* Chemin de la Perrière\n' +
+      '* Chemin du Nant-d\'Argent\n' +
+      '* Chemin de Ruth\n' +
+      'Rues adjacentes fortement perturbées.\n\n' +
+      'STATIONNEMENT INTERDIT\n' +
+      '* Quai Gustave-Ador et sa contre-route\n' +
+      '* Rue de la Scie\n' +
+      '* Rue du Lac (3 places)\n' +
+      '* Quai de Cologny\n\n' +
+      'PARKINGS AMÉNAGÉS\n' +
+      '* Cycles, cyclomoteurs et motos : rue de la Scie et contre-route du quai Gustave-Ador\n' +
+      '* Cycles et cyclomoteurs : quai de Cologny et parking du Manoir\n' +
+      '* Personnes à mobilité réduite : rue des Barques\n\n' +
+      'ACCÈS MAINTENU\n' +
+      '* Parking de Genève-Plage, par la contre-route et la rampe de Cologny\n\n' +
+      'Les horaires des courses, les renforts de transports publics et le village public ne figurent\n' +
+      'pas dans l\'arrêté cantonal. Se référer à sailgp.com et à tpg.ch.\n' +
+      'Secours (144, ambulances, police) : accès permanent et prioritaire.',
+    type:        'TRANSPORT_DISRUPTION',
+    severity:    'HIGH',
+    coordinates: ZONE_SAILGP,
+    activeFrom:  new Date('2026-09-16T00:00:00+02:00'),
+    activeTo:    new Date('2026-09-22T23:59:00+02:00'),
+    fillColor:   '#FF9F0A',
+    fillOpacity: 0.15,
+    strokeColor: '#FF9F0A',
+    source:      'https://www.ge.ch/actualite/perturbations-circulation-du-mercredi-16-au-mardi-22-septembre-15-09-2026',
+    sourceRef:   'État de Genève · perturbations de la circulation, 16 au 22 septembre 2026',
+  },
   {
     id:          'triathlon-2026-mobilite',
     renderOnMap: true,
