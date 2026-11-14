@@ -542,7 +542,7 @@ export default function SearchHandle({ map }: SearchHandleProps) {
             const openCrossing = route.warnings.find((w: string) => w.startsWith('Via ') && w !== 'Via centre-ville')
             const slower = i > 0 ? Math.ceil((route.summary.durationInTraffic - carRoutes[0].summary.durationInTraffic) / 60) : 0
             const reasons = i === 0
-              ? ['Itinéraire le plus rapide', route.trafficDelay === 0 ? 'Trafic fluide' : null].filter(Boolean) as string[]
+              ? ['Itinéraire le plus rapide', route.trafficDelay < 60 ? 'Trafic fluide' : `+${Math.round(route.trafficDelay / 60)} min de trafic`]
               : openCrossing
                 ? (slower > 0 ? [`+${slower} min vs le plus rapide`] : [])
                 : [`Via centre-ville`, `+${slower} min`]

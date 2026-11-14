@@ -1,7 +1,8 @@
-// Car routing via Mapbox Directions API
+// Car routing via Mapbox Directions API, profil driving-traffic (trafic en direct).
+// duration = durée avec le trafic du moment ; duration_typical = durée habituelle à cette heure.
 // https://docs.mapbox.com/api/navigation/directions/
 
-const MAPBOX_BASE = 'https://api.mapbox.com/directions/v5/mapbox/driving'
+const MAPBOX_BASE = 'https://api.mapbox.com/directions/v5/mapbox/driving-traffic'
 
 export interface CarRouteRequest {
   from: { lat: number; lng: number }
@@ -35,6 +36,7 @@ export interface CarRoute {
 
 interface MapboxRoute {
   duration: number
+  duration_typical?: number
   distance: number
   geometry: { type: 'LineString'; coordinates: number[][] }
   legs:     unknown[]
@@ -173,15 +175,17 @@ function toCarRoute(
   const geometry = r.geometry.coordinates as [number, number][]
   const warnings: string[] = []
   if (extraWarning) warnings.unshift(extraWarning)
+  // Sans duration_typical (rare), on ne prétend pas connaître le retard : il vaut 0.
+  const typical = typeof r.duration_typical === 'number' ? r.duration_typical : r.duration
   return {
     id,
     summary: {
-      duration:          Math.round(r.duration),
+      duration:          Math.round(typical),
       durationInTraffic: Math.round(r.duration),
       distance:          Math.round(r.distance),
       arrivalTime:       new Date(Date.now() + r.duration * 1000).toISOString(),
     },
-    steps: [], geometry, trafficDelay: 0,
+    steps: [], geometry, trafficDelay: Math.max(0, Math.round(r.duration - typical)),
     alternative, warnings,
   }
 }
