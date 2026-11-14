@@ -92,7 +92,7 @@ export default function AProposPage() {
         <section style={{ marginBottom: 40 }}>
           <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>Technologies</h2>
           <p style={{ color: 'var(--text-secondary)' }}>
-            Next.js 15, React 19, Mapbox GL JS, Firebase Auth, Redis (Upstash), PostgreSQL (Neon), Prisma, Claude AI (Anthropic), HERE Mobility API, Inngest, Vercel, PostHog.
+            Next.js 15, React 19, Mapbox GL JS, Firebase Auth, Redis (Upstash), PostgreSQL (Neon), Prisma, Claude AI (Anthropic), HERE Mobility API, Inngest, Vercel.
           </p>
         </section>
 

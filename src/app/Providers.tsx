@@ -3,7 +3,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider }                      from '@/context/AuthContext'
 import { GuestProvider }                     from '@/context/GuestContext'
-import { PostHogProvider }                   from '@/components/PostHogProvider'
+import { PageViewTracker }                   from '@/components/PageViewTracker'
 import { useState }                          from 'react'
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -20,7 +20,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   )
 
   return (
-    <PostHogProvider>
+    <PageViewTracker>
       <AuthProvider>
         <GuestProvider>
           <QueryClientProvider client={queryClient}>
@@ -28,6 +28,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
           </QueryClientProvider>
         </GuestProvider>
       </AuthProvider>
-    </PostHogProvider>
+    </PageViewTracker>
   )
 }
